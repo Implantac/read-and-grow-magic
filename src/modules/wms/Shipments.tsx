@@ -111,8 +111,9 @@ export default function ShipmentsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2"><Truck className="h-5 w-5" /> Embarques</CardTitle>
-        </CardHeader>
+        <CardTitle className="flex items-center gap-2"><Truck className="h-5 w-5" /> Expedições (Last Mile Ready)</CardTitle>
+        <CardDescription>Gestão integrada com a Torre de Controle Operacional</CardDescription>
+      </CardHeader>
         <CardContent>
           {loading ? (
             <div className="space-y-3">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}</div>

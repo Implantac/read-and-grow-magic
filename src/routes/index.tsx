@@ -51,7 +51,8 @@ const HardeningDashboard = () => {
     { id: '21-25', title: 'UX & Performance', status: 'completed', description: 'Design System, PERF-GUARD, Database Indexes, LGPD.' },
     { id: '26-29', title: 'Governança & QA', status: 'completed', description: 'Documentação, DoD Permanente, No-Mock Policy.' },
     { id: '2A', title: 'Rede Operacional', status: 'completed', description: 'Hierarquia de Lojas/CD/Fábrica, Estoque em Trânsito.' },
-    { id: '2B', title: 'Orquestração de Pedidos', status: 'in_progress', description: 'Cross-docking, Drop-shipping, Roteirização de Carga.' },
+    { id: '2B', title: 'Orquestração de Pedidos', status: 'completed', description: 'Cross-docking, Drop-shipping, Roteirização de Carga.' },
+    { id: '2C', title: 'Expedição & Última Milha', status: 'in_progress', description: 'Gestão de Romaneios, Tracking em Tempo Real, Last Mile.' },
   ];
 
   const operationalRequirements = [
@@ -87,7 +88,7 @@ const HardeningDashboard = () => {
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Hardening & Evolução (Fase 2B)</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Hardening & Evolução (Fase 2C)</h1>
           </div>
           <p className="text-muted-foreground text-lg">
             Plataforma Enterprise: Prontidão para Produção e Rede Operacional.
@@ -152,7 +153,7 @@ const HardeningDashboard = () => {
               <div className="flex items-center gap-2">
                 <Zap className="h-6 w-6 text-primary fill-primary" />
                 <div>
-                  <CardTitle>Requisitos da Fase 2B (Orquestração de Pedidos)</CardTitle>
+                  <CardTitle>Requisitos da Fase 2C (Expedição & Last Mile)</CardTitle>
                   <CardDescription>Hardening de fluxos logísticos avançados e roteirização</CardDescription>
                 </div>
               </div>
