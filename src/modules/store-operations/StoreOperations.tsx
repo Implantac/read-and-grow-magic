@@ -64,7 +64,7 @@ export default function StoreOperations() {
             <Button variant="outline" size="sm" className="gap-2">
               <RefreshCcw className="h-4 w-4" /> Atualizar Tudo
             </Button>
-            <Button size="sm" className="gap-2">
+            <Button size="sm" className="gap-2" onClick={() => setIsRequestOpen(true)}>
               <Plus className="h-4 w-4" /> Nova Operação
             </Button>
           </div>
@@ -77,7 +77,7 @@ export default function StoreOperations() {
               key={action.id}
               onClick={() => {
                 if (action.id === 'receive') setIsReceivingOpen(true);
-                if (action.id === 'request') setIsRequestOpen(true);
+                if (action.id === 'request' || action.id === 'transfer') setIsRequestOpen(true);
               }}
               className="group relative flex flex-col items-center justify-center p-4 rounded-xl border-2 border-transparent bg-muted/30 hover:bg-muted/50 hover:border-primary/20 transition-all text-center"
             >
