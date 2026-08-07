@@ -55,8 +55,8 @@ const HardeningDashboard = () => {
     { id: '2B', title: 'Orquestração de Pedidos', status: 'completed', description: 'Cross-docking, Drop-shipping, Roteirização de Carga.' },
     { id: '2C', title: 'Expedição & Última Milha', status: 'completed', description: 'Gestão de Romaneios, Tracking em Tempo Real, Last Mile.' },
     { id: '3', title: 'Inteligência Logística IA', status: 'completed', description: 'Otimização de Slotting, IA Preditiva, Cross-docking Dinâmico.' },
-    { id: '4', title: 'Auditoria & Compliance (LGPD)', status: 'in_progress', description: 'Certificação de Segurança Proativa, Criptografia E2E, LGPD.' },
-    { id: '5', title: 'Expansão & Ecossistema', status: 'pending', description: 'Marketplace de Plugins, Multi-moeda, Expansão Global.' },
+    { id: '4', title: 'Auditoria & Compliance (LGPD)', status: 'completed', description: 'Certificação de Segurança Proativa, Criptografia E2E, LGPD.' },
+    { id: '5', title: 'Expansão & Ecossistema', status: 'in_progress', description: 'Marketplace de Plugins, Multi-moeda, Expansão Global.' },
   ];
 
   const operationalRequirements = [
@@ -92,7 +92,7 @@ const HardeningDashboard = () => {
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Hardening & Evolução (Fase 3: Inteligência Logística)</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Hardening & Evolução (Fase 5: Expansão)</h1>
           </div>
           <p className="text-muted-foreground text-lg">
             Plataforma Enterprise: Inteligência Logística e Automação Predictiva.
