@@ -103,6 +103,10 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
           const company = companies[0];
           applyCompany(company as CompanyRow);
           
+          // Sync with the legacy store
+          const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
+          useEnterpriseStore.getState().setActiveCompanyId(company.id);
+          
           // Load branches for this company
           const { data: branches } = await supabase
             .from('branches')
@@ -113,8 +117,13 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
             setAllBranches(branches);
             // Default to first branch or profile default
             const { data: profile } = await supabase.from('profiles').select('default_branch_id').eq('id', user.id).maybeSingle();
-            const defaultBranch = branches.find(b => b.id === profile?.default_branch_id) || null;
+            const defaultBranch = branches.find(b => b.id === profile?.default_branch_id) || branches[0] || null;
             setCurrentBranch(defaultBranch);
+            
+            if (defaultBranch) {
+              const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
+              useEnterpriseStore.getState().setActiveBranchId(defaultBranch.id);
+            }
           }
         }
       }
@@ -127,16 +136,26 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
 
   const setCompany = async (id: string) => {
     const { data } = await supabase.from('companies').select('*').eq('id', id).maybeSingle();
-    if (data) applyCompany(data as CompanyRow);
+    if (data) {
+      applyCompany(data as CompanyRow);
+      const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
+      useEnterpriseStore.getState().setActiveCompanyId(id);
+    }
   };
 
-  const setBranch = (id: string | null) => {
+  const setBranch = async (id: string | null) => {
     if (!id) {
       setCurrentBranch(null);
+      const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
+      useEnterpriseStore.getState().setActiveBranchId(null);
       return;
     }
     const branch = allBranches.find(b => b.id === id);
-    if (branch) setCurrentBranch(branch);
+    if (branch) {
+      setCurrentBranch(branch);
+      const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
+      useEnterpriseStore.getState().setActiveBranchId(id);
+    }
   };
 
   return (
