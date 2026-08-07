@@ -106,7 +106,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
           // Load branches for this company
           const { data: branches } = await supabase
             .from('branches')
-            .select('id, name, code')
+            .select('id, name, code, tipo')
             .eq('company_id', company.id);
           
           if (branches) {
