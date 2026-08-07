@@ -23,11 +23,14 @@ import {
 import { useStoreCentral } from '@/hooks/operational/store/useStoreCentral';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { cn } from '@/lib/utils';
+import { ReceivingDialog } from './components/ReceivingDialog';
 
 export default function StoreOperations() {
   const { currentBranch } = useEnterprise();
   const { kpis, alerts, health, isLoading } = useStoreCentral();
   const [activeTab, setActiveTab] = useState<'resumo' | 'solicitacoes' | 'recebimentos' | 'transferencias' | 'estoque' | 'ocorrencias'>('resumo');
+  const [isReceivingOpen, setIsReceivingOpen] = useState(false);
+
 
   const mainActions = [
     { id: 'receive', label: 'RECEBER MERCADORIA', icon: <Download className="h-6 w-6" />, color: 'bg-emerald-500', description: 'Conferir o que está chegando' },
@@ -69,6 +72,7 @@ export default function StoreOperations() {
           {mainActions.map((action) => (
             <button
               key={action.id}
+              onClick={() => action.id === 'receive' && setIsReceivingOpen(true)}
               className="group relative flex flex-col items-center justify-center p-4 rounded-xl border-2 border-transparent bg-muted/30 hover:bg-muted/50 hover:border-primary/20 transition-all text-center"
             >
               <div className={cn(
@@ -181,7 +185,14 @@ export default function StoreOperations() {
                       </div>
                       <p className="text-[10px] text-muted-foreground font-medium">Chegada prevista: Hoje (87 itens)</p>
                     </div>
-                    <Button size="sm" variant="default" className="bg-blue-600 hover:bg-blue-700 h-7 text-[10px] font-black px-3">CONFERIR</Button>
+                    <Button 
+                      size="sm" 
+                      variant="default" 
+                      className="bg-blue-600 hover:bg-blue-700 h-7 text-[10px] font-black px-3"
+                      onClick={() => setIsReceivingOpen(true)}
+                    >
+                      CONFERIR
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -227,6 +238,11 @@ export default function StoreOperations() {
           </div>
         )}
       </div>
+
+      <ReceivingDialog 
+        isOpen={isReceivingOpen} 
+        onClose={() => setIsReceivingOpen(false)} 
+      />
     </PageContainer>
   );
 }
