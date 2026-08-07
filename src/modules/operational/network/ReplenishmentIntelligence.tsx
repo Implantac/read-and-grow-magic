@@ -91,7 +91,7 @@ export default function ReplenishmentIntelligencePage() {
                 icon={AlertCircle}
                 title="Erro ao carregar políticas"
                 description="Não foi possível recuperar as políticas de estoque no momento."
-                action={<Button onClick={() => refetch()}>Tentar Novamente</Button>}
+                action={{ label: "Tentar Novamente", onClick: () => refetch() }}
               />
             ) : policies && policies.length > 0 ? (
               <div className="grid gap-4">

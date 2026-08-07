@@ -73,7 +73,7 @@ export default function ReplenishmentPage() {
               icon={AlertTriangle}
               title="Erro ao carregar tarefas"
               description="Não foi possível recuperar as tarefas de reabastecimento. Verifique sua conexão."
-              action={<Button onClick={() => refetch()}>Tentar Novamente</Button>}
+              action={{ label: "Tentar Novamente", onClick: () => refetch() }}
             />
           ) : filtered.length > 0 ? (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

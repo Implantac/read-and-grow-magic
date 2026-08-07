@@ -125,7 +125,7 @@ export function SmartReplenishment() {
               icon={AlertTriangle}
               title="Erro na análise"
               description="Não foi possível analisar a malha logística."
-              action={<Button size="sm" onClick={() => refetch()}>Tentar Novamente</Button>}
+              action={{ label: "Tentar Novamente", onClick: () => refetch() }}
             />
           ) : isLoading ? (
             <div className="py-8 text-center text-muted-foreground flex flex-col items-center gap-3">
