@@ -26,7 +26,8 @@ import {
   Shield,
   Search,
   LayoutDashboard,
-  Network
+  Network,
+  RefreshCw
 } from 'lucide-react';
 import { ScrollArea } from "@/ui/base/scroll-area";
 import { cn } from "@/lib/utils";
@@ -51,33 +52,34 @@ const HardeningDashboard = () => {
     { id: '21-25', title: 'UX & Performance', status: 'completed', description: 'Design System, PERF-GUARD, Database Indexes, LGPD.' },
     { id: '26-29', title: 'Governança & QA', status: 'completed', description: 'Documentação, DoD Permanente, No-Mock Policy.' },
     { id: '2A', title: 'Rede Operacional', status: 'completed', description: 'Hierarquia de Lojas/CD/Fábrica, Estoque em Trânsito.' },
-    { id: '2B', title: 'Orquestração de Pedidos', status: 'in_progress', description: 'Cross-docking, Drop-shipping, Roteirização de Carga.' },
+    { id: '2B', title: 'Orquestração de Pedidos', status: 'completed', description: 'Cross-docking, Drop-shipping, Roteirização de Carga.' },
+    { id: '2C', title: 'Expedição & Última Milha', status: 'in_progress', description: 'Gestão de Romaneios, Tracking em Tempo Real, Last Mile.' },
   ];
 
   const operationalRequirements = [
     { 
-      id: 'crossdocking', 
-      title: '1. Orquestração de Pedidos & Cross-docking', 
+      id: 'shipment_tracking', 
+      title: '1. Gestão de Romaneios & Last Mile', 
       icon: <Truck className="h-4 w-4" />,
-      content: `O sistema orquestra a origem do estoque (Sourcing). Pedidos podem ser atendidos via estoque local, cross-docking (via CD sem armazenagem longa) ou drop-shipping (direto do fornecedor).`
+      content: `O sistema consolida múltiplas expedições em romaneios únicos, otimizando o carregamento e o tracking de última milha com atualizações em tempo real.`
     },
     { 
-      id: 'roteirizacao', 
-      title: '2. Roteirização de Carga & Last Mile', 
+      id: 'live_tracking', 
+      title: '2. Rastreamento Live & IoT', 
       icon: <TrendingUp className="h-4 w-4" />,
-      content: `Agrupamento de pedidos por região, veículo e cubagem. Integração com mapas para otimização de rotas e monitoramento de entregas em tempo real.`
+      content: `Integração com sensores IoT e GPS para monitoramento contínuo da temperatura, umidade (se aplicável) e localização exata da carga durante o transporte.`
     },
     { 
-      id: 'omnichannel', 
-      title: '3. Omnichannel Real (BOPIS/Ship-from-Store)', 
-      icon: <Store className="h-4 w-4" />,
-      content: `Compra online e retira na loja (BOPIS). Envio a partir da loja mais próxima (Ship-from-store) para redução de custo de frete e tempo de entrega.`
+      id: 'proof_delivery', 
+      title: '3. Comprovação Digital de Entrega', 
+      icon: <CheckCircle2 className="h-4 w-4" />,
+      content: `Captura de assinaturas digitais, fotos de canhoto e geolocalização no momento da entrega para encerramento automático do ciclo logístico e fiscal.`
     },
     { 
-      id: 'fiscal_avancado', 
-      title: '4. Fiscal em Rede (Venda por Ordem)', 
-      icon: <ShieldCheck className="h-4 w-4" />,
-      content: `Emissão automática de notas de Remessa, Venda por Ordem e Triangular. Garantia de conformidade fiscal em operações multi-unidade complexas.`
+      id: 'reverse_logistics', 
+      title: '4. Logística Reversa Integrada', 
+      icon: <RefreshCw className="h-4 w-4" />,
+      content: `Gestão simplificada de devoluções e coletas, com orquestração automática para o ponto de recebimento mais eficiente (CD ou Loja).`
     }
   ];
 
@@ -87,7 +89,7 @@ const HardeningDashboard = () => {
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Hardening & Evolução (Fase 2B)</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Hardening & Evolução (Fase 2C)</h1>
           </div>
           <p className="text-muted-foreground text-lg">
             Plataforma Enterprise: Prontidão para Produção e Rede Operacional.
@@ -152,8 +154,8 @@ const HardeningDashboard = () => {
               <div className="flex items-center gap-2">
                 <Zap className="h-6 w-6 text-primary fill-primary" />
                 <div>
-                  <CardTitle>Requisitos da Fase 2B (Orquestração de Pedidos)</CardTitle>
-                  <CardDescription>Hardening de fluxos logísticos avançados e roteirização</CardDescription>
+                  <CardTitle>Requisitos da Fase 2C (Expedição & Last Mile)</CardTitle>
+                  <CardDescription>Hardening de fluxos de romaneio, tracking live e gestão de última milha</CardDescription>
                 </div>
               </div>
               <Badge variant="secondary" className="bg-primary/20 text-primary hover:bg-primary/30">

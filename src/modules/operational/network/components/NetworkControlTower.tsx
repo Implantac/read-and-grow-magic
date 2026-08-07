@@ -51,7 +51,7 @@ export default function NetworkControlTower() {
     {
       title: "Acuracidade",
       value: `${stats?.accuracy || 0}%`,
-      description: "Precisão de sugestão IA",
+      description: "Precisão Sourcing IA",
       icon: TrendingUp,
       color: "text-green-500",
       bg: "bg-green-500/10"

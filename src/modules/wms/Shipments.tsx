@@ -4,7 +4,7 @@ import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
 import { ExportButton } from '@/shared/components/ExportButton';
-import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
 
@@ -111,8 +111,9 @@ export default function ShipmentsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2"><Truck className="h-5 w-5" /> Embarques</CardTitle>
-        </CardHeader>
+        <CardTitle className="flex items-center gap-2"><Truck className="h-5 w-5" /> Expedições (Last Mile Ready)</CardTitle>
+        <CardDescription>Gestão integrada com a Torre de Controle Operacional</CardDescription>
+      </CardHeader>
         <CardContent>
           {loading ? (
             <div className="space-y-3">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}</div>
