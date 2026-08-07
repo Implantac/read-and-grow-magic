@@ -2,6 +2,8 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
 import { Box, Layers, Activity, Maximize2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/ui/base/button';
 
 export default function DigitalTwinViewer() {
   return (
