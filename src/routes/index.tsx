@@ -54,8 +54,8 @@ const HardeningDashboard = () => {
     { id: '2A', title: 'Rede Operacional', status: 'completed', description: 'Hierarquia de Lojas/CD/Fábrica, Estoque em Trânsito.' },
     { id: '2B', title: 'Orquestração de Pedidos', status: 'completed', description: 'Cross-docking, Drop-shipping, Roteirização de Carga.' },
     { id: '2C', title: 'Expedição & Última Milha', status: 'completed', description: 'Gestão de Romaneios, Tracking em Tempo Real, Last Mile.' },
-    { id: '3', title: 'Inteligência Logística IA', status: 'in_progress', description: 'Otimização de Slotting, IA Preditiva, Cross-docking Dinâmico.' },
-    { id: '4', title: 'Auditoria & Compliance (LGPD)', status: 'pending', description: 'Certificação de Segurança Proativa, Criptografia E2E, LGPD.' },
+    { id: '3', title: 'Inteligência Logística IA', status: 'completed', description: 'Otimização de Slotting, IA Preditiva, Cross-docking Dinâmico.' },
+    { id: '4', title: 'Auditoria & Compliance (LGPD)', status: 'in_progress', description: 'Certificação de Segurança Proativa, Criptografia E2E, LGPD.' },
     { id: '5', title: 'Expansão & Ecossistema', status: 'pending', description: 'Marketplace de Plugins, Multi-moeda, Expansão Global.' },
   ];
 
