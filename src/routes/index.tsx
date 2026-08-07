@@ -41,8 +41,8 @@ const HardeningDashboard = () => {
 
   const phases = [
     { id: '2A', title: 'Rede Operacional', status: 'completed', description: 'Hierarquia de Lojas/CD/Fábrica, Estoque em Trânsito.' },
-    { id: '2B', title: 'Controle Operacional de Lojas', status: 'in_progress', description: 'Central da Loja, Cockpit de Exceções, Saúde da Unidade, Inventário Cíclico.' },
-    { id: '2C', title: 'Especificação & Blueprint', status: 'pending', description: 'Mapeamento de Atores, Operações Críticas e Regras de Autorização.' },
+    { id: '2B', title: 'Controle Operacional de Lojas', status: 'completed', description: 'Central da Loja, Cockpit de Exceções, Saúde da Unidade, Inventário Cíclico.' },
+    { id: '2C', title: 'Especificação & Blueprint', status: 'completed', description: 'Mapeamento de Atores, Operações Críticas e Regras de Autorização.' },
     { id: '3', title: 'Inteligência Logística IA', status: 'completed', description: 'Otimização de Slotting, IA Preditiva, Digital Twin.' },
     { id: '4', title: 'Auditoria & Compliance', status: 'completed', description: 'UEEF SEC-LEVEL 3, Certificação RLS, LGPD GA.' },
     { id: '5', title: 'Expansão & Ecossistema', status: 'completed', description: 'Marketplace, Multi-moeda, Expansão Global.' },
