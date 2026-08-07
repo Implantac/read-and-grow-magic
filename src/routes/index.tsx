@@ -29,7 +29,8 @@ import {
   Network,
   RefreshCw,
   Puzzle,
-  Monitor
+  Monitor,
+  Heart
 } from 'lucide-react';
 import { ScrollArea } from "@/ui/base/scroll-area";
 import { cn } from "@/lib/utils";
@@ -54,36 +55,37 @@ const HardeningDashboard = () => {
     { id: '21-25', title: 'UX & Performance', status: 'completed', description: 'Design System, PERF-GUARD, Database Indexes, LGPD.' },
     { id: '26-29', title: 'Governança & QA', status: 'completed', description: 'Documentação, DoD Permanente, No-Mock Policy.' },
     { id: '2A', title: 'Rede Operacional', status: 'completed', description: 'Hierarquia de Lojas/CD/Fábrica, Estoque em Trânsito.' },
-    { id: '2B', title: 'Orquestração de Pedidos', status: 'completed', description: 'Cross-docking, Drop-shipping, Roteirização de Carga.' },
+    { id: '2B', title: 'Controle Operacional de Lojas', status: 'in_progress', description: 'Central da Loja, Cockpit de Exceções, Saúde da Unidade, Inventário Cíclico.' },
     { id: '3', title: 'Inteligência Logística IA', status: 'completed', description: 'Otimização de Slotting, IA Preditiva, Digital Twin.' },
     { id: '4', title: 'Auditoria & Compliance', status: 'completed', description: 'UEEF SEC-LEVEL 3, Certificação RLS, LGPD GA.' },
     { id: '5', title: 'Expansão & Ecossistema', status: 'completed', description: 'Marketplace, Multi-moeda, Expansão Global.' },
+    { id: 'FINAL', title: 'Go-Live Ready', status: 'pending', description: 'Consolidação final, testes de carga e certificação de produção.' },
   ];
 
   const pendingItems = [
     { 
-      id: 'network_model', 
-      title: '1. Modelo de Rede Operacional (Fase 2A)', 
-      icon: <Network className="h-4 w-4" />,
-      content: `Separação clara entre CNPJ, Unidade Operacional (Loja, CD, Fábrica) e Locais de Estoque. Suporte a visão individual por unidade e visão global consolidada.`
+      id: 'store_central', 
+      title: '1. Central da Loja & Cockpit de Exceções', 
+      icon: <Store className="h-4 w-4" />,
+      content: `Página operacional única para gerentes. Foco em resolver exceções (rupturas, divergências, atrasos) em vez de manutenção manual de dados.`
     },
     { 
-      id: 'stock_hierarchy', 
-      title: '2. Hierarquia de Estoque por Localização', 
-      icon: <Package className="h-4 w-4" />,
-      content: `Controle de saldo físico, reservado e disponível por localização (Fábrica, CD, Lojas). Registro de estoque em trânsito para transferências.`
+      id: 'operational_indexes', 
+      title: '2. Índices de Saúde e Confiabilidade', 
+      icon: <Heart className="h-4 w-4" />,
+      content: `Cálculo de Score de Saúde Operacional (0-100) e Índice de Confiabilidade de Estoque para garantir precisão dos dados.`
     },
     { 
-      id: 'replenishment_intel', 
-      title: '3. Inteligência de Reabastecimento', 
+      id: 'cyclic_inventory', 
+      title: '3. Inventário Cíclico Sem Sofrimento', 
       icon: <RefreshCw className="h-4 w-4" />,
-      content: `Cálculo automático de necessidade baseado em lead time, estoque mínimo/máximo e venda média. Sugestão de sourcing (CD -> Loja ou Loja -> Loja).`
+      content: `Sistema seleciona automaticamente SKUs para contagem diária. Diferenças aprovadas por níveis de alçada (Gerente -> Regional -> Corporativo).`
     },
     { 
-      id: 'transfer_documents', 
-      title: '4. Documentos de Transferência Reais', 
+      id: 'advanced_receiving', 
+      title: '4. Recebimento e Conferência Blindada', 
       icon: <Truck className="h-4 w-4" />,
-      content: `Workflow completo de transferência: Rascunho -> Solicitada -> Aprovada -> Separação -> Em Trânsito -> Recebida -> Conferida. Gestão de divergências.`
+      content: `Fluxo de conferência cega com registro de divergências e fotos como evidência. Rastreamento visual de transferências em trânsito.`
     }
   ];
 
@@ -108,7 +110,7 @@ const HardeningDashboard = () => {
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Hardening & Evolução (Fase FINAL: Go-Live Ready)</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Hardening & Evolução (Fase 2B: Controle Operacional de Lojas)</h1>
           </div>
           <p className="text-muted-foreground text-lg">
             Plataforma Enterprise: Inteligência Logística e Automação Predictiva.

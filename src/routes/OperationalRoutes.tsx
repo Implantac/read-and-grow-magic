@@ -1,5 +1,6 @@
 import { lazy } from 'react';
 import { Route } from 'react-router-dom';
+import { StoreRoutes } from './StoreRoutes';
 
 const OperationalDashboardPage = lazy(() => import("../modules/operational/OperationalDashboard"));
 const OrderTrackingPage = lazy(() => import("../modules/operational/OrderTracking"));
@@ -17,4 +18,5 @@ export const OperationalRoutes = [
   <Route key="op-bill" path="faturamento" element={<BillingQueuePage />} />,
   <Route key="op-ship" path="expedicao" element={<ShipmentPage />} />,
   <Route key="op-rede-rep" path="rede/ressuprimento" element={<ReplenishmentIntelligencePage />} />,
+  ...StoreRoutes,
 ];
