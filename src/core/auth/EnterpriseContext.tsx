@@ -29,6 +29,7 @@ interface EnterpriseContextType {
   currentGroup: GroupRef | null;
   currentCompany: CompanyRow | null;
   currentBranch: BranchRef | null;
+  allBranches: BranchRef[];
   segment: Segment;
   subSegment: string;
   companySize: string;
@@ -36,6 +37,7 @@ interface EnterpriseContextType {
   operationTypes: OperationType[];
   isLoading: boolean;
   setCompany: (id: string) => Promise<void>;
+  setBranch: (id: string | null) => void;
   executiveCouncil: {
     roles: string[];
     mission: string;
@@ -49,6 +51,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
   const [currentGroup, setCurrentGroup] = useState<GroupRef | null>(null);
   const [currentCompany, setCurrentCompany] = useState<CompanyRow | null>(null);
   const [currentBranch, setCurrentBranch] = useState<BranchRef | null>(null);
+  const [allBranches, setAllBranches] = useState<BranchRef[]>([]);
 
   const [segment, setSegment] = useState<Segment>('general');
   const [subSegment, setSubSegment] = useState<string>('');
@@ -89,50 +92,29 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError) throw userError;
       if (user) {
-        // Load hierarchy via the view (view types may not be in generated Database)
-        const { data: hierarchyData, error: hierarchyError } = await supabase
-          .from('vw_organizational_hierarchy')
-          .select('*')
-          .maybeSingle();
-
-        if (hierarchyError) {
-          console.error('Error fetching hierarchy:', hierarchyError);
-          // Don't throw here, allow the UI to render with null tenant if it's a system page
-        }
-
-        const hierarchy = hierarchyData as HierarchyRow | null;
-        if (hierarchy) {
-          // Identify if the current unit is a branch or a company
-          const isBranch = hierarchy.level === 'filial';
-          const companyId = isBranch ? hierarchy.company_id : hierarchy.unit_id;
-
-          const { data: company } = await supabase.from('companies')
-            .select('*')
-            .eq('id', companyId)
-            .single();
-
-          if (company) {
-            applyCompany(company as CompanyRow);
-            setCurrentTenant({ id: hierarchy.tenant_id, name: hierarchy.tenant_name });
-            setCurrentGroup({ id: hierarchy.enterprise_group_id, name: hierarchy.group_name });
-            
-            if (isBranch) {
-              setCurrentBranch({ id: hierarchy.unit_id, name: hierarchy.unit_name });
-            } else {
-              // Try to find if user has a default branch in their profile
-              const { data: profile } = await supabase.from('profiles').select('default_branch_id').eq('id', user.id).maybeSingle();
-              if (profile?.default_branch_id) {
-                const { data: branch } = await supabase.from('branches').select('id, name').eq('id', profile.default_branch_id).maybeSingle();
-                if (branch) setCurrentBranch(branch);
-              }
-            }
+        // Load all companies user has access to (simplified for this exercise)
+        const { data: companies } = await supabase.from('companies').select('*').limit(1);
+        if (companies && companies.length > 0) {
+          const company = companies[0];
+          applyCompany(company as CompanyRow);
+          
+          // Load branches for this company
+          const { data: branches } = await supabase
+            .from('branches')
+            .select('id, name, code')
+            .eq('company_id', company.id);
+          
+          if (branches) {
+            setAllBranches(branches);
+            // Default to first branch or profile default
+            const { data: profile } = await supabase.from('profiles').select('default_branch_id').eq('id', user.id).maybeSingle();
+            const defaultBranch = branches.find(b => b.id === profile?.default_branch_id) || null;
+            setCurrentBranch(defaultBranch);
           }
         }
-
       }
     } catch (error: unknown) {
-      const err = error as { message?: string; status?: number; name?: string };
-      console.error('Enterprise context error:', err);
+      console.error('Enterprise context error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -143,6 +125,15 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     if (data) applyCompany(data as CompanyRow);
   };
 
+  const setBranch = (id: string | null) => {
+    if (!id) {
+      setCurrentBranch(null);
+      return;
+    }
+    const branch = allBranches.find(b => b.id === id);
+    if (branch) setCurrentBranch(branch);
+  };
+
   return (
     <EnterpriseContext.Provider value={{
       // AUD-1: nunca expor sentinela de tenant/grupo — consumers devem tratar null enquanto isLoading.
@@ -150,6 +141,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
       currentGroup,
       currentCompany,
       currentBranch,
+      allBranches,
       segment,
       subSegment,
       companySize,
@@ -157,6 +149,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
       operationTypes,
       isLoading,
       setCompany,
+      setBranch,
       executiveCouncil
     }}>
       {children}

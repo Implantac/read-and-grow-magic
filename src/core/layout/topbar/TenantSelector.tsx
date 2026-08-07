@@ -1,9 +1,6 @@
-import { Building2, ChevronDown } from 'lucide-react';
+import { Building2, ChevronDown, Store } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
-import type { Company, Branch } from '@/types';
-import { useCompanies } from '@/hooks/system/useCompanies';
-import { useAppStore } from '@/stores/useAppStore';
-import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
+import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { Button } from '@/ui/base/button';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
@@ -13,26 +10,26 @@ import { cn } from '@/lib/utils';
 
 export function TenantSelector() {
   const queryClient = useQueryClient();
-  const { activeCompany, activeBranch, setActiveCompany, setActiveBranch } = useAppStore();
-  const setActiveCompanyId = useEnterpriseStore((s) => s.setActiveCompanyId);
-  const setActiveBranchId = useEnterpriseStore((s) => s.setActiveBranchId);
-  const { companies } = useCompanies();
+  const { 
+    currentCompany, 
+    currentBranch, 
+    allBranches, 
+    setCompany, 
+    setBranch,
+    isLoading 
+  } = useEnterprise();
 
-  const handleSelectCompany = (company: Company) => {
-    const previousId = activeCompany?.id ?? null;
-    setActiveCompany(company);
-    setActiveCompanyId(company?.id ?? null);
-    const firstBranch = Array.isArray(company?.branches) && company.branches.length > 0 ? company.branches[0] : null;
-    setActiveBranchId(firstBranch?.id ?? null);
-    if (previousId !== (company?.id ?? null)) queryClient.clear();
+  const handleSelectCompany = async (id: string) => {
+    await setCompany(id);
+    queryClient.clear();
   };
 
-  const handleSelectBranch = (branch: Branch) => {
-    const previousId = activeBranch?.id ?? null;
-    setActiveBranch(branch);
-    setActiveBranchId(branch?.id ?? null);
-    if (previousId !== (branch?.id ?? null)) queryClient.clear();
+  const handleSelectBranch = (id: string | null) => {
+    setBranch(id);
+    queryClient.clear();
   };
+
+  if (isLoading) return <div className="h-9 w-32 animate-pulse bg-sidebar-accent/20 rounded-lg" />;
 
   return (
     <>
@@ -44,51 +41,59 @@ export function TenantSelector() {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="group flex items-center gap-2 h-9 px-2 sm:px-3 rounded-lg border border-sidebar-border/50 bg-sidebar-accent/20 text-sidebar-foreground hover:text-primary hover:bg-sidebar-accent/50 hover:border-primary/30 text-sm font-medium transition-all">
             <Building2 className="h-3.5 w-3.5 text-primary/70 group-hover:text-primary shrink-0" aria-hidden="true" />
-            <span className="max-w-[110px] sm:max-w-[180px] truncate">{activeCompany?.name || 'Empresa'}</span>
+            <span className="max-w-[110px] sm:max-w-[180px] truncate">{currentCompany?.name || 'Empresa'}</span>
             <ChevronDown className="h-3.5 w-3.5 opacity-50 transition-transform group-data-[state=open]:rotate-180" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-64 bg-sidebar border-sidebar-border">
           <DropdownMenuLabel className="text-sidebar-foreground/60 text-xs uppercase tracking-wider">Empresas</DropdownMenuLabel>
           <DropdownMenuSeparator className="bg-sidebar-border" />
-          {(Array.isArray(companies) ? companies : []).map((company: any) => (
+          {currentCompany && (
             <DropdownMenuItem
-              key={company.id}
-              onClick={() => handleSelectCompany(company)}
-              className={cn('text-sidebar-foreground/80 hover:text-primary focus:text-primary',
-                activeCompany?.id === company.id && 'text-primary bg-sidebar-accent')}
+              onClick={() => handleSelectCompany(currentCompany.id)}
+              className={cn('text-sidebar-foreground/80 hover:text-primary focus:text-primary', 'text-primary bg-sidebar-accent')}
             >
-              {company.name}
+              {currentCompany.name}
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="group flex items-center gap-2 h-9 px-3 rounded-lg text-sidebar-foreground/60 hover:text-primary hover:bg-sidebar-accent/50 text-sm transition-all">
+            <span className="text-sidebar-foreground/40">/</span>
+            <Store className="h-3.5 w-3.5 opacity-70 group-hover:text-primary" />
+            <span className="max-w-[120px] truncate">{currentBranch?.name || 'TODAS AS UNIDADES'}</span>
+            <ChevronDown className="h-3 w-3 opacity-50 transition-transform group-data-[state=open]:rotate-180" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-64 bg-sidebar border-sidebar-border">
+          <DropdownMenuLabel className="text-sidebar-foreground/60 text-xs uppercase tracking-wider">Unidades Operacionais</DropdownMenuLabel>
+          <DropdownMenuSeparator className="bg-sidebar-border" />
+          <DropdownMenuItem
+            onClick={() => handleSelectBranch(null)}
+            className={cn('text-sidebar-foreground/80 hover:text-primary focus:text-primary',
+              !currentBranch && 'text-primary bg-sidebar-accent font-bold')}
+          >
+            Visão Global (Todas)
+          </DropdownMenuItem>
+          <DropdownMenuSeparator className="bg-sidebar-border/50" />
+          {allBranches.map((branch) => (
+            <DropdownMenuItem
+              key={branch.id}
+              onClick={() => handleSelectBranch(branch.id)}
+              className={cn('text-sidebar-foreground/80 hover:text-primary focus:text-primary',
+                currentBranch?.id === branch.id && 'text-primary bg-sidebar-accent')}
+            >
+              <div className="flex flex-col">
+                <span className="font-medium">{branch.name}</span>
+                {branch.code && <span className="text-[10px] opacity-50">{branch.code}</span>}
+              </div>
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
-
-      {activeCompany && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="group hidden sm:flex items-center gap-2 h-9 px-3 rounded-lg text-sidebar-foreground/60 hover:text-primary hover:bg-sidebar-accent/50 text-sm transition-all">
-              <span className="text-sidebar-foreground/40">/</span>
-              <span className="max-w-[120px] truncate">{activeBranch?.name || 'Filial'}</span>
-              <ChevronDown className="h-3 w-3 opacity-50 transition-transform group-data-[state=open]:rotate-180" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-56 bg-sidebar border-sidebar-border">
-            <DropdownMenuLabel className="text-sidebar-foreground/60 text-xs uppercase tracking-wider">Filiais</DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-sidebar-border" />
-            {(activeCompany.branches || []).map((branch) => (
-              <DropdownMenuItem
-                key={branch.id}
-                onClick={() => handleSelectBranch(branch)}
-                className={cn('text-sidebar-foreground/80 hover:text-primary focus:text-primary',
-                  activeBranch?.id === branch.id && 'text-primary bg-sidebar-accent')}
-              >
-                {branch.name}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
     </>
   );
 }

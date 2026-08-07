@@ -1,7 +1,8 @@
-import { lazy } from 'react';
-import { Route } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
+import { Route, Routes } from 'react-router-dom';
 
 const ProfilePage = lazy(() => import("../pages/Profile"));
+const HardeningMasterPlan = lazy(() => import("./index"));
 const NotificationsPage = lazy(() => import("../pages/Notifications"));
 const LandingPage = lazy(() => import("../pages/LandingPage"));
 const RFIDDashboardPage = lazy(() => import("../pages/rfid/Dashboard"));
@@ -22,6 +23,7 @@ const TMSPerformancePage = lazy(() => import("../pages/tms/TMSPerformance"));
 
 export const MiscellaneousRoutes = [
   <Route key="profile" path="/profile" element={<ProfilePage />} />,
+  <Route key="hardening" path="/admin/hardening" element={<HardeningMasterPlan />} />,
   <Route key="notifications" path="/notifications" element={<NotificationsPage />} />,
   <Route key="landing" path="/landing" element={<LandingPage />} />,
   <Route key="rfid-dash" path="/rfid/dashboard" element={<RFIDDashboardPage />} />,
