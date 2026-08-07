@@ -58,6 +58,7 @@ const HardeningDashboard = () => {
     { id: '3', title: 'Inteligência Logística IA', status: 'completed', description: 'Otimização de Slotting, IA Preditiva, Digital Twin.' },
     { id: '4', title: 'Auditoria & Compliance', status: 'completed', description: 'UEEF SEC-LEVEL 3, Certificação RLS, LGPD GA.' },
     { id: '5', title: 'Expansão & Ecossistema', status: 'completed', description: 'Marketplace, Multi-moeda, Expansão Global.' },
+    { id: 'FINAL', title: 'Go-Live Ready', status: 'pending', description: 'Consolidação final, testes de carga e certificação de produção.' },
   ];
 
   const pendingItems = [
@@ -108,7 +109,7 @@ const HardeningDashboard = () => {
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Hardening & Evolução (Fase FINAL: Go-Live Ready)</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Hardening & Evolução (Fase 2B: Controle Operacional de Lojas)</h1>
           </div>
           <p className="text-muted-foreground text-lg">
             Plataforma Enterprise: Inteligência Logística e Automação Predictiva.
