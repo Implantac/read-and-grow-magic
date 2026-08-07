@@ -22,28 +22,47 @@ export interface AuthError {
 
 export async function requireAuth(
   req: Request,
-  opts: { roles?: Role[]; allowCron?: boolean } = {},
+  opts: { roles?: Role[]; allowCron?: boolean; allowInternal?: boolean } = {},
 ): Promise<AuthResult | AuthError> {
-  const { roles, allowCron } = opts;
-
-  // Cron secret path (used by Supabase scheduled functions)
-  if (allowCron) {
-    const cronSecret = Deno.env.get("CRON_SECRET");
-    const provided = req.headers.get("x-cron-secret");
-    if (cronSecret && provided && provided === cronSecret) {
-      return { ok: true, userId: null, role: null, viaCron: true, companyId: null, defaultBranchId: null };
-    }
-  }
-
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
-    return { ok: false, status: 401, message: "Unauthorized" };
-  }
+  const { roles, allowCron, allowInternal } = opts;
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
+
+  // 1. Internal System Callers (Service Role, Cron, or Internal Secret)
+  if (allowCron || allowInternal) {
+    const cronSecret = Deno.env.get("CRON_SECRET");
+    const providedCron = req.headers.get("x-cron-secret");
+    const isCron = !!cronSecret && !!providedCron && providedCron === cronSecret;
+
+    const authHeader = req.headers.get("Authorization");
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const isServiceRole = !!serviceKey && authHeader === `Bearer ${serviceKey}`;
+
+    const providedInternal = req.headers.get("x-internal-secret");
+    let isInternal = false;
+    if (providedInternal) {
+      const { data } = await supabase
+        .from("internal_fn_secrets")
+        .select("value")
+        .eq("name", "edge_internal")
+        .maybeSingle();
+      isInternal = !!data?.value && data.value === providedInternal;
+    }
+
+    if (isCron || isServiceRole || isInternal) {
+      return { ok: true, userId: null, role: null, viaCron: true, companyId: null, defaultBranchId: null };
+    }
+  }
+
+  // 2. User Authentication
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
+    return { ok: false, status: 401, message: "Unauthorized" };
+  }
+
   const token = authHeader.replace("Bearer ", "");
   const { data, error } = await supabase.auth.getUser(token);
   if (error || !data?.user) {

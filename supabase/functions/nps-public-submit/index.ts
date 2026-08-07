@@ -16,8 +16,18 @@ Deno.serve(async (req) => {
 
   try {
     const body = (await req.json()) as Body;
-    if (!body?.token || typeof body.score !== 'number' || body.score < 0 || body.score > 10) {
+    
+    // Hardening: Sanitização básica de input
+    if (!body?.token || typeof body.token !== 'string' || body.token.length > 256) {
+       return json({ error: 'Token inválido' }, 400);
+    }
+    
+    if (typeof body.score !== 'number' || body.score < 0 || body.score > 10) {
       return json({ error: 'Dados inválidos' }, 400);
+    }
+
+    if (body.comment && body.comment.length > 5000) {
+      return json({ error: 'Comentário muito longo' }, 400);
     }
 
     const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
