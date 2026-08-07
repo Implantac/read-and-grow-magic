@@ -63,3 +63,12 @@ export function useReplenishmentPolicies() {
 
   return { ...query, upsertPolicy: upsertMutation.mutateAsync };
 }
+
+export function useSupplyChainStats() {
+  const { currentCompany } = useEnterprise();
+  return useQuery({
+    queryKey: ['supply_chain_stats', currentCompany?.id],
+    queryFn: () => networkService.getSupplyChainStats(currentCompany!.id),
+    enabled: !!currentCompany?.id
+  });
+}
