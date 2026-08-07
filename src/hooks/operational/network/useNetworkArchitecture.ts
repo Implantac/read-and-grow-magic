@@ -9,7 +9,7 @@ export function usePosTerminals(branchId?: string) {
 
   return useQuery({
     queryKey: ['pos_terminals', targetId],
-    queryFn: () => networkService.getPosTerminals(targetId),
+    queryFn: () => networkService.getPosTerminals(targetId!),
     enabled: !!targetId
   });
 }
