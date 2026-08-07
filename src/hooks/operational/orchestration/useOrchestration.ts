@@ -1,5 +1,8 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { orchestrationService, SourcingOption } from '@/services/operational/orchestration/orchestrationService';
+import { orchestrationService, type SourcingOption } from '@/services/operational/orchestration/orchestrationService';
+import { toast } from 'sonner';
+
+export type { SourcingOption };
 import { toast } from 'sonner';
 
 export function useSourcingOptions(productId?: string, quantity: number = 1, targetBranchId?: string) {

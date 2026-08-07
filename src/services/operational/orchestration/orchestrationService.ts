@@ -18,39 +18,40 @@ export class OrchestrationService {
   async getSourcingOptions(productId: string, quantity: number, targetBranchId: string): Promise<SourcingOption[]> {
     const options: SourcingOption[] = [];
 
+    // Use a generic query to avoid TS deep instantiation issues with complex generated types
     // 1. Check local stock
-    const { data: localStock } = await supabase
+    const { data: localStock } = await (supabase as any)
       .from('inventory_levels')
       .select('balance')
       .eq('product_id', productId)
       .eq('branch_id', targetBranchId)
       .single();
 
-    if (localStock && localStock.balance >= quantity) {
+    if (localStock && (localStock as any).balance >= quantity) {
       options.push({
         type: 'local',
         branchId: targetBranchId,
         leadTimeDays: 0,
         cost: 0,
-        stockAvailable: localStock.balance
+        stockAvailable: (localStock as any).balance
       });
     }
 
     // 2. Check network stock (Cross-docking candidate)
-    const { data: networkStock } = await supabase
+    const { data: networkStock } = await (supabase as any)
       .from('inventory_levels')
-      .select('branch_id, balance, branches(name)')
+      .select('branch_id, balance')
       .eq('product_id', productId)
       .neq('branch_id', targetBranchId)
       .gt('balance', 0);
 
     if (networkStock) {
-      networkStock.forEach(item => {
+      (networkStock as any[]).forEach(item => {
         options.push({
           type: 'crossdock',
           branchId: item.branch_id,
-          leadTimeDays: 2, // Hardcoded for now, should be based on distance/logistics
-          cost: 15.00, // Hardcoded transfer cost
+          leadTimeDays: 2,
+          cost: 15.00,
           stockAvailable: item.balance
         });
       });
@@ -63,8 +64,7 @@ export class OrchestrationService {
    * Create an orchestrated order
    */
   async createOrchestratedOrder(orderData: any, sourcing: SourcingOption) {
-    // This would involve creating the sales order AND the related logistics entity (Transfer or PO)
-    const { data: order, error } = await supabase
+    const { data: order, error } = await (supabase as any)
       .from('storefront_orders')
       .insert({
         ...orderData,
@@ -79,13 +79,12 @@ export class OrchestrationService {
     if (error) throw error;
 
     if (sourcing.type === 'crossdock') {
-      // Create automatic stock transfer order
-      await supabase.from('stock_transfer_orders').insert({
+      await (supabase as any).from('stock_transfer_orders').insert({
         company_id: order.company_id,
         origin_unit_id: sourcing.branchId,
         destination_unit_id: orderData.branch_id,
         status: 'pending',
-        metadata: { related_order_id: order.id }
+        metadata: { related_order_id: (order as any).id }
       });
     }
 
