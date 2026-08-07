@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 
 export function SmartReplenishment() {
   const [search, setSearch] = useState('');
-  const { data: matrix = [], isLoading } = useEstoqueMatrix(search);
+  const { data: matrix = [], isLoading, error, refetch } = useEstoqueMatrix(search);
   const { data: branches = [] } = useBranches();
   const createTransfer = useCreateTransferenciaCanal();
 
@@ -113,11 +113,25 @@ export function SmartReplenishment() {
                 className="pl-9 bg-background" 
               />
             </div>
+            <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isLoading}>
+              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            </Button>
             <Button variant="outline" size="icon"><Filter className="h-4 w-4" /></Button>
           </div>
 
-          {isLoading ? (
-            <div className="py-8 text-center text-muted-foreground">Analisando malha logística...</div>
+          {error ? (
+            <EmptyState 
+              compact
+              icon={AlertTriangle}
+              title="Erro na análise"
+              description="Não foi possível analisar a malha logística."
+              action={<Button size="sm" onClick={() => refetch()}>Tentar Novamente</Button>}
+            />
+          ) : isLoading ? (
+            <div className="py-8 text-center text-muted-foreground flex flex-col items-center gap-3">
+              <RefreshCw className="h-8 w-8 animate-spin opacity-20" />
+              <p>Analisando malha logística...</p>
+            </div>
           ) : suggestions.length === 0 ? (
             <EmptyState 
               compact

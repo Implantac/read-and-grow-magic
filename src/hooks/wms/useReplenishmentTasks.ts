@@ -24,9 +24,11 @@ export interface ReplenishmentTask {
 export function useReplenishmentTasks() {
   const [tasks, setTasks] = useState<ReplenishmentTask[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const { data, error } = await supabase
         .from('replenishment_tasks')
@@ -51,8 +53,9 @@ export function useReplenishmentTasks() {
         completedAt: r.completed_at,
         createdAt: r.created_at,
       })));
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      setError(e);
       toast.error('Erro ao carregar reabastecimentos');
     } finally {
       setLoading(false);
@@ -76,5 +79,5 @@ export function useReplenishmentTasks() {
   };
 
   useEffect(() => { fetchData(); }, [fetchData]);
-  return { tasks, loading, refetch: fetchData, updateStatus };
+  return { tasks, loading, error, refetch: fetchData, updateStatus };
 }
