@@ -127,12 +127,13 @@ export default function AccountsReceivable() {
 
   const handleReceive = () => {
     if (!selectedAccount) return;
-    const amount = parseFloat(payForm.amount) || 0;
-    const interest = parseFloat(payForm.interest) || 0;
-    const penalty = parseFloat(payForm.penalty) || 0;
-    const discount = parseFloat(payForm.discount) || 0;
-    const totalPaid = amount + interest + penalty - discount;
-    const openAmount = Number(selectedAccount.open_amount ?? selectedAccount.amount);
+    const amount = roundCurrency(parseFloat(payForm.amount) || 0);
+    const interest = roundCurrency(parseFloat(payForm.interest) || 0);
+    const penalty = roundCurrency(parseFloat(payForm.penalty) || 0);
+    const discount = roundCurrency(parseFloat(payForm.discount) || 0);
+    const totalPaid = calculateTotalWithTaxes(amount, interest, penalty, discount);
+    const openAmount = roundCurrency(Number(selectedAccount.open_amount ?? selectedAccount.amount));
+
 
     if (amount <= 0) { toastError('Informe o valor do recebimento'); return; }
     if (amount > openAmount + 0.01) {

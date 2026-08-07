@@ -1,6 +1,6 @@
 # Baseline de Hardening - READ & GROW
 Data: 2026-08-07
-Status: **FASE 11 CONCLUÍDA** | **FASE 12 PLANEJADA**
+Status: **FASE 12 CONCLUÍDA** | **FASE 13 PLANEJADA**
 
 ## Status do Hardening
 | Fase | Descrição | Status |
@@ -25,8 +25,10 @@ Status: **FASE 11 CONCLUÍDA** | **FASE 12 PLANEJADA**
 - [x] Integridade de Estoque (Fase 9): Implementado Trigger de Sincronização Atômica entre Movimentações (Kardex) e Saldos. Criada função RPC `audit_stock_integrity` para detecção de divergências. Hardening de RLS em `stock_balances`.
 - [x] Atomicidade de Transações (Fase 10): Criado RPC `process_invoice_atomic` (NF-e + Estoque + Financeiro) e trigger `trg_sync_payment_to_ledger` para garantir atomicidade em fluxos críticos de faturamento e baixa.
 - [x] Idempotência Global (Fase 11): Adicionado suporte a `external_idempotency_key` em faturamento e `idempotency_key` em movimentações de WMS. Implementada função de manutenção de chaves para evitar overhead de banco.
+- [x] Precisão Monetária (Fase 12): Criada biblioteca `src/lib/financialMath.ts` com funções `roundCurrency` e `calculateInstallments` baseadas em `EPSILON`. Refatorados `AccountsPayable` e `AccountsReceivable` para eliminar erros de ponto flutuante em parcelamentos e baixas.
 
 ## Ações Imediatas
-1. Auditoria de Cálculos Monetários e Precisão (Fase 12).
+1. Consolidação do Sistema de Auditoria Empresarial (Fase 13).
 2. Stress test em PDV Offline.
+
 
