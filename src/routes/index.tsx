@@ -50,7 +50,8 @@ const HardeningDashboard = () => {
     { id: '16-20', title: 'Monitoramento & Refatoração', status: 'completed', description: 'Monitoring, Refatoração PCP/Financial, Services.' },
     { id: '21-25', title: 'UX & Performance', status: 'completed', description: 'Design System, PERF-GUARD, Database Indexes, LGPD.' },
     { id: '26-29', title: 'Governança & QA', status: 'completed', description: 'Documentação, DoD Permanente, No-Mock Policy.' },
-    { id: '2A', title: 'Rede Operacional', status: 'in_progress', description: 'Hierarquia de Lojas/CD/Fábrica, Estoque em Trânsito.' },
+    { id: '2A', title: 'Rede Operacional', status: 'completed', description: 'Hierarquia de Lojas/CD/Fábrica, Estoque em Trânsito.' },
+    { id: '2B', title: 'Orquestração de Pedidos', status: 'in_progress', description: 'Cross-docking, Drop-shipping, Roteirização de Carga.' },
   ];
 
   const operationalRequirements = [
