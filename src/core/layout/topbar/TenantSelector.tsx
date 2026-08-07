@@ -1,5 +1,5 @@
 import { Building2, ChevronDown, Store, Package } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/ui/base/badge';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { Button } from '@/ui/base/button';
