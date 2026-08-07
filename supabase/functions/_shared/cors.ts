@@ -9,8 +9,8 @@ const ALLOWLIST = (Deno.env.get("ALLOWED_ORIGINS") ?? "")
 
 const BASE_HEADERS = {
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+    "authorization, x-client-info, apikey, content-type, x-cron-secret, x-branch-id, x-internal-secret",
+  "Access-Control-Allow-Methods": "POST, GET, OPTIONS, PUT, DELETE",
   "Access-Control-Max-Age": "86400",
   "Vary": "Origin",
 };
