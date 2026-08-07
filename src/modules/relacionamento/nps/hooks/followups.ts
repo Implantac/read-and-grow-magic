@@ -25,9 +25,14 @@ export function useNPSFollowups(status?: string) {
 
 export function useUpdateFollowup() {
   const qc = useQueryClient();
+  const companyId = useCompanyId();
   return useMutation({
     mutationFn: async ({ id, ...patch }: { id: string } & NPSFollowupPatch) => {
-      const { error } = await supabase.from('nps_followups').update(patch).eq('id', id);
+      const { error } = await supabase
+        .from('nps_followups')
+        .update(patch)
+        .eq('id', id)
+        .eq('company_id', companyId!);
       if (error) throw error;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['nps', 'followups'] }); toast.success('Follow-up atualizado'); },
