@@ -1,6 +1,6 @@
 # Baseline de Hardening - READ & GROW
 Data: 2026-08-06
-Status: **FASE 7 CONCLUÍDA** | **FASE 8 PLANEJADA**
+Status: **FASE 8 CONCLUÍDA** | **FASE 9 PLANEJADA**
 
 ## Status do Hardening
 | Fase | Descrição | Status |
@@ -25,9 +25,10 @@ Status: **FASE 7 CONCLUÍDA** | **FASE 8 PLANEJADA**
 - [x] Hardening IDOR (Fase 4): Reforço de `company_id` em mutações (Delete/Update) nos hooks de NPS e ERP.
 - [x] Hardening de Edge Functions (Fase 5): Padronização de CORS, centralização de Auth (Service Role/Cron/Internal Secret) e sanitização de inputs públicos.
 - [x] Idempotência (Fase 6): Criada tabela \`idempotency_keys\` e utilitário compartilhado em Edge Functions. Aplicada proteção em \`billing-checkout\`, \`financial-intelligence\` e hooks de boletos.
-- [x] Autorização Granular (Fase 7): Implementada infraestrutura de permissões baseada em recursos/ações (\`permissions\` e \`role_permissions\`). Criada função RPC \`has_permission\` com Security Definer para validação server-side.
+- [x] Autorização Granular (Fase 7): Implementada infraestrutura de permissões baseada em recursos/ações (`permissions` e `role_permissions`). Criada função RPC `has_permission` com Security Definer para validação server-side.
+- [x] Hardening de Idempotência em Pagamentos (Fase 8): Implementada tabela global `idempotency_keys` com RLS por empresa. Hardened `payment_records` e `billing_subscriptions` para suportar chaves únicas de transação, prevenindo duplicidade em gateways externos.
 
 ## Ações Imediatas
 1. Stress test em PDV Offline (Fase 11/12).
-2. Hardening de Idempotência em Pagamentos (Fase 8).
+2. Hardening de Integridade de Dados & Estoque (Fase 9).
 
