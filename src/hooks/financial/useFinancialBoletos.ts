@@ -106,9 +106,10 @@ export function useMarkBoletoPaid() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (params: { id: string; bank_account_id?: string }) => {
-      const { data: bol, error: e1 } = await supabase.from('financial_boletos').select('*').eq('id', params.id).single();
+      const { data: boleto, error: e1 } = await supabase.from('financial_boletos').select('*').eq('id', params.id).single();
       if (e1) throw e1;
-      const boleto = bol;
+      if (!boleto) throw new Error('Boleto não encontrado');
+
       if (boleto.receivable_id) {
         const { error: e2 } = await supabase.from('payment_records').insert({
           receivable_id: boleto.receivable_id,
