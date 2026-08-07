@@ -93,17 +93,17 @@ const HardeningDashboard = () => {
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Fase FINAL: Go-Live</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Fase FINAL: Central de Abastecimento</h1>
           </div>
           <p className="text-muted-foreground text-lg">
             Blueprint Operacional: Complexidade no motor, simplicidade na operação.
           </p>
           <div className="mt-4 p-4 border rounded-xl bg-primary/10 border-primary/20 max-w-2xl animate-in fade-in duration-700">
             <h4 className="text-sm font-black uppercase tracking-widest text-primary mb-2 flex items-center gap-2">
-              <Store className="h-4 w-4" /> Implementação Concluída: Central de Abastecimento e Movimentação
+              <Store className="h-4 w-4" /> Hardening Operacional: Central de Abastecimento e Movimentação
             </h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              O conceito de "Operação da Loja" foi evoluído para uma <strong>Central de Abastecimento Unificada</strong>. Agora, Fábricas, CDs e Lojas operam sob o mesmo motor logístico, permitindo fluxos ponta a ponta (Fábrica → CD → Loja) e movimentações laterais/reversas com rastreabilidade total e gestão por exceção.
+              O conceito de "Operação da Loja" foi evoluído para uma <strong>Central de Abastecimento Unificada</strong> conforme o Padrão Operacional, Arquitetural e de UX (Skill Central de Abastecimento). Agora, Fábricas, CDs e Lojas operam sob o mesmo motor logístico, permitindo fluxos ponta a ponta e movimentações laterais com rastreabilidade total, auditoria e gestão por exceção.
             </p>
             <div className="mt-4 flex gap-2">
               <Button size="sm" variant="default" className="font-bold text-[10px] uppercase h-8" asChild>
