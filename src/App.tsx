@@ -239,7 +239,12 @@ const App = () => (
                 </Route>
                 <Route path="/admin/*" element={<ModuleErrorBoundary moduleName="Admin"><Routes>{AdminRoutes}</Routes></ModuleErrorBoundary>} />
                 <Route path="/operacional/*" element={<ModuleErrorBoundary moduleName="Operacional"><Routes>{OperationalRoutes}</Routes></ModuleErrorBoundary>} />
-                {NetworkRoutes}
+                <Route path="/operacional/rede/*">
+                  <Route path="control-tower" element={<NetworkControlTower />} />
+                  <Route path="pos" element={<PosTerminals />} />
+                  <Route path="transferencias" element={<StockTransfers />} />
+                  <Route path="ressuprimento" element={<ReplenishmentIntelligence />} />
+                </Route>
                 {MiscellaneousRoutes}
                 <Route element={<GatedOutlet module="fiscal" />}>
                   <Route path="/fiscal/*" element={<ModuleErrorBoundary moduleName="Fiscal"><Routes>{FiscalRoutes}</Routes></ModuleErrorBoundary>} />
