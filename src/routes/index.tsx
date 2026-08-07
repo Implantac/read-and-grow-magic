@@ -54,7 +54,7 @@ const HardeningDashboard = () => {
     { id: '21-25', title: 'UX & Performance', status: 'completed', description: 'Design System, PERF-GUARD, Database Indexes, LGPD.' },
     { id: '26-29', title: 'Governança & QA', status: 'completed', description: 'Documentação, DoD Permanente, No-Mock Policy.' },
     { id: '2A', title: 'Rede Operacional', status: 'completed', description: 'Hierarquia de Lojas/CD/Fábrica, Estoque em Trânsito.' },
-    { id: '2B', title: 'Orquestração de Pedidos', status: 'completed', description: 'Cross-docking, Drop-shipping, Roteirização de Carga.' },
+    { id: '2B', title: 'Controle Operacional de Lojas', status: 'in_progress', description: 'Central da Loja, Cockpit de Exceções, Saúde da Unidade, Inventário Cíclico.' },
     { id: '3', title: 'Inteligência Logística IA', status: 'completed', description: 'Otimização de Slotting, IA Preditiva, Digital Twin.' },
     { id: '4', title: 'Auditoria & Compliance', status: 'completed', description: 'UEEF SEC-LEVEL 3, Certificação RLS, LGPD GA.' },
     { id: '5', title: 'Expansão & Ecossistema', status: 'completed', description: 'Marketplace, Multi-moeda, Expansão Global.' },
