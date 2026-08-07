@@ -7,6 +7,7 @@ const SeparationQueuePage = lazy(() => import("../modules/operational/Separation
 const ConferenceQueuePage = lazy(() => import("../modules/operational/ConferenceQueue"));
 const BillingQueuePage = lazy(() => import("../modules/operational/BillingQueue"));
 const ShipmentPage = lazy(() => import("../modules/operational/ShipmentPage"));
+const ReplenishmentIntelligencePage = lazy(() => import("../modules/operational/network/ReplenishmentIntelligence"));
 
 export const OperationalRoutes = [
   <Route key="op-dash" path="/operacional/dashboard" element={<OperationalDashboardPage />} />,
@@ -15,4 +16,5 @@ export const OperationalRoutes = [
   <Route key="op-conf" path="/operacional/conferencia" element={<ConferenceQueuePage />} />,
   <Route key="op-bill" path="/operacional/faturamento" element={<BillingQueuePage />} />,
   <Route key="op-ship" path="/operacional/expedicao" element={<ShipmentPage />} />,
+  <Route key="op-rede-rep" path="/operacional/rede/reabastecimento" element={<ReplenishmentIntelligencePage />} />,
 ];
