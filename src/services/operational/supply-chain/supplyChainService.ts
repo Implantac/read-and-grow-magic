@@ -1,17 +1,17 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export type MovementStatus = 
-  | 'requested'   // SOLICITADA
-  | 'approved'    // APROVADA
-  | 'reserved'    // RESERVADA
-  | 'picking'     // EM SEPARAÇÃO
-  | 'shipped'     // EXPEDIDA
-  | 'in_transit'  // EM TRÂNSITO
-  | 'delivered'   // RECEBIDA
-  | 'checked'     // CONFERIDA
-  | 'divergent'   // DIVERGÊNCIA
-  | 'completed'   // CONCLUÍDA
-  | 'investigating'; // INVESTIGAÇÃO
+  | 'requested'   
+  | 'approved'    
+  | 'reserved'    
+  | 'picking'     
+  | 'shipped'     
+  | 'in_transit'  
+  | 'delivered'   
+  | 'checked'     
+  | 'divergent'   
+  | 'completed'   
+  | 'investigating';
 
 export type UnitType = 'factory' | 'warehouse' | 'store' | 'customer';
 
@@ -76,26 +76,31 @@ export const supplyChainService = {
   },
 
   async createRequest(request: Partial<SupplyChainMovement> & { items: Partial<SupplyChainItem>[] }) {
-    // In a real scenario, this would be a single transaction or RPC
-    const { data: movement, error: mError } = await supabase
-      .from('supply_chain_movements' as any)
+    const { data, error: mError } = await (supabase as any)
+      .from('supply_chain_movements')
       .insert({
-        ...request,
+        origin_id: request.origin_id,
+        origin_type: request.origin_type,
+        destination_id: request.destination_id,
+        destination_type: request.destination_type,
+        company_id: request.company_id,
         status: 'requested',
-        items: undefined // Remove items from movement object
+        priority: request.priority || 'normal',
+        items_count: request.items.length
       })
       .select()
       .single();
 
     if (mError) throw mError;
+    const movement = data as SupplyChainMovement;
 
     const items = request.items.map(item => ({
       ...item,
       movement_id: movement.id
     }));
 
-    const { error: iError } = await supabase
-      .from('supply_chain_items' as any)
+    const { error: iError } = await (supabase as any)
+      .from('supply_chain_items')
       .insert(items);
 
     if (iError) throw iError;
@@ -104,8 +109,8 @@ export const supplyChainService = {
   },
 
   async updateStatus(movementId: string, status: MovementStatus) {
-    const { error } = await supabase
-      .from('supply_chain_movements' as any)
+    const { error } = await (supabase as any)
+      .from('supply_chain_movements')
       .update({ status, updated_at: new Date().toISOString() })
       .eq('id', movementId);
     
