@@ -10,10 +10,10 @@ export const redeOperacionalSection: NavSection = {
       children: [
         { title: 'Operação da Loja', href: '/operacional/loja/operacao', icon: 'Store' },
         { title: 'Painel Gerencial', href: '/operacional/loja/central', icon: 'LayoutDashboard' },
-        { title: 'Terminais PDV', href: '/operacional/rede/pdvs', icon: 'Monitor' },
+        { title: 'Terminais PDV', href: '/operacional/rede/pos', icon: 'Monitor' },
         { title: 'Transferências de Estoque', href: '/operacional/rede/transferencias', icon: 'Truck' },
-      { title: 'Inteligência de Reposição', href: '/operacional/rede/ressuprimento', icon: 'Brain' },
-        { title: 'Torre de Controle', href: '/dashboard', icon: 'LayoutDashboard' },
+        { title: 'Inteligência de Reposição', href: '/operacional/rede/ressuprimento', icon: 'Brain' },
+        { title: 'Torre de Controle', href: '/operacional/rede/control-tower', icon: 'Network' },
       ],
     },
   ],
