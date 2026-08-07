@@ -151,6 +151,23 @@ const HardeningDashboard = () => {
         ))}
       </div>
 
+      <div className="grid grid-cols-1 gap-6">
+        <Card className="border-primary bg-primary/5 shadow-lg">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Network className="h-6 w-6 text-primary" />
+              <div>
+                <CardTitle>Torre de Controle Operacional (Live)</CardTitle>
+                <CardDescription>Monitoramento em tempo real da rede e supply chain</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <NetworkControlTower />
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2 border-primary bg-primary/5 shadow-lg overflow-hidden">
           <CardHeader className="bg-primary/10 border-b border-primary/20">
