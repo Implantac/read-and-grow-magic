@@ -56,8 +56,8 @@ const HardeningDashboard = () => {
     { id: '2A', title: 'Rede Operacional', status: 'completed', description: 'Hierarquia de Lojas/CD/Fábrica, Estoque em Trânsito.' },
     { id: '2B', title: 'Orquestração de Pedidos', status: 'completed', description: 'Cross-docking, Drop-shipping, Roteirização de Carga.' },
     { id: '3', title: 'Inteligência Logística IA', status: 'completed', description: 'Otimização de Slotting, IA Preditiva, Digital Twin.' },
-    { id: '4', title: 'Auditoria & Compliance', status: 'in_progress', description: 'UEEF SEC-LEVEL 3, Certificação RLS, LGPD GA.' },
-    { id: '5', title: 'Expansão & Ecossistema', status: 'pending', description: 'Marketplace, Multi-moeda, Expansão Global.' },
+    { id: '4', title: 'Auditoria & Compliance', status: 'completed', description: 'UEEF SEC-LEVEL 3, Certificação RLS, LGPD GA.' },
+    { id: '5', title: 'Expansão & Ecossistema', status: 'in_progress', description: 'Marketplace, Multi-moeda, Expansão Global.' },
   ];
 
   const pendingItems = [
@@ -108,7 +108,7 @@ const HardeningDashboard = () => {
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Hardening & Evolução (Fase 4: Auditoria & Compliance)</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Hardening & Evolução (Fase 5: Expansão & Ecossistema)</h1>
           </div>
           <p className="text-muted-foreground text-lg">
             Plataforma Enterprise: Inteligência Logística e Automação Predictiva.
