@@ -4,11 +4,10 @@ export const redeOperacionalSection: NavSection = {
   label: 'Rede & Distribuição',
   items: [
     {
-      title: 'Rede Operacional',
-      href: '/operacional/rede',
-      icon: 'Network',
+      title: 'Central de Abastecimento',
+      href: '/operacional/abastecimento',
+      icon: 'ArrowRightLeft',
       children: [
-        { title: 'Operação da Loja', href: '/operacional/loja/operacao', icon: 'Store' },
         { title: 'Painel Gerencial', href: '/operacional/loja/central', icon: 'LayoutDashboard' },
         { title: 'Terminais PDV', href: '/operacional/rede/pos', icon: 'Monitor' },
         { title: 'Transferências de Estoque', href: '/operacional/rede/transferencias', icon: 'Truck' },
