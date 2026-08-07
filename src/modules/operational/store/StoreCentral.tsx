@@ -110,34 +110,46 @@ export default function StoreCentral() {
             </CardHeader>
             <CardContent className="p-0">
               <div className="divide-y">
-                {alerts?.map((alert) => (
-                  <div key={alert.id} className="p-4 flex items-start gap-4 hover:bg-muted/50 transition-colors group">
-                    <div className={cn(
-                      "p-2 rounded-full",
-                      alert.type === 'critical' ? "bg-destructive/10 text-destructive" : 
-                      alert.type === 'warning' ? "bg-warning/10 text-warning" : "bg-primary/10 text-primary"
-                    )}>
-                      {alert.category === 'rupture' && <AlertTriangle className="h-5 w-5" />}
-                      {alert.category === 'receiving' && <Package className="h-5 w-5" />}
-                      {alert.category === 'transfer' && <Truck className="h-5 w-5" />}
-                      {alert.category === 'cashier' && <DollarSign className="h-5 w-5" />}
-                      {alert.category === 'replenishment' && <RefreshCw className="h-5 w-5" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <p className="font-bold text-sm">{alert.title}</p>
-                        {alert.actionPath && (
-                          <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 opacity-0 group-hover:opacity-100 transition-opacity" asChild>
-                            <Link to={alert.actionPath}>
-                              {alert.actionLabel || 'Tratar'} <ChevronRight className="h-3 w-3" />
-                            </Link>
-                          </Button>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-0.5">{alert.description}</p>
-                    </div>
+                {isLoading ? (
+                  <div className="p-8 text-center">
+                    <RefreshCw className="h-8 w-8 animate-spin mx-auto text-primary opacity-20" />
+                    <p className="text-xs text-muted-foreground mt-2">Carregando tarefas críticas...</p>
                   </div>
-                ))}
+                ) : alerts?.length > 0 ? (
+                  alerts.map((alert) => (
+                    <div key={alert.id} className="p-4 flex items-start gap-4 hover:bg-muted/50 transition-colors group">
+                      <div className={cn(
+                        "p-2 rounded-full",
+                        alert.type === 'critical' ? "bg-destructive/10 text-destructive" : 
+                        alert.type === 'warning' ? "bg-warning/10 text-warning" : "bg-primary/10 text-primary"
+                      )}>
+                        {alert.category === 'rupture' && <AlertTriangle className="h-5 w-5" />}
+                        {alert.category === 'receiving' && <Package className="h-5 w-5" />}
+                        {alert.category === 'transfer' && <Truck className="h-5 w-5" />}
+                        {alert.category === 'cashier' && <DollarSign className="h-5 w-5" />}
+                        {alert.category === 'replenishment' && <RefreshCw className="h-5 w-5" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <p className="font-bold text-sm">{alert.title}</p>
+                          {alert.actionPath && (
+                            <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 opacity-0 group-hover:opacity-100 transition-opacity" asChild>
+                              <Link to={alert.actionPath}>
+                                {alert.actionLabel || 'Tratar'} <ChevronRight className="h-3 w-3" />
+                              </Link>
+                            </Button>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">{alert.description}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-8 text-center text-muted-foreground">
+                    <CheckCircle2 className="h-8 w-8 mx-auto mb-2 opacity-20" />
+                    <p className="text-sm">Nenhuma pendência crítica encontrada.</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
