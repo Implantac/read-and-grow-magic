@@ -61,30 +61,45 @@ const HardeningDashboard = () => {
     { id: 'FINAL', title: 'Modo Produção Live', status: 'in_progress', description: 'Certificado A1, Chaves PSP, Homologação SEFAZ.' },
   ];
 
+  const pendingItems = [
+    { 
+      id: 'fiscal_a1', 
+      title: '1. Certificado Digital A1 (Real)', 
+      icon: <Lock className="h-4 w-4" />,
+      content: `O sistema está pronto para faturamento, mas aguarda a inserção de um certificado A1 válido no cofre (Vault) para assinar NF-e/NFC-e de produção via XMLDSig.`
+    },
+    { 
+      id: 'billing_psp', 
+      title: '2. Ativação de Chaves do PSP (Stripe)', 
+      icon: <Database className="h-4 w-4" />,
+      content: `O motor de cobrança SaaS está operacional. É necessário configurar as chaves STRIPE_SECRET_KEY e STRIPE_WEBHOOK_SECRET para processar pagamentos reais.`
+    },
+    { 
+      id: 'sefaz_homologation', 
+      title: '3. Homologação SEFAZ Ponta a Ponta', 
+      icon: <CheckCircle2 className="h-4 w-4" />,
+      content: `Ciclo completo de validação (Autorização, DANFE, Cancelamento, CC-e) em ambiente de homologação para garantir 100% de estabilidade fiscal.`
+    },
+    { 
+      id: 'e2e_mutational', 
+      title: '4. Testes E2E Mutacionais (Fluxo do Dinheiro)', 
+      icon: <TrendingUp className="h-4 w-4" />,
+      content: `Implementação de testes que criam pedidos reais, baixam estoque e geram financeiro em um tenant de teste isolado para garantir que refatores não quebrem o core.`
+    }
+  ];
+
   const operationalRequirements = [
     { 
       id: 'plugin_marketplace', 
-      title: '1. Marketplace de Aplicações (Plugins)', 
+      title: 'Marketplace de Aplicações (Plugins)', 
       icon: <Puzzle className="h-4 w-4" />,
       content: `Ecossistema aberto para extensões de terceiros e integrações nativas (Stripe, WhatsApp, IoT), permitindo modularidade total sem inflar o core do ERP.`
     },
     { 
       id: 'multi_currency', 
-      title: '2. Arquitetura Multi-moeda & Global', 
+      title: 'Arquitetura Multi-moeda & Global', 
       icon: <TrendingUp className="h-4 w-4" />,
       content: `Suporte a múltiplas jurisdições fiscais e conversão automática de câmbio em tempo real para operações de exportação/importação.`
-    },
-    { 
-      id: 'global_inventory', 
-      title: '3. Rede Global de Inventário', 
-      icon: <Network className="h-4 w-4" />,
-      content: `Visibilidade e gestão de estoque em escala global, permitindo transferências internacionais e otimização de custos tributários entre fronteiras.`
-    },
-    { 
-      id: 'enterprise_api', 
-      title: '4. Enterprise SDK & GraphQL API', 
-      icon: <Zap className="h-4 w-4" />,
-      content: `Camada de abstração robusta para desenvolvedores corporativos integrarem sistemas legados ou construírem UIs customizadas sobre o motor Use ERP.`
     }
   ];
 
