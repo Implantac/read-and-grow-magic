@@ -1,6 +1,6 @@
 # Baseline de Hardening - READ & GROW
 Data: 2026-08-07
-Status: **FASE 15 EM ANDAMENTO**
+Status: **FASE 18 CONCLUÍDA**
 
 ## Status do Hardening
 | Fase | Descrição | Status |
@@ -20,6 +20,9 @@ Status: **FASE 15 EM ANDAMENTO**
 | 13 | Auditoria Empresarial | ✅ Concluído |
 | 26 | Governança (DoD) | ✅ Concluído |
 | 15 | Testes de Integração e RLS | ✅ Concluído |
+| 16 | Golden Path E2E | ✅ Concluído |
+| 17 | Regressão (Global Suite) | ✅ Concluído |
+| 18 | CI/CD (Pipeline Hardening) | ✅ Concluído |
 
 
 ## Ações Executadas
