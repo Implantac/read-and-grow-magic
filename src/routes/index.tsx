@@ -56,52 +56,28 @@ const HardeningDashboard = () => {
 
   const operationalRequirements = [
     { 
-      id: 'modelo', 
-      title: '1. Modelo de Rede (CNPJ ≠ Unidade ≠ Estoque)', 
-      icon: <Building2 className="h-4 w-4" />,
-      content: `O sistema distingue Entidade Jurídica, Unidade Operacional, Local Físico, Estoque e PDV. Estrutura: Grupo > Empresa/CNPJ > Unidade (Fábrica, CD, Loja) > Local de Estoque > PDV.`
-    },
-    { 
-      id: 'unidade', 
-      title: '2. Unidade Operacional Completa', 
-      icon: <LayoutDashboard className="h-4 w-4" />,
-      content: `Cada loja possui seu próprio operacional (PDV, caixa, turnos, estoque) e financeiro (DRE individualizado), com contexto fiscal próprio (Série, Numeração, IE).`
-    },
-    { 
-      id: 'visoes', 
-      title: '3-4. Visão Individual vs. Global', 
-      icon: <Search className="h-4 w-4" />,
-      content: `Gestores alternam entre Visão Individual (detalhes de uma loja) e Visão Global (consolidado do grupo) sem perda de rastreabilidade.`
-    },
-    { 
-      id: 'estoque', 
-      title: '6-7. Estoque por Localização', 
-      icon: <Package className="h-4 w-4" />,
-      content: `Controle granular: Físico, Reservado e Disponível por unidade. Itens vinculados a Stock Locations específicas para evitar confusão de saldos.`
-    },
-    { 
-      id: 'reabastecimento', 
-      title: '8-13. Reabastecimento Inteligente', 
-      icon: <TrendingUp className="h-4 w-4" />,
-      content: `Cálculo automático de necessidade baseado em: Venda Média, Lead Time, Estoque em Trânsito, Reservas e Sazonalidade. Hierarquia: Estoque Próprio > Transferência Interna > CD > Fábrica > Compra.`
-    },
-    { 
-      id: 'transferencias', 
-      title: '14-17. Transferências como Documentos Reais', 
+      id: 'crossdocking', 
+      title: '1. Orquestração de Pedidos & Cross-docking', 
       icon: <Truck className="h-4 w-4" />,
-      content: `Workflow completo: Solicitada > Aprovada > Separação > Em Trânsito > Recebida > Conferida. Gestão automática de divergências e estoque 'Em Trânsito'.`
+      content: `O sistema orquestra a origem do estoque (Sourcing). Pedidos podem ser atendidos via estoque local, cross-docking (via CD sem armazenagem longa) ou drop-shipping (direto do fornecedor).`
     },
     { 
-      id: 'entidades', 
-      title: '18-22. Entidades de Primeira Classe', 
-      icon: <Factory className="h-4 w-4" />,
-      content: `CD e Fábrica possuem fluxos específicos (Matéria-prima, WIP, Expedição). PDVs possuem identidade única para auditoria extrema.`
+      id: 'roteirizacao', 
+      title: '2. Roteirização de Carga & Last Mile', 
+      icon: <TrendingUp className="h-4 w-4" />,
+      content: `Agrupamento de pedidos por região, veículo e cubagem. Integração com mapas para otimização de rotas e monitoramento de entregas em tempo real.`
     },
     { 
-      id: 'dash_corp', 
-      title: '24-28. Torre de Controle & Supply Chain', 
-      icon: <Shield className="h-4 w-4" />,
-      content: `Painel consolidado para monitoramento de rupturas, excessos e sugestões de reabastecimento aprováveis pelo gestor, preparando a base para futura IA.`
+      id: 'omnichannel', 
+      title: '3. Omnichannel Real (BOPIS/Ship-from-Store)', 
+      icon: <Store className="h-4 w-4" />,
+      content: `Compra online e retira na loja (BOPIS). Envio a partir da loja mais próxima (Ship-from-store) para redução de custo de frete e tempo de entrega.`
+    },
+    { 
+      id: 'fiscal_avancado', 
+      title: '4. Fiscal em Rede (Venda por Ordem)', 
+      icon: <ShieldCheck className="h-4 w-4" />,
+      content: `Emissão automática de notas de Remessa, Venda por Ordem e Triangular. Garantia de conformidade fiscal em operações multi-unidade complexas.`
     }
   ];
 
