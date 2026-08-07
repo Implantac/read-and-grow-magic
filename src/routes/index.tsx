@@ -53,12 +53,10 @@ const HardeningDashboard = () => {
     { id: '21-25', title: 'UX & Performance', status: 'completed', description: 'Design System, PERF-GUARD, Database Indexes, LGPD.' },
     { id: '26-29', title: 'Governança & QA', status: 'completed', description: 'Documentação, DoD Permanente, No-Mock Policy.' },
     { id: '2A', title: 'Rede Operacional', status: 'completed', description: 'Hierarquia de Lojas/CD/Fábrica, Estoque em Trânsito.' },
-    { id: '2B', title: 'Orquestração de Pedidos', status: 'completed', description: 'Cross-docking, Drop-shipping, Roteirização de Carga.' },
-    { id: '2C', title: 'Expedição & Última Milha', status: 'completed', description: 'Gestão de Romaneios, Tracking em Tempo Real, Last Mile.' },
-    { id: '3', title: 'Inteligência Logística IA', status: 'completed', description: 'Otimização de Slotting, IA Preditiva, Cross-docking Dinâmico.' },
-    { id: '4', title: 'Auditoria & Compliance (LGPD)', status: 'completed', description: 'Certificação de Segurança Proativa, Criptografia E2E, LGPD.' },
-    { id: '5', title: 'Expansão & Ecossistema', status: 'completed', description: 'Marketplace de Plugins, Multi-moeda, Expansão Global.' },
-    { id: 'FINAL', title: 'Modo Produção Live', status: 'in_progress', description: 'Certificado A1, Chaves PSP, Homologação SEFAZ.' },
+    { id: '2B', title: 'Orquestração de Pedidos', status: 'in_progress', description: 'Cross-docking, Drop-shipping, Roteirização de Carga.' },
+    { id: '3', title: 'Inteligência Logística IA', status: 'pending', description: 'Otimização de Slotting, IA Preditiva, Digital Twin.' },
+    { id: '4', title: 'Auditoria & Compliance', status: 'pending', description: 'UEEF SEC-LEVEL 3, Certificação RLS, LGPD GA.' },
+    { id: '5', title: 'Expansão & Ecossistema', status: 'pending', description: 'Marketplace, Multi-moeda, Expansão Global.' },
   ];
 
   const pendingItems = [
