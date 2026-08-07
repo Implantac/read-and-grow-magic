@@ -61,43 +61,43 @@ const HardeningDashboard = () => {
 
   const pendingItems = [
     { 
-      id: 'fiscal_a1', 
-      title: '1. Certificado Digital A1 (Real)', 
-      icon: <Lock className="h-4 w-4" />,
-      content: `O sistema está pronto para faturamento, mas aguarda a inserção de um certificado A1 válido no cofre (Vault) para assinar NF-e/NFC-e de produção via XMLDSig.`
+      id: 'network_model', 
+      title: '1. Modelo de Rede Operacional (Fase 2A)', 
+      icon: <Network className="h-4 w-4" />,
+      content: `Separação clara entre CNPJ, Unidade Operacional (Loja, CD, Fábrica) e Locais de Estoque. Suporte a visão individual por unidade e visão global consolidada.`
     },
     { 
-      id: 'billing_psp', 
-      title: '2. Ativação de Chaves do PSP (Stripe)', 
-      icon: <Database className="h-4 w-4" />,
-      content: `O motor de cobrança SaaS está operacional. É necessário configurar as chaves STRIPE_SECRET_KEY e STRIPE_WEBHOOK_SECRET para processar pagamentos reais.`
+      id: 'stock_hierarchy', 
+      title: '2. Hierarquia de Estoque por Localização', 
+      icon: <Package className="h-4 w-4" />,
+      content: `Controle de saldo físico, reservado e disponível por localização (Fábrica, CD, Lojas). Registro de estoque em trânsito para transferências.`
     },
     { 
-      id: 'sefaz_homologation', 
-      title: '3. Homologação SEFAZ Ponta a Ponta', 
-      icon: <CheckCircle2 className="h-4 w-4" />,
-      content: `Ciclo completo de validação (Autorização, DANFE, Cancelamento, CC-e) em ambiente de homologação para garantir 100% de estabilidade fiscal.`
+      id: 'replenishment_intel', 
+      title: '3. Inteligência de Reabastecimento', 
+      icon: <RefreshCw className="h-4 w-4" />,
+      content: `Cálculo automático de necessidade baseado em lead time, estoque mínimo/máximo e venda média. Sugestão de sourcing (CD -> Loja ou Loja -> Loja).`
     },
     { 
-      id: 'e2e_mutational', 
-      title: '4. Testes E2E Mutacionais (Fluxo do Dinheiro)', 
-      icon: <TrendingUp className="h-4 w-4" />,
-      content: `Implementação de testes que criam pedidos reais, baixam estoque e geram financeiro em um tenant de teste isolado para garantir que refatores não quebrem o core.`
+      id: 'transfer_documents', 
+      title: '4. Documentos de Transferência Reais', 
+      icon: <Truck className="h-4 w-4" />,
+      content: `Workflow completo de transferência: Rascunho -> Solicitada -> Aprovada -> Separação -> Em Trânsito -> Recebida -> Conferida. Gestão de divergências.`
     }
   ];
 
   const operationalRequirements = [
     { 
-      id: 'plugin_marketplace', 
-      title: 'Marketplace de Aplicações (Plugins)', 
-      icon: <Puzzle className="h-4 w-4" />,
-      content: `Ecossistema aberto para extensões de terceiros e integrações nativas (Stripe, WhatsApp, IoT), permitindo modularidade total sem inflar o core do ERP.`
+      id: 'store_autonomy', 
+      title: 'Autonomia Operacional da Loja', 
+      icon: <Store className="h-4 w-4" />,
+      content: `Cada loja com PDV, caixa, operadores, turnos, financeiro e fiscal próprios, sem mistura automática de dados entre unidades.`
     },
     { 
-      id: 'multi_currency', 
-      title: 'Arquitetura Multi-moeda & Global', 
-      icon: <TrendingUp className="h-4 w-4" />,
-      content: `Suporte a múltiplas jurisdições fiscais e conversão automática de câmbio em tempo real para operações de exportação/importação.`
+      id: 'control_tower', 
+      title: 'Torre de Controle (Supply Chain)', 
+      icon: <Monitor className="h-4 w-4" />,
+      content: `Visão consolidada de faturamento, margem, estoque global, rupturas e transferências em tempo real para o gestor do grupo.`
     }
   ];
 
