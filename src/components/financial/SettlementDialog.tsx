@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
+import { roundCurrency, calculateTotalWithTaxes } from '@/lib/financialMath';
+
 import { formatBRL, formatDate } from '@/lib/formatters';
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
@@ -16,7 +18,8 @@ import { useUseAdvance } from '@/hooks/financial/useFinancialSettlements';
 import { cn } from '@/lib/utils';
 
 const fmt = (v: number) =>
-  formatBRL(Number(v) || 0);
+  formatBRL(roundCurrency(Number(v) || 0));
+
 
 export type SettlementTarget = {
   source_type: 'receivable' | 'payable';
@@ -54,9 +57,10 @@ export function SettlementDialog({ open, onOpenChange, target, onSettled }: Prop
   const useAdv = useUseAdvance();
 
   const open_amount = useMemo(
-    () => Math.max((target?.amount_total ?? 0) - (target?.paid_amount ?? 0), 0),
+    () => Math.max(roundCurrency((target?.amount_total ?? 0) - (target?.paid_amount ?? 0)), 0),
     [target]
   );
+
 
   const [splits, setSplits] = useState<PaymentSplit[]>([]);
   const [interest, setInterest] = useState('0');
@@ -81,10 +85,15 @@ export function SettlementDialog({ open, onOpenChange, target, onSettled }: Prop
     }
   }, [open, target?.source_id]); // eslint-disable-line
 
-  const totalSplits = splits.reduce((s, x) => s + (Number(x.amount) || 0), 0);
-  const totalSettled =
-    totalSplits + (parseFloat(interest) || 0) + (parseFloat(penalty) || 0) - (parseFloat(discount) || 0);
-  const principal = totalSettled - (parseFloat(interest) || 0) - (parseFloat(penalty) || 0) + (parseFloat(discount) || 0);
+  const totalSplits = roundCurrency(splits.reduce((s, x) => s + (Number(x.amount) || 0), 0));
+  
+  const interestVal = roundCurrency(parseFloat(interest) || 0);
+  const penaltyVal = roundCurrency(parseFloat(penalty) || 0);
+  const discountVal = roundCurrency(parseFloat(discount) || 0);
+
+  const totalSettled = calculateTotalWithTaxes(totalSplits, interestVal, penaltyVal, discountVal);
+  const principal = roundCurrency(totalSettled - interestVal - penaltyVal + discountVal);
+
 
   const partyAdvances = useMemo(
     () =>
@@ -99,28 +108,31 @@ export function SettlementDialog({ open, onOpenChange, target, onSettled }: Prop
   if (!target) return null;
 
   const addSplit = () => {
-    const remaining = Math.max(open_amount - totalSplits, 0);
+    const remaining = Math.max(roundCurrency(open_amount - totalSplits), 0);
     setSplits([...splits, { payment_method: 'cash', amount: remaining, bank_account_id: accounts[0]?.id ?? null }]);
   };
+
   const removeSplit = (i: number) => setSplits(splits.filter((_, idx) => idx !== i));
   const updateSplit = (i: number, patch: Partial<PaymentSplit>) =>
     setSplits(splits.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
 
   const fillRemaining = (i: number) => {
-    const others = splits.reduce((s, x, idx) => (idx === i ? s : s + (Number(x.amount) || 0)), 0);
-    updateSplit(i, { amount: Math.max(open_amount - others, 0) });
+    const others = roundCurrency(splits.reduce((s, x, idx) => (idx === i ? s : s + (Number(x.amount) || 0)), 0));
+    updateSplit(i, { amount: Math.max(roundCurrency(open_amount - others), 0) });
   };
+
 
   const handleConfirm = async () => {
     if (totalSplits <= 0) return;
     await settle.mutateAsync({
       source_type: target.source_type,
       source_id: target.source_id,
-      splits: splits.filter((s) => Number(s.amount) > 0),
+      splits: splits.filter((s) => Number(s.amount) > 0).map(s => ({ ...s, amount: roundCurrency(s.amount) })),
       settlement_date: date,
-      interest: parseFloat(interest) || 0,
-      penalty: parseFloat(penalty) || 0,
-      discount: parseFloat(discount) || 0,
+      interest: interestVal,
+      penalty: penaltyVal,
+      discount: discountVal,
+
       notes: notes || undefined,
     });
     onSettled?.();
@@ -221,8 +233,9 @@ export function SettlementDialog({ open, onOpenChange, target, onSettled }: Prop
                   onChange={(e) => {
                     const val = e.target.value.replace(',', '.');
                     const num = val === '' ? 0 : parseFloat(val);
-                    updateSplit(idx, { amount: isNaN(num) ? 0 : num });
+                    updateSplit(idx, { amount: isNaN(num) ? 0 : roundCurrency(num) });
                   }}
+
                 />
 
                 <Select
@@ -281,8 +294,9 @@ export function SettlementDialog({ open, onOpenChange, target, onSettled }: Prop
           <div className="flex justify-between text-base">
             <span>Saldo após baixa:</span>
             <Badge variant={open_amount - principal <= 0.01 ? 'default' : 'secondary'}>
-              {fmt(Math.max(open_amount - principal, 0))}
+              {fmt(Math.max(roundCurrency(open_amount - principal), 0))}
             </Badge>
+
           </div>
         </div>
 
