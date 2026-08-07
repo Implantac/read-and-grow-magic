@@ -12,7 +12,7 @@ export interface BranchRef {
   id: string; 
   name: string; 
   code?: string; 
-  tipo?: 'FACTORY' | 'DISTRIBUTION_CENTER' | 'STORE';
+  tipo?: 'FACTORY' | 'DISTRIBUTION_CENTER' | 'STORE' | 'industria' | 'filial' | 'cd';
 }
 
 
