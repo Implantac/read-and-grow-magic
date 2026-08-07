@@ -20,9 +20,10 @@ export const logisticaSection: NavSection = {
     },
     {
       title: 'TMS - Transportes',
-      href: '/tms',
+      href: '/tms/dashboard',
       icon: 'Truck',
       children: [
+        { title: 'Dashboard TMS', href: '/tms/dashboard', icon: 'LayoutDashboard' },
         { title: 'Gestão de Frotas', href: '/tms/veiculos', icon: 'Truck' },
         { title: 'Rotas & Last Mile', href: '/tms/rotas', icon: 'MapPin' },
         { title: 'Rastreamento Live', href: '/tms/live', icon: 'Navigation' },
@@ -30,9 +31,10 @@ export const logisticaSection: NavSection = {
     },
     {
       title: 'RFID & IoT',
-      href: '/rfid',
+      href: '/rfid/dashboard',
       icon: 'Radio',
       children: [
+        { title: 'Dashboard RFID', href: '/rfid/dashboard', icon: 'LayoutDashboard' },
         { title: 'Status Leitores', href: '/rfid/leitores', icon: 'Wifi' },
         { title: 'Monitor de Tags', href: '/rfid/tags', icon: 'Tag' },
       ],
