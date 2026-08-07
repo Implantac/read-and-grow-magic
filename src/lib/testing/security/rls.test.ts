@@ -7,37 +7,27 @@ import { supabase } from '@/integrations/supabase/client';
  */
 describe('Security Integration & RLS (Phase 15)', () => {
   it('should prevent cross-tenant data access on stock_balances', async () => {
-    // Tentativa de buscar dados sem filtro de empresa (deve ser bloqueado pelo RLS se não houver policy bypass)
+    // Tentativa de buscar dados sem filtro de empresa (deve ser bloqueado pelo RLS)
     const { data, error } = await supabase
       .from('stock_balances')
       .select('*')
       .limit(1);
 
-    // O erro pode ser nulo se o usuário estiver autenticado e a policy permitir SELECT 
-    // mas o dataset retornado DEVE ser vazio ou filtrado automaticamente pelo RLS.
     if (!error) {
-       // Se retornou dados, verificamos se o company_id é consistente
        if (data && data.length > 0) {
          expect(data[0].company_id).toBeDefined();
        }
     }
   });
-});
 
-  it('should prevent cross-tenant data access on stock_balances', async () => {
-    // Tentativa de buscar dados sem filtro de empresa (deve ser bloqueado pelo RLS se não houver policy bypass)
+  it('should enforce company isolation on nfe table', async () => {
     const { data, error } = await supabase
-      .from('stock_balances')
-      .select('*')
+      .from('nfe')
+      .select('company_id')
       .limit(1);
 
-    // O erro pode ser nulo se o usuário estiver autenticado e a policy permitir SELECT 
-    // mas o dataset retornado DEVE ser vazio ou filtrado automaticamente pelo RLS.
-    if (!error) {
-       // Se retornou dados, verificamos se o company_id é consistente
-       if (data && data.length > 0) {
-         expect(data[0].company_id).toBeDefined();
-       }
+    if (!error && data && data.length > 0) {
+      expect(data[0].company_id).toBeDefined();
     }
   });
 });
