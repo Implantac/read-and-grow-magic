@@ -4,7 +4,7 @@ import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
 import { ExportButton } from '@/shared/components/ExportButton';
-import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
 
