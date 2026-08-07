@@ -3,7 +3,6 @@ import { orchestrationService, type SourcingOption } from '@/services/operationa
 import { toast } from 'sonner';
 
 export type { SourcingOption };
-import { toast } from 'sonner';
 
 export function useSourcingOptions(productId?: string, quantity: number = 1, targetBranchId?: string) {
   return useQuery({
