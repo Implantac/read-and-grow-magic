@@ -161,9 +161,16 @@ export default function StoreOperations() {
                   <div className="flex items-center justify-between p-3 bg-background rounded-lg border border-red-500/20 shadow-sm">
                     <div className="space-y-0.5">
                       <p className="text-xs font-bold uppercase tracking-tight">Risco de Ruptura</p>
-                      <p className="text-[10px] text-muted-foreground font-medium">2 produtos atingiram nível crítico</p>
+                    <p className="text-[10px] text-muted-foreground font-medium">2 produtos atingiram nível crítico</p>
                     </div>
-                    <Button size="sm" variant="destructive" className="h-7 text-[10px] font-black px-3">TRATAR</Button>
+                    <Button 
+                      size="sm" 
+                      variant="destructive" 
+                      className="h-7 text-[10px] font-black px-3"
+                      onClick={() => setIsRequestOpen(true)}
+                    >
+                      TRATAR
+                    </Button>
                   </div>
                   <div className="flex items-center justify-between p-3 bg-background rounded-lg border border-amber-500/20 shadow-sm">
                     <div className="space-y-0.5">
