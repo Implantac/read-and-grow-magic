@@ -25,12 +25,14 @@ import {
   Settings,
   Shield,
   Search,
-  LayoutDashboard
+  LayoutDashboard,
+  Network
 } from 'lucide-react';
 import { ScrollArea } from "@/ui/base/scroll-area";
 import { cn } from "@/lib/utils";
 import { Button } from "@/ui/base/button";
 import { Separator } from "@/ui/base/separator";
+import NetworkControlTower from '@/modules/operational/network/components/NetworkControlTower';
 
 const PageLoader = () => (
   <div className="flex min-h-[40vh] items-center justify-center">
