@@ -42,5 +42,12 @@ describe('REINF reinfCsv', () => {
       expect(result.errors).toHaveLength(1);
       expect(result.errors[0]).toContain('vr_ret_inss');
     });
+
+    it('should return error if TOTAL row is missing', () => {
+      const rows = [{ event_type: 'R-2010', vr_ret_inss: '100,00' }];
+      const result = validateTotalsRow(rows, { vr_ret_inss: 100 });
+      expect(result.ok).toBe(false);
+      expect(result.errors[0]).toBe('Linha TOTAL ausente no CSV.');
+    });
   });
 });
