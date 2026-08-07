@@ -8547,6 +8547,36 @@ export type Database = {
           },
         ]
       }
+      idempotency_keys: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          id: string
+          idempotency_key: string
+          request_path: string
+          response_body: Json | null
+          response_code: number | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          id?: string
+          idempotency_key: string
+          request_path: string
+          response_body?: Json | null
+          response_code?: number | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          idempotency_key?: string
+          request_path?: string
+          response_body?: Json | null
+          response_code?: number | null
+        }
+        Relationships: []
+      }
       industrial_alerts: {
         Row: {
           alert_type: string
@@ -11926,6 +11956,7 @@ export type Database = {
           created_by: string | null
           discount: number
           id: string
+          idempotency_key: string | null
           interest: number
           notes: string | null
           payable_id: string | null
@@ -11943,6 +11974,7 @@ export type Database = {
           created_by?: string | null
           discount?: number
           id?: string
+          idempotency_key?: string | null
           interest?: number
           notes?: string | null
           payable_id?: string | null
@@ -11960,6 +11992,7 @@ export type Database = {
           created_by?: string | null
           discount?: number
           id?: string
+          idempotency_key?: string | null
           interest?: number
           notes?: string | null
           payable_id?: string | null
@@ -18564,6 +18597,7 @@ export type Database = {
           current_period_start: string
           external_customer_id: string | null
           external_gateway: string | null
+          external_idempotency_key: string | null
           external_subscription_id: string | null
           id: string
           last_payment_at: string | null
@@ -18582,6 +18616,7 @@ export type Database = {
           current_period_start?: string
           external_customer_id?: string | null
           external_gateway?: string | null
+          external_idempotency_key?: string | null
           external_subscription_id?: string | null
           id?: string
           last_payment_at?: string | null
@@ -18600,6 +18635,7 @@ export type Database = {
           current_period_start?: string
           external_customer_id?: string | null
           external_gateway?: string | null
+          external_idempotency_key?: string | null
           external_subscription_id?: string | null
           id?: string
           last_payment_at?: string | null
