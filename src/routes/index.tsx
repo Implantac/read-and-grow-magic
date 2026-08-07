@@ -27,7 +27,8 @@ import {
   Search,
   LayoutDashboard,
   Network,
-  RefreshCw
+  RefreshCw,
+  Puzzle
 } from 'lucide-react';
 import { ScrollArea } from "@/ui/base/scroll-area";
 import { cn } from "@/lib/utils";
@@ -54,35 +55,35 @@ const HardeningDashboard = () => {
     { id: '2A', title: 'Rede Operacional', status: 'completed', description: 'Hierarquia de Lojas/CD/Fábrica, Estoque em Trânsito.' },
     { id: '2B', title: 'Orquestração de Pedidos', status: 'completed', description: 'Cross-docking, Drop-shipping, Roteirização de Carga.' },
     { id: '2C', title: 'Expedição & Última Milha', status: 'completed', description: 'Gestão de Romaneios, Tracking em Tempo Real, Last Mile.' },
-    { id: '3', title: 'Inteligência Logística IA', status: 'in_progress', description: 'Otimização de Slotting, IA Preditiva, Cross-docking Dinâmico.' },
-    { id: '4', title: 'Auditoria & Compliance (LGPD)', status: 'pending', description: 'Certificação de Segurança Proativa, Criptografia E2E, LGPD.' },
-    { id: '5', title: 'Expansão & Ecossistema', status: 'pending', description: 'Marketplace de Plugins, Multi-moeda, Expansão Global.' },
+    { id: '3', title: 'Inteligência Logística IA', status: 'completed', description: 'Otimização de Slotting, IA Preditiva, Cross-docking Dinâmico.' },
+    { id: '4', title: 'Auditoria & Compliance (LGPD)', status: 'completed', description: 'Certificação de Segurança Proativa, Criptografia E2E, LGPD.' },
+    { id: '5', title: 'Expansão & Ecossistema', status: 'in_progress', description: 'Marketplace de Plugins, Multi-moeda, Expansão Global.' },
   ];
 
   const operationalRequirements = [
     { 
-      id: 'dynamic_slotting', 
-      title: '1. Otimização Dinâmica de Slotting (IA)', 
-      icon: <Zap className="h-4 w-4" />,
-      content: `A IA analisa o giro dos SKUs (Curva ABC) e sugere realocações inteligentes de endereçamento para reduzir o tempo de picking em até 40%.`
+      id: 'plugin_marketplace', 
+      title: '1. Marketplace de Aplicações (Plugins)', 
+      icon: <Puzzle className="h-4 w-4" />,
+      content: `Ecossistema aberto para extensões de terceiros e integrações nativas (Stripe, WhatsApp, IoT), permitindo modularidade total sem inflar o core do ERP.`
     },
     { 
-      id: 'predictive_demand', 
-      title: '2. Previsão de Demanda & Ruptura', 
+      id: 'multi_currency', 
+      title: '2. Arquitetura Multi-moeda & Global', 
       icon: <TrendingUp className="h-4 w-4" />,
-      content: `Modelos de Machine Learning identificam tendências de consumo por unidade, antecipando ordens de reabastecimento antes que o estoque atinja o nível crítico.`
+      content: `Suporte a múltiplas jurisdições fiscais e conversão automática de câmbio em tempo real para operações de exportação/importação.`
     },
     { 
-      id: 'auto_crossdock', 
-      title: '3. Cross-docking Autônomo', 
-      icon: <ArrowRight className="h-4 w-4" />,
-      content: `O sistema identifica oportunidades de fluxo direto no momento do agendamento do fornecedor, bloqueando a armazenagem e gerando tarefas de expedição imediata.`
-    },
-    { 
-      id: 'warehouse_digital_twin', 
-      title: '4. Digital Twin & Telemetria', 
+      id: 'global_inventory', 
+      title: '3. Rede Global de Inventário', 
       icon: <Network className="h-4 w-4" />,
-      content: `Simulação 3D em tempo real da ocupação do armazém integrada a sensores IoT, permitindo ajustes térmicos e de fluxo baseados em carga real.`
+      content: `Visibilidade e gestão de estoque em escala global, permitindo transferências internacionais e otimização de custos tributários entre fronteiras.`
+    },
+    { 
+      id: 'enterprise_api', 
+      title: '4. Enterprise SDK & GraphQL API', 
+      icon: <Zap className="h-4 w-4" />,
+      content: `Camada de abstração robusta para desenvolvedores corporativos integrarem sistemas legados ou construírem UIs customizadas sobre o motor Use ERP.`
     }
   ];
 
@@ -92,7 +93,7 @@ const HardeningDashboard = () => {
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Hardening & Evolução (Fase 3: Inteligência Logística)</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Hardening & Evolução (Fase 5: Expansão)</h1>
           </div>
           <p className="text-muted-foreground text-lg">
             Plataforma Enterprise: Inteligência Logística e Automação Predictiva.
