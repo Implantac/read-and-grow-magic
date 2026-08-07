@@ -26,7 +26,11 @@ export function useSaveAutomation() {
     mutationFn: async (input: NPSAutomationInput) => {
       if (input.id) {
         const { id, ...patch } = input;
-        const { error } = await supabase.from('nps_automations').update(patch as TablesUpdate<'nps_automations'>).eq('id', id);
+        const { error } = await supabase
+          .from('nps_automations')
+          .update(patch as TablesUpdate<'nps_automations'>)
+          .eq('id', id)
+          .eq('company_id', companyId!);
         if (error) throw error;
       } else {
         const { error } = await supabase.from('nps_automations').insert({ ...input, company_id: companyId! } as TablesInsert<'nps_automations'>);

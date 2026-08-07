@@ -51,9 +51,14 @@ export function useCreateCampaign() {
 
 export function useUpdateCampaign() {
   const qc = useQueryClient();
+  const companyId = useCompanyId();
   return useMutation({
     mutationFn: async ({ id, ...patch }: { id: string } & TablesUpdate<'nps_campaigns'>) => {
-      const { error } = await supabase.from('nps_campaigns').update(patch).eq('id', id);
+      const { error } = await supabase
+        .from('nps_campaigns')
+        .update(patch)
+        .eq('id', id)
+        .eq('company_id', companyId!);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['nps'] }),
@@ -63,9 +68,14 @@ export function useUpdateCampaign() {
 
 export function useDeleteCampaign() {
   const qc = useQueryClient();
+  const companyId = useCompanyId();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('nps_campaigns').delete().eq('id', id);
+      const { error } = await supabase
+        .from('nps_campaigns')
+        .delete()
+        .eq('id', id)
+        .eq('company_id', companyId!);
       if (error) throw error;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['nps'] }); toast.success('Campanha removida'); },

@@ -34,7 +34,11 @@ export function useSaveQuestionToBank() {
   return useMutation({
     mutationFn: async (input: { category: string; question_text: string; question_type: string; options?: Json; required?: boolean; tags?: string[]; id?: string }) => {
       if (input.id) {
-        const { error } = await supabase.from('nps_question_bank').update(input).eq('id', input.id);
+        const { error } = await supabase
+          .from('nps_question_bank')
+          .update(input)
+          .eq('id', input.id)
+          .eq('company_id', companyId!);
         if (error) throw error;
       } else {
         const { error } = await supabase.from('nps_question_bank').insert({ ...input, company_id: companyId, is_global: false });
@@ -48,9 +52,14 @@ export function useSaveQuestionToBank() {
 
 export function useDeleteQuestionFromBank() {
   const qc = useQueryClient();
+  const companyId = useCompanyId();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('nps_question_bank').delete().eq('id', id);
+      const { error } = await supabase
+        .from('nps_question_bank')
+        .delete()
+        .eq('id', id)
+        .eq('company_id', companyId!);
       if (error) throw error;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['nps', 'question-bank'] }); toast.success('Removida'); },

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNPSAutomations, useSaveAutomation, useNPSCampaigns } from './hooks';
 import { supabase } from '@/integrations/supabase/client';
+import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
@@ -32,8 +33,17 @@ export default function Automations() {
   const { data: campaigns = [] } = useNPSCampaigns();
   const save = useSaveAutomation();
   const qc = useQueryClient();
+  const { currentCompany } = useEnterprise();
+  const activeCompanyId = currentCompany?.id;
   const del = useMutation({
-    mutationFn: async (id: string) => { const { error } = await supabase.from('nps_automations').delete().eq('id', id); if (error) throw error; },
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('nps_automations')
+        .delete()
+        .eq('id', id)
+        .eq('company_id', activeCompanyId!);
+      if (error) throw error;
+    },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['nps'] }); toast.success('Removida'); },
   });
 

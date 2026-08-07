@@ -29,7 +29,14 @@ export default function Settings() {
   const qc = useQueryClient();
   const { currentCompany } = useEnterprise(); const activeCompanyId = currentCompany?.id;
   const delWH = useMutation({
-    mutationFn: async (id: string) => { const { error } = await supabase.from('nps_webhooks').delete().eq('id', id); if (error) throw error; },
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('nps_webhooks')
+        .delete()
+        .eq('id', id)
+        .eq('company_id', activeCompanyId!);
+      if (error) throw error;
+    },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['nps'] }); toast.success('Removido'); },
   });
 

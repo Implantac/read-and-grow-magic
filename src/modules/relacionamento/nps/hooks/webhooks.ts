@@ -26,7 +26,11 @@ export function useSaveWebhook() {
     mutationFn: async (input: NPSWebhookInput) => {
       if (input.id) {
         const { id, ...patch } = input;
-        const { error } = await supabase.from('nps_webhooks').update(patch as TablesUpdate<'nps_webhooks'>).eq('id', id);
+        const { error } = await supabase
+          .from('nps_webhooks')
+          .update(patch as TablesUpdate<'nps_webhooks'>)
+          .eq('id', id)
+          .eq('company_id', companyId!);
         if (error) throw error;
       } else {
         const { error } = await supabase.from('nps_webhooks').insert({ ...input, company_id: companyId! } as TablesInsert<'nps_webhooks'>);

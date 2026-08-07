@@ -26,7 +26,11 @@ export function useSaveTemplate() {
     mutationFn: async (input: NPSTemplateInput) => {
       if (input.id) {
         const { id, ...patch } = input;
-        const { error } = await supabase.from('nps_templates').update(patch as TablesUpdate<'nps_templates'>).eq('id', id);
+        const { error } = await supabase
+          .from('nps_templates')
+          .update(patch as TablesUpdate<'nps_templates'>)
+          .eq('id', id)
+          .eq('company_id', companyId!);
         if (error) throw error;
       } else {
         const { error } = await supabase.from('nps_templates').insert({ ...input, company_id: companyId! } as TablesInsert<'nps_templates'>);
