@@ -4,7 +4,7 @@ import StockTransfers from '@/modules/operational/network/StockTransfers';
 import ReplenishmentIntelligence from '@/modules/operational/network/ReplenishmentIntelligence';
 import NetworkControlTower from '@/modules/operational/network/components/NetworkControlTower';
 
-export default function NetworkRoutes() {
+export function NetworkRoutes() {
   return (
     <Routes>
       <Route path="control-tower" element={<NetworkControlTower />} />
