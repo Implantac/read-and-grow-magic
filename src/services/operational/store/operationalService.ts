@@ -1,5 +1,4 @@
 import { supabase } from '@/integrations/supabase/client';
-import type { TablesInsert } from '@/integrations/supabase/types';
 
 export interface OperationalTask {
   id: string;
@@ -14,7 +13,7 @@ export interface OperationalTask {
 
 export const operationalService = {
   async getMyTasks(branchId: string): Promise<OperationalTask[]> {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('operational_tasks')
       .select('*')
       .eq('branch_id', branchId)
@@ -22,11 +21,11 @@ export const operationalService = {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return (data || []) as any;
+    return (data || []) as OperationalTask[];
   },
 
-  async createTask(task: TablesInsert<'operational_tasks'>) {
-    const { data, error } = await supabase
+  async createTask(task: any) {
+    const { data, error } = await (supabase as any)
       .from('operational_tasks')
       .insert(task)
       .select()
@@ -36,8 +35,8 @@ export const operationalService = {
     return data;
   },
 
-  async resolveDiscrepancy(discrepancyId: string, resolution: { notes: string; status: string }) {
-    const { data, error } = await supabase
+  async resolveDiscrepancy(discrepancyId: string, resolution: { resolution_notes: string; status: string }) {
+    const { data, error } = await (supabase as any)
       .from('operational_discrepancies')
       .update({
         ...resolution,
@@ -52,3 +51,4 @@ export const operationalService = {
     return data;
   }
 };
+
