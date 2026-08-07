@@ -265,13 +265,19 @@ export default function StoreCentral() {
             </CardContent>
           </Card>
 
-          <Card className="border-dashed">
+          <Card className="border-dashed border-primary/40 bg-primary/5">
             <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-bold uppercase text-muted-foreground">Inventário Rápido (Hoje)</CardTitle>
+              <CardTitle className="text-xs font-black uppercase text-primary/70">Auditoria Cíclica (Smart)</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <p className="text-xs text-muted-foreground">O sistema selecionou 12 SKUs para contagem cíclica hoje.</p>
-              <Button variant="outline" className="w-full text-xs">Iniciar Contagem</Button>
+              <div className="flex items-center gap-2 text-primary">
+                <ClipboardList className="h-4 w-4" />
+                <span className="text-sm font-bold">12 SKUs Críticos</span>
+              </div>
+              <p className="text-[10px] text-muted-foreground">O motor de inteligência selecionou itens de alto giro e risco de ruptura para conferência hoje.</p>
+              <Button variant="default" size="sm" className="w-full text-xs font-bold shadow-sm" asChild>
+                <Link to="/estoque/inventario">Iniciar Contagem Cíclica</Link>
+              </Button>
             </CardContent>
           </Card>
         </div>
