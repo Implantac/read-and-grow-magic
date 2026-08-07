@@ -1,12 +1,16 @@
-import { lazy } from 'react';
-import { Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
+import PosTerminals from '@/modules/operational/network/PosTerminals';
+import StockTransfers from '@/modules/operational/network/StockTransfers';
+import ReplenishmentIntelligence from '@/modules/operational/network/ReplenishmentIntelligence';
+import NetworkControlTower from '@/modules/operational/network/components/NetworkControlTower';
 
-const PosTerminalsPage = lazy(() => import("../modules/operational/network/PosTerminals"));
-const StockTransfersPage = lazy(() => import("../modules/operational/network/StockTransfers"));
-const ReplenishmentIntelligencePage = lazy(() => import("../modules/operational/network/ReplenishmentIntelligence"));
-
-export const NetworkRoutes = [
-  <Route key="net-pos" path="/operacional/rede/pdvs" element={<PosTerminalsPage />} />,
-  <Route key="net-transfers" path="/operacional/rede/transferencias" element={<StockTransfersPage />} />,
-  <Route key="net-replenishment" path="/operacional/rede/reabastecimento" element={<ReplenishmentIntelligencePage />} />,
-];
+export default function NetworkRoutes() {
+  return (
+    <Routes>
+      <Route path="control-tower" element={<NetworkControlTower />} />
+      <Route path="pos" element={<PosTerminals />} />
+      <Route path="transfers" element={<StockTransfers />} />
+      <Route path="replenishment" element={<ReplenishmentIntelligence />} />
+    </Routes>
+  );
+}
