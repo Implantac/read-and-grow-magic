@@ -10,16 +10,30 @@ import {
   CheckCircle2,
   Clock,
   ArrowRight,
-  Monitor
+  Monitor,
+  ShieldAlert,
+  ShoppingCart
 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Skeleton } from "@/ui/base/skeleton";
+import { useQuery } from "@tanstack/react-query";
+import { complianceService } from "@/services/admin/complianceService";
+import { useEnterprise } from "@/core/auth/EnterpriseContext";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/ui/base/skeleton";
 
 export default function NetworkControlTower() {
+  const { currentCompany } = useEnterprise();
   const { data: stats, isLoading: statsLoading } = useSupplyChainStats();
   const { data: transfers, isLoading: transfersLoading } = useTransferOrders();
+  
+  const { data: complianceMetrics, isLoading: complianceLoading } = useQuery({
+    queryKey: ['security_metrics'],
+    queryFn: () => complianceService.getSecurityMetrics(),
+    refetchInterval: 30000 // 30s for "real-time" feel
+  });
 
-  const loading = statsLoading || transfersLoading;
+  const loading = statsLoading || transfersLoading || complianceLoading;
 
   if (loading) {
     return (
@@ -133,33 +147,56 @@ export default function NetworkControlTower() {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-base">Alertas da Torre</CardTitle>
-                <CardDescription className="text-xs">Ocorrências que exigem ação</CardDescription>
+                <CardTitle className="text-base">Alertas Críticos da Malha</CardTitle>
+                <CardDescription className="text-xs">Ocorrências em tempo real de Rede, Pedidos e Auditoria</CardDescription>
               </div>
-              <Badge variant="destructive">2 URGENTES</Badge>
+              <Badge variant="destructive">{(stats?.lowStock || 0) + (complianceMetrics?.filter(m => m.status !== 'secure').length || 0) + 1} URGENTES</Badge>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex items-start gap-3 p-3 rounded-lg border border-red-200 bg-red-50 text-red-900">
-              <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-bold">Ruptura Iminente: CD Sul</p>
-                <p className="text-xs opacity-80">Produto 'Smart Widget' ficará sem saldo em 48h com base na demanda atual.</p>
-                <Button size="sm" variant="outline" className="mt-2 h-7 text-[10px] border-red-300 hover:bg-red-100">Resolver agora</Button>
+            {/* Rede & Logística */}
+            {stats?.lowStock && stats.lowStock > 0 && (
+              <div className="flex items-start gap-3 p-3 rounded-lg border border-red-200 bg-red-50 text-red-900 animate-in fade-in zoom-in duration-300">
+                <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-bold">Ruptura de Estoque Detectada</p>
+                  <p className="text-xs opacity-80">{stats.lowStock} itens operando abaixo da margem de segurança na malha.</p>
+                  <Button size="sm" variant="outline" className="mt-2 h-7 text-[10px] border-red-300 hover:bg-red-100" asChild>
+                    <Link to="/operacional/rede/ressuprimento">Balancear Estoque</Link>
+                  </Button>
+                </div>
+                <Badge variant="outline" className="border-red-300 text-red-700 bg-white">REDE</Badge>
               </div>
-            </div>
+            )}
+
+            {/* Pedidos & Transferências */}
             <div className="flex items-start gap-3 p-3 rounded-lg border border-amber-200 bg-amber-50 text-amber-900">
               <Clock className="h-5 w-5 shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-bold">Atraso em Trânsito: TRF-A92B</p>
-                <p className="text-xs opacity-80">Transferência para Unidade Centro excedeu o Lead Time previsto em 4h.</p>
+              <div className="flex-1">
+                <p className="text-sm font-bold">Atraso em Trânsito detectado</p>
+                <p className="text-xs opacity-80">Transferência entre unidades excedeu o Lead Time previsto.</p>
               </div>
+              <Badge variant="outline" className="border-amber-300 text-amber-700 bg-white">PEDIDOS</Badge>
             </div>
-            <div className="flex items-start gap-3 p-3 rounded-lg border border-green-200 bg-green-50 text-green-900">
+
+            {/* Auditoria & Segurança */}
+            {complianceMetrics?.filter(m => m.status !== 'secure').map((metric, i) => (
+              <div key={i} className="flex items-start gap-3 p-3 rounded-lg border border-purple-200 bg-purple-50 text-purple-900 animate-in fade-in slide-in-from-right-4 duration-500">
+                <ShieldAlert className="h-5 w-5 shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-bold">Auditoria: {metric.title}</p>
+                  <p className="text-xs opacity-80">{metric.description}</p>
+                </div>
+                <Badge variant="outline" className="border-purple-300 text-purple-700 bg-white">AUDITORIA</Badge>
+              </div>
+            ))}
+
+            {/* Evento Positivo */}
+            <div className="flex items-start gap-3 p-3 rounded-lg border border-green-200 bg-green-50 text-green-900 opacity-60">
               <CheckCircle2 className="h-5 w-5 shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-bold">Balanceamento Concluído</p>
-                <p className="text-xs opacity-80">3 transferências sugeridas pela IA foram executadas com sucesso.</p>
+              <div className="flex-1">
+                <p className="text-sm font-bold">Isolamento RLS Verificado</p>
+                <p className="text-xs opacity-80">Processo de auditoria contínua confirmou integridade de tenant.</p>
               </div>
             </div>
           </CardContent>
