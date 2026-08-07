@@ -63,28 +63,28 @@ const HardeningDashboard = () => {
 
   const pendingItems = [
     { 
-      id: 'network_model', 
-      title: '1. Modelo de Rede Operacional (Fase 2A)', 
-      icon: <Network className="h-4 w-4" />,
-      content: `Separação clara entre CNPJ, Unidade Operacional (Loja, CD, Fábrica) e Locais de Estoque. Suporte a visão individual por unidade e visão global consolidada.`
+      id: 'store_central', 
+      title: '1. Central da Loja & Cockpit de Exceções', 
+      icon: <Store className="h-4 w-4" />,
+      content: `Página operacional única para gerentes. Foco em resolver exceções (rupturas, divergências, atrasos) em vez de manutenção manual de dados.`
     },
     { 
-      id: 'stock_hierarchy', 
-      title: '2. Hierarquia de Estoque por Localização', 
-      icon: <Package className="h-4 w-4" />,
-      content: `Controle de saldo físico, reservado e disponível por localização (Fábrica, CD, Lojas). Registro de estoque em trânsito para transferências.`
+      id: 'operational_indexes', 
+      title: '2. Índices de Saúde e Confiabilidade', 
+      icon: <Heart className="h-4 w-4" />,
+      content: `Cálculo de Score de Saúde Operacional (0-100) e Índice de Confiabilidade de Estoque para garantir precisão dos dados.`
     },
     { 
-      id: 'replenishment_intel', 
-      title: '3. Inteligência de Reabastecimento', 
+      id: 'cyclic_inventory', 
+      title: '3. Inventário Cíclico Sem Sofrimento', 
       icon: <RefreshCw className="h-4 w-4" />,
-      content: `Cálculo automático de necessidade baseado em lead time, estoque mínimo/máximo e venda média. Sugestão de sourcing (CD -> Loja ou Loja -> Loja).`
+      content: `Sistema seleciona automaticamente SKUs para contagem diária. Diferenças aprovadas por níveis de alçada (Gerente -> Regional -> Corporativo).`
     },
     { 
-      id: 'transfer_documents', 
-      title: '4. Documentos de Transferência Reais', 
+      id: 'advanced_receiving', 
+      title: '4. Recebimento e Conferência Blindada', 
       icon: <Truck className="h-4 w-4" />,
-      content: `Workflow completo de transferência: Rascunho -> Solicitada -> Aprovada -> Separação -> Em Trânsito -> Recebida -> Conferida. Gestão de divergências.`
+      content: `Fluxo de conferência cega com registro de divergências e fotos como evidência. Rastreamento visual de transferências em trânsito.`
     }
   ];
 
