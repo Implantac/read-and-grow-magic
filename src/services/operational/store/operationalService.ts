@@ -49,6 +49,27 @@ export const operationalService = {
 
     if (error) throw error;
     return data;
+  },
+
+  async getSmartInventorySuggestions(branchId: string) {
+    // Busca produtos com estoque baixo ou alta movimentação sem contagem recente
+    // Esta lógica seria idealmente uma VIEW ou RPC no Postgres
+    const { data: suggestions, error } = await (supabase as any)
+      .from('replenishment_policies')
+      .select('*, product:products(name, code, unit)')
+      .eq('branch_id', branchId)
+      .limit(12);
+
+    if (error) return [];
+    
+    return (suggestions || []).map((s: any) => ({
+      productId: s.product_id,
+      productName: s.product?.name,
+      productCode: s.product?.code,
+      reason: 'Auditoria Cíclica (Giro Alto)',
+      expectedQty: 100, // Mocked balance for now
+    }));
   }
 };
+
 
