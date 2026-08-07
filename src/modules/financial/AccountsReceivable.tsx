@@ -11,6 +11,8 @@ import { SettlementDialog, type SettlementTarget } from '@/components/financial/
 import { AgingList } from '@/components/financial/AgingList';
 import { AccountsReceivableSummary } from '@/components/financial/AccountsReceivableSummary';
 import { formatBRL } from '@/lib/formatters';
+import { roundCurrency, calculateInstallments, calculateTotalWithTaxes } from '@/lib/financialMath';
+
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 import { CreateReceivableDialog, type ReceivableFormData } from './accounts-receivable/CreateReceivableDialog';
 import { ReceivableFilters } from './accounts-receivable/ReceivableFilters';
@@ -67,7 +69,7 @@ export default function AccountsReceivable() {
       return;
     }
     const client = clients.find(c => c.id === formData.clientId);
-    const totalAmount = parseFloat(formData.amount);
+    const totalAmount = roundCurrency(parseFloat(formData.amount));
     const installments = parseInt(formData.installments) || 1;
 
     if (installments === 1) {
@@ -86,13 +88,14 @@ export default function AccountsReceivable() {
         total_installments: 1,
       }, { onSuccess: () => { setIsDialogOpen(false); resetForm(); } });
     } else {
-      const installmentAmount = Math.round((totalAmount / installments) * 100) / 100;
+      const installmentAmounts = calculateInstallments(totalAmount, installments);
       const baseDate = new Date(formData.dueDate);
+      
       for (let i = 0; i < installments; i++) {
         const dueDate = new Date(baseDate);
         dueDate.setMonth(dueDate.getMonth() + i);
-        const isLast = i === installments - 1;
-        const amount = isLast ? totalAmount - installmentAmount * (installments - 1) : installmentAmount;
+        const amount = installmentAmounts[i];
+        
         createMutation.mutate({
           description: `${formData.description} (${i + 1}/${installments})`,
           client_name: client?.name || '',
@@ -111,6 +114,7 @@ export default function AccountsReceivable() {
       setIsDialogOpen(false);
       resetForm();
     }
+
   };
 
   const openReceiveDialog = (account: typeof accounts[0]) => {
