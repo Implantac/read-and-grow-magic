@@ -22828,6 +22828,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      audit_stock_integrity: {
+        Args: { _company_id: string }
+        Returns: {
+          balance_qty: number
+          divergence: number
+          movement_sum: number
+          product_id: string
+        }[]
+      }
       auto_match_bank_transactions: {
         Args: { p_bank_account_id?: string; p_tolerance_days?: number }
         Returns: {
