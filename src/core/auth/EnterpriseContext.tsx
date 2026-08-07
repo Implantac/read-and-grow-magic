@@ -8,7 +8,12 @@ type CompanyRow = Database['public']['Tables']['companies']['Row'];
 
 export interface TenantRef { id: string; name: string }
 export interface GroupRef { id: string; name: string }
-export interface BranchRef { id: string; name: string; code?: string }
+export interface BranchRef { 
+  id: string; 
+  name: string; 
+  code?: string; 
+  tipo?: 'FACTORY' | 'DISTRIBUTION_CENTER' | 'STORE' | 'industria' | 'filial' | 'cd' | string;
+}
 
 
 interface HierarchyRow {
@@ -101,7 +106,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
           // Load branches for this company
           const { data: branches } = await supabase
             .from('branches')
-            .select('id, name, code')
+            .select('id, name, code, tipo')
             .eq('company_id', company.id);
           
           if (branches) {
