@@ -23346,6 +23346,16 @@ export type Database = {
         Returns: number
       }
       process_charges_ruler: { Args: never; Returns: Json }
+      process_invoice_atomic: {
+        Args: {
+          p_company_id: string
+          p_financial: Json
+          p_fiscal_payload: Json
+          p_items: Json
+          p_sale_id: string
+        }
+        Returns: Json
+      }
       process_pix_payment: {
         Args: {
           _e2e_id: string
