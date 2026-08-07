@@ -15,8 +15,8 @@ export const comercialSection: NavSection = {
         { title: 'Gestão de Pedidos', href: '/comercial/pedidos', icon: 'ClipboardList' },
         { title: 'Clientes', href: '/comercial/clientes', icon: 'UserCircle' },
         { title: 'Metas & Forecast', href: '/comercial/metas', icon: 'Target' },
-        { title: '🎮 Gamificação', href: '/comercial/gamificacao', icon: 'Trophy' },
-        { title: '🧠 IA Comercial', href: '/comercial/ia', icon: 'Brain' },
+        { title: 'Gamificação', href: '/comercial/gamificacao', icon: 'Trophy' },
+        { title: 'IA Comercial', href: '/comercial/ia', icon: 'Brain' },
       ],
     },
     {
