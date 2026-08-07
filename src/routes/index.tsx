@@ -25,12 +25,14 @@ import {
   Settings,
   Shield,
   Search,
-  LayoutDashboard
+  LayoutDashboard,
+  Network
 } from 'lucide-react';
 import { ScrollArea } from "@/ui/base/scroll-area";
 import { cn } from "@/lib/utils";
 import { Button } from "@/ui/base/button";
 import { Separator } from "@/ui/base/separator";
+import NetworkControlTower from '@/modules/operational/network/components/NetworkControlTower';
 
 const PageLoader = () => (
   <div className="flex min-h-[40vh] items-center justify-center">
@@ -48,57 +50,34 @@ const HardeningDashboard = () => {
     { id: '16-20', title: 'Monitoramento & Refatoração', status: 'completed', description: 'Monitoring, Refatoração PCP/Financial, Services.' },
     { id: '21-25', title: 'UX & Performance', status: 'completed', description: 'Design System, PERF-GUARD, Database Indexes, LGPD.' },
     { id: '26-29', title: 'Governança & QA', status: 'completed', description: 'Documentação, DoD Permanente, No-Mock Policy.' },
-    { id: '2A', title: 'Rede Operacional', status: 'in_progress', description: 'Hierarquia de Lojas/CD/Fábrica, Estoque em Trânsito.' },
+    { id: '2A', title: 'Rede Operacional', status: 'completed', description: 'Hierarquia de Lojas/CD/Fábrica, Estoque em Trânsito.' },
+    { id: '2B', title: 'Orquestração de Pedidos', status: 'in_progress', description: 'Cross-docking, Drop-shipping, Roteirização de Carga.' },
   ];
 
   const operationalRequirements = [
     { 
-      id: 'modelo', 
-      title: '1. Modelo de Rede (CNPJ ≠ Unidade ≠ Estoque)', 
-      icon: <Building2 className="h-4 w-4" />,
-      content: `O sistema distingue Entidade Jurídica, Unidade Operacional, Local Físico, Estoque e PDV. Estrutura: Grupo > Empresa/CNPJ > Unidade (Fábrica, CD, Loja) > Local de Estoque > PDV.`
-    },
-    { 
-      id: 'unidade', 
-      title: '2. Unidade Operacional Completa', 
-      icon: <LayoutDashboard className="h-4 w-4" />,
-      content: `Cada loja possui seu próprio operacional (PDV, caixa, turnos, estoque) e financeiro (DRE individualizado), com contexto fiscal próprio (Série, Numeração, IE).`
-    },
-    { 
-      id: 'visoes', 
-      title: '3-4. Visão Individual vs. Global', 
-      icon: <Search className="h-4 w-4" />,
-      content: `Gestores alternam entre Visão Individual (detalhes de uma loja) e Visão Global (consolidado do grupo) sem perda de rastreabilidade.`
-    },
-    { 
-      id: 'estoque', 
-      title: '6-7. Estoque por Localização', 
-      icon: <Package className="h-4 w-4" />,
-      content: `Controle granular: Físico, Reservado e Disponível por unidade. Itens vinculados a Stock Locations específicas para evitar confusão de saldos.`
-    },
-    { 
-      id: 'reabastecimento', 
-      title: '8-13. Reabastecimento Inteligente', 
-      icon: <TrendingUp className="h-4 w-4" />,
-      content: `Cálculo automático de necessidade baseado em: Venda Média, Lead Time, Estoque em Trânsito, Reservas e Sazonalidade. Hierarquia: Estoque Próprio > Transferência Interna > CD > Fábrica > Compra.`
-    },
-    { 
-      id: 'transferencias', 
-      title: '14-17. Transferências como Documentos Reais', 
+      id: 'crossdocking', 
+      title: '1. Orquestração de Pedidos & Cross-docking', 
       icon: <Truck className="h-4 w-4" />,
-      content: `Workflow completo: Solicitada > Aprovada > Separação > Em Trânsito > Recebida > Conferida. Gestão automática de divergências e estoque 'Em Trânsito'.`
+      content: `O sistema orquestra a origem do estoque (Sourcing). Pedidos podem ser atendidos via estoque local, cross-docking (via CD sem armazenagem longa) ou drop-shipping (direto do fornecedor).`
     },
     { 
-      id: 'entidades', 
-      title: '18-22. Entidades de Primeira Classe', 
-      icon: <Factory className="h-4 w-4" />,
-      content: `CD e Fábrica possuem fluxos específicos (Matéria-prima, WIP, Expedição). PDVs possuem identidade única para auditoria extrema.`
+      id: 'roteirizacao', 
+      title: '2. Roteirização de Carga & Last Mile', 
+      icon: <TrendingUp className="h-4 w-4" />,
+      content: `Agrupamento de pedidos por região, veículo e cubagem. Integração com mapas para otimização de rotas e monitoramento de entregas em tempo real.`
     },
     { 
-      id: 'dash_corp', 
-      title: '24-28. Torre de Controle & Supply Chain', 
-      icon: <Shield className="h-4 w-4" />,
-      content: `Painel consolidado para monitoramento de rupturas, excessos e sugestões de reabastecimento aprováveis pelo gestor, preparando a base para futura IA.`
+      id: 'omnichannel', 
+      title: '3. Omnichannel Real (BOPIS/Ship-from-Store)', 
+      icon: <Store className="h-4 w-4" />,
+      content: `Compra online e retira na loja (BOPIS). Envio a partir da loja mais próxima (Ship-from-store) para redução de custo de frete e tempo de entrega.`
+    },
+    { 
+      id: 'fiscal_avancado', 
+      title: '4. Fiscal em Rede (Venda por Ordem)', 
+      icon: <ShieldCheck className="h-4 w-4" />,
+      content: `Emissão automática de notas de Remessa, Venda por Ordem e Triangular. Garantia de conformidade fiscal em operações multi-unidade complexas.`
     }
   ];
 
@@ -108,7 +87,7 @@ const HardeningDashboard = () => {
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Hardening & Evolução (Fase 2A)</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Hardening & Evolução (Fase 2B)</h1>
           </div>
           <p className="text-muted-foreground text-lg">
             Plataforma Enterprise: Prontidão para Produção e Rede Operacional.
@@ -149,6 +128,23 @@ const HardeningDashboard = () => {
         ))}
       </div>
 
+      <div className="grid grid-cols-1 gap-6">
+        <Card className="border-primary bg-primary/5 shadow-lg">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Network className="h-6 w-6 text-primary" />
+              <div>
+                <CardTitle>Torre de Controle Operacional (Live)</CardTitle>
+                <CardDescription>Monitoramento em tempo real da rede e supply chain</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <NetworkControlTower />
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2 border-primary bg-primary/5 shadow-lg overflow-hidden">
           <CardHeader className="bg-primary/10 border-b border-primary/20">
@@ -156,8 +152,8 @@ const HardeningDashboard = () => {
               <div className="flex items-center gap-2">
                 <Zap className="h-6 w-6 text-primary fill-primary" />
                 <div>
-                  <CardTitle>Requisitos da Fase 2A (Rede Operacional)</CardTitle>
-                  <CardDescription>Hardening de fluxos críticos: Estoque, Fiscal e Operações</CardDescription>
+                  <CardTitle>Requisitos da Fase 2B (Orquestração de Pedidos)</CardTitle>
+                  <CardDescription>Hardening de fluxos logísticos avançados e roteirização</CardDescription>
                 </div>
               </div>
               <Badge variant="secondary" className="bg-primary/20 text-primary hover:bg-primary/30">
@@ -205,31 +201,31 @@ const HardeningDashboard = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-start gap-3 p-3 rounded-lg bg-accent/30 border border-border/50">
-                <Database className="h-5 w-5 text-primary mt-0.5" />
+                <Truck className="h-5 w-5 text-primary mt-0.5" />
                 <div>
-                  <p className="text-sm font-bold">Base de Dados</p>
-                  <p className="text-xs text-muted-foreground">Tabelas de rede e transferências migradas.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-accent/30 border border-border/50">
-                <HardDrive className="h-5 w-5 text-primary mt-0.5" />
-                <div>
-                  <p className="text-sm font-bold">Contexto de Unidade</p>
-                  <p className="text-xs text-muted-foreground">Seletor global e suporte a 'Todas' no Topbar.</p>
+                  <p className="text-sm font-bold">Orquestração (Sourcing)</p>
+                  <p className="text-xs text-muted-foreground">Lógica de seleção de origem de estoque ativa.</p>
                 </div>
               </div>
               <div className="flex items-start gap-3 p-3 rounded-lg bg-accent/30 border border-border/50">
                 <Settings className="h-5 w-5 text-primary mt-0.5" />
                 <div>
-                  <p className="text-sm font-bold">Lógica de Reabastecimento</p>
-                  <p className="text-xs text-muted-foreground">Motores de cálculo e políticas em implementação.</p>
+                  <p className="text-sm font-bold">Roteirização</p>
+                  <p className="text-xs text-muted-foreground">Algoritmos de agrupamento e despacho em teste.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-accent/30 border border-border/50">
+                <Store className="h-5 w-5 text-primary mt-0.5" />
+                <div>
+                  <p className="text-sm font-bold">Omnichannel</p>
+                  <p className="text-xs text-muted-foreground">Módulo BOPIS e Ship-from-Store integrado.</p>
                 </div>
               </div>
               <div className="flex items-start gap-3 p-3 rounded-lg bg-accent/30 border border-border/50">
                 <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5" />
                 <div>
-                  <p className="text-sm font-bold">Divergências</p>
-                  <p className="text-xs text-muted-foreground">Monitoramento de ocorrências operacionais ativo.</p>
+                  <p className="text-sm font-bold">Rastreabilidade Last Mile</p>
+                  <p className="text-xs text-muted-foreground">Monitoramento de status de entrega final.</p>
                 </div>
               </div>
             </CardContent>
