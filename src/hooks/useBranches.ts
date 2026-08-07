@@ -19,7 +19,7 @@ export function useBranches() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('branches')
-        .select('id, name, tipo, canal_padrao, active')
+        .select('id, name, tipo, canal_padrao, is_active')
         .eq('company_id', companyId!)
         .order('name');
       if (error) throw error;
