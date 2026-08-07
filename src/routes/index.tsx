@@ -154,7 +154,7 @@ const HardeningDashboard = () => {
                 <Zap className="h-6 w-6 text-primary fill-primary" />
                 <div>
                   <CardTitle>Requisitos da Fase 2C (Expedição & Last Mile)</CardTitle>
-                  <CardDescription>Hardening de fluxos logísticos avançados e roteirização</CardDescription>
+                  <CardDescription>Hardening de fluxos de romaneio, tracking live e gestão de última milha</CardDescription>
                 </div>
               </div>
               <Badge variant="secondary" className="bg-primary/20 text-primary hover:bg-primary/30">
