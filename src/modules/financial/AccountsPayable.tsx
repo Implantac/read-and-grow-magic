@@ -20,6 +20,8 @@ import { useBankAccounts } from '@/hooks/financial/useBankAccounts';
 import { useCostCenters } from '@/hooks/system/useCostCenters';
 import { SettlementDialog, type SettlementTarget } from '@/components/financial/SettlementDialog';
 import { formatBRL } from '@/lib/formatters';
+import { roundCurrency, calculateInstallments } from '@/lib/financialMath';
+
 import { AccountsPayableSummary } from '@/components/financial/AccountsPayableSummary';
 import { AccountsPayableTable } from '@/components/financial/AccountsPayableTable';
 import { AccountsPayableFilters } from '@/components/financial/AccountsPayableFilters';
@@ -81,35 +83,54 @@ export default function AccountsPayable() {
       toastError('Preencha todos os campos obrigatórios');
       return;
     }
-    const totalAmount = parseFloat(formData.amount);
+    const totalAmount = roundCurrency(parseFloat(formData.amount));
     const installments = parseInt(formData.installments) || 1;
-    const installmentAmount = Math.round((totalAmount / installments) * 100) / 100;
-    const baseDate = new Date(formData.dueDate);
 
-    for (let i = 0; i < installments; i++) {
-      const dueDate = new Date(baseDate);
-      dueDate.setMonth(dueDate.getMonth() + i);
-      const isLast = i === installments - 1;
-      const amount = isLast ? totalAmount - installmentAmount * (installments - 1) : installmentAmount;
-
+    if (installments <= 1) {
       createMutation.mutate({
-        description: installments > 1 ? `${formData.description} (${i + 1}/${installments})` : formData.description,
+        description: formData.description,
         supplier: formData.supplier,
         category: formData.category || 'Fornecedores',
-        amount,
-        original_amount: amount,
-        open_amount: amount,
-        due_date: dueDate.toISOString().split('T')[0],
+        amount: totalAmount,
+        original_amount: totalAmount,
+        open_amount: totalAmount,
+        due_date: formData.dueDate,
         invoice_number: formData.invoiceNumber || null,
         notes: formData.notes || null,
-        installment_number: i + 1,
-        total_installments: installments,
+        installment_number: 1,
+        total_installments: 1,
         cost_center_id: formData.costCenterId || null,
         expense_type: formData.expenseType,
       });
+    } else {
+      const installmentAmounts = calculateInstallments(totalAmount, installments);
+      const baseDate = new Date(formData.dueDate);
+      
+      for (let i = 0; i < installments; i++) {
+        const dueDate = new Date(baseDate);
+        dueDate.setMonth(dueDate.getMonth() + i);
+        const amount = installmentAmounts[i];
+        
+        createMutation.mutate({
+          description: `${formData.description} (${i + 1}/${installments})`,
+          supplier: formData.supplier,
+          category: formData.category || 'Fornecedores',
+          amount,
+          original_amount: amount,
+          open_amount: amount,
+          due_date: dueDate.toISOString().split('T')[0],
+          invoice_number: formData.invoiceNumber || null,
+          notes: formData.notes || null,
+          installment_number: i + 1,
+          total_installments: installments,
+          cost_center_id: formData.costCenterId || null,
+          expense_type: formData.expenseType,
+        });
+      }
     }
     setIsDialogOpen(false);
     setFormData({ description: '', supplier: '', category: '', amount: '', dueDate: '', invoiceNumber: '', notes: '', installments: '1', costCenterId: '', expenseType: 'variable' });
+
   };
 
   const openPayDialog = (account: AccountPayable) => {
