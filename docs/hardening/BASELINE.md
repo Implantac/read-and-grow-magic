@@ -31,8 +31,15 @@ Status: **FASE 14 EM ANDAMENTO**
 - [x] Auditoria Empresarial (Fase 13): Consolidada infraestrutura de auditoria em `system_audit_logs`. Criada interface administrativa em `src/modules/admin/systemManual/AuditLogs.tsx` com filtros por módulo e busca.
 
 ## Ações Imediatas
-1. Implementação de Testes Unitários (Fase 14).
-2. Stress test em PDV Offline.
+1. Stress test em PDV Offline.
+2. Expansão da cobertura de testes para Autenticação e RLS.
+
+## Histórico de Testes (Fase 14)
+- [x] Testes de Precisão Financeira (`financialMath.test.ts`)
+- [x] Testes de Cálculos Fiscais REINF (`reinf.test.ts`)
+- [x] Testes de Integridade de Pricing (`pricing.test.ts`)
+- [x] Testes de Atomicidade de Estoque e Reservas (`stock.test.ts`)
+
 
 
 
