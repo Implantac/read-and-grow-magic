@@ -23,8 +23,8 @@ export interface ReplenishmentTask {
 
 export function useReplenishmentTasks() {
   const [tasks, setTasks] = useState<ReplenishmentTask[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<any>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);

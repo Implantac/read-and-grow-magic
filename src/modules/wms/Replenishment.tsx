@@ -115,9 +115,10 @@ export default function ReplenishmentPage() {
             </div>
           ) : (
             <EmptyState
-              icon={RefreshCw}
-              title={loading ? "Carregando tarefas..." : "Nenhum reabastecimento pendente"}
-              description={loading ? "Buscando atualizações na malha logística..." : "Tarefas de reabastecimento são geradas automaticamente quando o estoque de picking cai abaixo do mínimo."}
+              icon={loading ? RefreshCw : RefreshCw}
+              title={loading ? "Carregando tarefas..." : (error ? "Erro ao carregar" : "Nenhum reabastecimento pendente")}
+              description={loading ? "Buscando atualizações na malha logística..." : (error ? "Não foi possível conectar ao servidor." : "Tarefas de reabastecimento são geradas automaticamente quando o estoque de picking cai abaixo do mínimo.")}
+              action={error ? { label: "Tentar Novamente", onClick: () => refetch() } : undefined}
             />
           )}
         </TabsContent>

@@ -129,8 +129,9 @@ export function SmartReplenishment() {
             />
           ) : isLoading ? (
             <div className="py-8 text-center text-muted-foreground flex flex-col items-center gap-3">
-              <RefreshCw className="h-8 w-8 animate-spin opacity-20" />
-              <p>Analisando malha logística...</p>
+              <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+              <p className="font-medium">Analisando malha logística em tempo real...</p>
+              <p className="text-xs opacity-70">Cruzando dados de ruptura, surplus e lead-times...</p>
             </div>
           ) : suggestions.length === 0 ? (
             <EmptyState 

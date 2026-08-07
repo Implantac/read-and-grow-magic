@@ -108,9 +108,10 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
           useEnterpriseStore.getState().setActiveCompanyId(company.id);
           
           // Load branches for this company
+          // Fix: 'active' column is actually 'is_active' in the DB
           const { data: branches } = await supabase
             .from('branches')
-            .select('id, name, code, tipo')
+            .select('id, name, code, tipo, is_active, canal_padrao')
             .eq('company_id', company.id);
           
           if (branches) {
