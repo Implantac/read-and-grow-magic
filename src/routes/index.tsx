@@ -26,7 +26,8 @@ import {
   Shield,
   Search,
   LayoutDashboard,
-  Network
+  Network,
+  RefreshCw
 } from 'lucide-react';
 import { ScrollArea } from "@/ui/base/scroll-area";
 import { cn } from "@/lib/utils";
@@ -57,28 +58,28 @@ const HardeningDashboard = () => {
 
   const operationalRequirements = [
     { 
-      id: 'crossdocking', 
-      title: '1. Orquestração de Pedidos & Cross-docking', 
+      id: 'shipment_tracking', 
+      title: '1. Gestão de Romaneios & Last Mile', 
       icon: <Truck className="h-4 w-4" />,
-      content: `O sistema orquestra a origem do estoque (Sourcing). Pedidos podem ser atendidos via estoque local, cross-docking (via CD sem armazenagem longa) ou drop-shipping (direto do fornecedor).`
+      content: `O sistema consolida múltiplas expedições em romaneios únicos, otimizando o carregamento e o tracking de última milha com atualizações em tempo real.`
     },
     { 
-      id: 'roteirizacao', 
-      title: '2. Roteirização de Carga & Last Mile', 
+      id: 'live_tracking', 
+      title: '2. Rastreamento Live & IoT', 
       icon: <TrendingUp className="h-4 w-4" />,
-      content: `Agrupamento de pedidos por região, veículo e cubagem. Integração com mapas para otimização de rotas e monitoramento de entregas em tempo real.`
+      content: `Integração com sensores IoT e GPS para monitoramento contínuo da temperatura, umidade (se aplicável) e localização exata da carga durante o transporte.`
     },
     { 
-      id: 'omnichannel', 
-      title: '3. Omnichannel Real (BOPIS/Ship-from-Store)', 
-      icon: <Store className="h-4 w-4" />,
-      content: `Compra online e retira na loja (BOPIS). Envio a partir da loja mais próxima (Ship-from-store) para redução de custo de frete e tempo de entrega.`
+      id: 'proof_delivery', 
+      title: '3. Comprovação Digital de Entrega', 
+      icon: <CheckCircle2 className="h-4 w-4" />,
+      content: `Captura de assinaturas digitais, fotos de canhoto e geolocalização no momento da entrega para encerramento automático do ciclo logístico e fiscal.`
     },
     { 
-      id: 'fiscal_avancado', 
-      title: '4. Fiscal em Rede (Venda por Ordem)', 
-      icon: <ShieldCheck className="h-4 w-4" />,
-      content: `Emissão automática de notas de Remessa, Venda por Ordem e Triangular. Garantia de conformidade fiscal em operações multi-unidade complexas.`
+      id: 'reverse_logistics', 
+      title: '4. Logística Reversa Integrada', 
+      icon: <RefreshCw className="h-4 w-4" />,
+      content: `Gestão simplificada de devoluções e coletas, com orquestração automática para o ponto de recebimento mais eficiente (CD ou Loja).`
     }
   ];
 
