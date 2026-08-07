@@ -1,36 +1,54 @@
+import { useState, useEffect } from 'react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
 import { Button } from '@/ui/base/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { 
-  Package, 
-  Truck, 
-  Factory, 
-  Store, 
-  ArrowRightLeft, 
-  Download, 
-  Upload, 
-  AlertTriangle,
-  ClipboardList,
-  Search,
-  Plus
+  Package, Truck, Factory, Store, ArrowRightLeft, 
+  Download, Upload, AlertTriangle, ClipboardList, Search, Plus, 
+  CheckCircle2, Clock, ChevronRight
 } from 'lucide-react';
 import { useSupplyChain } from '@/hooks/operational/supply-chain/useSupplyChain';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+
+const STATUS_MAP: Record<string, { label: string, color: string, icon: any }> = {
+  requested: { label: 'Solicitado', color: 'bg-blue-500/10 text-blue-500', icon: Clock },
+  approved: { label: 'Aprovado', color: 'bg-cyan-500/10 text-cyan-500', icon: CheckCircle2 },
+  picking: { label: 'Em Separação', color: 'bg-amber-500/10 text-amber-500', icon: Package },
+  shipped: { label: 'Expedido', color: 'bg-indigo-500/10 text-indigo-500', icon: Upload },
+  in_transit: { label: 'Em Trânsito', color: 'bg-purple-500/10 text-purple-500', icon: Truck },
+  received: { label: 'Recebido', color: 'bg-emerald-500/10 text-emerald-500', icon: Download },
+  checked: { label: 'Conferido', color: 'bg-teal-500/10 text-teal-500', icon: CheckCircle2 },
+  completed: { label: 'Finalizado', color: 'bg-slate-500/10 text-slate-500', icon: CheckCircle2 },
+  divergent: { label: 'Divergente', color: 'bg-red-500/10 text-red-500', icon: AlertTriangle },
+};
 
 export default function UnifiedSupplyChain() {
   const { currentBranch } = useEnterprise();
-  const { movements, isLoading } = useSupplyChain();
+  const { movements, isLoading, updateStatus } = useSupplyChain();
+  const [selectedMovement, setSelectedMovement] = useState<any>(null);
 
-  // Determine UI based on branch type
   const unitType = (currentBranch as any)?.type || 'store';
+
+  const handleNextStep = async (m: any) => {
+    const statusOrder: string[] = [
+      'requested', 'approved', 'picking', 'shipped', 'in_transit', 'received', 'checked', 'completed'
+    ];
+
+    const currentIndex = statusOrder.indexOf(m.status);
+    if (currentIndex !== -1 && currentIndex < statusOrder.length - 1) {
+      const nextStatus = statusOrder[currentIndex + 1];
+      await updateStatus(m.id, nextStatus as any);
+    }
+  };
 
   return (
     <PageContainer loading={isLoading}>
       <div className="space-y-6 pb-10">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-4">
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-4">
           <div>
             <h1 className="text-3xl font-black uppercase tracking-tight flex items-center gap-3">
               {unitType === 'factory' && <Factory className="h-8 w-8 text-primary" />}
@@ -39,7 +57,7 @@ export default function UnifiedSupplyChain() {
               Central de Abastecimento
             </h1>
             <p className="text-muted-foreground font-medium">
-              Gestão Unificada de Fluxos: {currentBranch?.name || '---'}
+              Malha Logística: {currentBranch?.name || '---'} ({unitType.toUpperCase()})
             </p>
           </div>
           <div className="flex gap-2">
@@ -50,53 +68,88 @@ export default function UnifiedSupplyChain() {
               <Search className="h-4 w-4" /> Consultar Rede
             </Button>
           </div>
-        </div>
+        </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard title="Solicitações" value={movements.filter(m => m.status === 'requested').length} icon={ClipboardList} color="blue" />
           <StatCard title="Em Trânsito" value={movements.filter(m => m.status === 'in_transit').length} icon={Truck} color="purple" />
-          <StatCard title="Recebimentos" value={movements.filter(m => m.status === 'shipped').length} icon={Download} color="emerald" />
+          <StatCard title="Recebimentos" value={movements.filter(m => ['shipped', 'received'].includes(m.status)).length} icon={Download} color="emerald" />
           <StatCard title="Divergências" value={movements.filter(m => m.status === 'divergent').length} icon={AlertTriangle} color="red" />
         </div>
 
-        <Tabs defaultValue="inbox" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 md:w-[400px]">
-            <TabsTrigger value="inbox" className="font-bold uppercase text-[10px]">Caixa de Entrada</TabsTrigger>
-            <TabsTrigger value="outbox" className="font-bold uppercase text-[10px]">Minhas Saídas</TabsTrigger>
-            <TabsTrigger value="history" className="font-bold uppercase text-[10px]">Histórico</TabsTrigger>
+        <Tabs defaultValue="all" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 md:w-[500px]">
+            <TabsTrigger value="all" className="font-bold uppercase text-[10px]">Todas</TabsTrigger>
+            <TabsTrigger value="inbound" className="font-bold uppercase text-[10px]">Entradas</TabsTrigger>
+            <TabsTrigger value="outbound" className="font-bold uppercase text-[10px]">Saídas</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="inbox" className="mt-6">
+          <TabsContent value="all" className="mt-6">
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
                 <CardTitle className="text-sm font-black uppercase flex items-center gap-2">
-                  <Download className="h-4 w-4 text-primary" /> O que chega para mim
+                  <ArrowRightLeft className="h-4 w-4 text-primary" /> Fluxo de Movimentação
                 </CardTitle>
+                <Badge variant="outline" className="text-[10px] uppercase font-bold">Total: {movements.length}</Badge>
               </CardHeader>
               <CardContent>
-                <div className="divide-y border rounded-lg overflow-hidden">
+                <div className="space-y-4">
                   {movements.length === 0 ? (
-                    <div className="p-10 text-center text-muted-foreground">Nenhuma movimentação pendente.</div>
+                    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground border-2 border-dashed rounded-lg">
+                      <Package className="h-12 w-12 opacity-20 mb-4" />
+                      <p className="font-medium">Nenhuma movimentação registrada.</p>
+                    </div>
                   ) : (
                     movements.map(m => (
-                      <MovementRow key={m.id} movement={m} type="inbound" />
+                      <div key={m.id} className="group border rounded-xl p-4 hover:border-primary/50 transition-all bg-card shadow-sm">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                          <div className="flex items-center gap-4">
+                            <div className={cn("p-3 rounded-full", STATUS_MAP[m.status]?.color)}>
+                              {(() => {
+                                const Icon = STATUS_MAP[m.status]?.icon || Package;
+                                return <Icon className="h-5 w-5" />;
+                              })()}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-black text-xs uppercase text-muted-foreground">{m.origin_type}</span>
+                                <ChevronRight className="h-3 w-3 text-muted-foreground" />
+                                <span className="font-black text-xs uppercase text-muted-foreground">{m.destination_type}</span>
+                              </div>
+                              <h3 className="font-bold text-sm">Transferência #{m.id.split('-')[0].toUpperCase()}</h3>
+                              <p className="text-[10px] text-muted-foreground font-medium uppercase mt-1">
+                                {m.items_count} Itens • Prioridade: {m.priority}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3 justify-end">
+                            <Badge className={cn("text-[9px] font-black uppercase px-2 py-0.5", STATUS_MAP[m.status]?.color)}>
+                              {STATUS_MAP[m.status]?.label || m.status}
+                            </Badge>
+                            <Button 
+                              size="sm" 
+                              variant="secondary" 
+                              className="h-8 font-black text-[9px] uppercase"
+                              onClick={() => handleNextStep(m)}
+                            >
+                              Avançar Etapa
+                            </Button>
+                          </div>
+                        </div>
+                        
+                        {/* Progress Bar */}
+                        <div className="mt-4 h-1 w-full bg-muted rounded-full overflow-hidden flex">
+                          <div 
+                            className="h-full bg-primary transition-all duration-500" 
+                            style={{ 
+                              width: `${(Object.keys(STATUS_MAP).indexOf(m.status) + 1) / Object.keys(STATUS_MAP).length * 100}%` 
+                            }} 
+                          />
+                        </div>
+                      </div>
                     ))
                   )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="outbox" className="mt-6">
-             <Card>
-              <CardHeader>
-                <CardTitle className="text-sm font-black uppercase flex items-center gap-2">
-                  <Upload className="h-4 w-4 text-primary" /> O que estou enviando
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="divide-y border rounded-lg overflow-hidden">
-                  <div className="p-10 text-center text-muted-foreground">Em breve: fluxo de saída unificado.</div>
                 </div>
               </CardContent>
             </Card>
@@ -109,45 +162,23 @@ export default function UnifiedSupplyChain() {
 
 function StatCard({ title, value, icon: Icon, color }: any) {
   const colors: any = {
-    blue: 'text-blue-500 bg-blue-500/10 border-blue-500/20',
-    purple: 'text-purple-500 bg-purple-500/10 border-purple-500/20',
-    emerald: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20',
-    red: 'text-red-500 bg-red-500/10 border-red-500/20',
+    blue: 'text-blue-500 bg-blue-500/5 border-blue-500/20',
+    purple: 'text-purple-500 bg-purple-500/5 border-purple-500/20',
+    emerald: 'text-emerald-500 bg-emerald-500/5 border-emerald-500/20',
+    red: 'text-red-500 bg-red-500/5 border-red-500/20',
   };
 
   return (
-    <Card className={cn("border", colors[color])}>
-      <CardContent className="p-4 flex items-center justify-between">
+    <Card className={cn("border transition-all hover:shadow-md", colors[color])}>
+      <CardContent className="p-5 flex items-center justify-between">
         <div>
-          <p className="text-[10px] font-black uppercase opacity-70 mb-1">{title}</p>
-          <p className="text-2xl font-black">{value}</p>
+          <p className="text-[10px] font-black uppercase opacity-60 mb-1">{title}</p>
+          <p className="text-3xl font-black">{value}</p>
         </div>
-        <Icon className="h-6 w-6 opacity-50" />
+        <div className="p-3 rounded-xl bg-background/50 backdrop-blur-sm border shadow-inner">
+          <Icon className="h-6 w-6" />
+        </div>
       </CardContent>
     </Card>
-  );
-}
-
-function MovementRow({ movement, type }: any) {
-  return (
-    <div className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors cursor-pointer group">
-      <div className="flex items-center gap-4">
-        <div className="p-2 rounded-full bg-primary/10 text-primary">
-          <ArrowRightLeft className="h-4 w-4" />
-        </div>
-        <div>
-          <p className="font-bold text-xs uppercase">{movement.origin_type} → {movement.destination_type}</p>
-          <p className="text-[10px] text-muted-foreground">{movement.items_count} SKUs • Criado em {new Date(movement.created_at).toLocaleDateString()}</p>
-        </div>
-      </div>
-      <div className="flex items-center gap-3">
-        <Badge variant="secondary" className="text-[9px] font-black uppercase">
-          {movement.status}
-        </Badge>
-        <Button size="sm" variant="ghost" className="h-8 w-8 p-0 group-hover:translate-x-1 transition-transform">
-          <ArrowRightLeft className="h-4 w-4" />
-        </Button>
-      </div>
-    </div>
   );
 }

@@ -19262,6 +19262,124 @@ export type Database = {
         }
         Relationships: []
       }
+      supply_chain_items: {
+        Row: {
+          created_at: string
+          id: string
+          movement_id: string
+          product_id: string
+          received_qty: number | null
+          requested_qty: number
+          shipped_qty: number | null
+          unit_price: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          movement_id: string
+          product_id: string
+          received_qty?: number | null
+          requested_qty: number
+          shipped_qty?: number | null
+          unit_price?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          movement_id?: string
+          product_id?: string
+          received_qty?: number | null
+          requested_qty?: number
+          shipped_qty?: number | null
+          unit_price?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supply_chain_items_movement_id_fkey"
+            columns: ["movement_id"]
+            isOneToOne: false
+            referencedRelation: "supply_chain_movements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supply_chain_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supply_chain_movements: {
+        Row: {
+          company_id: string
+          created_at: string
+          destination_id: string
+          destination_type: string
+          estimated_arrival: string | null
+          external_ref: string | null
+          id: string
+          items_count: number
+          origin_id: string
+          origin_type: string
+          priority: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          destination_id: string
+          destination_type: string
+          estimated_arrival?: string | null
+          external_ref?: string | null
+          id?: string
+          items_count?: number
+          origin_id: string
+          origin_type: string
+          priority?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          destination_id?: string
+          destination_type?: string
+          estimated_arrival?: string | null
+          external_ref?: string | null
+          id?: string
+          items_count?: number
+          origin_id?: string
+          origin_type?: string
+          priority?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supply_chain_movements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supply_chain_movements_destination_id_fkey"
+            columns: ["destination_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supply_chain_movements_origin_id_fkey"
+            columns: ["origin_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       supply_movements: {
         Row: {
           company_id: string | null
