@@ -52,6 +52,7 @@ export function useSaveQuestionToBank() {
 
 export function useDeleteQuestionFromBank() {
   const qc = useQueryClient();
+  const companyId = useCompanyId();
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
