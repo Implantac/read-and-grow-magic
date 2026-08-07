@@ -19,7 +19,8 @@ import {
   DollarSign,
   Ticket,
   Clock,
-  ArrowRight
+  ArrowRight,
+  ClipboardList
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
