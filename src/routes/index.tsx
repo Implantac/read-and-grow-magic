@@ -57,33 +57,49 @@ const HardeningDashboard = () => {
     { id: '2C', title: 'Expedição & Última Milha', status: 'completed', description: 'Gestão de Romaneios, Tracking em Tempo Real, Last Mile.' },
     { id: '3', title: 'Inteligência Logística IA', status: 'completed', description: 'Otimização de Slotting, IA Preditiva, Cross-docking Dinâmico.' },
     { id: '4', title: 'Auditoria & Compliance (LGPD)', status: 'completed', description: 'Certificação de Segurança Proativa, Criptografia E2E, LGPD.' },
-    { id: '5', title: 'Expansão & Ecossistema', status: 'in_progress', description: 'Marketplace de Plugins, Multi-moeda, Expansão Global.' },
+    { id: '5', title: 'Expansão & Ecossistema', status: 'completed', description: 'Marketplace de Plugins, Multi-moeda, Expansão Global.' },
+    { id: 'FINAL', title: 'Modo Produção Live', status: 'in_progress', description: 'Certificado A1, Chaves PSP, Homologação SEFAZ.' },
+  ];
+
+  const pendingItems = [
+    { 
+      id: 'fiscal_a1', 
+      title: '1. Certificado Digital A1 (Real)', 
+      icon: <Lock className="h-4 w-4" />,
+      content: `O sistema está pronto para faturamento, mas aguarda a inserção de um certificado A1 válido no cofre (Vault) para assinar NF-e/NFC-e de produção via XMLDSig.`
+    },
+    { 
+      id: 'billing_psp', 
+      title: '2. Ativação de Chaves do PSP (Stripe)', 
+      icon: <Database className="h-4 w-4" />,
+      content: `O motor de cobrança SaaS está operacional. É necessário configurar as chaves STRIPE_SECRET_KEY e STRIPE_WEBHOOK_SECRET para processar pagamentos reais.`
+    },
+    { 
+      id: 'sefaz_homologation', 
+      title: '3. Homologação SEFAZ Ponta a Ponta', 
+      icon: <CheckCircle2 className="h-4 w-4" />,
+      content: `Ciclo completo de validação (Autorização, DANFE, Cancelamento, CC-e) em ambiente de homologação para garantir 100% de estabilidade fiscal.`
+    },
+    { 
+      id: 'e2e_mutational', 
+      title: '4. Testes E2E Mutacionais (Fluxo do Dinheiro)', 
+      icon: <TrendingUp className="h-4 w-4" />,
+      content: `Implementação de testes que criam pedidos reais, baixam estoque e geram financeiro em um tenant de teste isolado para garantir que refatores não quebrem o core.`
+    }
   ];
 
   const operationalRequirements = [
     { 
       id: 'plugin_marketplace', 
-      title: '1. Marketplace de Aplicações (Plugins)', 
+      title: 'Marketplace de Aplicações (Plugins)', 
       icon: <Puzzle className="h-4 w-4" />,
       content: `Ecossistema aberto para extensões de terceiros e integrações nativas (Stripe, WhatsApp, IoT), permitindo modularidade total sem inflar o core do ERP.`
     },
     { 
       id: 'multi_currency', 
-      title: '2. Arquitetura Multi-moeda & Global', 
+      title: 'Arquitetura Multi-moeda & Global', 
       icon: <TrendingUp className="h-4 w-4" />,
       content: `Suporte a múltiplas jurisdições fiscais e conversão automática de câmbio em tempo real para operações de exportação/importação.`
-    },
-    { 
-      id: 'global_inventory', 
-      title: '3. Rede Global de Inventário', 
-      icon: <Network className="h-4 w-4" />,
-      content: `Visibilidade e gestão de estoque em escala global, permitindo transferências internacionais e otimização de custos tributários entre fronteiras.`
-    },
-    { 
-      id: 'enterprise_api', 
-      title: '4. Enterprise SDK & GraphQL API', 
-      icon: <Zap className="h-4 w-4" />,
-      content: `Camada de abstração robusta para desenvolvedores corporativos integrarem sistemas legados ou construírem UIs customizadas sobre o motor Use ERP.`
     }
   ];
 
@@ -93,7 +109,7 @@ const HardeningDashboard = () => {
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Hardening & Evolução (Fase 5: Expansão)</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Hardening & Evolução (Fase FINAL: Go-Live)</h1>
           </div>
           <p className="text-muted-foreground text-lg">
             Plataforma Enterprise: Inteligência Logística e Automação Predictiva.
@@ -156,42 +172,59 @@ const HardeningDashboard = () => {
           <CardHeader className="bg-primary/10 border-b border-primary/20">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Zap className="h-6 w-6 text-primary fill-primary" />
+                <AlertTriangle className="h-6 w-6 text-amber-500 fill-amber-500/20" />
                 <div>
-                  <CardTitle>Requisitos da Fase 3 (Inteligência & IA)</CardTitle>
-                  <CardDescription>Hardening de motores preditivos, slotting dinâmico e otimização autônoma</CardDescription>
+                  <CardTitle>O que ainda falta? (Pendências de Produção)</CardTitle>
+                  <CardDescription>Itens críticos externos e de validação final para o Go-Live</CardDescription>
                 </div>
               </div>
-              <Badge variant="secondary" className="bg-primary/20 text-primary hover:bg-primary/30">
-                CRÍTICO
+              <Badge variant="destructive" className="bg-amber-500 text-white hover:bg-amber-600 border-none">
+                BLOQUEANTE
               </Badge>
             </div>
           </CardHeader>
           <CardContent className="p-0">
             <ScrollArea className="h-[500px]">
               <div className="p-6 space-y-4">
-                {operationalRequirements.map((req) => (
-                  <div key={req.id} className="border rounded-lg bg-background overflow-hidden transition-all">
+                {pendingItems.map((req) => (
+                  <div key={req.id} className="border rounded-lg bg-background overflow-hidden transition-all border-amber-500/20 shadow-sm">
                     <button 
                       onClick={() => setExpandedSection(expandedSection === req.id ? null : req.id)}
-                      className="w-full flex items-center justify-between p-4 text-left hover:bg-accent/50 transition-colors"
+                      className="w-full flex items-center justify-between p-4 text-left hover:bg-amber-500/5 transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-md bg-primary/10 text-primary">
+                        <div className="p-2 rounded-md bg-amber-500/10 text-amber-600">
                           {req.icon}
                         </div>
-                        <span className="font-semibold text-sm">{req.title}</span>
+                        <span className="font-bold text-sm text-amber-900">{req.title}</span>
                       </div>
-                      {expandedSection === req.id ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                      {expandedSection === req.id ? <ChevronUp className="h-4 w-4 text-amber-600" /> : <ChevronDown className="h-4 w-4 text-amber-600" />}
                     </button>
                     {expandedSection === req.id && (
                       <div className="px-4 pb-4 text-sm text-muted-foreground animate-in fade-in slide-in-from-top-2">
-                        <Separator className="mb-4" />
-                        <p className="leading-relaxed">{req.content}</p>
+                        <Separator className="mb-4 bg-amber-500/10" />
+                        <p className="leading-relaxed font-medium">{req.content}</p>
                       </div>
                     )}
                   </div>
                 ))}
+
+                <div className="pt-4 px-2">
+                  <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-4">Próximos passos de Expansão</h4>
+                  <div className="space-y-3">
+                    {operationalRequirements.map((req) => (
+                      <div key={req.id} className="flex items-start gap-3 p-3 rounded-lg border bg-background/50">
+                        <div className="p-1.5 rounded bg-primary/10 text-primary">
+                          {req.icon}
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold">{req.title}</p>
+                          <p className="text-xs text-muted-foreground">{req.content}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </ScrollArea>
           </CardContent>
