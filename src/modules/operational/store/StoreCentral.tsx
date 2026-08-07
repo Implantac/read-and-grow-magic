@@ -173,7 +173,7 @@ export default function StoreCentral() {
                       <p className="text-[10px] text-muted-foreground">Aguardando conferência</p>
                     </div>
                   </div>
-                  <Button variant="primary" size="sm" className="text-[10px] h-7">Conferir</Button>
+                  <Button variant="default" size="sm" className="text-[10px] h-7">Conferir</Button>
                 </div>
               </CardContent>
             </Card>
