@@ -172,42 +172,59 @@ const HardeningDashboard = () => {
           <CardHeader className="bg-primary/10 border-b border-primary/20">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Zap className="h-6 w-6 text-primary fill-primary" />
+                <AlertTriangle className="h-6 w-6 text-amber-500 fill-amber-500/20" />
                 <div>
-                  <CardTitle>Requisitos da Fase 3 (Inteligência & IA)</CardTitle>
-                  <CardDescription>Hardening de motores preditivos, slotting dinâmico e otimização autônoma</CardDescription>
+                  <CardTitle>O que ainda falta? (Pendências de Produção)</CardTitle>
+                  <CardDescription>Itens críticos externos e de validação final para o Go-Live</CardDescription>
                 </div>
               </div>
-              <Badge variant="secondary" className="bg-primary/20 text-primary hover:bg-primary/30">
-                CRÍTICO
+              <Badge variant="destructive" className="bg-amber-500 text-white hover:bg-amber-600 border-none">
+                BLOQUEANTE
               </Badge>
             </div>
           </CardHeader>
           <CardContent className="p-0">
             <ScrollArea className="h-[500px]">
               <div className="p-6 space-y-4">
-                {operationalRequirements.map((req) => (
-                  <div key={req.id} className="border rounded-lg bg-background overflow-hidden transition-all">
+                {pendingItems.map((req) => (
+                  <div key={req.id} className="border rounded-lg bg-background overflow-hidden transition-all border-amber-500/20 shadow-sm">
                     <button 
                       onClick={() => setExpandedSection(expandedSection === req.id ? null : req.id)}
-                      className="w-full flex items-center justify-between p-4 text-left hover:bg-accent/50 transition-colors"
+                      className="w-full flex items-center justify-between p-4 text-left hover:bg-amber-500/5 transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-md bg-primary/10 text-primary">
+                        <div className="p-2 rounded-md bg-amber-500/10 text-amber-600">
                           {req.icon}
                         </div>
-                        <span className="font-semibold text-sm">{req.title}</span>
+                        <span className="font-bold text-sm text-amber-900">{req.title}</span>
                       </div>
-                      {expandedSection === req.id ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                      {expandedSection === req.id ? <ChevronUp className="h-4 w-4 text-amber-600" /> : <ChevronDown className="h-4 w-4 text-amber-600" />}
                     </button>
                     {expandedSection === req.id && (
                       <div className="px-4 pb-4 text-sm text-muted-foreground animate-in fade-in slide-in-from-top-2">
-                        <Separator className="mb-4" />
-                        <p className="leading-relaxed">{req.content}</p>
+                        <Separator className="mb-4 bg-amber-500/10" />
+                        <p className="leading-relaxed font-medium">{req.content}</p>
                       </div>
                     )}
                   </div>
                 ))}
+
+                <div className="pt-4 px-2">
+                  <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-4">Próximos passos de Expansão</h4>
+                  <div className="space-y-3">
+                    {operationalRequirements.map((req) => (
+                      <div key={req.id} className="flex items-start gap-3 p-3 rounded-lg border bg-background/50">
+                        <div className="p-1.5 rounded bg-primary/10 text-primary">
+                          {req.icon}
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold">{req.title}</p>
+                          <p className="text-xs text-muted-foreground">{req.content}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </ScrollArea>
           </CardContent>
