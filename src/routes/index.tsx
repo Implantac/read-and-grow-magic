@@ -201,31 +201,31 @@ const HardeningDashboard = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-start gap-3 p-3 rounded-lg bg-accent/30 border border-border/50">
-                <Database className="h-5 w-5 text-primary mt-0.5" />
+                <Truck className="h-5 w-5 text-primary mt-0.5" />
                 <div>
-                  <p className="text-sm font-bold">Base de Dados</p>
-                  <p className="text-xs text-muted-foreground">Tabelas de rede e transferências migradas.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-accent/30 border border-border/50">
-                <HardDrive className="h-5 w-5 text-primary mt-0.5" />
-                <div>
-                  <p className="text-sm font-bold">Contexto de Unidade</p>
-                  <p className="text-xs text-muted-foreground">Seletor global e suporte a 'Todas' no Topbar.</p>
+                  <p className="text-sm font-bold">Orquestração (Sourcing)</p>
+                  <p className="text-xs text-muted-foreground">Lógica de seleção de origem de estoque ativa.</p>
                 </div>
               </div>
               <div className="flex items-start gap-3 p-3 rounded-lg bg-accent/30 border border-border/50">
                 <Settings className="h-5 w-5 text-primary mt-0.5" />
                 <div>
-                  <p className="text-sm font-bold">Lógica de Reabastecimento</p>
-                  <p className="text-xs text-muted-foreground">Motores de cálculo e políticas em implementação.</p>
+                  <p className="text-sm font-bold">Roteirização</p>
+                  <p className="text-xs text-muted-foreground">Algoritmos de agrupamento e despacho em teste.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-accent/30 border border-border/50">
+                <Store className="h-5 w-5 text-primary mt-0.5" />
+                <div>
+                  <p className="text-sm font-bold">Omnichannel</p>
+                  <p className="text-xs text-muted-foreground">Módulo BOPIS e Ship-from-Store integrado.</p>
                 </div>
               </div>
               <div className="flex items-start gap-3 p-3 rounded-lg bg-accent/30 border border-border/50">
                 <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5" />
                 <div>
-                  <p className="text-sm font-bold">Divergências</p>
-                  <p className="text-xs text-muted-foreground">Monitoramento de ocorrências operacionais ativo.</p>
+                  <p className="text-sm font-bold">Rastreabilidade Last Mile</p>
+                  <p className="text-xs text-muted-foreground">Monitoramento de status de entrega final.</p>
                 </div>
               </div>
             </CardContent>
