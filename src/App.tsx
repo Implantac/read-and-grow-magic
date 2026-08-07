@@ -238,7 +238,7 @@ const App = () => (
                   <Route path="/wms/*" element={<ModuleErrorBoundary moduleName="WMS"><Routes>{WMSRoutes}</Routes></ModuleErrorBoundary>} />
                 </Route>
                 <Route path="/admin/*" element={<ModuleErrorBoundary moduleName="Admin"><Routes>{AdminRoutes}</Routes></ModuleErrorBoundary>} />
-                {OperationalRoutes}
+                <Route path="/operacional/*" element={<ModuleErrorBoundary moduleName="Operacional"><Routes>{OperationalRoutes}</Routes></ModuleErrorBoundary>} />
                 {NetworkRoutes}
                 {MiscellaneousRoutes}
                 <Route element={<GatedOutlet module="fiscal" />}>
