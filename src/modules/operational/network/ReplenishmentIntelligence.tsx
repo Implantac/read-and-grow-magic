@@ -90,7 +90,7 @@ export default function ReplenishmentIntelligencePage() {
               <EmptyState 
                 icon={AlertCircle}
                 title="Erro ao carregar políticas"
-                description="Não foi possível recuperar as políticas de estoque no momento."
+                description="Não foi possível recuperar as políticas de estoque no momento. Verifique sua permissão de acesso."
                 action={{ label: "Tentar Novamente", onClick: () => refetch() }}
               />
             ) : policies && policies.length > 0 ? (
