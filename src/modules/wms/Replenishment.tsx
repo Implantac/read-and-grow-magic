@@ -22,17 +22,19 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
 };
 
 export default function ReplenishmentPage() {
-  const { tasks, loading, updateStatus } = useReplenishmentTasks();
+  const { tasks = [], loading, updateStatus } = useReplenishmentTasks();
   const [search, setSearch] = useState('');
 
-  const filtered = tasks.filter(t =>
-    t.productName.toLowerCase().includes(search.toLowerCase()) ||
-    t.taskNumber.toLowerCase().includes(search.toLowerCase())
+  const safeTasks = Array.isArray(tasks) ? tasks : [];
+
+  const filtered = safeTasks.filter(t =>
+    t.productName?.toLowerCase().includes(search.toLowerCase()) ||
+    t.taskNumber?.toLowerCase().includes(search.toLowerCase())
   );
 
-  const pending = tasks.filter(t => t.status === 'pending').length;
-  const inProgress = tasks.filter(t => t.status === 'in_progress').length;
-  const completedToday = tasks.filter(t => t.status === 'completed' && t.completedAt && new Date(t.completedAt).toDateString() === new Date().toDateString()).length;
+  const pending = safeTasks.filter(t => t.status === 'pending').length;
+  const inProgress = safeTasks.filter(t => t.status === 'in_progress').length;
+  const completedToday = safeTasks.filter(t => t.status === 'completed' && t.completedAt && new Date(t.completedAt).toDateString() === new Date().toDateString()).length;
 
   return (
     <PageContainer loading={loading}>
@@ -46,7 +48,7 @@ export default function ReplenishmentPage() {
 
         <TabsContent value="tasks" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-4">
-            <KPICard title="Total" value={tasks.length} icon={RefreshCw} index={0} />
+            <KPICard title="Total" value={safeTasks.length} icon={RefreshCw} index={0} />
             <KPICard title="Pendentes" value={pending} icon={AlertTriangle} index={1} color={pending > 0 ? 'warning' : undefined} />
             <KPICard title="Em Andamento" value={inProgress} icon={Clock} index={2} />
             <KPICard title="Concluídas Hoje" value={completedToday} icon={CheckCircle} index={3} color="success" />
