@@ -199,8 +199,8 @@ export default function CrossDockingPage() {
   return (
     <PageContainer>
       <PageHeader
-        title="Cross-Docking"
-        description="Encaminha mercadoria recebida direto para expedição, evitando armazenagem"
+        title="Cross-Docking Dinâmico"
+        description="Orquestração inteligente de fluxo direto Doca-Doca via IA"
       >
         <Button variant="outline" onClick={load} disabled={loading}>
           <Zap className="h-4 w-4 mr-2" /> Recalcular

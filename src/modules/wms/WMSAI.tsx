@@ -28,8 +28,8 @@ export default function WMSAIPage() {
   return (
     <PageContainer loading={loading}>
       <PageHeader
-        title="IA do WMS"
-        description="Insights inteligentes para otimizar operação logística"
+        title="IA Logística — Cérebro Operacional"
+        description="Insights preditivos e otimização autônoma de armazém e rede"
         actions={<Button variant="outline" onClick={refetch}><RefreshCw className="h-4 w-4 mr-2" /> Atualizar</Button>}
       />
 
