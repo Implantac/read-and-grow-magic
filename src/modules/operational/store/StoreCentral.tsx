@@ -19,7 +19,8 @@ import {
   DollarSign,
   Ticket,
   Clock,
-  ArrowRight
+  ArrowRight,
+  ClipboardList
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
@@ -110,34 +111,46 @@ export default function StoreCentral() {
             </CardHeader>
             <CardContent className="p-0">
               <div className="divide-y">
-                {alerts?.map((alert) => (
-                  <div key={alert.id} className="p-4 flex items-start gap-4 hover:bg-muted/50 transition-colors group">
-                    <div className={cn(
-                      "p-2 rounded-full",
-                      alert.type === 'critical' ? "bg-destructive/10 text-destructive" : 
-                      alert.type === 'warning' ? "bg-warning/10 text-warning" : "bg-primary/10 text-primary"
-                    )}>
-                      {alert.category === 'rupture' && <AlertTriangle className="h-5 w-5" />}
-                      {alert.category === 'receiving' && <Package className="h-5 w-5" />}
-                      {alert.category === 'transfer' && <Truck className="h-5 w-5" />}
-                      {alert.category === 'cashier' && <DollarSign className="h-5 w-5" />}
-                      {alert.category === 'replenishment' && <RefreshCw className="h-5 w-5" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <p className="font-bold text-sm">{alert.title}</p>
-                        {alert.actionPath && (
-                          <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 opacity-0 group-hover:opacity-100 transition-opacity" asChild>
-                            <Link to={alert.actionPath}>
-                              {alert.actionLabel || 'Tratar'} <ChevronRight className="h-3 w-3" />
-                            </Link>
-                          </Button>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-0.5">{alert.description}</p>
-                    </div>
+                {isLoading ? (
+                  <div className="p-8 text-center">
+                    <RefreshCw className="h-8 w-8 animate-spin mx-auto text-primary opacity-20" />
+                    <p className="text-xs text-muted-foreground mt-2">Carregando tarefas críticas...</p>
                   </div>
-                ))}
+                ) : alerts?.length > 0 ? (
+                  alerts.map((alert) => (
+                    <div key={alert.id} className="p-4 flex items-start gap-4 hover:bg-muted/50 transition-colors group">
+                      <div className={cn(
+                        "p-2 rounded-full",
+                        alert.type === 'critical' ? "bg-destructive/10 text-destructive" : 
+                        alert.type === 'warning' ? "bg-warning/10 text-warning" : "bg-primary/10 text-primary"
+                      )}>
+                        {alert.category === 'rupture' && <AlertTriangle className="h-5 w-5" />}
+                        {alert.category === 'receiving' && <Package className="h-5 w-5" />}
+                        {alert.category === 'transfer' && <Truck className="h-5 w-5" />}
+                        {alert.category === 'cashier' && <DollarSign className="h-5 w-5" />}
+                        {alert.category === 'replenishment' && <RefreshCw className="h-5 w-5" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <p className="font-bold text-sm">{alert.title}</p>
+                          {alert.actionPath && (
+                            <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 opacity-0 group-hover:opacity-100 transition-opacity" asChild>
+                              <Link to={alert.actionPath}>
+                                {alert.actionLabel || 'Tratar'} <ChevronRight className="h-3 w-3" />
+                              </Link>
+                            </Button>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">{alert.description}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-8 text-center text-muted-foreground">
+                    <CheckCircle2 className="h-8 w-8 mx-auto mb-2 opacity-20" />
+                    <p className="text-sm">Nenhuma pendência crítica encontrada.</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -253,13 +266,19 @@ export default function StoreCentral() {
             </CardContent>
           </Card>
 
-          <Card className="border-dashed">
+          <Card className="border-dashed border-primary/40 bg-primary/5">
             <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-bold uppercase text-muted-foreground">Inventário Rápido (Hoje)</CardTitle>
+              <CardTitle className="text-xs font-black uppercase text-primary/70">Auditoria Cíclica (Smart)</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <p className="text-xs text-muted-foreground">O sistema selecionou 12 SKUs para contagem cíclica hoje.</p>
-              <Button variant="outline" className="w-full text-xs">Iniciar Contagem</Button>
+              <div className="flex items-center gap-2 text-primary">
+                <ClipboardList className="h-4 w-4" />
+                <span className="text-sm font-bold">12 SKUs Críticos</span>
+              </div>
+              <p className="text-[10px] text-muted-foreground">O motor de inteligência selecionou itens de alto giro e risco de ruptura para conferência hoje.</p>
+              <Button variant="default" size="sm" className="w-full text-xs font-bold shadow-sm" asChild>
+                <Link to="/estoque/inventario">Iniciar Contagem Cíclica</Link>
+              </Button>
             </CardContent>
           </Card>
         </div>
