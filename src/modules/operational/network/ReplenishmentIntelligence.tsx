@@ -42,11 +42,11 @@ export default function ReplenishmentIntelligencePage() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="suggestions">
+        <TabsContent value="suggestions" className="space-y-4">
           <SmartReplenishment />
         </TabsContent>
 
-        <TabsContent value="policies">
+        <TabsContent value="policies" className="space-y-4">
           <div className="grid gap-6 md:grid-cols-4 mb-8 mt-4">
             <Card className="bg-primary/5 border-primary/20">
               <CardHeader className="pb-2">
@@ -144,7 +144,7 @@ export default function ReplenishmentIntelligencePage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="kpis">
+        <TabsContent value="kpis" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Painel de Ruptura e Saúde de Estoque</CardTitle>
