@@ -53,33 +53,34 @@ const HardeningDashboard = () => {
     { id: '26-29', title: 'Governança & QA', status: 'completed', description: 'Documentação, DoD Permanente, No-Mock Policy.' },
     { id: '2A', title: 'Rede Operacional', status: 'completed', description: 'Hierarquia de Lojas/CD/Fábrica, Estoque em Trânsito.' },
     { id: '2B', title: 'Orquestração de Pedidos', status: 'completed', description: 'Cross-docking, Drop-shipping, Roteirização de Carga.' },
-    { id: '2C', title: 'Expedição & Última Milha', status: 'in_progress', description: 'Gestão de Romaneios, Tracking em Tempo Real, Last Mile.' },
+    { id: '2C', title: 'Expedição & Última Milha', status: 'completed', description: 'Gestão de Romaneios, Tracking em Tempo Real, Last Mile.' },
+    { id: '3', title: 'Inteligência Logística IA', status: 'in_progress', description: 'Otimização de Slotting, IA Preditiva, Cross-docking Dinâmico.' },
   ];
 
   const operationalRequirements = [
     { 
-      id: 'shipment_tracking', 
-      title: '1. Gestão de Romaneios & Last Mile', 
-      icon: <Truck className="h-4 w-4" />,
-      content: `O sistema consolida múltiplas expedições em romaneios únicos, otimizando o carregamento e o tracking de última milha com atualizações em tempo real.`
+      id: 'dynamic_slotting', 
+      title: '1. Otimização Dinâmica de Slotting (IA)', 
+      icon: <Zap className="h-4 w-4" />,
+      content: `A IA analisa o giro dos SKUs (Curva ABC) e sugere realocações inteligentes de endereçamento para reduzir o tempo de picking em até 40%.`
     },
     { 
-      id: 'live_tracking', 
-      title: '2. Rastreamento Live & IoT', 
+      id: 'predictive_demand', 
+      title: '2. Previsão de Demanda & Ruptura', 
       icon: <TrendingUp className="h-4 w-4" />,
-      content: `Integração com sensores IoT e GPS para monitoramento contínuo da temperatura, umidade (se aplicável) e localização exata da carga durante o transporte.`
+      content: `Modelos de Machine Learning identificam tendências de consumo por unidade, antecipando ordens de reabastecimento antes que o estoque atinja o nível crítico.`
     },
     { 
-      id: 'proof_delivery', 
-      title: '3. Comprovação Digital de Entrega', 
-      icon: <CheckCircle2 className="h-4 w-4" />,
-      content: `Captura de assinaturas digitais, fotos de canhoto e geolocalização no momento da entrega para encerramento automático do ciclo logístico e fiscal.`
+      id: 'auto_crossdock', 
+      title: '3. Cross-docking Autônomo', 
+      icon: <ArrowRight className="h-4 w-4" />,
+      content: `O sistema identifica oportunidades de fluxo direto no momento do agendamento do fornecedor, bloqueando a armazenagem e gerando tarefas de expedição imediata.`
     },
     { 
-      id: 'reverse_logistics', 
-      title: '4. Logística Reversa Integrada', 
-      icon: <RefreshCw className="h-4 w-4" />,
-      content: `Gestão simplificada de devoluções e coletas, com orquestração automática para o ponto de recebimento mais eficiente (CD ou Loja).`
+      id: 'warehouse_digital_twin', 
+      title: '4. Digital Twin & Telemetria', 
+      icon: <Network className="h-4 w-4" />,
+      content: `Simulação 3D em tempo real da ocupação do armazém integrada a sensores IoT, permitindo ajustes térmicos e de fluxo baseados em carga real.`
     }
   ];
 
@@ -89,10 +90,10 @@ const HardeningDashboard = () => {
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Hardening & Evolução (Fase 2C)</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Hardening & Evolução (Fase 3)</h1>
           </div>
           <p className="text-muted-foreground text-lg">
-            Plataforma Enterprise: Prontidão para Produção e Rede Operacional.
+            Plataforma Enterprise: Inteligência Logística e Automação Predictiva.
           </p>
         </div>
         <Badge variant="outline" className="text-primary border-primary bg-primary/5 px-4 py-1 text-sm font-semibold">
@@ -154,8 +155,8 @@ const HardeningDashboard = () => {
               <div className="flex items-center gap-2">
                 <Zap className="h-6 w-6 text-primary fill-primary" />
                 <div>
-                  <CardTitle>Requisitos da Fase 2C (Expedição & Last Mile)</CardTitle>
-                  <CardDescription>Hardening de fluxos de romaneio, tracking live e gestão de última milha</CardDescription>
+                  <CardTitle>Requisitos da Fase 3 (Inteligência & IA)</CardTitle>
+                  <CardDescription>Hardening de motores preditivos, slotting dinâmico e otimização autônoma</CardDescription>
                 </div>
               </div>
               <Badge variant="secondary" className="bg-primary/20 text-primary hover:bg-primary/30">

@@ -28,8 +28,8 @@ export default function DistributionCentersPage() {
   return (
     <PageContainer loading={loading}>
       <PageHeader
-        title="Centros de Distribuição"
-        description="Gestão multi-CD para operação logística"
+        title="Rede de Distribuição"
+        description="Visão global de CDs e balanceamento inteligente de malha"
         actions={<Button><Plus className="h-4 w-4 mr-2" /> Novo CD</Button>}
       />
 
