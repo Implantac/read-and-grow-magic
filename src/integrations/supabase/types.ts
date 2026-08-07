@@ -11424,6 +11424,167 @@ export type Database = {
           },
         ]
       }
+      operational_discrepancies: {
+        Row: {
+          actual_qty: number
+          branch_id: string
+          company_id: string
+          created_at: string
+          diff_qty: number | null
+          evidence_url: string | null
+          expected_qty: number
+          id: string
+          origin_task_id: string | null
+          product_id: string | null
+          reason: string
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+        }
+        Insert: {
+          actual_qty: number
+          branch_id: string
+          company_id: string
+          created_at?: string
+          diff_qty?: number | null
+          evidence_url?: string | null
+          expected_qty: number
+          id?: string
+          origin_task_id?: string | null
+          product_id?: string | null
+          reason: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+        }
+        Update: {
+          actual_qty?: number
+          branch_id?: string
+          company_id?: string
+          created_at?: string
+          diff_qty?: number | null
+          evidence_url?: string | null
+          expected_qty?: number
+          id?: string
+          origin_task_id?: string | null
+          product_id?: string | null
+          reason?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operational_discrepancies_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "operational_discrepancies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "operational_discrepancies_origin_task_id_fkey"
+            columns: ["origin_task_id"]
+            isOneToOne: false
+            referencedRelation: "operational_tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "operational_discrepancies_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      operational_tasks: {
+        Row: {
+          assigned_role: Database["public"]["Enums"]["app_role"] | null
+          assigned_user_id: string | null
+          branch_id: string
+          category: string
+          company_id: string
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          description: string | null
+          due_at: string | null
+          id: string
+          metadata: Json | null
+          origin_id: string | null
+          origin_type: string | null
+          priority: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_role?: Database["public"]["Enums"]["app_role"] | null
+          assigned_user_id?: string | null
+          branch_id: string
+          category: string
+          company_id: string
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          description?: string | null
+          due_at?: string | null
+          id?: string
+          metadata?: Json | null
+          origin_id?: string | null
+          origin_type?: string | null
+          priority?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_role?: Database["public"]["Enums"]["app_role"] | null
+          assigned_user_id?: string | null
+          branch_id?: string
+          category?: string
+          company_id?: string
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          description?: string | null
+          due_at?: string | null
+          id?: string
+          metadata?: Json | null
+          origin_id?: string | null
+          origin_type?: string | null
+          priority?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operational_tasks_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "operational_tasks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_approvals: {
         Row: {
           approval_type: string
