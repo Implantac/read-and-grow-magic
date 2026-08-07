@@ -119,6 +119,11 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
             const { data: profile } = await supabase.from('profiles').select('default_branch_id').eq('id', user.id).maybeSingle();
             const defaultBranch = branches.find(b => b.id === profile?.default_branch_id) || branches[0] || null;
             setCurrentBranch(defaultBranch);
+            
+            if (defaultBranch) {
+              const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
+              useEnterpriseStore.getState().setActiveBranchId(defaultBranch.id);
+            }
           }
         }
       }
@@ -131,7 +136,11 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
 
   const setCompany = async (id: string) => {
     const { data } = await supabase.from('companies').select('*').eq('id', id).maybeSingle();
-    if (data) applyCompany(data as CompanyRow);
+    if (data) {
+      applyCompany(data as CompanyRow);
+      const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
+      useEnterpriseStore.getState().setActiveCompanyId(id);
+    }
   };
 
   const setBranch = async (id: string | null) => {
