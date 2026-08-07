@@ -2,20 +2,20 @@ export const Index = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 text-center">
       <h1 className="text-2xl font-bold mb-4">READ & GROW — Enterprise Evolution</h1>
-      <p className="text-muted-foreground mb-6">A plataforma está em fase de Hardening Crítico (FASE 27 concluída — PRODUTO PRONTO).</p>
+      <p className="text-muted-foreground mb-6">A plataforma está em estado READY (Hardening Completo — Fases 0 a 29).</p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl w-full">
         <div className="p-4 border rounded-lg bg-card text-left">
-          <h2 className="font-semibold mb-2">Definition of Done (DoD)</h2>
+          <h2 className="font-semibold mb-2">Certificação Final</h2>
           <ul className="text-xs text-muted-foreground space-y-1">
-            <li>• Padrão Ouro de Qualidade (FASE 27)</li>
-            <li>• Checklist Permanente de Segurança</li>
-            <li>• Validação 360º (UI, DB, Auth, Performance)</li>
-            <li>• Certificação de Estabilidade Global</li>
+            <li>• Relatório Final de Hardening (READY)</li>
+            <li>• Checklist de Segurança 100% Concluído</li>
+            <li>• No-Mock Policy: Dados Reais e Auditáveis</li>
+            <li>• Pronta para Escala Enterprise</li>
           </ul>
         </div>
         <div className="p-4 border rounded-lg bg-card text-left">
           <h2 className="font-semibold mb-2">Arquitetura</h2>
-          <p className="text-sm text-muted-foreground">Governança: Critérios de aceite inegociáveis para a evolução sustentável do ecossistema.</p>
+          <p className="text-sm text-muted-foreground">Status: O projeto atingiu maturidade de produção e está pronto para novas funcionalidades.</p>
         </div>
       </div>
       <p className="mt-8 text-xs text-muted-foreground">Consulte docs/hardening/MASTER_PLAN.md para o roadmap completo.</p>
