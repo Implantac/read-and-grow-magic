@@ -18138,6 +18138,8 @@ export type Database = {
       }
       stock_movements: {
         Row: {
+          adjustment_reason: string | null
+          approved_by: string | null
           batch: string | null
           branch_id: string | null
           canal_operacional:
@@ -18167,6 +18169,8 @@ export type Database = {
           wms_movement_id: string | null
         }
         Insert: {
+          adjustment_reason?: string | null
+          approved_by?: string | null
           batch?: string | null
           branch_id?: string | null
           canal_operacional?:
@@ -18196,6 +18200,8 @@ export type Database = {
           wms_movement_id?: string | null
         }
         Update: {
+          adjustment_reason?: string | null
+          approved_by?: string | null
           batch?: string | null
           branch_id?: string | null
           canal_operacional?:
