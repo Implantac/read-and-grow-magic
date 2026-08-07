@@ -100,7 +100,7 @@ const HardeningDashboard = () => {
           </p>
           <div className="mt-4 p-4 border rounded-xl bg-primary/10 border-primary/20 max-w-2xl animate-in fade-in duration-700">
             <h4 className="text-sm font-black uppercase tracking-widest text-primary mb-2 flex items-center gap-2">
-              <Store className="h-4 w-4" /> Implementação Concluída: Central de Abastecimento e Movimentação
+              <Store className="h-4 w-4" /> Hardening Operacional: Central de Abastecimento e Movimentação
             </h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
               O conceito de "Operação da Loja" foi evoluído para uma <strong>Central de Abastecimento Unificada</strong>. Agora, Fábricas, CDs e Lojas operam sob o mesmo motor logístico, permitindo fluxos ponta a ponta (Fábrica → CD → Loja) e movimentações laterais/reversas com rastreabilidade total e gestão por exceção.
