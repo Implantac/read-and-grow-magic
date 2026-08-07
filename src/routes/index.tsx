@@ -176,8 +176,8 @@ const HardeningDashboard = () => {
               <div className="flex items-center gap-2">
                 <Zap className="h-6 w-6 text-primary fill-primary" />
                 <div>
-                  <CardTitle>Requisitos da Fase 2A (Rede Operacional)</CardTitle>
-                  <CardDescription>Hardening de fluxos críticos: Estoque, Fiscal e Operações</CardDescription>
+                  <CardTitle>Requisitos da Fase 2B (Orquestração de Pedidos)</CardTitle>
+                  <CardDescription>Hardening de fluxos logísticos avançados e roteirização</CardDescription>
                 </div>
               </div>
               <Badge variant="secondary" className="bg-primary/20 text-primary hover:bg-primary/30">
