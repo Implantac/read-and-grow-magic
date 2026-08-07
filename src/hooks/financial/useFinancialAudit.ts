@@ -37,12 +37,12 @@ export function useFinancialAuditLogs() {
 export function useRunFinancialAudit() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (_mode: 'light' | 'full' = 'light') => {
+    mutationFn: async (mode: 'light' | 'full' = 'light') => {
       const { data, error } = await supabase.functions.invoke('financial-audit', {
-        body: null,
+        body: { mode },
       });
       if (error) throw error;
-      return data;
+      return data as { result?: { issues_open: number; auto_fixed: number } };
     },
     onSuccess: (data: { result?: { issues_open?: number; auto_fixed?: number } } | null) => {
       qc.invalidateQueries({ queryKey: ['financial_audit_logs'] });
