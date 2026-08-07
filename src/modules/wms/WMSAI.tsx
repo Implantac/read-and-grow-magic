@@ -5,7 +5,9 @@ import { EmptyState } from '@/shared/components/EmptyState';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
 import { Button } from '@/ui/base/button';
-import { Brain, AlertTriangle, TrendingUp, RefreshCw } from 'lucide-react';
+import { Brain, AlertTriangle, TrendingUp, RefreshCw, Zap, Layers } from 'lucide-react';
+import DigitalTwinViewer from './components/twin/DigitalTwinViewer';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { useWMSAIInsights } from '@/hooks/wms/useWMSAIInsights';
 
 const severityConfig: Record<string, { icon: React.ReactNode; variant: 'default' | 'secondary' | 'destructive' | 'outline'; border: string }> = {
@@ -39,49 +41,82 @@ export default function WMSAIPage() {
         <KPICard title="Alertas" value={warnings} icon={AlertTriangle} index={2} color={warnings > 0 ? 'warning' : undefined} />
       </div>
 
-      {insights.length > 0 ? (
-        <div className="space-y-4">
-          {insights.map(insight => {
-            const sev = severityConfig[insight.severity] || severityConfig.info;
-            return (
-              <Card key={insight.id} className={sev.border}>
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg flex items-center gap-2">{sev.icon} {insight.title}</CardTitle>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline">{categoryLabels[insight.category] || insight.category}</Badge>
-                      <Badge variant={sev.variant}>{insight.severity === 'critical' ? 'Crítico' : insight.severity === 'warning' ? 'Alerta' : 'Info'}</Badge>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {insight.description && <p className="text-sm">{insight.description}</p>}
-                  {insight.recommendedActions && Array.isArray(insight.recommendedActions) && (
-                    <div className="bg-muted/50 rounded-md p-3">
-                      <p className="text-sm font-medium mb-2">Ações Recomendadas:</p>
-                      <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
-                        {(insight.recommendedActions as string[]).map((a, i) => <li key={i}>{a}</li>)}
-                      </ul>
-                    </div>
-                  )}
-                  <Button size="sm" variant="ghost" onClick={() => dismiss(insight.id)}>Dispensar</Button>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      ) : (
-        <Card>
-          <CardContent className="p-0">
-            <EmptyState
-              icon={Brain}
-              title="Nenhum insight no momento"
-              description="A IA está monitorando a operação e gerará insights automaticamente."
-              action={{ label: 'Atualizar', onClick: () => refetch(), icon: RefreshCw }}
-            />
-          </CardContent>
-        </Card>
-      )}
+      <Tabs defaultValue="insights" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="insights">Insights Ativos</TabsTrigger>
+          <TabsTrigger value="twin">Digital Twin (Live)</TabsTrigger>
+          <TabsTrigger value="slotting">Otimização de Slotting</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="insights" className="space-y-4">
+          {insights.length > 0 ? (
+            <div className="space-y-4">
+              {insights.map(insight => {
+                const sev = severityConfig[insight.severity] || severityConfig.info;
+                return (
+                  <Card key={insight.id} className={sev.border}>
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg flex items-center gap-2">{sev.icon} {insight.title}</CardTitle>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline">{categoryLabels[insight.category] || insight.category}</Badge>
+                          <Badge variant={sev.variant}>{insight.severity === 'critical' ? 'Crítico' : insight.severity === 'warning' ? 'Alerta' : 'Info'}</Badge>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {insight.description && <p className="text-sm">{insight.description}</p>}
+                      {insight.recommendedActions && Array.isArray(insight.recommendedActions) && (
+                        <div className="bg-muted/50 rounded-md p-3">
+                          <p className="text-sm font-medium mb-2">Ações Recomendadas:</p>
+                          <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                            {(insight.recommendedActions as string[]).map((a, i) => <li key={i}>{a}</li>)}
+                          </ul>
+                        </div>
+                      )}
+                      <Button size="sm" variant="ghost" onClick={() => dismiss(insight.id)}>Dispensar</Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="p-0">
+                <EmptyState
+                  icon={Brain}
+                  title="Nenhum insight no momento"
+                  description="A IA está monitorando a operação e gerará insights automaticamente."
+                  action={{ label: 'Atualizar', onClick: () => refetch(), icon: RefreshCw }}
+                />
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="twin">
+          <DigitalTwinViewer />
+        </TabsContent>
+
+        <TabsContent value="slotting">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Zap className="h-5 w-5 text-amber-500" /> Sugestões de Slotting IA
+              </CardTitle>
+              <CardDescription>Realocação de SKUs para otimizar tempo de picking baseada no giro atual</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <EmptyState 
+                compact
+                icon={Zap}
+                title="Cálculo de slotting em processamento"
+                description="O motor de IA está analisando 30 dias de movimentos para sugerir novos endereços."
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </PageContainer>
   );
 }
