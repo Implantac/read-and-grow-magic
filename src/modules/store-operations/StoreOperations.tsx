@@ -24,12 +24,15 @@ import { useStoreCentral } from '@/hooks/operational/store/useStoreCentral';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { cn } from '@/lib/utils';
 import { ReceivingDialog } from './components/ReceivingDialog';
+import { RequestDialog } from './components/RequestDialog';
 
 export default function StoreOperations() {
   const { currentBranch } = useEnterprise();
   const { kpis, alerts, health, isLoading } = useStoreCentral();
   const [activeTab, setActiveTab] = useState<'resumo' | 'solicitacoes' | 'recebimentos' | 'transferencias' | 'estoque' | 'ocorrencias'>('resumo');
   const [isReceivingOpen, setIsReceivingOpen] = useState(false);
+  const [isRequestOpen, setIsRequestOpen] = useState(false);
+
 
 
   const mainActions = [
@@ -72,7 +75,10 @@ export default function StoreOperations() {
           {mainActions.map((action) => (
             <button
               key={action.id}
-              onClick={() => action.id === 'receive' && setIsReceivingOpen(true)}
+              onClick={() => {
+                if (action.id === 'receive') setIsReceivingOpen(true);
+                if (action.id === 'request') setIsRequestOpen(true);
+              }}
               className="group relative flex flex-col items-center justify-center p-4 rounded-xl border-2 border-transparent bg-muted/30 hover:bg-muted/50 hover:border-primary/20 transition-all text-center"
             >
               <div className={cn(
@@ -242,6 +248,10 @@ export default function StoreOperations() {
       <ReceivingDialog 
         isOpen={isReceivingOpen} 
         onClose={() => setIsReceivingOpen(false)} 
+      />
+      <RequestDialog
+        isOpen={isRequestOpen}
+        onClose={() => setIsRequestOpen(false)}
       />
     </PageContainer>
   );

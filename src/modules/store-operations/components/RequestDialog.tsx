@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Button } from "@/ui/base/button";
-import { Plus, Search, Trash2, ArrowRight } from 'lucide-react';
+import { Plus, Search, Trash2, ArrowRight, Truck } from 'lucide-react';
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/ui/base/dialog";
 import { Input } from "@/ui/base/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/base/select";
