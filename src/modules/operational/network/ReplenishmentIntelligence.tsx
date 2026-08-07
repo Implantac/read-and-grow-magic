@@ -11,7 +11,7 @@ import { Input } from '@/ui/base/input';
 import { SmartReplenishment } from '@/modules/wms/components/SmartReplenishment';
 
 export default function ReplenishmentIntelligencePage() {
-  const { data: policies, isLoading } = useReplenishmentPolicies();
+  const { data: policies, isLoading, error, refetch } = useReplenishmentPolicies();
 
   return (
     <PageContainer loading={isLoading}>
@@ -20,8 +20,8 @@ export default function ReplenishmentIntelligencePage() {
         description="Motores de cálculo preditivo e políticas de estoque da malha operacional"
       >
         <div className="flex gap-2">
-          <Button variant="outline">
-            <RefreshCw className="mr-2 h-4 w-4" /> Recalcular Malha
+          <Button variant="outline" onClick={() => refetch()} disabled={isLoading}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} /> Recalcular Malha
           </Button>
           <Button>
             <Brain className="mr-2 h-4 w-4" /> IA: Simular Cenários
@@ -86,7 +86,14 @@ export default function ReplenishmentIntelligencePage() {
               </div>
             </div>
             
-            {policies && policies.length > 0 ? (
+            {error ? (
+              <EmptyState 
+                icon={AlertCircle}
+                title="Erro ao carregar políticas"
+                description="Não foi possível recuperar as políticas de estoque no momento."
+                action={{ label: "Tentar Novamente", onClick: () => refetch() }}
+              />
+            ) : policies && policies.length > 0 ? (
               <div className="grid gap-4">
                 {policies.map((policy: any) => (
                   <Card key={policy.id} className="hover:border-primary/40 transition-colors">
@@ -130,8 +137,8 @@ export default function ReplenishmentIntelligencePage() {
             ) : (
               <EmptyState 
                 icon={Brain}
-                title="Nenhuma política definida"
-                description="Defina níveis críticos de estoque para que a IA possa sugerir reabastecimentos automáticos."
+                title={isLoading ? "Buscando políticas..." : "Nenhuma política definida"}
+                description={isLoading ? "Consultando base de dados operacional..." : "Defina níveis críticos de estoque para que a IA possa sugerir reabastecimentos automáticos."}
               />
             )}
           </div>

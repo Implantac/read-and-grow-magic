@@ -22,7 +22,7 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
 };
 
 export default function ReplenishmentPage() {
-  const { tasks = [], loading, updateStatus } = useReplenishmentTasks();
+  const { tasks = [], loading, error, updateStatus, refetch } = useReplenishmentTasks();
   const [search, setSearch] = useState('');
 
   const safeTasks = Array.isArray(tasks) ? tasks : [];
@@ -38,7 +38,12 @@ export default function ReplenishmentPage() {
 
   return (
     <PageContainer loading={loading}>
-      <PageHeader title="Reabastecimento" description="Controle de reabastecimento pulmão → picking" />
+      <PageHeader title="Reabastecimento" description="Controle de reabastecimento pulmão → picking">
+        <Button variant="outline" size="sm" onClick={() => refetch()} disabled={loading}>
+          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+          Atualizar
+        </Button>
+      </PageHeader>
 
       <Tabs defaultValue="tasks" className="space-y-4">
         <TabsList>
@@ -63,7 +68,14 @@ export default function ReplenishmentPage() {
             </CardContent>
           </Card>
 
-          {filtered.length > 0 ? (
+          {error ? (
+            <EmptyState
+              icon={AlertTriangle}
+              title="Erro ao carregar tarefas"
+              description="Não foi possível recuperar as tarefas de reabastecimento. Verifique sua conexão."
+              action={{ label: "Tentar Novamente", onClick: () => refetch() }}
+            />
+          ) : filtered.length > 0 ? (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {filtered.map(task => {
                 const cfg = statusConfig[task.status] || statusConfig.pending;
@@ -104,8 +116,8 @@ export default function ReplenishmentPage() {
           ) : (
             <EmptyState
               icon={RefreshCw}
-              title="Nenhum reabastecimento pendente"
-              description="Tarefas de reabastecimento são geradas automaticamente quando o estoque de picking cai abaixo do mínimo."
+              title={loading ? "Carregando tarefas..." : "Nenhum reabastecimento pendente"}
+              description={loading ? "Buscando atualizações na malha logística..." : "Tarefas de reabastecimento são geradas automaticamente quando o estoque de picking cai abaixo do mínimo."}
             />
           )}
         </TabsContent>
