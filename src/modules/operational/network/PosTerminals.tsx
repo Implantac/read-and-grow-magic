@@ -39,8 +39,8 @@ export default function PosTerminalsPage() {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-xs text-muted-foreground">Status:</span>
-                    <Badge variant={terminal.is_active ? "default" : "secondary"}>
-                      {terminal.is_active ? "Ativo" : "Inativo"}
+                    <Badge variant={terminal.status === 'active' ? "default" : "secondary"}>
+                      {terminal.status === 'active' ? "Ativo" : "Inativo"}
                     </Badge>
                   </div>
                   <div className="mt-4 pt-4 border-t flex items-center gap-2 text-[10px] text-primary">
