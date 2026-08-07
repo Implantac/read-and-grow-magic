@@ -98,6 +98,22 @@ const HardeningDashboard = () => {
           <p className="text-muted-foreground text-lg">
             Blueprint Operacional: Complexidade no motor, simplicidade na operação.
           </p>
+          <div className="mt-4 p-4 border rounded-xl bg-primary/10 border-primary/20 max-w-2xl animate-in fade-in duration-700">
+            <h4 className="text-sm font-black uppercase tracking-widest text-primary mb-2 flex items-center gap-2">
+              <Store className="h-4 w-4" /> Implementação Concluída: Central de Operações
+            </h4>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              O fluxo de loja foi reestruturado para ser <strong>orientado a tarefas</strong>. A nova <strong>Central de Operações da Loja</strong> unifica Solicitação, Recebimento, Transferência e Inventário em uma interface intuitiva, abstraindo a complexidade técnica do WMS/Comercial para o gerente local.
+            </p>
+            <div className="mt-4 flex gap-2">
+              <Button size="sm" variant="default" className="font-bold text-[10px] uppercase h-8" asChild>
+                <a href="/operacional/loja/operacao">Acessar Nova Operação</a>
+              </Button>
+              <Button size="sm" variant="outline" className="font-bold text-[10px] uppercase h-8" asChild>
+                <a href="/operacional/loja/central">Ver Painel Gerencial</a>
+              </Button>
+            </div>
+          </div>
         </div>
         <Badge variant="outline" className="text-primary border-primary bg-primary/5 px-4 py-1 text-sm font-semibold">
           BLUEPRINT V2.0 — OPERATIONAL
