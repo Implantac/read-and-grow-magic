@@ -18,6 +18,7 @@ import { AdminRoutes } from './routes/AdminRoutes';
 import { OperationalRoutes } from './routes/OperationalRoutes';
 import { MiscellaneousRoutes } from './routes/MiscellaneousRoutes';
 import { FiscalRoutes } from './routes/FiscalRoutes';
+import { NetworkRoutes } from './routes/NetworkRoutes';
 import { VerticalPackRoutes } from './core/routes/VerticalPackRoutes';
 import { EvolutionAuditRoutes } from './routes/EvolutionAuditRoutes';
 import { ExecutiveRoutes } from './routes/ExecutiveRoutes';
@@ -238,6 +239,7 @@ const App = () => (
                 </Route>
                 <Route path="/admin/*" element={<ModuleErrorBoundary moduleName="Admin"><Routes>{AdminRoutes}</Routes></ModuleErrorBoundary>} />
                 {OperationalRoutes}
+                {NetworkRoutes}
                 {MiscellaneousRoutes}
                 <Route element={<GatedOutlet module="fiscal" />}>
                   <Route path="/fiscal/*" element={<ModuleErrorBoundary moduleName="Fiscal"><Routes>{FiscalRoutes}</Routes></ModuleErrorBoundary>} />

@@ -14,6 +14,7 @@ export const logisticaSection: NavSection = {
         { title: 'Picking & Ondas', href: '/wms/separacao', icon: 'PackageSearch' },
         { title: 'Packing & Conferência', href: '/wms/embalagem', icon: 'PackageCheck' },
         { title: 'Docas & Yard', href: '/wms/docas', icon: 'DoorOpen' },
+        { title: 'Reabastecimento', href: '/wms/reabastecimento', icon: 'RefreshCw' },
         { title: 'IA WMS / Slotting', href: '/wms/ia', icon: 'Brain' },
       ],
     },
