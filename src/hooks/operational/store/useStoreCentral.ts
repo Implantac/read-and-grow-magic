@@ -3,7 +3,8 @@ import { storeService } from "@/services/operational/store/storeService";
 import { useEnterprise } from "@/core/auth/EnterpriseContext";
 
 export function useStoreCentral() {
-  const { activeBranchId } = useEnterprise();
+  const { currentBranch } = useEnterprise();
+  const activeBranchId = currentBranch?.id;
 
   const kpisQuery = useQuery({
     queryKey: ['store-kpis', activeBranchId],
