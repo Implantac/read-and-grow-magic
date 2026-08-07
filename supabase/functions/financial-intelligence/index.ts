@@ -2,6 +2,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 import { getSystemPrompt } from '../_shared/ai-prompts.ts';
 import { requireAuth } from '../_shared/require-auth.ts';
 import { instrument, contextFromAuth } from "../_shared/observability.ts";
+import { checkIdempotency, recordIdempotency } from "../_shared/idempotency.ts";
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -35,14 +37,29 @@ const handler = async (req: Request): Promise<Response> => {
     const url = new URL(req.url);
     const action = url.searchParams.get('action') ?? 'compute';
 
+    let body: any = {};
+    if (req.method === 'POST') {
+      try { body = await req.json(); } catch { /* ignore */ }
+    }
+
+    const idempotencyKey = body.idempotency_key || url.searchParams.get('idempotency_key');
+    if (idempotencyKey) {
+      const existing = await checkIdempotency(supabase, idempotencyKey, `fin-intel:${action}`);
+      if (existing) return Response.json(existing.response_body, { status: existing.response_status, headers: corsHeaders });
+    }
+
     if (action === 'compute') {
+
       const [{ data: score, error: e1 }, { data: risks, error: e2 }] = await Promise.all([
         supabase.rpc('calculate_financial_health_score'),
         supabase.rpc('detect_cashflow_risks'),
       ]);
       if (e1) throw e1;
       if (e2) throw e2;
-      return Response.json({ ok: true, score, risks }, { headers: corsHeaders });
+      const resBody = { ok: true, score, risks };
+      if (idempotencyKey) await recordIdempotency(supabase, idempotencyKey, `fin-intel:${action}`, resBody);
+      return Response.json(resBody, { headers: corsHeaders });
+
     }
 
     if (action === 'auto-reconcile') {
@@ -55,7 +72,10 @@ const handler = async (req: Request): Promise<Response> => {
         const { data } = await supabase.rpc('match_bank_transaction', { _bank_tx_id: tx.id });
         if ((data as any)?.matched_entry_id) matched++;
       }
-      return Response.json({ ok: true, processed: pending?.length ?? 0, matched }, { headers: corsHeaders });
+      const resBody = { ok: true, processed: pending?.length ?? 0, matched };
+      if (idempotencyKey) await recordIdempotency(supabase, idempotencyKey, `fin-intel:${action}`, resBody);
+      return Response.json(resBody, { headers: corsHeaders });
+
     }
 
     return Response.json({ ok: false, error: 'unknown action' }, { status: 400, headers: corsHeaders });

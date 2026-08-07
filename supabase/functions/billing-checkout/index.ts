@@ -3,6 +3,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { requireAuth } from "../_shared/require-auth.ts";
 import { checkRateLimit, rateLimitResponse } from "../_shared/rate-limit.ts";
+import { checkIdempotency, recordIdempotency } from "../_shared/idempotency.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -27,21 +29,35 @@ Deno.serve(async (req) => {
   const rl = checkRateLimit({ key: `billing-checkout:${auth.userId}`, limit: 10, windowMs: 60_000 });
   if (!rl.allowed) return rateLimitResponse(rl, corsHeaders);
 
-  let body: { plan_id?: string; cycle?: string; return_url?: string };
+  let body: { plan_id?: string; cycle?: string; return_url?: string; idempotency_key?: string };
   try {
     body = await req.json();
   } catch {
     return json({ error: "Payload inválido" }, 400);
   }
 
-  const planId = String(body.plan_id ?? "");
-  const cycle = body.cycle === "annual" ? "annual" : "monthly";
-  if (!planId) return json({ error: "plan_id obrigatório" }, 400);
-
   const admin = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
+
+  // Validação de idempotência
+  const idempotencyKey = body.idempotency_key;
+  if (idempotencyKey) {
+    const existing = await checkIdempotency(admin, idempotencyKey, "billing-checkout");
+    if (existing) {
+      console.log("[billing-checkout] idempotency hit:", idempotencyKey);
+      return json(existing.response_body, existing.response_status);
+    }
+  }
+
+
+  const planId = String(body.plan_id ?? "");
+  const cycle = body.cycle === "annual" ? "annual" : "monthly";
+  if (!planId) return json({ error: "plan_id obrigatório" }, 400);
+
+  // Client already created for idempotency check above.
+
 
   const { data: plan, error: planErr } = await admin
     .from("plans")
@@ -84,8 +100,11 @@ Deno.serve(async (req) => {
       console.error("[billing-checkout] free activation failed", error.message);
       return json({ error: "Não foi possível ativar o plano" }, 500);
     }
-    return json({ ok: true, mode: "free", activated: true });
+    const responseBody = { ok: true, mode: "free", activated: true };
+    if (idempotencyKey) await recordIdempotency(admin, idempotencyKey, "billing-checkout", responseBody);
+    return json(responseBody);
   }
+
 
   const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
   const provider = stripeKey ? "stripe" : "manual";
@@ -115,15 +134,18 @@ Deno.serve(async (req) => {
 
   if (!stripeKey) {
     // Sem PSP configurado: fatura fica pendente aguardando confirmação via webhook.
-    return json({
+    const responseBody = {
       ok: true,
       mode: "manual",
       invoice_id: invoice.id,
       amount,
       message:
         "Fatura gerada. A assinatura será ativada assim que o pagamento for confirmado pelo provedor.",
-    });
+    };
+    if (idempotencyKey) await recordIdempotency(admin, idempotencyKey, "billing-checkout", responseBody);
+    return json(responseBody);
   }
+
 
   // Stripe Checkout (assinatura recorrente com preço dinâmico)
   const origin = req.headers.get("origin") ?? "";
@@ -169,5 +191,8 @@ Deno.serve(async (req) => {
     .update({ external_invoice_id: session.id, checkout_url: session.url })
     .eq("id", invoice.id);
 
-  return json({ ok: true, mode: "stripe", invoice_id: invoice.id, checkout_url: session.url });
+  const responseBody = { ok: true, mode: "stripe", invoice_id: invoice.id, checkout_url: session.url };
+  if (idempotencyKey) await recordIdempotency(admin, idempotencyKey, "billing-checkout", responseBody);
+  return json(responseBody);
 });
+
