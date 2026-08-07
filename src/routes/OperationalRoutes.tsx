@@ -17,6 +17,5 @@ export const OperationalRoutes = [
   <Route key="op-conf" path="conferencia" element={<ConferenceQueuePage />} />,
   <Route key="op-bill" path="faturamento" element={<BillingQueuePage />} />,
   <Route key="op-ship" path="expedicao" element={<ShipmentPage />} />,
-  <Route key="op-rede-rep" path="rede/ressuprimento" element={<ReplenishmentIntelligencePage />} />,
   ...StoreRoutes,
 ];

@@ -19,6 +19,10 @@ import { OperationalRoutes } from './routes/OperationalRoutes';
 import { MiscellaneousRoutes } from './routes/MiscellaneousRoutes';
 import { FiscalRoutes } from './routes/FiscalRoutes';
 import { NetworkRoutes } from './routes/NetworkRoutes';
+const NetworkControlTower = lazy(() => import('@/modules/operational/network/components/NetworkControlTower'));
+const PosTerminals = lazy(() => import('@/modules/operational/network/PosTerminals'));
+const StockTransfers = lazy(() => import('@/modules/operational/network/StockTransfers'));
+const ReplenishmentIntelligence = lazy(() => import('@/modules/operational/network/ReplenishmentIntelligence'));
 import { VerticalPackRoutes } from './core/routes/VerticalPackRoutes';
 import { EvolutionAuditRoutes } from './routes/EvolutionAuditRoutes';
 import { ExecutiveRoutes } from './routes/ExecutiveRoutes';
@@ -239,7 +243,12 @@ const App = () => (
                 </Route>
                 <Route path="/admin/*" element={<ModuleErrorBoundary moduleName="Admin"><Routes>{AdminRoutes}</Routes></ModuleErrorBoundary>} />
                 <Route path="/operacional/*" element={<ModuleErrorBoundary moduleName="Operacional"><Routes>{OperationalRoutes}</Routes></ModuleErrorBoundary>} />
-                {NetworkRoutes}
+                <Route path="/operacional/rede/*">
+                  <Route path="control-tower" element={<NetworkControlTower />} />
+                  <Route path="pos" element={<PosTerminals />} />
+                  <Route path="transferencias" element={<StockTransfers />} />
+                  <Route path="ressuprimento" element={<ReplenishmentIntelligence />} />
+                </Route>
                 {MiscellaneousRoutes}
                 <Route element={<GatedOutlet module="fiscal" />}>
                   <Route path="/fiscal/*" element={<ModuleErrorBoundary moduleName="Fiscal"><Routes>{FiscalRoutes}</Routes></ModuleErrorBoundary>} />
