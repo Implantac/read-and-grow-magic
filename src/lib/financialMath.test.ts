@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { roundCurrency, calculateInstallments, calculateTotalWithTaxes } from '../src/lib/financialMath';
+import { roundCurrency, calculateInstallments, calculateTotalWithTaxes } from './financialMath';
 
 describe('financialMath', () => {
   describe('roundCurrency', () => {
