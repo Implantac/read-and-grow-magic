@@ -6,7 +6,7 @@ export const Index = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl w-full">
         <div className="p-4 border rounded-lg bg-card">
           <h2 className="font-semibold mb-2">Segurança (RLS)</h2>
-          <p className="text-sm text-muted-foreground">Isolamento hardened em Core e Fiscal (NFe/NFCe).</p>
+          <p className="text-sm text-muted-foreground">Isolamento hardened em Core, Fiscal e RBAC Granular.</p>
         </div>
         <div className="p-4 border rounded-lg bg-card">
           <h2 className="font-semibold mb-2">Arquitetura</h2>
