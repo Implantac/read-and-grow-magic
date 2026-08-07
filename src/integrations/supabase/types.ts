@@ -12920,6 +12920,118 @@ export type Database = {
         }
         Relationships: []
       }
+      pos_sessions: {
+        Row: {
+          branch_id: string
+          closed_at: string | null
+          closing_balance: number | null
+          company_id: string
+          id: string
+          opened_at: string
+          opening_balance: number
+          operator_id: string
+          status: string
+          terminal_id: string
+        }
+        Insert: {
+          branch_id: string
+          closed_at?: string | null
+          closing_balance?: number | null
+          company_id: string
+          id?: string
+          opened_at?: string
+          opening_balance?: number
+          operator_id: string
+          status?: string
+          terminal_id: string
+        }
+        Update: {
+          branch_id?: string
+          closed_at?: string | null
+          closing_balance?: number | null
+          company_id?: string
+          id?: string
+          opened_at?: string
+          opening_balance?: number
+          operator_id?: string
+          status?: string
+          terminal_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pos_sessions_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pos_sessions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pos_sessions_terminal_id_fkey"
+            columns: ["terminal_id"]
+            isOneToOne: false
+            referencedRelation: "pos_terminals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pos_terminals: {
+        Row: {
+          branch_id: string
+          code: string
+          company_id: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          branch_id: string
+          code: string
+          company_id: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          branch_id?: string
+          code?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pos_terminals_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pos_terminals_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       price_lists: {
         Row: {
           active: boolean
@@ -15430,6 +15542,80 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "commercial_client_profiles"
             referencedColumns: ["client_id"]
+          },
+        ]
+      }
+      replenishment_policies: {
+        Row: {
+          branch_id: string
+          company_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          lead_time_days: number
+          max_stock: number
+          min_stock: number
+          product_id: string
+          replenishment_source_id: string | null
+          safety_stock: number
+          updated_at: string
+        }
+        Insert: {
+          branch_id: string
+          company_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          lead_time_days?: number
+          max_stock?: number
+          min_stock?: number
+          product_id: string
+          replenishment_source_id?: string | null
+          safety_stock?: number
+          updated_at?: string
+        }
+        Update: {
+          branch_id?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          lead_time_days?: number
+          max_stock?: number
+          min_stock?: number
+          product_id?: string
+          replenishment_source_id?: string | null
+          safety_stock?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "replenishment_policies_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "replenishment_policies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "replenishment_policies_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "replenishment_policies_replenishment_source_id_fkey"
+            columns: ["replenishment_source_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -18028,6 +18214,134 @@ export type Database = {
             columns: ["warehouse_id"]
             isOneToOne: false
             referencedRelation: "warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_transfer_items: {
+        Row: {
+          created_at: string
+          id: string
+          picked_qty: number | null
+          product_id: string
+          received_qty: number | null
+          requested_qty: number
+          shipped_qty: number | null
+          transfer_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          picked_qty?: number | null
+          product_id: string
+          received_qty?: number | null
+          requested_qty: number
+          shipped_qty?: number | null
+          transfer_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          picked_qty?: number | null
+          product_id?: string
+          received_qty?: number | null
+          requested_qty?: number
+          shipped_qty?: number | null
+          transfer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_transfer_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_transfer_items_transfer_id_fkey"
+            columns: ["transfer_id"]
+            isOneToOne: false
+            referencedRelation: "stock_transfer_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_transfer_orders: {
+        Row: {
+          approved_by: string | null
+          carrier_id: string | null
+          company_id: string
+          created_at: string
+          destination_unit_id: string
+          id: string
+          notes: string | null
+          order_number: number
+          origin_unit_id: string
+          received_at: string | null
+          requested_by: string | null
+          shipped_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          approved_by?: string | null
+          carrier_id?: string | null
+          company_id: string
+          created_at?: string
+          destination_unit_id: string
+          id?: string
+          notes?: string | null
+          order_number?: number
+          origin_unit_id: string
+          received_at?: string | null
+          requested_by?: string | null
+          shipped_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          approved_by?: string | null
+          carrier_id?: string | null
+          company_id?: string
+          created_at?: string
+          destination_unit_id?: string
+          id?: string
+          notes?: string | null
+          order_number?: number
+          origin_unit_id?: string
+          received_at?: string | null
+          requested_by?: string | null
+          shipped_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_transfer_orders_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
+            referencedRelation: "carriers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_transfer_orders_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_transfer_orders_destination_unit_id_fkey"
+            columns: ["destination_unit_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_transfer_orders_origin_unit_id_fkey"
+            columns: ["origin_unit_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
             referencedColumns: ["id"]
           },
         ]
@@ -23727,10 +24041,26 @@ export type Database = {
         | "franquia"
         | "system_admin"
         | "admin_matriz"
-      branch_tipo: "industria" | "filial" | "cd"
+      branch_tipo:
+        | "industria"
+        | "filial"
+        | "cd"
+        | "FACTORY"
+        | "DISTRIBUTION_CENTER"
+        | "STORE"
       canal_operacional: "VAREJO_PDV" | "ATACADO_INDUSTRIA"
       enterprise_tier: "small" | "medium" | "enterprise"
       org_type: "holding" | "company" | "branch" | "unit"
+      stock_transfer_status:
+        | "DRAFT"
+        | "REQUESTED"
+        | "APPROVED"
+        | "PICKING"
+        | "IN_TRANSIT"
+        | "RECEIVED"
+        | "CONFERRED"
+        | "COMPLETED"
+        | "CANCELLED"
       tax_regime: "simples" | "presumed" | "real"
     }
     CompositeTypes: {
@@ -23877,10 +24207,28 @@ export const Constants = {
         "system_admin",
         "admin_matriz",
       ],
-      branch_tipo: ["industria", "filial", "cd"],
+      branch_tipo: [
+        "industria",
+        "filial",
+        "cd",
+        "FACTORY",
+        "DISTRIBUTION_CENTER",
+        "STORE",
+      ],
       canal_operacional: ["VAREJO_PDV", "ATACADO_INDUSTRIA"],
       enterprise_tier: ["small", "medium", "enterprise"],
       org_type: ["holding", "company", "branch", "unit"],
+      stock_transfer_status: [
+        "DRAFT",
+        "REQUESTED",
+        "APPROVED",
+        "PICKING",
+        "IN_TRANSIT",
+        "RECEIVED",
+        "CONFERRED",
+        "COMPLETED",
+        "CANCELLED",
+      ],
       tax_regime: ["simples", "presumed", "real"],
     },
   },
