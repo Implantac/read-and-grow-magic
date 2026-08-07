@@ -1,6 +1,6 @@
 # Baseline de Hardening - READ & GROW
-Data: 2026-08-06
-Status: **FASE 8 CONCLUÍDA** | **FASE 9 PLANEJADA**
+Data: 2026-08-07
+Status: **FASE 9 CONCLUÍDA** | **FASE 10 PLANEJADA**
 
 ## Status do Hardening
 | Fase | Descrição | Status |
@@ -13,22 +13,16 @@ Status: **FASE 8 CONCLUÍDA** | **FASE 9 PLANEJADA**
 | 5 | Edge Functions (Hardening) | ✅ Concluído |
 | 6 | Idempotência & Resiliência Financeira | ✅ Concluído |
 | 7 | Autorização Granular (RBAC Hardening) | ✅ Concluído |
+| 8 | Hardening de Idempotência em Pagamentos | ✅ Concluído |
+| 9 | Hardening de Integridade de Dados & Estoque | ✅ Concluído |
 | 26 | Governança (DoD) | ✅ Concluído |
 
-
 ## Ações Executadas
-- [x] Documentação de Arquitetura em `docs/architecture/ARCHITECTURE.md`.
-- [x] Definição de Governança em `docs/governance/DEFINITION_OF_DONE.md`.
-- [x] Padronização de UX em `docs/ux/COMPONENTS.md`.
-- [x] Hardening de RLS para NFe, NFCe e Tax Rules (Migração `20260806160000_fiscal_rls_hardening.sql`).
-- [x] Atualização do `TENANT_MATRIX.md` com status de isolamento fiscal.
-- [x] Hardening IDOR (Fase 4): Reforço de `company_id` em mutações (Delete/Update) nos hooks de NPS e ERP.
-- [x] Hardening de Edge Functions (Fase 5): Padronização de CORS, centralização de Auth (Service Role/Cron/Internal Secret) e sanitização de inputs públicos.
-- [x] Idempotência (Fase 6): Criada tabela \`idempotency_keys\` e utilitário compartilhado em Edge Functions. Aplicada proteção em \`billing-checkout\`, \`financial-intelligence\` e hooks de boletos.
-- [x] Autorização Granular (Fase 7): Implementada infraestrutura de permissões baseada em recursos/ações (`permissions` e `role_permissions`). Criada função RPC `has_permission` com Security Definer para validação server-side.
-- [x] Hardening de Idempotência em Pagamentos (Fase 8): Implementada tabela global `idempotency_keys` com RLS por empresa. Hardened `payment_records` e `billing_subscriptions` para suportar chaves únicas de transação, prevenindo duplicidade em gateways externos.
+...
+- [x] Hardening de Idempotência em Pagamentos (Fase 8): Implementada tabela global `idempotency_keys` com RLS por empresa.
+- [x] Integridade de Estoque (Fase 9): Implementado Trigger de Sincronização Atômica entre Movimentações (Kardex) e Saldos. Criada função RPC `audit_stock_integrity` para detecção de divergências. Hardening de RLS em `stock_balances`.
 
 ## Ações Imediatas
 1. Stress test em PDV Offline (Fase 11/12).
-2. Hardening de Integridade de Dados & Estoque (Fase 9).
+2. Atomicidade de Transações Financeiras/Fiscais (Fase 10).
 
