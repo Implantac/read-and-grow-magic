@@ -109,7 +109,7 @@ const HardeningDashboard = () => {
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Hardening & Evolução (Fase 5: Expansão)</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Hardening & Evolução (Fase FINAL: Go-Live)</h1>
           </div>
           <p className="text-muted-foreground text-lg">
             Plataforma Enterprise: Inteligência Logística e Automação Predictiva.
