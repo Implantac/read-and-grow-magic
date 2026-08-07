@@ -26,6 +26,7 @@ const ReplenishmentIntelligence = lazy(() => import('@/modules/operational/netwo
 const StoreOperations = lazy(() => import('@/modules/store-operations/StoreOperations'));
 const StoreCentral = lazy(() => import('@/modules/operational/store/StoreCentral'));
 import { VerticalPackRoutes } from './core/routes/VerticalPackRoutes';
+const UnifiedSupplyChain = lazy(() => import('@/modules/operational/supply-chain/UnifiedSupplyChain'));
 import { EvolutionAuditRoutes } from './routes/EvolutionAuditRoutes';
 import { ExecutiveRoutes } from './routes/ExecutiveRoutes';
 import { RelacionamentoRoutes } from './routes/RelacionamentoRoutes';
@@ -244,8 +245,9 @@ const App = () => (
                   <Route path="/wms/*" element={<ModuleErrorBoundary moduleName="WMS"><Routes>{WMSRoutes}</Routes></ModuleErrorBoundary>} />
                 </Route>
                 <Route path="/admin/*" element={<ModuleErrorBoundary moduleName="Admin"><Routes>{AdminRoutes}</Routes></ModuleErrorBoundary>} />
+                <Route path="/operacional/abastecimento" element={<Suspense fallback={<PageLoader />}><UnifiedSupplyChain /></Suspense>} />
                 <Route path="/operacional/loja/*">
-                  <Route path="operacao" element={<Suspense fallback={<PageLoader />}><StoreOperations /></Suspense>} />
+                  <Route path="operacao" element={<Suspense fallback={<PageLoader />}><UnifiedSupplyChain /></Suspense>} />
                   <Route path="central" element={<Suspense fallback={<PageLoader />}><StoreCentral /></Suspense>} />
                 </Route>
                 <Route path="/operacional/*" element={<ModuleErrorBoundary moduleName="Operacional"><Routes>{OperationalRoutes}</Routes></ModuleErrorBoundary>} />
