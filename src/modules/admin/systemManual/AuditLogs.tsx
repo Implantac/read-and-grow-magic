@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { PageContainer } from '@/core/layout/PageContainer';
-import { PageHeader } from '@/core/layout/PageHeader';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+
 import { Card } from '@/ui/base/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Badge } from '@/ui/base/badge';
@@ -11,7 +12,7 @@ import { ShieldCheck, History, User, Search, Filter } from 'lucide-react';
 import { Input } from '@/ui/base/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 
-import { PageLoading } from '@/components/ui/PageLoading';
+import { PageLoading } from '@/shared/components/PageLoading';
 
 export default function AuditLogs() {
   const [moduleFilter, setModuleFilter] = useState<string>('all');
