@@ -29,7 +29,8 @@ import {
   Network,
   RefreshCw,
   Puzzle,
-  Monitor
+  Monitor,
+  Heart
 } from 'lucide-react';
 import { ScrollArea } from "@/ui/base/scroll-area";
 import { cn } from "@/lib/utils";
