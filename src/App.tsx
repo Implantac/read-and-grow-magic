@@ -23,6 +23,8 @@ const NetworkControlTower = lazy(() => import('@/modules/operational/network/com
 const PosTerminals = lazy(() => import('@/modules/operational/network/PosTerminals'));
 const StockTransfers = lazy(() => import('@/modules/operational/network/StockTransfers'));
 const ReplenishmentIntelligence = lazy(() => import('@/modules/operational/network/ReplenishmentIntelligence'));
+const StoreOperations = lazy(() => import('@/modules/store-operations/StoreOperations'));
+const StoreCentral = lazy(() => import('@/modules/operational/store/StoreCentral'));
 import { VerticalPackRoutes } from './core/routes/VerticalPackRoutes';
 import { EvolutionAuditRoutes } from './routes/EvolutionAuditRoutes';
 import { ExecutiveRoutes } from './routes/ExecutiveRoutes';
@@ -242,6 +244,10 @@ const App = () => (
                   <Route path="/wms/*" element={<ModuleErrorBoundary moduleName="WMS"><Routes>{WMSRoutes}</Routes></ModuleErrorBoundary>} />
                 </Route>
                 <Route path="/admin/*" element={<ModuleErrorBoundary moduleName="Admin"><Routes>{AdminRoutes}</Routes></ModuleErrorBoundary>} />
+                <Route path="/operacional/loja/*">
+                  <Route path="operacao" element={<Suspense fallback={<PageLoader />}><StoreOperations /></Suspense>} />
+                  <Route path="central" element={<Suspense fallback={<PageLoader />}><StoreCentral /></Suspense>} />
+                </Route>
                 <Route path="/operacional/*" element={<ModuleErrorBoundary moduleName="Operacional"><Routes>{OperationalRoutes}</Routes></ModuleErrorBoundary>} />
                 <Route path="/operacional/rede/*">
                   <Route path="control-tower" element={<NetworkControlTower />} />
