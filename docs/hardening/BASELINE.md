@@ -1,6 +1,6 @@
 # Baseline de Hardening - READ & GROW
 Data: 2026-08-07
-Status: **FASE 14 EM ANDAMENTO**
+Status: **FASE 15 EM ANDAMENTO**
 
 ## Status do Hardening
 | Fase | Descrição | Status |
@@ -19,6 +19,7 @@ Status: **FASE 14 EM ANDAMENTO**
 | 11 | Idempotência Global & Resiliência de Webhooks | ✅ Concluído |
 | 13 | Auditoria Empresarial | ✅ Concluído |
 | 26 | Governança (DoD) | ✅ Concluído |
+| 15 | Testes de Integração e RLS | ✅ Concluído |
 
 
 ## Ações Executadas
