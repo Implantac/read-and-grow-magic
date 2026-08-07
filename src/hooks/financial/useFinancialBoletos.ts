@@ -55,12 +55,15 @@ export function useCreateBoleto() {
   return useMutation({
     mutationFn: async (input: { receivable_id?: string; client_id?: string; client_name?: string; amount: number; due_date: string; bank_account_id?: string; notes?: string }) => {
       if (!companyId) throw new Error('Empresa não selecionada');
+      const idempotencyKey = `boleto-${input.receivable_id || 'manual'}-${Date.now()}`;
+
       
       // Attempt real generation via Edge Function if possible, fallback to mock
       try {
         const { data, error } = await supabase.functions.invoke('financial-intelligence', {
-          body: { action: 'generate_boleto', ...input, company_id: companyId }
+          body: { action: 'generate_boleto', ...input, company_id: companyId, idempotency_key: idempotencyKey }
         });
+
         if (!error && data?.id) return data;
       } catch (e) {
         console.warn('Edge Function fallback to local mock:', e);
