@@ -246,10 +246,6 @@ const App = () => (
                 </Route>
                 <Route path="/admin/*" element={<ModuleErrorBoundary moduleName="Admin"><Routes>{AdminRoutes}</Routes></ModuleErrorBoundary>} />
                 <Route path="/operacional/abastecimento" element={<Suspense fallback={<PageLoader />}><UnifiedSupplyChain /></Suspense>} />
-                <Route path="/operacional/loja/*">
-                  <Route path="operacao" element={<Suspense fallback={<PageLoader />}><UnifiedSupplyChain /></Suspense>} />
-                  <Route path="central" element={<Suspense fallback={<PageLoader />}><StoreCentral /></Suspense>} />
-                </Route>
                 <Route path="/operacional/rede/*" element={<ModuleErrorBoundary moduleName="Rede"><Routes>{NetworkRoutes}</Routes></ModuleErrorBoundary>} />
                 <Route path="/operacional/*" element={<ModuleErrorBoundary moduleName="Operacional"><Routes>{OperationalRoutes}</Routes></ModuleErrorBoundary>} />
                 {MiscellaneousRoutes}
