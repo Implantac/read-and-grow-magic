@@ -5,7 +5,7 @@ export const gestaoSection: NavSection = {
   items: [
     {
       title: 'Business Intelligence',
-      href: '/relatorios',
+      href: '/dashboard',
       icon: 'BarChart3',
       children: [
         { title: 'BI Comercial', href: '/relatorios/vendas', icon: 'ShoppingBag' },
@@ -15,7 +15,7 @@ export const gestaoSection: NavSection = {
     },
     {
       title: 'Configurações',
-      href: '/admin',
+      href: '/admin/usuarios',
       icon: 'Settings',
       children: [
         { title: 'Usuários & Permissões', href: '/admin/usuarios', icon: 'Users' },
@@ -27,7 +27,7 @@ export const gestaoSection: NavSection = {
         { title: 'Privacidade (LGPD)', href: '/admin/privacidade', icon: 'ShieldCheck' },
         { title: 'Trilha de Auditoria', href: '/admin/auditoria-sistema', icon: 'History' },
         { title: 'Manual do Sistema', href: '/admin/manual', icon: 'BookOpenCheck' },
-        { title: 'Hardening & Evolução', href: '/admin/hardening', icon: 'ShieldCheck' },
+        { title: 'Hardening & Evolução', href: '/', icon: 'ShieldCheck' },
       ],
     },
   ],

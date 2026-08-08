@@ -5,10 +5,10 @@ export const financeiroSection: NavSection = {
   items: [
     {
       title: 'Financeiro Core',
-      href: '/financeiro',
+      href: '/financeiro/dashboard',
       icon: 'Wallet',
       children: [
-        { title: 'Central Financeira', href: '/financeiro/central', icon: 'Zap' },
+        { title: 'Central Financeira', href: '/financeiro/dashboard', icon: 'Zap' },
         { title: 'Fluxo de Caixa', href: '/financeiro/fluxo', icon: 'TrendingUp' },
         { title: 'DRE Dinâmica', href: '/financeiro/dre-dinamica', icon: 'BarChart3' },
         { title: 'Contas a Pagar', href: '/financeiro/pagar', icon: 'ArrowUpCircle' },
@@ -19,7 +19,7 @@ export const financeiroSection: NavSection = {
     },
     {
       title: 'Fiscal & Tributário',
-      href: '/fiscal',
+      href: '/fiscal/dashboard',
       icon: 'FileCheck',
       children: [
         { title: 'Painel Fiscal', href: '/fiscal/dashboard', icon: 'Gauge' },
@@ -30,7 +30,7 @@ export const financeiroSection: NavSection = {
     },
     {
       title: 'Contabilidade',
-      href: '/contabilidade',
+      href: '/contabilidade/plano-contas',
       icon: 'Calculator',
       children: [
         { title: 'Plano de Contas', href: '/contabilidade/plano-contas', icon: 'FolderTree' },

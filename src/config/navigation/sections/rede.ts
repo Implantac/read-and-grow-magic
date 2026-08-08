@@ -9,9 +9,6 @@ export const redeOperacionalSection: NavSection = {
       icon: 'ArrowRightLeft',
       children: [
         { title: 'Painel Gerencial', href: '/operacional/abastecimento', icon: 'LayoutDashboard' },
-        { title: 'Terminais PDV', href: '/operacional/rede/terminais', icon: 'Monitor' },
-        { title: 'Transferências de Estoque', href: '/operacional/rede/transferencias', icon: 'Truck' },
-        { title: 'Inteligência de Reposição', href: '/operacional/rede/ressuprimento', icon: 'Brain' },
         { title: 'Torre de Controle', href: '/operacional/rede/painel', icon: 'Layers' },
       ],
     },

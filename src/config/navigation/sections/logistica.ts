@@ -14,13 +14,13 @@ export const logisticaSection: NavSection = {
         { title: 'Picking & Ondas', href: '/wms/separacao', icon: 'PackageSearch' },
         { title: 'Packing & Conferência', href: '/wms/embalagem', icon: 'PackageCheck' },
         { title: 'Docas & Yard', href: '/wms/docas', icon: 'DoorOpen' },
-        { title: 'Reabastecimento', href: '/wms/ressuprimento', icon: 'RefreshCw' },
+        { title: 'Ressuprimento', href: '/wms/ressuprimento', icon: 'RefreshCw' },
         { title: 'IA WMS / Slotting', href: '/wms/ia', icon: 'Brain' },
       ],
     },
     {
       title: 'TMS - Transportes',
-      href: '/tms/dashboard',
+      href: '/wms/dashboard',
       icon: 'Truck',
       children: [
         { title: 'Dashboard TMS', href: '/tms/dashboard', icon: 'LayoutDashboard' },
@@ -31,7 +31,7 @@ export const logisticaSection: NavSection = {
     },
     {
       title: 'RFID & IoT',
-      href: '/rfid/dashboard',
+      href: '/wms/dashboard',
       icon: 'Radio',
       children: [
         { title: 'Dashboard RFID', href: '/rfid/dashboard', icon: 'LayoutDashboard' },

@@ -14,6 +14,7 @@ const LotsPage = lazy(() => import("../modules/wms/Lots"));
 const WavesPage = lazy(() => import("../modules/wms/Waves"));
 const PutawayPage = lazy(() => import("../modules/wms/Putaway"));
 const ReplenishmentPage = lazy(() => import("../modules/wms/Replenishment"));
+const MatrixEstoquePage = lazy(() => import("../modules/wms/EstoqueMatrix"));
 const ReturnsPage = lazy(() => import("../modules/wms/Returns"));
 const DistributionCentersPage = lazy(() => import("../modules/wms/DistributionCenters"));
 const StockBalancesPage = lazy(() => import("../modules/wms/StockBalances"));
