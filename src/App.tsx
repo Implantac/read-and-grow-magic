@@ -213,6 +213,11 @@ const App = () => (
                 <Route path="/credito/bloqueios" element={<RequirePermission resource="credit.blocks" action="view"><CreditOrderBlocks /></RequirePermission>} />
                 <Route path="/credito/cobranca" element={<RequirePermission resource="credit.collections" action="view"><CreditCollections /></RequirePermission>} />
                 <Route path="/credito" element={<Navigate to="/credito/dashboard" replace />} />
+                <Route path="/tms/dashboard" element={<Navigate to="/wms/dashboard" replace />} />
+                <Route path="/rfid/dashboard" element={<Navigate to="/wms/dashboard" replace />} />
+                <Route path="/relatorios/vendas" element={<Navigate to="/comercial/dashboard" replace />} />
+                <Route path="/relatorios/producao" element={<Navigate to="/producao/dashboard" replace />} />
+                <Route path="/relatorios/financeiro" element={<Navigate to="/financeiro/dashboard" replace />} />
                 <Route path="/success" element={<ModuleErrorBoundary moduleName="Use Success"><SuccessDashboard /></ModuleErrorBoundary>} />
                 <Route path="/success/produtos/:type" element={<ModuleErrorBoundary moduleName="Use Success"><SuccessProductsDetail /></ModuleErrorBoundary>} />
 
