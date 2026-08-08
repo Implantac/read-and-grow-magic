@@ -109,11 +109,17 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
             .select('id, name, type, is_active')
             .eq('company_id', company.id);
           
-          if (branches) {
-            setAllBranches(branches);
+          if (units) {
+            const mappedUnits = units.map((u: any) => ({
+              id: u.id,
+              name: u.name,
+              tipo: u.type.toUpperCase() as BranchRef['tipo'],
+              is_active: u.is_active
+            }));
+            setAllBranches(mappedUnits);
             // Default to first branch or profile default
             const { data: profile } = await supabase.from('profiles').select('default_branch_id').eq('id', user.id).maybeSingle();
-            const defaultBranch = branches.find(b => b.id === profile?.default_branch_id) || branches[0] || null;
+            const defaultBranch = mappedUnits.find(b => b.id === profile?.default_branch_id) || mappedUnits[0] || null;
             setCurrentBranch(defaultBranch);
             
             if (defaultBranch) {
