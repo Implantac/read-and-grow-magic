@@ -17,6 +17,15 @@ import {
   Percent, Globe, ScrollText, ArrowRightLeft,
   BellRing, RotateCw, AlertOctagon, GitBranch, Siren, Scissors, Inbox, Heart,
   Send, MessageSquare, Palette, BookOpenCheck, Crown, LayoutGrid, Split, FileBarChart, Navigation,
+  Activity, ArrowLeftRight, ArrowDownCircle, ArrowUpCircle, BarChart3, BookOpen, Box, Brain, Building,
+  Building2, Calculator, CalendarClock, CheckCircle, CircleGauge, ClipboardCheck, ClipboardList,
+  Columns, Cpu, Database, DollarSign, DoorOpen, Eye, Factory, FileCheck, FileCheck2, FileDown,
+  FileSearch, FileText, Filter, FolderTree, Gauge, Globe, History, Layers, LayoutDashboard, LineChart,
+  ListOrdered, Lock, MapPin, Megaphone, Monitor, MoveHorizontal, Package, PackageCheck, PackageMinus,
+  PackagePlus, PackageSearch, Percent, Phone, PieChart, Plug, QrCode, Radio, Receipt, RefreshCw,
+  Repeat, Rocket, RotateCcw, Route, Rows3, ScanBarcode, Scale, ScrollText, Search, Settings, Shield,
+  ShieldAlert, ShieldCheck, ShoppingBag, ShoppingCart, Sliders, Smartphone, Sparkles, Target, Trophy,
+  Truck, UserCheck, UserCircle, Users, Wallet, Wifi, Wrench, Zap,
 } from 'lucide-react';
 
 export const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -36,4 +45,5 @@ export const iconMap: Record<string, React.ComponentType<{ className?: string }>
   FileCheck2, FileDown, Percent, Globe, ScrollText, ArrowRightLeft,
   BellRing, RotateCw, AlertOctagon, GitBranch, Siren, Scissors, Inbox, Heart,
   Send, MessageSquare, Palette, BookOpenCheck, LayoutGrid, Split, FileBarChart, Navigation,
+  History,
 };
