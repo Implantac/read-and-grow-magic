@@ -5,7 +5,7 @@ export const comercialSection: NavSection = {
   items: [
     {
       title: 'Comercial',
-      href: '/comercial',
+      href: '/comercial/dashboard',
       icon: 'Users',
       children: [
         { title: 'Painel Único (PDV)', href: '/comercial/dashboard', icon: 'ShoppingCart' },

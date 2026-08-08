@@ -5,7 +5,7 @@ export const financeiroSection: NavSection = {
   items: [
     {
       title: 'Financeiro Core',
-      href: '/financeiro',
+      href: '/financeiro/dashboard',
       icon: 'Wallet',
       children: [
         { title: 'Central Financeira', href: '/financeiro/dashboard', icon: 'Zap' },
@@ -19,7 +19,7 @@ export const financeiroSection: NavSection = {
     },
     {
       title: 'Fiscal & Tributário',
-      href: '/fiscal',
+      href: '/fiscal/dashboard',
       icon: 'FileCheck',
       children: [
         { title: 'Painel Fiscal', href: '/fiscal/dashboard', icon: 'Gauge' },
@@ -30,7 +30,7 @@ export const financeiroSection: NavSection = {
     },
     {
       title: 'Contabilidade',
-      href: '/contabilidade',
+      href: '/contabilidade/plano-contas',
       icon: 'Calculator',
       children: [
         { title: 'Plano de Contas', href: '/contabilidade/plano-contas', icon: 'FolderTree' },

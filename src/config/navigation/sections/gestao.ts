@@ -5,7 +5,7 @@ export const gestaoSection: NavSection = {
   items: [
     {
       title: 'Business Intelligence',
-      href: '/relatorios',
+      href: '/dashboard',
       icon: 'BarChart3',
       children: [
         { title: 'BI Comercial', href: '/relatorios/vendas', icon: 'ShoppingBag' },
@@ -15,7 +15,7 @@ export const gestaoSection: NavSection = {
     },
     {
       title: 'Configurações',
-      href: '/admin',
+      href: '/admin/usuarios',
       icon: 'Settings',
       children: [
         { title: 'Usuários & Permissões', href: '/admin/usuarios', icon: 'Users' },

@@ -20,7 +20,7 @@ export const logisticaSection: NavSection = {
     },
     {
       title: 'TMS - Transportes',
-      href: '/tms/dashboard',
+      href: '/wms/dashboard',
       icon: 'Truck',
       children: [
         { title: 'Dashboard TMS', href: '/tms/dashboard', icon: 'LayoutDashboard' },
@@ -31,7 +31,7 @@ export const logisticaSection: NavSection = {
     },
     {
       title: 'RFID & IoT',
-      href: '/rfid/dashboard',
+      href: '/wms/dashboard',
       icon: 'Radio',
       children: [
         { title: 'Dashboard RFID', href: '/rfid/dashboard', icon: 'LayoutDashboard' },
