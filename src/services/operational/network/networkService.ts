@@ -31,7 +31,7 @@ export const networkService = {
       .eq('company_id', companyId);
     
     if (error) throw error;
-    return data as OperationalUnit[];
+    return (data || []) as unknown as OperationalUnit[];
   },
 
   async createTransfer(params: Omit<StockTransfer, 'id' | 'created_at' | 'reference_number'>) {
@@ -43,7 +43,7 @@ export const networkService = {
       .single();
     
     if (error) throw error;
-    return data as StockTransfer;
+    return data as unknown as StockTransfer;
   },
 
   async updateTransferStatus(transferId: string, status: StockTransfer['status']) {
@@ -55,6 +55,6 @@ export const networkService = {
       .single();
     
     if (error) throw error;
-    return data as StockTransfer;
+    return data as unknown as StockTransfer;
   }
 };
