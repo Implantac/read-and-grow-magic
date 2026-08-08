@@ -13,8 +13,8 @@ test.describe('Navegação e Segurança de Rotas', () => {
     // Tenta acessar uma rota protegida conhecida
     await page.goto('/operacional/abastecimento');
     
-    // Verifica se foi redirecionado para o login (ajustar conforme a rota real de login)
-    await expect(page).toHaveURL(/.*auth/);
+    // Verifica se foi redirecionado para o login
+    await expect(page).toHaveURL(/.*login/);
   });
 
   test('Página Inicial (Hardening Dashboard) deve carregar elementos básicos', async ({ page }) => {
