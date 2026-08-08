@@ -34,7 +34,7 @@ export default function UnifiedSupplyChain() {
   const { movements, isLoading, updateStatus } = useSupplyChain();
   const [selectedMovement, setSelectedMovement] = useState<any>(null);
 
-  const unitType = (currentBranch as any)?.type || 'store';
+  const unitType = (currentBranch as any)?.tipo?.toLowerCase() || 'store';
 
   const handleNextStep = async (m: any) => {
     const statusOrder: MovementStatus[] = [
