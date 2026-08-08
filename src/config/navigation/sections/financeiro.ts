@@ -8,7 +8,7 @@ export const financeiroSection: NavSection = {
       href: '/financeiro',
       icon: 'Wallet',
       children: [
-        { title: 'Central Financeira', href: '/financeiro/central', icon: 'Zap' },
+        { title: 'Central Financeira', href: '/financeiro/dashboard', icon: 'Zap' },
         { title: 'Fluxo de Caixa', href: '/financeiro/fluxo', icon: 'TrendingUp' },
         { title: 'DRE Dinâmica', href: '/financeiro/dre-dinamica', icon: 'BarChart3' },
         { title: 'Contas a Pagar', href: '/financeiro/pagar', icon: 'ArrowUpCircle' },
