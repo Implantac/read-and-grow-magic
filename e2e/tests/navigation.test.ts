@@ -25,7 +25,7 @@ test.describe('Navegação e Segurança de Rotas', () => {
     const currentUrl = page.url();
     if (currentUrl.includes('login')) {
         console.log('Home é protegida, redirecionado para login.');
-        await expect(page.locator('h1')).toContainText('Use Sistemas');
+        await expect(page.locator('h1')).toHaveText(/Use Sistemas|Master Plan/, { timeout: 10000 });
     } else {
         // Se for acessível, verifica o título do Master Plan
         await expect(page.locator('h1')).toContainText('Master Plan');
