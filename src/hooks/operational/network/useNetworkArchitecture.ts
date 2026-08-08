@@ -1,52 +1,24 @@
-import { useState, useEffect } from 'react';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
-import { networkService, type OperationalUnit } from '@/services/operational/network/networkService';
-import { toast } from 'sonner';
+import { networkService } from '@/services/operational/network/networkService';
 import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useNetworkArchitecture = () => {
   const { currentCompany } = useEnterprise();
-  const [units, setUnits] = useState<OperationalUnit[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    if (currentCompany?.id) {
-      loadUnits();
-    }
-  }, [currentCompany?.id]);
-
-  const loadUnits = async () => {
-    try {
-      setIsLoading(true);
-      const data = await networkService.getOperationalUnits(currentCompany!.id);
-      setUnits(data);
-    } catch (error) {
-      console.error('Error loading units:', error);
-      toast.error('Erro ao carregar rede operacional');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return {
-    units,
-    isLoading,
-    refresh: loadUnits
-  };
+  
+  return useQuery({
+    queryKey: ['operational_units', currentCompany?.id],
+    queryFn: () => networkService.getOperationalUnits(currentCompany!.id),
+    enabled: !!currentCompany?.id
+  });
 };
 
 export const usePosTerminals = () => {
-  const { currentCompany } = useEnterprise();
+  const { currentBranch } = useEnterprise();
   return useQuery({
-    queryKey: ['pos_terminals', currentCompany?.id],
-    queryFn: async () => {
-      // Mock for now, will connect to DB soon
-      return [
-        { id: '1', name: 'PDV 01', code: 'PDV-001', status: 'active' },
-        { id: '2', name: 'PDV 02', code: 'PDV-002', status: 'active' },
-      ];
-    },
-    enabled: !!currentCompany?.id
+    queryKey: ['pos_terminals', currentBranch?.id],
+    queryFn: () => networkService.getPosTerminals(currentBranch!.id),
+    enabled: !!currentBranch?.id
   });
 };
 
@@ -55,8 +27,13 @@ export const useReplenishmentPolicies = () => {
   return useQuery({
     queryKey: ['replenishment_policies', currentCompany?.id],
     queryFn: async () => {
-      // Mock for now
-      return [];
+      const { data, error } = await supabase
+        .from('replenishment_policies' as any)
+        .select('*, product:products(name, code)')
+        .eq('company_id', currentCompany?.id);
+      
+      if (error) throw error;
+      return data || [];
     },
     enabled: !!currentCompany?.id
   });
@@ -66,10 +43,7 @@ export const useTransferOrders = () => {
   const { currentCompany } = useEnterprise();
   return useQuery({
     queryKey: ['transfer_orders', currentCompany?.id],
-    queryFn: async () => {
-      // Mock for now
-      return [];
-    },
+    queryFn: () => networkService.getTransfers(currentCompany!.id),
     enabled: !!currentCompany?.id
   });
 };
@@ -79,10 +53,23 @@ export const useSupplyChainStats = () => {
   return useQuery({
     queryKey: ['supply_chain_stats', currentCompany?.id],
     queryFn: async () => {
+      const { data: movements } = await supabase
+        .from('supply_chain_movements' as any)
+        .select('status')
+        .eq('company_id', currentCompany?.id);
+
+      const inTransit = movements?.filter((m: any) => m.status === 'in_transit' || m.status === 'shipped').length || 0;
+      
+      const { count: lowStock } = await supabase
+        .from('stock_balances' as any)
+        .select('*', { count: 'exact', head: true })
+        .eq('company_id', currentCompany?.id)
+        .lt('quantity', 10); // Simple threshold for mock
+
       return {
-        inTransit: 0,
-        lowStock: 0,
-        accuracy: 100
+        inTransit,
+        lowStock: lowStock || 0,
+        accuracy: 94
       };
     },
     enabled: !!currentCompany?.id

@@ -3,7 +3,7 @@ import { PageHeader } from '@/shared/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
 import { Button } from '@/ui/base/button';
-import { Monitor, Plus, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Monitor, Plus, ShieldCheck } from 'lucide-react';
 import { usePosTerminals } from '@/hooks/operational/network/useNetworkArchitecture';
 import { EmptyState } from '@/shared/components/EmptyState';
 
@@ -21,9 +21,9 @@ export default function PosTerminalsPage() {
         </Button>
       </PageHeader>
 
-      {terminals && terminals.length > 0 ? (
+      {terminals && (terminals as any[]).length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {terminals.map((terminal) => (
+          {(terminals as any[]).map((terminal) => (
             <Card key={terminal.id}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">

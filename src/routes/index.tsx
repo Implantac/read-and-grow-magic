@@ -22,7 +22,9 @@ import {
   Search,
   CheckSquare,
   BarChart3,
-  ClipboardList
+  ClipboardList,
+  Brain,
+  Monitor
 } from 'lucide-react';
 import { ScrollArea } from "@/ui/base/scroll-area";
 import { cn } from "@/lib/utils";
@@ -41,7 +43,7 @@ const HardeningDashboard = () => {
 
   const phases = [
     { id: '2A', title: 'Rede Operacional', status: 'completed', description: 'Hierarquia de Lojas/CD/Fábrica, Estoque em Trânsito.' },
-    { id: '2B', title: 'Controle Operacional de Lojas', status: 'completed', description: 'Central da Loja, Cockpit de Exceções, Saúde da Unidade, Inventário Cíclico.' },
+    { id: '2B', title: 'Orquestração & Logística', status: 'in-progress', description: 'Sourcing Inteligente, Last Mile, Rastreabilidade Ledger.' },
     { id: '2C', title: 'Especificação & Blueprint', status: 'completed', description: 'Mapeamento de Atores, Operações Críticas e Regras de Autorização.' },
     { id: '3', title: 'Inteligência Logística IA', status: 'completed', description: 'Otimização de Slotting, IA Preditiva, Digital Twin.' },
     { id: '4', title: 'Auditoria & Compliance', status: 'completed', description: 'UEEF SEC-LEVEL 3, Certificação RLS, LGPD GA.' },
@@ -50,40 +52,40 @@ const HardeningDashboard = () => {
 
   const blueprintItems = [
     { 
-      id: 'central_loja', 
-      title: '1. Central da Loja: O Ponto de Entrada', 
-      icon: <Store className="h-4 w-4" />,
-      content: `Cada loja terá uma central operacional focada em gerir exceções (rupturas, divergências, atrasos) em vez de manutenção manual. Status operacional em % (ex: 94%).`
+      id: 'sourcing_ia', 
+      title: '1. Orquestração de Sourcing IA', 
+      icon: <Brain className="h-4 w-4" />,
+      content: `Motor de decisão que escolhe a melhor origem para o pedido: Loja Local (Pick-up), CD (Transfer) ou Fábrica (Direct-to-Store). Foco em redução de Lead Time e Custo.`
     },
     { 
-      id: 'centro_tarefas', 
-      title: '2. Centro de Tarefas Operacionais', 
-      icon: <CheckSquare className="h-4 w-4" />,
-      content: `Fila única de ações: conferir recebimento, aprovar ajustes, realizar inventário inteligente, fechar caixa. Rastreabilidade total: origem, responsável, prioridade e SLA.`
+      id: 'last_mile', 
+      title: '2. Logística de Last Mile & Manifestos', 
+      icon: <Truck className="h-4 w-4" />,
+      content: `Criação automática de manifestos de transporte e romaneios de carga. Integração com transportadoras e rastreabilidade em tempo real do veículo.`
     },
     { 
-      id: 'fluxos_rapidos', 
-      title: '3. Fluxos Rápidos (Quick Actions)', 
-      icon: <Zap className="h-4 w-4" />,
-      content: `Ações executáveis em poucos cliques: Receber mercadoria, Solicitar abastecimento, Transferir produto, Registrar perda e Fechar caixa.`
-    },
-    { 
-      id: 'ledger_estoque', 
-      title: '4. Ledger de Estoque Imutável', 
+      id: 'ledger_logistico', 
+      title: '3. Ledger Logístico Imutável', 
       icon: <ClipboardList className="h-4 w-4" />,
-      content: `Estoque baseado em movimentações imutáveis. Saldo é consequência de logs de VENDA, TRANSFERÊNCIA, RECEBIMENTO, INVENTÁRIO, etc.`
+      content: `Cada etapa da movimentação (Aprovado -> Picking -> Expedido -> Trânsito -> Recebido) gera um registro imutável no Ledger, garantindo auditoria total.`
     },
     { 
-      id: 'acuracidade_kpi', 
-      title: '5. Acuracidade como KPI Estratégico', 
-      icon: <BarChart3 className="h-4 w-4" />,
-      content: `Índice de Acuracidade de Estoque por unidade. Drill-down das causas: divergência de recebimento, perdas não registradas, erros de inventário.`
+      id: 'cockpit_excecoes', 
+      title: '4. Cockpit de Exceções (Exception Hub)', 
+      icon: <AlertTriangle className="h-4 w-4" />,
+      content: `Painel único para tratar atrasos no trânsito, rupturas de estoque na origem ou divergências no recebimento. Ação corretiva imediata.`
     },
     { 
-      id: 'auditoria_silenciosa', 
-      title: '6. Auditoria Silenciosa & Anomalias', 
-      icon: <Shield className="h-4 w-4" />,
-      content: `Motor de anomalias operacionais: alerta para excesso de ajustes, cancelamentos suspeitos ou divergências recorrentes por unidade.`
+      id: 'terminais_pdv', 
+      title: '5. Blindagem de Terminais PDV', 
+      icon: <Monitor className="h-4 w-4" />,
+      content: `Gestão de identidades únicas por terminal físico. Bloqueio de vendas fora do contexto da unidade e autenticação por hardware.`
+    },
+    { 
+      id: 'inventario_ciclico', 
+      title: '6. Inventário Cíclico Inteligente', 
+      icon: <RefreshCw className="h-4 w-4" />,
+      content: `Sugestões de contagem baseadas em rotatividade (ABC) e discrepâncias detectadas pelo motor de anomalias. Ajuste de estoque auditado.`
     }
   ];
 
@@ -93,7 +95,7 @@ const HardeningDashboard = () => {
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Fase 2A: Rede Operacional (Concluído)</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Fase 2B: Orquestração & Logística (Iniciado)</h1>
           </div>
           <p className="text-muted-foreground text-lg">
             Blueprint Operacional: Complexidade no motor, simplicidade na operação.
