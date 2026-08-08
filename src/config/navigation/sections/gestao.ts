@@ -27,7 +27,7 @@ export const gestaoSection: NavSection = {
         { title: 'Privacidade (LGPD)', href: '/admin/privacidade', icon: 'ShieldCheck' },
         { title: 'Trilha de Auditoria', href: '/admin/auditoria-sistema', icon: 'History' },
         { title: 'Manual do Sistema', href: '/admin/manual', icon: 'BookOpenCheck' },
-        { title: 'Hardening & Evolução', href: '/admin/hardening', icon: 'ShieldCheck' },
+        { title: 'Hardening & Evolução', href: '/', icon: 'ShieldCheck' },
       ],
     },
   ],
