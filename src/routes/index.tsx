@@ -22,7 +22,9 @@ import {
   Search,
   CheckSquare,
   BarChart3,
-  ClipboardList
+  ClipboardList,
+  Brain,
+  Monitor
 } from 'lucide-react';
 import { ScrollArea } from "@/ui/base/scroll-area";
 import { cn } from "@/lib/utils";

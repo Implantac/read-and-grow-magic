@@ -21,6 +21,8 @@ export interface StockTransfer {
   status: 'draft' | 'requested' | 'approved' | 'picking' | 'shipped' | 'in_transit' | 'received' | 'checked' | 'completed';
   reference_number: string;
   created_at: string;
+  origin?: { name: string };
+  destination?: { name: string };
 }
 
 export const networkService = {
@@ -75,5 +77,29 @@ export const networkService = {
     
     if (error) throw error;
     return data as unknown as StockTransfer;
+  },
+
+  async getTransfers(companyId: string): Promise<StockTransfer[]> {
+    const { data, error } = await supabase
+      .from('supply_chain_movements' as any)
+      .select(`
+        *,
+        origin:operational_units!origin_id(name),
+        destination:operational_units!destination_id(name)
+      `)
+      .eq('company_id', companyId);
+
+    if (error) throw error;
+    return (data || []) as any[];
+  },
+
+  async getPosTerminals(unitId: string) {
+    const { data, error } = await supabase
+      .from('pos_terminals' as any)
+      .select('*')
+      .eq('unit_id', unitId);
+    
+    if (error) throw error;
+    return data || [];
   }
 };
