@@ -23,9 +23,9 @@ test.describe('Navegação e Segurança de Rotas', () => {
     
     // Se a home for protegida, ele redirecionará para login
     const currentUrl = page.url();
-    if (currentUrl.includes('auth')) {
-        console.log('Home é protegida, redirecionado para auth.');
-        await expect(page.locator('button, input')).toBeVisible();
+    if (currentUrl.includes('login')) {
+        console.log('Home é protegida, redirecionado para login.');
+        await expect(page.locator('h1')).toContainText('Use Sistemas');
     } else {
         // Se for acessível, verifica o título do Master Plan
         await expect(page.locator('h1')).toContainText('Master Plan');
