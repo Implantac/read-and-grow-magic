@@ -7,23 +7,26 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { 
   Package, Truck, Factory, Store, ArrowRightLeft, 
   Download, Upload, AlertTriangle, ClipboardList, Search, Plus, 
-  CheckCircle2, Clock, ChevronRight
+  CheckCircle2, Clock, ChevronRight, Activity, Zap
 } from 'lucide-react';
 import { useSupplyChain } from '@/hooks/operational/supply-chain/useSupplyChain';
+import { MovementStatus } from '@/services/operational/supply-chain/supplyChainService';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
-const STATUS_MAP: Record<string, { label: string, color: string, icon: any }> = {
+const STATUS_MAP: Record<MovementStatus, { label: string, color: string, icon: any }> = {
   requested: { label: 'Solicitado', color: 'bg-blue-500/10 text-blue-500', icon: Clock },
   approved: { label: 'Aprovado', color: 'bg-cyan-500/10 text-cyan-500', icon: CheckCircle2 },
+  reserved: { label: 'Reservado', color: 'bg-indigo-500/10 text-indigo-500', icon: Package },
   picking: { label: 'Em Separação', color: 'bg-amber-500/10 text-amber-500', icon: Package },
-  shipped: { label: 'Expedido', color: 'bg-indigo-500/10 text-indigo-500', icon: Upload },
+  shipped: { label: 'Expedido', color: 'bg-orange-500/10 text-orange-500', icon: Upload },
   in_transit: { label: 'Em Trânsito', color: 'bg-purple-500/10 text-purple-500', icon: Truck },
-  received: { label: 'Recebido', color: 'bg-emerald-500/10 text-emerald-500', icon: Download },
+  delivered: { label: 'Entregue', color: 'bg-emerald-500/10 text-emerald-500', icon: CheckCircle2 },
   checked: { label: 'Conferido', color: 'bg-teal-500/10 text-teal-500', icon: CheckCircle2 },
   completed: { label: 'Finalizado', color: 'bg-slate-500/10 text-slate-500', icon: CheckCircle2 },
   divergent: { label: 'Divergente', color: 'bg-red-500/10 text-red-500', icon: AlertTriangle },
+  investigating: { label: 'Em Investigação', color: 'bg-zinc-500/10 text-zinc-500', icon: Search },
 };
 
 export default function UnifiedSupplyChain() {
@@ -34,8 +37,8 @@ export default function UnifiedSupplyChain() {
   const unitType = (currentBranch as any)?.type || 'store';
 
   const handleNextStep = async (m: any) => {
-    const statusOrder: string[] = [
-      'requested', 'approved', 'picking', 'shipped', 'in_transit', 'received', 'checked', 'completed'
+    const statusOrder: MovementStatus[] = [
+      'requested', 'approved', 'reserved', 'picking', 'shipped', 'in_transit', 'delivered', 'checked', 'completed'
     ];
 
     const currentIndex = statusOrder.indexOf(m.status);
@@ -72,8 +75,8 @@ export default function UnifiedSupplyChain() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard title="Solicitações" value={movements.filter(m => m.status === 'requested').length} icon={ClipboardList} color="blue" />
+          <StatCard title="Em Operação" value={movements.filter(m => ['picking', 'shipped'].includes(m.status)).length} icon={Zap} color="orange" />
           <StatCard title="Em Trânsito" value={movements.filter(m => m.status === 'in_transit').length} icon={Truck} color="purple" />
-          <StatCard title="Recebimentos" value={movements.filter(m => ['shipped', 'received'].includes(m.status)).length} icon={Download} color="emerald" />
           <StatCard title="Divergências" value={movements.filter(m => m.status === 'divergent').length} icon={AlertTriangle} color="red" />
         </div>
 
@@ -163,6 +166,7 @@ export default function UnifiedSupplyChain() {
 function StatCard({ title, value, icon: Icon, color }: any) {
   const colors: any = {
     blue: 'text-blue-500 bg-blue-500/5 border-blue-500/20',
+    orange: 'text-orange-500 bg-orange-500/5 border-orange-500/20',
     purple: 'text-purple-500 bg-purple-500/5 border-purple-500/20',
     emerald: 'text-emerald-500 bg-emerald-500/5 border-emerald-500/20',
     red: 'text-red-500 bg-red-500/5 border-red-500/20',
