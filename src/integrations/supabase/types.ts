@@ -11585,6 +11585,50 @@ export type Database = {
           },
         ]
       }
+      operational_units: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          document_number: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          settings: Json | null
+          type: Database["public"]["Enums"]["unit_type"]
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          document_number?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          settings?: Json | null
+          type: Database["public"]["Enums"]["unit_type"]
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          document_number?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          settings?: Json | null
+          type?: Database["public"]["Enums"]["unit_type"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operational_units_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_approvals: {
         Row: {
           approval_type: string
@@ -18008,6 +18052,41 @@ export type Database = {
           },
         ]
       }
+      stock_locations: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_picking_area: boolean | null
+          is_quarantine: boolean | null
+          name: string
+          unit_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_picking_area?: boolean | null
+          is_quarantine?: boolean | null
+          name: string
+          unit_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_picking_area?: boolean | null
+          is_quarantine?: boolean | null
+          name?: string
+          unit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_locations_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "operational_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stock_lots: {
         Row: {
           auto_generated: boolean
@@ -24347,6 +24426,7 @@ export type Database = {
         | "COMPLETED"
         | "CANCELLED"
       tax_regime: "simples" | "presumed" | "real"
+      unit_type: "factory" | "distribution_center" | "store" | "office"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -24515,6 +24595,7 @@ export const Constants = {
         "CANCELLED",
       ],
       tax_regime: ["simples", "presumed", "real"],
+      unit_type: ["factory", "distribution_center", "store", "office"],
     },
   },
 } as const
