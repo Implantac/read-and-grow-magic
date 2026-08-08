@@ -1,74 +1,35 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { networkService } from '@/services/operational/network/networkService';
+import { useState, useEffect } from 'react';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
+import { networkService, type OperationalUnit } from '@/services/operational/network/networkService';
 import { toast } from 'sonner';
-import type { TablesInsert } from '@/integrations/supabase/types';
 
-export function usePosTerminals(branchId?: string) {
-  const { currentBranch } = useEnterprise();
-  const targetId = branchId || currentBranch?.id;
-
-  return useQuery({
-    queryKey: ['pos_terminals', targetId],
-    queryFn: () => networkService.getPosTerminals(targetId!),
-    enabled: !!targetId
-  });
-}
-
-export function useTransferOrders() {
-  const { currentCompany, currentBranch } = useEnterprise();
-  const queryClient = useQueryClient();
-
-  const query = useQuery({
-    queryKey: ['stock_transfer_orders', currentCompany?.id, currentBranch?.id],
-    queryFn: () => networkService.getTransferOrders({ 
-      companyId: currentCompany!.id, 
-      branchId: currentBranch?.id 
-    }),
-    enabled: !!currentCompany?.id
-  });
-
-  const createMutation = useMutation({
-    mutationFn: (data: { order: TablesInsert<'stock_transfer_orders'>, items: TablesInsert<'stock_transfer_items'>[] }) => 
-      networkService.createTransferOrder(data.order, data.items),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['stock_transfer_orders'] });
-      toast.success('Transferência solicitada com sucesso');
-    },
-    onError: (error: any) => {
-      toast.error('Erro ao criar transferência: ' + error.message);
-    }
-  });
-
-  return { ...query, createTransfer: createMutation.mutateAsync };
-}
-
-export function useReplenishmentPolicies() {
-  const { currentBranch } = useEnterprise();
-  const queryClient = useQueryClient();
-
-  const query = useQuery({
-    queryKey: ['replenishment_policies', currentBranch?.id],
-    queryFn: () => networkService.getReplenishmentPolicies(currentBranch!.id),
-    enabled: !!currentBranch?.id
-  });
-
-  const upsertMutation = useMutation({
-    mutationFn: (policy: TablesInsert<'replenishment_policies'>) => networkService.upsertReplenishmentPolicy(policy),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['replenishment_policies'] });
-      toast.success('Política atualizada');
-    }
-  });
-
-  return { ...query, upsertPolicy: upsertMutation.mutateAsync };
-}
-
-export function useSupplyChainStats() {
+export const useNetworkArchitecture = () => {
   const { currentCompany } = useEnterprise();
-  return useQuery({
-    queryKey: ['supply_chain_stats', currentCompany?.id],
-    queryFn: () => networkService.getSupplyChainStats(currentCompany!.id),
-    enabled: !!currentCompany?.id
-  });
-}
+  const [units, setUnits] = useState<OperationalUnit[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (currentCompany?.id) {
+      loadUnits();
+    }
+  }, [currentCompany?.id]);
+
+  const loadUnits = async () => {
+    try {
+      setIsLoading(true);
+      const data = await networkService.getOperationalUnits(currentCompany!.id);
+      setUnits(data);
+    } catch (error) {
+      console.error('Error loading units:', error);
+      toast.error('Erro ao carregar rede operacional');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    units,
+    isLoading,
+    refresh: loadUnits
+  };
+};
