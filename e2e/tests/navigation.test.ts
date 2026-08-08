@@ -38,7 +38,7 @@ test.describe('Navegação e Segurança de Rotas', () => {
     await page.goto('/');
     
     // Se estiver na home (não redirecionado), testa os botões de ação
-    if (!page.url().includes('auth')) {
+    if (!page.url().includes('login')) {
         const supplyChainButton = page.locator('text=Acessar Central Unificada');
         if (await supplyChainButton.isVisible()) {
             await supplyChainButton.click();
