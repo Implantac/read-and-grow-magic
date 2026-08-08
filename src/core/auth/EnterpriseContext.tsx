@@ -103,15 +103,10 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
           const company = companies[0];
           applyCompany(company as CompanyRow);
           
-          // Sync with the legacy store
-          const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
-          useEnterpriseStore.getState().setActiveCompanyId(company.id);
-          
-          // Load branches for this company
-          // Fix: 'active' column is actually 'is_active' in the DB
-          const { data: branches } = await supabase
-            .from('branches')
-            .select('id, name, code, tipo, is_active, canal_padrao')
+          // Load operational units for this company (Fase 2A)
+          const { data: units } = await supabase
+            .from('operational_units' as any)
+            .select('id, name, type, is_active')
             .eq('company_id', company.id);
           
           if (branches) {
