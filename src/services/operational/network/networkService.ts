@@ -34,11 +34,30 @@ export const networkService = {
     return (data || []) as unknown as OperationalUnit[];
   },
 
+  async getStockBalances(companyId: string, unitId?: string) {
+    let query = supabase
+      .from('stock_balances' as any)
+      .select('*, operational_units(name), stock_locations(name), products(name, code)')
+      .eq('company_id', companyId);
+    
+    if (unitId) {
+      query = query.eq('unit_id', unitId);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data;
+  },
+
   async createTransfer(params: Omit<StockTransfer, 'id' | 'created_at' | 'reference_number'>) {
     const ref = `TRF-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
     const { data, error } = await supabase
-      .from('stock_transfers' as any)
-      .insert([{ ...params, reference_number: ref }])
+      .from('stock_movements' as any)
+      .insert([{ 
+        ...params, 
+        reference_number: ref,
+        status: 'requested' 
+      }])
       .select()
       .single();
     
@@ -48,7 +67,7 @@ export const networkService = {
 
   async updateTransferStatus(transferId: string, status: StockTransfer['status']) {
     const { data, error } = await supabase
-      .from('stock_transfers' as any)
+      .from('stock_movements' as any)
       .update({ status })
       .eq('id', transferId)
       .select()
