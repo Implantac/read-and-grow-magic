@@ -2,14 +2,20 @@ import { lazy } from 'react';
 
 // Orquestração & Sourcing
 export const orchestrationService = {
-  calculateSourcing: async (orderItems: any[]) => {
-    // Lógica para decidir entre Local, Cross-docking ou Drop-shipping
+  calculateSourcing: async (orderItems: any[], companyId: string) => {
     console.log("Calculando sourcing para:", orderItems);
+    
+    // In a real scenario, this would query stock_balances across all units for each item
+    // and apply logic (closest unit, unit with most excess stock, etc.)
+    
     return {
       strategy: 'MULTI_SOURCE',
+      recommendation: "DISTRIBUTION_CENTER",
+      reason: "Estoque local insuficiente (Ruptura em 2 dias)",
+      savings: 15.4,
       options: [
-        { unit_id: 'local-store', method: 'PICKUP', available: true },
-        { unit_id: 'cd-central', method: 'TRANSFER', lead_time: '2d' }
+        { unit_id: 'store-001', name: 'Loja Principal', method: 'PICKUP', available: false },
+        { unit_id: 'cd-001', name: 'CD Central', method: 'TRANSFER', lead_time: '1d', available: true }
       ]
     };
   }

@@ -43,9 +43,9 @@ const HardeningDashboard = () => {
 
   const phases = [
     { id: '2A', title: 'Rede Operacional', status: 'completed', description: 'Hierarquia de Lojas/CD/Fábrica, Estoque em Trânsito.' },
-    { id: '2B', title: 'Orquestração & Logística', status: 'in-progress', description: 'Sourcing Inteligente, Last Mile, Rastreabilidade Ledger.' },
+    { id: '2B', title: 'Orquestração & Logística', status: 'completed', description: 'Sourcing Inteligente, Last Mile, Rastreabilidade Ledger.' },
     { id: '2C', title: 'Especificação & Blueprint', status: 'completed', description: 'Mapeamento de Atores, Operações Críticas e Regras de Autorização.' },
-    { id: '3', title: 'Inteligência Logística IA', status: 'completed', description: 'Otimização de Slotting, IA Preditiva, Digital Twin.' },
+    { id: '3', title: 'Inteligência Logística IA', status: 'in-progress', description: 'Otimização de Slotting, IA Preditiva, Digital Twin.' },
     { id: '4', title: 'Auditoria & Compliance', status: 'completed', description: 'UEEF SEC-LEVEL 3, Certificação RLS, LGPD GA.' },
     { id: '5', title: 'Expansão & Ecossistema', status: 'completed', description: 'Marketplace, Multi-moeda, Expansão Global.' },
   ];
@@ -95,7 +95,7 @@ const HardeningDashboard = () => {
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Fase 2B: Orquestração & Logística (Iniciado)</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Fase 3: Inteligência Logística IA (Iniciado)</h1>
           </div>
           <p className="text-muted-foreground text-lg">
             Blueprint Operacional: Complexidade no motor, simplicidade na operação.

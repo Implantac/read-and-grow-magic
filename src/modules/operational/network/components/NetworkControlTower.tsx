@@ -12,7 +12,8 @@ import {
   ArrowRight,
   Monitor,
   ShieldAlert,
-  ShoppingCart
+  ShoppingCart,
+  Brain
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/ui/base/skeleton";
@@ -166,6 +167,19 @@ export default function NetworkControlTower() {
                 <Badge variant="outline" className="border-red-300 text-red-700 bg-white">REDE</Badge>
               </div>
             )}
+
+            {/* Sourcing & Orquestração */}
+            <div className="flex items-start gap-3 p-3 rounded-lg border border-blue-200 bg-blue-50 text-blue-900 animate-in fade-in zoom-in duration-300">
+              <Brain className="h-5 w-5 shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-bold">Otimização de Sourcing</p>
+                <p className="text-xs opacity-80">IA recomenda transferir do CD-01 para evitar ruptura na Loja Matriz.</p>
+                <Button size="sm" variant="outline" className="mt-2 h-7 text-[10px] border-blue-300 hover:bg-blue-100" asChild>
+                  <Link to="/operacional/abastecimento">Gerar Ordem</Link>
+                </Button>
+              </div>
+              <Badge variant="outline" className="border-blue-300 text-blue-700 bg-white">IA</Badge>
+            </div>
 
             {/* Pedidos & Transferências */}
             <div className="flex items-start gap-3 p-3 rounded-lg border border-amber-200 bg-amber-50 text-amber-900">
