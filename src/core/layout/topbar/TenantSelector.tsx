@@ -68,9 +68,10 @@ export function TenantSelector() {
             <span className="max-w-[120px] truncate">
               {currentBranch ? (
                 <span className="flex items-center gap-1.5">
-                  {currentBranch.tipo === 'FACTORY' && <Building2 className="h-3 w-3 text-amber-500" />}
-                  {currentBranch.tipo === 'DISTRIBUTION_CENTER' && <Package className="h-3 w-3 text-blue-500" />}
-                  {currentBranch.tipo === 'STORE' && <Store className="h-3 w-3 text-green-500" />}
+                  {currentBranch.tipo?.toUpperCase() === 'FACTORY' && <Building2 className="h-3 w-3 text-amber-500" />}
+                  {currentBranch.tipo?.toUpperCase() === 'DISTRIBUTION_CENTER' && <Package className="h-3 w-3 text-blue-500" />}
+                  {currentBranch.tipo?.toUpperCase() === 'STORE' && <Store className="h-3 w-3 text-green-500" />}
+                  {currentBranch.tipo?.toUpperCase() === 'OFFICE' && <Building2 className="h-3 w-3 text-slate-500" />}
                   {currentBranch.name}
                 </span>
               ) : 'TODAS AS UNIDADES'}

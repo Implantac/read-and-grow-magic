@@ -7,8 +7,8 @@ const StockTransfers = lazy(() => import('@/modules/operational/network/StockTra
 const ReplenishmentIntelligence = lazy(() => import('@/modules/operational/network/ReplenishmentIntelligence'));
 
 export const NetworkRoutes = [
-  <Route key="net-control" path="control-tower" element={<NetworkControlTower />} />,
-  <Route key="net-pos" path="pos" element={<PosTerminals />} />,
+  <Route key="net-painel" path="painel" element={<NetworkControlTower />} />,
+  <Route key="net-terminais" path="terminais" element={<PosTerminals />} />,
   <Route key="net-transfers" path="transferencias" element={<StockTransfers />} />,
   <Route key="net-ressuprimento" path="ressuprimento" element={<ReplenishmentIntelligence />} />,
 ];
