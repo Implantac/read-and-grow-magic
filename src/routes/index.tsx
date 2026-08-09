@@ -1,3 +1,7 @@
+/**
+ * Master Plan — Dashboard de Hardening e Roadmap de Evolução.
+ * Auditoria profunda de Segurança e Banco de Dados executada em 09/08/2026.
+ */
 import { Suspense, useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/ui/base/card";
