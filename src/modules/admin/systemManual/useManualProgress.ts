@@ -1,3 +1,8 @@
+/**
+ * Hook para gerenciar o progresso do manual do sistema.
+ * Nota: O uso de localStorage aqui é seguro pois armazena apenas slugs de módulos
+ * concluídos para fins de UI (gamificação local), sem dados sensíveis de negócio.
+ */
 import { useCallback, useEffect, useState } from 'react';
 
 const KEY = 'manual-progress-v1';
