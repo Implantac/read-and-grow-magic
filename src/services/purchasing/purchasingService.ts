@@ -11,7 +11,7 @@ export type PurchaseOrderRow = Tables<'purchase_orders'> & {
 export const purchasingService = {
   // Suppliers
   async getSuppliers(): Promise<Tables<'suppliers'>[]> {
-    const { data, error } = await supabase.from('suppliers').select('*').order('name');
+    const { data, error } = await supabase.from('suppliers').select('*').order('name').limit(500);
     if (error) throw error;
     return data || [];
   },

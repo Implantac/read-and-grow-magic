@@ -38,7 +38,7 @@ export const inventoryService = {
 
   // Categories
   async getCategories(): Promise<Tables<'categories'>[]> {
-    const { data, error } = await supabase.from('categories').select('*').order('name');
+    const { data, error } = await supabase.from('categories').select('*').order('name').limit(200);
     if (error) throw error;
     return data || [];
   },

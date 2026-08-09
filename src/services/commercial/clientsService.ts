@@ -13,7 +13,8 @@ class ClientsService {
     const { data, error } = await supabase
       .from('clients')
       .select('*')
-      .order('name', { ascending: true });
+      .order('name', { ascending: true })
+      .limit(1000);
     if (error) throw error;
     return (data || []) as Tables<'clients'>[];
   }
