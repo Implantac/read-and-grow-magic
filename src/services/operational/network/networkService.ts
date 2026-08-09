@@ -30,7 +30,8 @@ export const networkService = {
     const { data, error } = await supabase
       .from('operational_units' as any)
       .select('*')
-      .eq('company_id', companyId);
+      .eq('company_id', companyId)
+      .limit(100);
     
     if (error) throw error;
     return (data || []) as unknown as OperationalUnit[];
@@ -40,7 +41,8 @@ export const networkService = {
     let query = supabase
       .from('stock_balances' as any)
       .select('*, operational_units(name), stock_locations(name), products(name, code)')
-      .eq('company_id', companyId);
+      .eq('company_id', companyId)
+      .limit(1000);
     
     if (unitId) {
       query = query.eq('unit_id', unitId);
@@ -87,7 +89,9 @@ export const networkService = {
         origin:operational_units!origin_id(name),
         destination:operational_units!destination_id(name)
       `)
-      .eq('company_id', companyId);
+      .eq('company_id', companyId)
+      .order('created_at', { ascending: false })
+      .limit(1000);
 
     if (error) throw error;
     return (data || []) as any[];
@@ -97,7 +101,8 @@ export const networkService = {
     const { data, error } = await supabase
       .from('pos_terminals' as any)
       .select('*')
-      .eq('unit_id', unitId);
+      .eq('unit_id', unitId)
+      .limit(100);
     
     if (error) throw error;
     return data || [];

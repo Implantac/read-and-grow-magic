@@ -30,7 +30,8 @@ export const useReplenishmentPolicies = () => {
       const { data, error } = await supabase
         .from('replenishment_policies' as any)
         .select('*, product:products(name, code)')
-        .eq('company_id', currentCompany?.id);
+        .eq('company_id', currentCompany?.id)
+        .limit(200);
       
       if (error) throw error;
       return data || [];
@@ -56,7 +57,8 @@ export const useSupplyChainStats = () => {
       const { data: movements } = await supabase
         .from('supply_chain_movements' as any)
         .select('status')
-        .eq('company_id', currentCompany?.id);
+        .eq('company_id', currentCompany?.id)
+        .limit(2000);
 
       const inTransit = movements?.filter((m: any) => m.status === 'in_transit' || m.status === 'shipped').length || 0;
       

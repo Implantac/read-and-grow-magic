@@ -65,7 +65,8 @@ export class FiscalService {
     const { data, error } = await this.supabase
       .from('tax_rules')
       .select('*')
-      .order('name');
+      .order('name')
+      .limit(200);
 
     if (error) throw error;
     return data || [];

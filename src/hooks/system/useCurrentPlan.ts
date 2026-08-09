@@ -26,7 +26,7 @@ export interface CurrentPlan {
 export function useCurrentPlan() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const [realtimeStatus, setRealtimeStatus] = useState<'SUBSCRIBED' | 'CHANNEL_ERROR' | 'TIMED_OUT' | 'CLOSED' | 'SUBSCRIBING'>('SUBSCRIBING');
+  const [realtimeStatus, setRealtimeStatus] = useState<string>('SUBSCRIBING');
 
   useEffect(() => {
     let retryCount = 0;
@@ -48,7 +48,7 @@ export function useCurrentPlan() {
           }
         )
         .subscribe((status) => {
-          setRealtimeStatus(status as any);
+          setRealtimeStatus(status);
           if (status === 'SUBSCRIBED') {
             retryCount = 0;
           }
