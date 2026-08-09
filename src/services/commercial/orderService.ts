@@ -13,7 +13,7 @@ export class OrderService extends BaseService<'orders'> {
       .from('orders')
       .select('*, order_items(*)')
       .order('created_at', { ascending: false })
-      .limit(LIST_LIMIT);
+      .limit(LIST_LIMIT || 1000);
 
     if (error) throw error;
     return (data ?? []).map((o) => ({
