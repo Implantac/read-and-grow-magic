@@ -6,7 +6,8 @@ export const cashFlowService = {
     const { data, error } = await supabase
       .from('cash_flow_entries')
       .select('*')
-      .order('date', { ascending: true });
+      .order('date', { ascending: true })
+      .limit(1000);
     if (error) throw error;
     return (data || []) as CashFlowRow[];
   }

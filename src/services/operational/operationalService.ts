@@ -14,7 +14,8 @@ export class OperationalService {
     const { data, error } = await this.supabase
       .from('shipment_orders')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(500);
 
     if (error) throw error;
     return data || [];
@@ -34,7 +35,8 @@ export class OperationalService {
       .from('delivery_tracking')
       .select('*')
       .eq('shipment_id', shipmentId)
-      .order('occurred_at', { ascending: true });
+      .order('occurred_at', { ascending: true })
+      .limit(100);
 
     if (error) throw error;
     return data || [];
@@ -51,7 +53,8 @@ export class OperationalService {
   async getBillingQueue(): Promise<BillingQueueItem[]> {
     const { data, error } = await this.supabase
       .from('billing_queue')
-      .select('*');
+      .select('*')
+      .limit(200);
     if (error) throw error;
     return data || [];
   }

@@ -12,7 +12,8 @@ export class AccountingService {
     const { data, error } = await this.supabase
       .from('chart_of_accounts')
       .select('*')
-      .order('code');
+      .order('code')
+      .limit(1000);
 
     if (error) throw error;
 
@@ -58,7 +59,8 @@ export class AccountingService {
         *,
         lines:journal_entry_lines(*)
       `)
-      .order('date', { ascending: false });
+      .order('date', { ascending: false })
+      .limit(500);
 
     if (error) throw error;
 

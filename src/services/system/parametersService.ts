@@ -6,7 +6,8 @@ export const parametersService = {
       .from('system_parameters')
       .select('*')
       .order('category', { ascending: true })
-      .order('name', { ascending: true });
+      .order('name', { ascending: true })
+      .limit(500);
     
     if (error) throw error;
     return data || [];
