@@ -6,7 +6,8 @@ export class InventoryService {
     const { data, error } = await supabase
       .from('wms_inventory_items')
       .select('*')
-      .order('product_name');
+      .order('product_name')
+      .limit(1000);
     
     if (error) throw error;
     

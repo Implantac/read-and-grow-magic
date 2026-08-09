@@ -10,7 +10,8 @@ export const inventoryService = {
     const { data, error } = await supabase
       .from('products')
       .select('*, categories(name)')
-      .order('name');
+      .order('name')
+      .limit(1000);
     if (error) throw error;
     const rows = (data ?? []) as unknown as (Tables<'products'> & { categories: { name: string | null } | null })[];
     return rows.map((p) => ({
@@ -38,7 +39,7 @@ export const inventoryService = {
 
   // Categories
   async getCategories(): Promise<Tables<'categories'>[]> {
-    const { data, error } = await supabase.from('categories').select('*').order('name');
+    const { data, error } = await supabase.from('categories').select('*').order('name').limit(200);
     if (error) throw error;
     return data || [];
   },

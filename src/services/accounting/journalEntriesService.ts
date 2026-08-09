@@ -6,13 +6,15 @@ export const journalEntriesService = {
     const { data: entriesData, error: entriesError } = await supabase
       .from('journal_entries')
       .select('*')
-      .order('date', { ascending: false });
+      .order('date', { ascending: false })
+      .limit(1000);
 
     if (entriesError) throw entriesError;
 
     const { data: linesData, error: linesError } = await supabase
       .from('journal_entry_lines')
-      .select('*');
+      .select('*')
+      .limit(5000); // Linhas de lançamentos podem ser muitas
 
     if (linesError) throw linesError;
 

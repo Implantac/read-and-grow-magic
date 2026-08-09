@@ -91,7 +91,7 @@ class FinancialService extends BaseService<'financial_ledger'> {
 
   // Ledger
   async getLedger(filters?: { from?: string; to?: string; bankAccountId?: string }): Promise<Tables<'financial_ledger'>[]> {
-    let q = supabase.from('financial_ledger').select('*').order('entry_date', { ascending: false });
+    let q = supabase.from('financial_ledger').select('*').order('entry_date', { ascending: false }).limit(1000);
     if (filters?.from) q = q.gte('entry_date', filters.from);
     if (filters?.to) q = q.lte('entry_date', filters.to);
     if (filters?.bankAccountId) q = q.eq('bank_account_id', filters.bankAccountId);

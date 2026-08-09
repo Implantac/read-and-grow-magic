@@ -4,7 +4,7 @@ import type { ReaderStatus, TagStatus, TagType, RFIDEventType } from '@/types/rf
 
 export const rfidService = {
   async getReaders() {
-    const { data, error } = await supabase.from('rfid_readers').select('*').order('code');
+    const { data, error } = await supabase.from('rfid_readers').select('*').order('code').limit(100);
     if (error) throw error;
     return (data || []).map((r: Tables<'rfid_readers'>) => ({
       id: r.id, 
@@ -25,7 +25,7 @@ export const rfidService = {
   },
 
   async getTags() {
-    const { data, error } = await supabase.from('rfid_tags').select('*').order('created_at', { ascending: false });
+    const { data, error } = await supabase.from('rfid_tags').select('*').order('created_at', { ascending: false }).limit(500);
     if (error) throw error;
     return (data || []).map((r: Tables<'rfid_tags'>) => ({
       id: r.id, 

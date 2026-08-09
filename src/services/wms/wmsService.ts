@@ -9,7 +9,8 @@ export class WmsService {
     const { data, error } = await supabase
       .from('stock_balances')
       .select('*')
-      .order('product_name');
+      .order('product_name')
+      .limit(1000);
     if (error) throw error;
     return (data ?? []).map((r) => ({
       id: r.id,
@@ -45,7 +46,8 @@ export class WmsService {
     const { data, error } = await supabase
       .from('wms_storage_locations')
       .select('*')
-      .order('code');
+      .order('code')
+      .limit(500);
     if (error) throw error;
     return data ?? [];
   }

@@ -15,7 +15,7 @@ type ProofRow = Database['public']['Tables']['delivery_proof']['Row'];
 export const tmsService = {
   // Carriers
   async getCarriers() {
-    const { data, error } = await supabase.from('carriers').select('*').order('name');
+    const { data, error } = await supabase.from('carriers').select('*').order('name').limit(200);
     if (error) throw error;
     return (data || []).map((r: CarrierRow) => ({
       id: r.id,
@@ -52,7 +52,7 @@ export const tmsService = {
 
   // Vehicles
   async getVehicles() {
-    const { data, error } = await supabase.from('vehicles').select('*').order('created_at', { ascending: false });
+    const { data, error } = await supabase.from('vehicles').select('*').order('created_at', { ascending: false }).limit(200);
     if (error) throw error;
     return (data || []).map((r: VehicleRow) => ({
       id: r.id,
@@ -83,7 +83,7 @@ export const tmsService = {
 
   // Routes
   async getRoutes() {
-    const { data, error } = await supabase.from('delivery_routes').select('*').order('planned_date', { ascending: false });
+    const { data, error } = await supabase.from('delivery_routes').select('*').order('planned_date', { ascending: false }).limit(500);
     if (error) throw error;
     return (data || []).map((r: RouteRow) => ({
       id: r.id,
@@ -118,7 +118,7 @@ export const tmsService = {
 
   // Proofs
   async getProofs() {
-    const { data, error } = await supabase.from('delivery_proof').select('*').order('created_at', { ascending: false });
+    const { data, error } = await supabase.from('delivery_proof').select('*').order('created_at', { ascending: false }).limit(500);
     if (error) throw error;
     return (data || []).map((r: ProofRow) => ({
       id: r.id,

@@ -43,7 +43,7 @@ export class BaseService<T extends TableName> {
   constructor(protected tableName: T) {}
 
   async getAll(options: GetAllOptions = {}): Promise<RowOf<T>[]> {
-    const { orderBy = 'created_at', ascending = false, limit, filters } = options;
+    const { orderBy = 'created_at', ascending = false, limit = 1000, filters } = options;
 
     let query = dynamicTable(this.tableName).select('*');
 

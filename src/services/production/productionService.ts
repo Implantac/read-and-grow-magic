@@ -27,7 +27,8 @@ export class ProductionService {
     const { data, error } = await supabase
       .from('production_resources')
       .select('*')
-      .order('name');
+      .order('name')
+      .limit(100);
     if (error) throw error;
     return data ?? [];
   }

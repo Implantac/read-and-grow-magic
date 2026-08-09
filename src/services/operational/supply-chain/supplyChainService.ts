@@ -65,7 +65,7 @@ export const supplyChainService = {
       query = query.in('status', filters.status);
     }
 
-    const { data, error } = await query.order('created_at', { ascending: false });
+    const { data, error } = await query.order('created_at', { ascending: false }).limit(1000);
     
     if (error) {
       console.error('Error fetching movements:', error);

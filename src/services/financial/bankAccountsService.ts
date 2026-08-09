@@ -6,7 +6,8 @@ export const bankAccountsService = {
     const { data, error } = await supabase
       .from('bank_accounts')
       .select('*')
-      .order('name');
+      .order('name')
+      .limit(100);
     if (error) throw error;
     return (data || []) as BankAccountRow[];
   },
