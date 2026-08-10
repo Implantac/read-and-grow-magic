@@ -26,6 +26,7 @@ export const gestaoSection: NavSection = {
         { title: 'Workflow Engine', href: '/admin/workflows', icon: 'GitBranch' },
         { title: 'Privacidade (LGPD)', href: '/admin/privacidade', icon: 'ShieldCheck' },
         { title: 'Trilha de Auditoria', href: '/admin/auditoria-sistema', icon: 'History' },
+        { title: 'Logs de Segurança', href: '/admin/seguranca/logs', icon: 'ShieldAlert' },
         { title: 'Manual do Sistema', href: '/admin/manual', icon: 'BookOpenCheck' },
         { title: 'Hardening & Evolução', href: '/', icon: 'ShieldCheck' },
       ],
