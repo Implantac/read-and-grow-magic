@@ -18,17 +18,19 @@ import {
 interface DemandChartProps {
   predictedDemand: number;
   unit: string;
+  periodDays?: number;
 }
 
-export function DemandProjectionChart({ predictedDemand, unit }: DemandChartProps) {
+export function DemandProjectionChart({ predictedDemand, unit, periodDays = 30 }: DemandChartProps) {
   // Gera dados simulados de projeção baseados no valor predito para criar o gráfico
   const chartData = useMemo(() => {
     const data = [];
     const baseValue = predictedDemand / 1.25; // Reverte o fator de crescimento para o início
+    const step = Math.max(1, Math.floor(periodDays / 6));
     
-    for (let i = 0; i <= 30; i += 5) {
+    for (let i = 0; i <= periodDays; i += step) {
       // Cria uma curva de crescimento levemente estocástica
-      const progress = i / 30;
+      const progress = i / periodDays;
       const noise = (Math.random() - 0.5) * (baseValue * 0.05);
       const value = Math.round(baseValue + (predictedDemand - baseValue) * progress + noise);
       
@@ -38,7 +40,7 @@ export function DemandProjectionChart({ predictedDemand, unit }: DemandChartProp
       });
     }
     return data;
-  }, [predictedDemand]);
+  }, [predictedDemand, periodDays]);
 
   const chartConfig = {
     demand: {
