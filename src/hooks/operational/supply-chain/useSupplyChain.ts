@@ -6,14 +6,14 @@ import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 export function useSupplyChain(filters?: { status?: MovementStatus[] }) {
-  const { currentBranch } = useEnterprise();
+  const { currentBranch, isLoading: isEnterpriseLoading } = useEnterprise();
   const [movements, setMovements] = useState<SupplyChainMovement[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isDataLoading, setIsDataLoading] = useState(false);
 
   const fetchMovements = async () => {
     if (!currentBranch?.id) return;
     
-    setIsLoading(true);
+    setIsDataLoading(true);
     try {
       const data = await supplyChainService.getMovements({
         unit_id: currentBranch.id,
@@ -24,13 +24,15 @@ export function useSupplyChain(filters?: { status?: MovementStatus[] }) {
       console.error('Error in useSupplyChain:', error);
       toast.error('Erro ao carregar movimentações');
     } finally {
-      setIsLoading(false);
+      setIsDataLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchMovements();
-  }, [currentBranch?.id, JSON.stringify(filters?.status)]);
+    if (!isEnterpriseLoading && currentBranch?.id) {
+      fetchMovements();
+    }
+  }, [currentBranch?.id, JSON.stringify(filters?.status), isEnterpriseLoading]);
 
   const updateStatus = async (id: string, status: MovementStatus) => {
     try {
@@ -68,7 +70,7 @@ export function useSupplyChain(filters?: { status?: MovementStatus[] }) {
 
   return {
     movements,
-    isLoading,
+    isLoading: isEnterpriseLoading || isDataLoading,
     refresh: fetchMovements,
     updateStatus,
     getMovementLedger
