@@ -27,7 +27,7 @@ export const networkService = {
   async getStockBalances(companyId: string, unitId?: string): Promise<StockBalance[]> {
     let query = supabase
       .from('stock_balances')
-      .select('*, operational_units(name), stock_locations(name), products(name, code)')
+      .select('*, branches(name), stock_locations(name), products(name, code)')
       .eq('company_id', companyId)
       .limit(1000);
     
@@ -37,7 +37,8 @@ export const networkService = {
 
     const { data, error } = await query;
     if (error) throw error;
-    return (data || []) as any[];
+    // Usamos unknown as any para evitar problemas de tipos com o join de branches
+    return (data || []) as unknown as StockBalance[];
   },
 
   async createTransfer(params: Database['public']['Tables']['supply_chain_movements']['Insert']) {
@@ -68,15 +69,14 @@ export const networkService = {
       .from('supply_chain_movements')
       .select(`
         *,
-        origin:operational_units!supply_chain_movements_origin_id_fkey(name),
-        destination:operational_units!supply_chain_movements_destination_id_fkey(name)
+        origin:branches!supply_chain_movements_origin_id_fkey(name),
+        destination:branches!supply_chain_movements_destination_id_fkey(name)
       `)
       .eq('company_id', companyId)
       .order('created_at', { ascending: false })
       .limit(1000);
 
     if (error) {
-      // Fallback para quando as fkeys não são resolvidas pelo nome automático do PostgREST
       const { data: fallbackData, error: fallbackError } = await supabase
         .from('supply_chain_movements')
         .select('*')
