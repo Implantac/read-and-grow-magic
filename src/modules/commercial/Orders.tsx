@@ -175,19 +175,21 @@ export default function OrdersPage() {
   return (
     <PageContainer>
       <PageHeader title="Pedidos de Venda" description="Gerencie e acompanhe o ciclo de vida dos seus pedidos">
-        <ExportButton
-          data={filteredOrders as unknown as Record<string, unknown>[]}
-          columns={[
-            { key: 'number', label: 'Pedido' }, { key: 'client_name', label: 'Cliente' },
-            { key: 'date', label: 'Data', format: (v) => formatDate(v as string) },
-            { key: 'total', label: 'Total', format: (v) => formatBRL(Number(v)) },
-            { key: 'priority', label: 'Prioridade' }, { key: 'status', label: 'Status' },
-          ]}
-          filename="pedidos"
-        />
-        <Button className="gap-2 shadow-sm" onClick={() => { resetForm(); setIsFormOpen(true); }}>
-          <Plus className="h-4 w-4" />Novo Pedido
-        </Button>
+        <div className="flex items-center gap-2">
+          <ExportButton
+            data={filteredOrders as unknown as Record<string, unknown>[]}
+            columns={[
+              { key: 'number', label: 'Pedido' }, { key: 'client_name', label: 'Cliente' },
+              { key: 'date', label: 'Data', format: (v) => formatDate(v as string) },
+              { key: 'total', label: 'Total', format: (v) => formatBRL(Number(v)) },
+              { key: 'priority', label: 'Prioridade' }, { key: 'status', label: 'Status' },
+            ]}
+            filename="pedidos"
+          />
+          <Button className="gap-2 shadow-sm" onClick={() => { resetForm(); setIsFormOpen(true); }}>
+            <Plus className="h-4 w-4" />Novo Pedido
+          </Button>
+        </div>
       </PageHeader>
 
       <div className="grid gap-4 md:grid-cols-4">
