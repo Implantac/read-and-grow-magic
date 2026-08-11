@@ -8,8 +8,7 @@ import {
   ArrowLeft,
   Info,
   Truck,
-  ShieldCheck,
-  AlertCircle
+  ShieldCheck
 } from 'lucide-react';
 import { Button } from '@/ui/base/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/base/card';
@@ -29,6 +28,7 @@ import { ProfitabilityCard } from '../ProfitabilityCard';
 import { CreditBadge } from '../CreditBadge';
 import { useCreateOrder } from '@/hooks/commercial/orders/useCreateOrder';
 import { OperationalFeedback } from '@/components/shared/OperationalFeedback';
+import { cn } from '@/lib/utils';
 
 const STEPS = [
   { id: 'client', title: 'Cliente & Origem', icon: User },
@@ -390,6 +390,3 @@ export function OrderWizard({ onSuccess, onCancel }: OrderWizardProps) {
   );
 }
 
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(' ');
-}

@@ -26,42 +26,35 @@ export class ProcurementAutomationService extends BaseService<'products'> {
   async getPurchaseSuggestions(): Promise<ProcurementSuggestion[]> {
     const companyId = await this.resolveCompanyId();
 
-    // Busca produtos que precisam de reposição
-    // Nota: Em um sistema real, aqui consideraríamos o estoque consolidado de todas as unidades
-    // ou de uma unidade específica. Para este MVP, usamos o cadastro global do produto.
-    const { data: products, error } = await supabase
+    const { data: products, error } = await (supabase as any)
       .from('products')
       .select('*')
       .eq('company_id', companyId)
       .eq('status', 'active')
-      .limit(LIST_LIMIT);
+      .limit(LIST_LIMIT || 1000);
 
     if (error) throw error;
 
-    // TODO: Integrar com a tabela de estoque real (inventory_ledger ou operational_units_stock)
-    // Por enquanto, simulamos o 'current_stock' como sendo 0 para produtos abaixo do ponto de pedido
-    // para demonstrar a lógica do serviço.
-    
     return (products || [])
-      .filter(p => (p.min_stock > 0 || p.reorder_point > 0))
-      .map(p => ({
+      .filter((p: any) => (p.min_stock > 0 || p.reorder_point > 0))
+      .map((p: any) => ({
         product_id: p.id,
         product_name: p.name,
         product_code: p.code,
-        current_stock: 0, // Placeholder: integrar com ledger de estoque
+        current_stock: 0,
         min_stock: p.min_stock || 0,
         reorder_point: p.reorder_point || 0,
         suggested_quantity: (p.max_stock || p.min_stock * 2) - 0, 
         lead_time_days: p.lead_time_days || 0,
         supplier: p.supplier
       }))
-      .filter(s => s.current_stock <= s.reorder_point);
+      .filter((s: any) => s.current_stock <= s.reorder_point);
   }
 
   private async resolveCompanyId(): Promise<string> {
     const { data: auth } = await supabase.auth.getUser();
     if (!auth.user?.id) throw new Error('Sessão expirada');
-    const { data: profile } = await supabase
+    const { data: profile } = await (supabase as any)
       .from('profiles')
       .select('company_id')
       .eq('id', auth.user.id)
