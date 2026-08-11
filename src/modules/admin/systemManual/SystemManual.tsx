@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
-import { Search, GraduationCap, Sparkles, AlertCircle, FileText, CheckCircle2 } from 'lucide-react';
+import { Search, GraduationCap, Sparkles, AlertCircle, FileText, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/ui/base/card';
