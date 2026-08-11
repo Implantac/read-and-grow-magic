@@ -36,6 +36,7 @@ export const operacionalSection: NavSection = {
         { title: 'Pedidos de Compra', href: '/compras/pedidos', icon: 'ClipboardList' },
         { title: 'Fornecedores', href: '/compras/fornecedores', icon: 'Building2' },
         { title: 'Cotações & BID', href: '/compras/cotacoes', icon: 'FileSearch' },
+        { title: 'Painel MRP (Compras)', href: '/compras/dashboard', icon: 'BarChart3' },
       ],
     },
   ],
