@@ -294,10 +294,11 @@ export default function EnterpriseConfig() {
             </CardHeader>
             <CardContent className="pt-6 space-y-6">
               <OperationalFeedback 
-                type="info"
-                title="Governança Fase 3 Ativa"
-                message="O Ledger Logístico Imutável está operando em 100% da malha de abastecimento. Alterações em status críticos agora exigem trilha de auditoria digital."
+                type="success"
+                title="Governança Fase 3 & 4 Consolidadas"
+                message="O Ledger Logístico e o OrderWizard Pro estão operando em 100%. Iniciando implantação dos motores de Inteligência Preditiva (Fase 5)."
               />
+
 
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="flex flex-row items-center justify-between rounded-lg border p-4 bg-muted/20 hover:bg-muted/30 transition-colors">
