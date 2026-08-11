@@ -1,32 +1,19 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
-export type UnitType = 'factory' | 'distribution_center' | 'store' | 'office';
+export type UnitType = Database['public']['Enums']['app_role'] | 'factory' | 'distribution_center' | 'store' | 'office';
 
-export interface OperationalUnit {
-  id: string;
-  company_id: string;
-  name: string;
-  type: UnitType;
-  document_number?: string;
-  is_active: boolean;
-  settings?: any;
-}
+export type OperationalUnit = Database['public']['Tables']['operational_units']['Row'];
+export type StockBalance = Database['public']['Tables']['stock_balances']['Row'];
+export type SupplyChainMovement = Database['public']['Tables']['supply_chain_movements']['Row'];
 
-export interface StockTransfer {
-  id: string;
-  company_id: string;
-  origin_unit_id: string;
-  destination_unit_id: string;
-  status: 'draft' | 'requested' | 'approved' | 'picking' | 'shipped' | 'in_transit' | 'received' | 'checked' | 'completed';
-  reference_number: string;
-  created_at: string;
-  origin?: { name: string };
-  destination?: { name: string };
+export interface StockTransfer extends SupplyChainMovement {
+  origin?: { name: string } | null;
+  destination?: { name: string } | null;
 }
 
 export const networkService = {
-  async getOperationalUnits(companyId: string) {
+  async getOperationalUnits(companyId: string): Promise<OperationalUnit[]> {
     const { data, error } = await supabase
       .from('operational_units')
       .select('*')
@@ -34,13 +21,13 @@ export const networkService = {
       .limit(100);
     
     if (error) throw error;
-    return (data || []) as any[];
+    return data || [];
   },
 
-  async getStockBalances(companyId: string, unitId?: string) {
-    let query = (supabase as any)
+  async getStockBalances(companyId: string, unitId?: string): Promise<StockBalance[]> {
+    let query = supabase
       .from('stock_balances')
-      .select('*, operational_units(name), stock_locations(name), products(name, code)')
+      .select('*, branches(name), stock_locations(name), products(name, code)')
       .eq('company_id', companyId)
       .limit(1000);
     
@@ -50,35 +37,31 @@ export const networkService = {
 
     const { data, error } = await query;
     if (error) throw error;
-    return data;
+    // Usamos unknown as any para evitar problemas de tipos com o join de branches
+    return (data || []) as unknown as StockBalance[];
   },
 
-  async createTransfer(params: Omit<StockTransfer, 'id' | 'created_at' | 'reference_number'>) {
-    const ref = `TRF-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
+  async createTransfer(params: Database['public']['Tables']['supply_chain_movements']['Insert']) {
     const { data, error } = await supabase
-      .from('stock_movements')
-      .insert([{ 
-        ...params, 
-        document_number: ref,
-        direction: 'out'
-      } as any])
+      .from('supply_chain_movements')
+      .insert([params])
       .select()
       .single();
     
     if (error) throw error;
-    return data as unknown as StockTransfer;
+    return data;
   },
 
-  async updateTransferStatus(transferId: string, status: string) {
+  async updateTransferStatus(transferId: string, status: Database['public']['Tables']['supply_chain_movements']['Update']['status']) {
     const { data, error } = await supabase
-      .from('stock_movements')
-      .update({ notes: `Status: ${status}` } as any)
+      .from('supply_chain_movements')
+      .update({ status })
       .eq('id', transferId)
       .select()
       .single();
     
     if (error) throw error;
-    return data as unknown as StockTransfer;
+    return data;
   },
 
   async getTransfers(companyId: string): Promise<StockTransfer[]> {
@@ -86,15 +69,26 @@ export const networkService = {
       .from('supply_chain_movements')
       .select(`
         *,
-        origin:operational_units!origin_id(name),
-        destination:operational_units!destination_id(name)
+        origin:branches!supply_chain_movements_origin_id_fkey(name),
+        destination:branches!supply_chain_movements_destination_id_fkey(name)
       `)
       .eq('company_id', companyId)
       .order('created_at', { ascending: false })
       .limit(1000);
 
-    if (error) throw error;
-    return (data || []) as any[];
+    if (error) {
+      const { data: fallbackData, error: fallbackError } = await supabase
+        .from('supply_chain_movements')
+        .select('*')
+        .eq('company_id', companyId)
+        .order('created_at', { ascending: false })
+        .limit(1000);
+      
+      if (fallbackError) throw fallbackError;
+      return (fallbackData || []) as StockTransfer[];
+    }
+    
+    return (data || []) as unknown as StockTransfer[];
   },
 
   async getPosTerminals(unitId: string) {
@@ -102,7 +96,7 @@ export const networkService = {
       .from('pos_terminals')
       .select('*')
       .eq('branch_id', unitId)
-      .limit(100);
+      .limit(50);
     
     if (error) throw error;
     return data || [];

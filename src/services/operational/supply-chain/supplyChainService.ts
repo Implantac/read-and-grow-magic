@@ -1,45 +1,9 @@
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 
-export type MovementStatus = 
-  | 'requested'   
-  | 'approved'    
-  | 'reserved'    
-  | 'picking'     
-  | 'shipped'     
-  | 'in_transit'  
-  | 'delivered'   
-  | 'checked'     
-  | 'divergent'   
-  | 'completed'   
-  | 'investigating';
-
-export type UnitType = 'factory' | 'warehouse' | 'store' | 'customer';
-
-export interface SupplyChainMovement {
-  id: string;
-  origin_id: string;
-  origin_type: UnitType;
-  destination_id: string;
-  destination_type: UnitType;
-  company_id: string;
-  status: MovementStatus;
-  priority: 'low' | 'normal' | 'high' | 'critical';
-  items_count: number;
-  created_at: string;
-  updated_at: string;
-  estimated_arrival?: string;
-  external_ref?: string;
-}
-
-export interface SupplyChainItem {
-  id: string;
-  movement_id: string;
-  product_id: string;
-  requested_qty: number;
-  shipped_qty?: number;
-  received_qty?: number;
-  unit_price?: number;
-}
+export type MovementStatus = Database['public']['Tables']['supply_chain_movements']['Row']['status'];
+export type SupplyChainMovement = Database['public']['Tables']['supply_chain_movements']['Row'];
+export type SupplyChainItem = Database['public']['Tables']['supply_chain_items']['Row'];
 
 export const supplyChainService = {
   async getMovements(filters: {
@@ -72,11 +36,11 @@ export const supplyChainService = {
       return [];
     }
     
-    return data as any[];
+    return data || [];
   },
 
-  async createRequest(request: Partial<SupplyChainMovement> & { items: Partial<SupplyChainItem>[] }) {
-    const { data, error: mError } = await supabase
+  async createRequest(request: Database['public']['Tables']['supply_chain_movements']['Insert'] & { items: Database['public']['Tables']['supply_chain_items']['Insert'][] }) {
+    const { data: movement, error: mError } = await supabase
       .from('supply_chain_movements')
       .insert({
         origin_id: request.origin_id,
@@ -92,28 +56,30 @@ export const supplyChainService = {
       .single();
 
     if (mError) throw mError;
-    const movement = data as SupplyChainMovement;
 
-    const items = request.items.map(item => ({
+    const itemsToInsert = request.items.map(item => ({
       ...item,
       movement_id: movement.id
     }));
 
     const { error: iError } = await supabase
       .from('supply_chain_items')
-      .insert(items as any);
+      .insert(itemsToInsert);
 
     if (iError) throw iError;
 
     return movement;
   },
 
-  async updateStatus(movementId: string, status: MovementStatus) {
-    const { error } = await supabase
+  async updateStatus(id: string, status: MovementStatus) {
+    const { data, error } = await supabase
       .from('supply_chain_movements')
-      .update({ status, updated_at: new Date().toISOString() })
-      .eq('id', movementId);
-    
+      .update({ status })
+      .eq('id', id)
+      .select()
+      .single();
+
     if (error) throw error;
+    return data;
   }
 };
