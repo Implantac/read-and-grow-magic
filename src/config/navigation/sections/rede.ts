@@ -8,7 +8,7 @@ export const redeOperacionalSection: NavSection = {
       href: '/operacional/abastecimento',
       icon: 'ArrowRightLeft',
       children: [
-        { title: 'Painel Gerencial', href: '/operacional/abastecimento', icon: 'LayoutDashboard' },
+        { title: 'Painel Gerencial', href: '/operacional/abastecimento/central', icon: 'LayoutDashboard' },
         { title: 'Torre de Controle', href: '/operacional/rede/painel', icon: 'Layers' },
       ],
     },

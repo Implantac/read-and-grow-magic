@@ -22,7 +22,10 @@ export const OperationalRoutes = [
   <Route key="op-bill" path="faturamento" element={<BillingQueuePage />} />,
   <Route key="op-ship" path="expedicao" element={<ShipmentPage />} />,
   <Route key="op-abastecimento" path="abastecimento" element={<UnifiedSupplyChain />} />,
+
   <Route key="op-rede-tower" path="rede/painel" element={<NetworkControlTower />} />,
+  <Route key="op-abastecimento-central" path="abastecimento/central" element={<UnifiedSupplyChain />} />,
+
   <Route key="op-rede-transfers" path="rede/transferencias" element={<StockTransfers />} />,
   <Route key="op-rede-replenish" path="rede/ressuprimento" element={<ReplenishmentIntelligence />} />,
   <Route key="op-rede-pos" path="rede/terminais" element={<PosTerminals />} />,

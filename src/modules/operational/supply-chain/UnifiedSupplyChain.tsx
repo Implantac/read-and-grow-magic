@@ -141,15 +141,18 @@ export default function UnifiedSupplyChain() {
                           </div>
                         </div>
                         
-                        {/* Progress Bar */}
-                        <div className="mt-4 h-1 w-full bg-muted rounded-full overflow-hidden flex">
-                          <div 
-                            className="h-full bg-primary transition-all duration-500" 
-                            style={{ 
-                              width: `${(Object.keys(STATUS_MAP).indexOf(m.status) + 1) / Object.keys(STATUS_MAP).length * 100}%` 
-                            }} 
-                          />
+                        {/* Status Lifecycle Indicator */}
+                        <div className="mt-4 flex items-center gap-1 w-full opacity-60">
+                          {['requested', 'approved', 'reserved', 'picking', 'shipped', 'in_transit', 'delivered', 'checked', 'completed'].map((status, idx) => {
+                            const currentIdx = ['requested', 'approved', 'reserved', 'picking', 'shipped', 'in_transit', 'delivered', 'checked', 'completed'].indexOf(m.status);
+                            return (
+                              <div key={status} className="flex items-center gap-1 flex-1">
+                                <div className={cn('h-1.5 flex-1 rounded-full transition-colors', idx <= currentIdx ? 'bg-primary' : 'bg-muted')} />
+                              </div>
+                            );
+                          })}
                         </div>
+
                       </div>
                     ))
                   )}
