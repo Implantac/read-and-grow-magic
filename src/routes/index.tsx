@@ -11,7 +11,10 @@
  *
  * Auditoria profunda de Segurança e Banco de Dados executada em 09/08/2026.
  * RLS (Row Level Security) validado para multi-tenancy rigoroso.
+ *
+ * ok prossiga com as melhorias solicitadas
  */
+
 
 import { Suspense, useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
