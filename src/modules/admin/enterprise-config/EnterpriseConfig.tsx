@@ -306,7 +306,7 @@ export default function EnterpriseConfig() {
                       <History className="h-4 w-4 text-primary" />
                       Ledger Logístico Imutável
                     </Label>
-                    <p className="text-[10px] text-muted-foreground font-medium uppercase">Registrar cada mudança de estado (Requested -> Received)</p>
+                    <p className="text-[10px] text-muted-foreground font-medium uppercase">Registrar cada mudança de estado (Requested {"->"} Received)</p>
                   </div>
                   <Switch 
                     checked={settings.modules.governance}
