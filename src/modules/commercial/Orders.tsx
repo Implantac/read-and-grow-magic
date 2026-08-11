@@ -210,7 +210,6 @@ export default function OrdersPage() {
 
       {filteredOrders.length === 0 ? (
         <EmptyState 
-          variant="search"
           title="Nenhum pedido encontrado" 
           description="Tente ajustar os filtros ou crie um novo pedido de venda para começar."
           action={{ label: "Novo Pedido", onClick: () => { resetForm(); setIsFormOpen(true); } }}
