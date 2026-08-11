@@ -171,12 +171,14 @@ export function Product360Drawer({ open, onOpenChange, productId, productName }:
                         <p className="text-lg font-black text-accent">
                           {Math.max(0, demand.predicted_demand - product.availableQty)} <span className="text-xs font-normal">{product.unit}</span>
                         </p>
+                        <p className="text-[9px] text-muted-foreground mt-0.5">Baseado na projeção IA</p>
                       </div>
                       <div>
                         <p className="text-[10px] text-muted-foreground uppercase font-bold">Cobertura Estimada</p>
                         <p className="text-lg font-black">
                           {Math.round((product.availableQty / (demand.predicted_demand / 30)) || 0)} <span className="text-xs font-normal">dias</span>
                         </p>
+                        <Badge variant="outline" className="text-[8px] h-3 px-1 mt-1 border-accent/30 text-accent bg-accent/5">Fase 5 - Predictive</Badge>
                       </div>
                     </div>
                     
