@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
-import { Star, Plus, Search, Eye, Edit, Trash2, Mail, Phone, MapPin, MoreHorizontal, Loader2 } from 'lucide-react';
+import { Star, Plus, Search, Eye, Edit, Trash2, Mail, Phone, MapPin, MoreHorizontal, Loader2, ExternalLink } from 'lucide-react';
 import { usePurchasing } from '@/hooks/purchasing/usePurchasingQuery';
+import { Supplier360Drawer } from '@/modules/purchasing/components/Supplier360Drawer';
 import { ExportButton } from '@/shared/components/ExportButton';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
