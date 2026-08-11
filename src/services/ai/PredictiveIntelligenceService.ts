@@ -6,6 +6,7 @@ export interface DemandPrediction {
   predicted_demand: number;
   confidence_score: number;
   reasoning: string;
+  period_days: number;
 }
 
 export interface SlottingOptimization {
@@ -24,7 +25,9 @@ export class PredictiveIntelligenceService extends BaseService<'products'> {
    * Digital Twin: Prediz a demanda para os próximos 30 dias usando IA Preditiva.
    * FASE 5: Simulação de demanda baseada em histórico de vendas e tendências.
    */
-  async predictProductDemand(productId: string): Promise<DemandPrediction> {
+  async predictProductDemand(productId: string, options: { days?: number, seasonality?: 'none' | 'high' | 'low' } = {}): Promise<DemandPrediction> {
+    const days = options.days || 30;
+    const seasonality = options.seasonality || 'none';
     const companyId = await this.resolveCompanyId();
     
     // Simulação de Digital Twin para a Fase 5
@@ -38,13 +41,20 @@ export class PredictiveIntelligenceService extends BaseService<'products'> {
       .limit(50);
 
     const totalQty = (salesHistory || []).reduce((acc: number, item: any) => acc + (item.quantity || 0), 0);
-    const avgDemand = salesHistory && salesHistory.length > 0 ? totalQty / salesHistory.length : 10;
+    const avgDemandPerDay = salesHistory && salesHistory.length > 0 ? (totalQty / salesHistory.length) / 30 : 0.33; // Mocking a per-day average
+    
+    let seasonalityMultiplier = 1;
+    if (seasonality === 'high') seasonalityMultiplier = 1.5;
+    if (seasonality === 'low') seasonalityMultiplier = 0.7;
+
+    const predictedDemand = Math.round(avgDemandPerDay * days * 1.25 * seasonalityMultiplier);
 
     return {
       product_id: productId,
-      predicted_demand: Math.round(avgDemand * 1.25), // Fator de crescimento preditivo
+      predicted_demand: predictedDemand,
       confidence_score: 0.85,
-      reasoning: "Baseado na sazonalidade dos últimos 30 dias e tendência de crescimento do setor."
+      reasoning: `Baseado na sazonalidade (${seasonality}) dos últimos ${days} dias e tendência de crescimento do setor.`,
+      period_days: days
     };
   }
 

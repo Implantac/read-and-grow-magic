@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { predictiveIntelligenceService, DemandPrediction } from '@/services/ai/PredictiveIntelligenceService';
 import { useToast } from '@/ui/base/use-toast';
 
-export function usePredictiveIntelligence(productId: string | null) {
+export function usePredictiveIntelligence(productId: string | null, options: { days?: number, seasonality?: 'none' | 'high' | 'low' } = {}) {
   const [demand, setDemand] = useState<DemandPrediction | null>(null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -12,7 +12,7 @@ export function usePredictiveIntelligence(productId: string | null) {
     
     setLoading(true);
     try {
-      const data = await predictiveIntelligenceService.predictProductDemand(productId);
+      const data = await predictiveIntelligenceService.predictProductDemand(productId, options);
       setDemand(data);
     } catch (error) {
       console.error('Error fetching demand prediction:', error);
@@ -32,7 +32,7 @@ export function usePredictiveIntelligence(productId: string | null) {
     } else {
       setDemand(null);
     }
-  }, [productId]);
+  }, [productId, options.days, options.seasonality]);
 
   return {
     demand,

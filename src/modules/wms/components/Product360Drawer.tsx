@@ -1,13 +1,14 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/ui/base/sheet';
 import { Badge } from '@/ui/base/badge';
 import { Card, CardContent } from '@/ui/base/card';
 import { Skeleton } from '@/ui/base/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { ScrollArea } from '@/ui/base/scroll-area';
 import { Progress } from '@/ui/base/progress';
 import { formatBRL, formatDate } from '@/lib/formatters';
-import { Package, History, TrendingUp, AlertTriangle, Box, ArrowRightLeft, DollarSign, BrainCircuit, Zap, Info } from 'lucide-react';
+import { Package, History, TrendingUp, AlertTriangle, Box, ArrowRightLeft, DollarSign, BrainCircuit, Zap, Info, Calendar, Wind } from 'lucide-react';
 import { useWMSInventory } from '@/hooks/wms/useWMSInventory';
 import { useProductCosts } from '@/hooks/production/useProductCosts';
 import { usePredictiveIntelligence } from '@/hooks/ai/usePredictiveIntelligence';
@@ -25,7 +26,9 @@ interface Props {
 export function Product360Drawer({ open, onOpenChange, productId, productName }: Props) {
   const { items, loading: loadingInventory } = useWMSInventory();
   const { costs, loading: loadingCosts } = useProductCosts();
-  const { demand, loading: loadingDemand } = usePredictiveIntelligence(productId);
+  const [period, setPeriod] = useState<number>(30);
+  const [seasonality, setSeasonality] = useState<'none' | 'high' | 'low'>('none');
+  const { demand, loading: loadingDemand } = usePredictiveIntelligence(productId, { days: period, seasonality });
 
   const product = useMemo(() => 
     items.find(i => i.id === productId || i.productCode === productId),
@@ -139,12 +142,48 @@ export function Product360Drawer({ open, onOpenChange, productId, productName }:
                     <CardContent className="p-4">
                       <div className="flex items-center gap-2 mb-3">
                         <BrainCircuit className="h-4 w-4 text-accent" />
-                        <span className="text-sm font-bold">Projeção Digital Twin (30 dias)</span>
+                        <span className="text-sm font-bold">Projeção Digital Twin</span>
+                        <Badge variant="outline" className="text-[9px] h-4 ml-auto border-accent/30 text-accent">Fase 5 - Predictive</Badge>
                       </div>
+
+                      {/* Filtros de IA */}
+                      <div className="flex gap-2 mb-4">
+                        <div className="flex-1 space-y-1">
+                          <label className="text-[9px] text-muted-foreground uppercase flex items-center gap-1">
+                            <Calendar className="h-2 w-2" /> Período
+                          </label>
+                          <Select value={period.toString()} onValueChange={(v) => setPeriod(parseInt(v))}>
+                            <SelectTrigger className="h-7 text-[10px] bg-background/50 border-accent/20">
+                              <SelectValue placeholder="Período" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="7">7 dias</SelectItem>
+                              <SelectItem value="30">30 dias</SelectItem>
+                              <SelectItem value="90">90 dias</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex-1 space-y-1">
+                          <label className="text-[9px] text-muted-foreground uppercase flex items-center gap-1">
+                            <Wind className="h-2 w-2" /> Sazonalidade
+                          </label>
+                          <Select value={seasonality} onValueChange={(v: any) => setSeasonality(v)}>
+                            <SelectTrigger className="h-7 text-[10px] bg-background/50 border-accent/20">
+                              <SelectValue placeholder="Sazonalidade" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">Normal</SelectItem>
+                              <SelectItem value="high">Alta (Pico)</SelectItem>
+                              <SelectItem value="low">Baixa</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
                       <div className="space-y-4">
                         <div className="flex justify-between items-start">
                           <div>
-                            <p className="text-[10px] uppercase text-muted-foreground font-bold">Demanda Prevista</p>
+                            <p className="text-[10px] uppercase text-muted-foreground font-bold">Demanda Prevista ({period}d)</p>
                             <p className="text-2xl font-black text-accent">{demand.predicted_demand} <span className="text-xs font-normal text-muted-foreground">{product.unit}</span></p>
                           </div>
                           <div className="flex flex-col items-end gap-1">
@@ -164,7 +203,7 @@ export function Product360Drawer({ open, onOpenChange, productId, productName }:
                           </div>
                         </div>
 
-                        <DemandProjectionChart predictedDemand={demand.predicted_demand} unit={product.unit} />
+                        <DemandProjectionChart predictedDemand={demand.predicted_demand} unit={product.unit} periodDays={period} />
 
                         <p className="text-[10px] text-muted-foreground leading-tight bg-accent/10 p-2 rounded border border-accent/10 italic">
                           "{demand.reasoning}"
