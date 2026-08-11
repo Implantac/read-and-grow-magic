@@ -102,6 +102,7 @@ const InventoryCategories = lazy(() => import("./pages/inventory/Categories"));
 const InventoryMovements = lazy(() => import("./pages/inventory/Movements"));
 const InventoryKardex = lazy(() => import("./pages/inventory/Kardex"));
 const InventoryStockLevels = lazy(() => import("./pages/inventory/StockLevels"));
+const ProcurementDashboard = lazy(() => import("./pages/purchasing/ProcurementDashboard"));
 const CreditRiskDashboard = lazy(() => import("./pages/credit/RiskDashboard"));
 const CreditAnalysis = lazy(() => import("./pages/credit/CreditAnalysis"));
 const CreditOrderBlocks = lazy(() => import("./pages/credit/OrderBlocks"));
@@ -201,6 +202,7 @@ const App = () => (
                 <Route path="/compras/pedidos" element={<PurchaseOrders />} />
                 <Route path="/compras/fornecedores" element={<Suppliers />} />
                 <Route path="/compras/cotacoes" element={<Quotations />} />
+                <Route path="/compras/dashboard" element={<ProcurementDashboard />} />
                 <Route path="/estoque/produtos" element={<InventoryProducts />} />
                 <Route path="/estoque/categorias" element={<InventoryCategories />} />
                 <Route path="/estoque/movimentacoes" element={<InventoryMovements />} />
