@@ -1,8 +1,9 @@
 import { AlertTriangle, Loader2, Trash2 } from 'lucide-react';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogFooter, AlertDialogHeader,
 } from '@/ui/base/alert-dialog';
+import { OperationalFeedback } from '@/components/shared/OperationalFeedback';
 
 interface DeleteOrderDialogProps {
   open: boolean;
@@ -20,13 +21,11 @@ export function DeleteOrderDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2 text-destructive">
-            <AlertTriangle className="h-5 w-5" />
-            Confirmar Exclusão
-          </AlertDialogTitle>
-          <AlertDialogDescription>
-            Tem certeza que deseja excluir o pedido <span className="font-mono font-bold text-foreground">{orderNumber}</span>? Esta ação não pode ser desfeita.
-          </AlertDialogDescription>
+          <OperationalFeedback
+            type="error"
+            title="Confirmar Exclusão"
+            message={`Tem certeza que deseja excluir o pedido ${orderNumber}? Esta ação removerá o registro permanentemente do sistema após o período de restauração.`}
+          />
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel onClick={onCancel} disabled={isPending}>

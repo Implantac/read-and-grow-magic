@@ -1,8 +1,9 @@
 import { XCircle } from 'lucide-react';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogFooter, AlertDialogHeader,
 } from '@/ui/base/alert-dialog';
+import { OperationalFeedback } from '@/components/shared/OperationalFeedback';
 
 interface CancelOrderDialogProps {
   open: boolean;
@@ -16,14 +17,11 @@ export function CancelOrderDialog({ open, onOpenChange, orderNumber, onConfirm }
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2">
-            <XCircle className="h-5 w-5 text-destructive" />
-            Cancelar Pedido
-          </AlertDialogTitle>
-          <AlertDialogDescription>
-            Tem certeza que deseja cancelar o pedido <strong className="font-mono">{orderNumber}</strong>?
-            Esta ação não pode ser desfeita.
-          </AlertDialogDescription>
+          <OperationalFeedback
+            type="warning"
+            title="Cancelar Pedido"
+            message={`Tem certeza que deseja cancelar o pedido ${orderNumber}? O cancelamento interrompe o fluxo logístico e financeiro associado.`}
+          />
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Voltar</AlertDialogCancel>
