@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { supplyChainService, SupplyChainMovement, MovementStatus } from '@/services/operational/supply-chain/supplyChainService';
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 export function useSupplyChain(filters?: { status?: MovementStatus[] }) {
@@ -41,10 +43,25 @@ export function useSupplyChain(filters?: { status?: MovementStatus[] }) {
     }
   };
 
+  const getMovementLedger = async (movementId: string) => {
+    const { data, error } = await supabase
+      .from('supply_chain_ledger' as any)
+      .select('*')
+      .eq('movement_id', movementId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching ledger:', error);
+      return [];
+    }
+    return data || [];
+  };
+
   return {
     movements,
     isLoading,
     refresh: fetchMovements,
-    updateStatus
+    updateStatus,
+    getMovementLedger
   };
 }
