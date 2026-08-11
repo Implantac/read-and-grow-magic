@@ -9,6 +9,7 @@ export const logisticaSection: NavSection = {
       icon: 'Warehouse',
       children: [
         { title: 'Dashboard WMS', href: '/wms/dashboard', icon: 'LayoutDashboard' },
+        { title: 'Inventário Geral', href: '/wms/inventario', icon: 'Package' },
         { title: 'Matriz Multi-Loja', href: '/wms/matriz-estoque', icon: 'LayoutGrid' },
         { title: 'Recebimento & Put-away', href: '/wms/recebimento', icon: 'PackagePlus' },
         { title: 'Picking & Ondas', href: '/wms/separacao', icon: 'PackageSearch' },
