@@ -67,14 +67,33 @@ export function useWMSInventory() {
 
   // Realtime: qualquer mudança nas tabelas do WMS re-busca os dados
   useEffect(() => {
-    const channel = supabase.channel('wms-inventory-hook');
+    let mounted = true;
+    const channelName = `wms-inventory-${Math.random().toString(36).substring(7)}`;
+    const channel = supabase.channel(channelName);
     
+    const handleChanges = () => {
+      if (mounted) fetchData();
+    };
+
     channel
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'wms_inventory_items' }, () => fetchData())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'wms_inventory_counts' }, () => fetchData())
-      .subscribe();
+      .on(
+        'postgres_changes', 
+        { event: '*', schema: 'public', table: 'wms_inventory_items' }, 
+        handleChanges
+      )
+      .on(
+        'postgres_changes', 
+        { event: '*', schema: 'public', table: 'wms_inventory_counts' }, 
+        handleChanges
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('Realtime subscribed successfully for WMS inventory');
+        }
+      });
 
     return () => {
+      mounted = false;
       supabase.removeChannel(channel);
     };
   }, [fetchData]);
