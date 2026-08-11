@@ -182,24 +182,34 @@ export default function AccountsReceivable() {
         />
       </PageHeader>
 
-      <AccountsReceivableSummary accounts={accounts} />
-      <AgingList accounts={accounts} />
+      {accounts.length === 0 ? (
+        <EmptyState 
+          title="Nenhum título a receber"
+          description="Você ainda não possui títulos financeiros registrados. Crie um novo lançamento ou fature um pedido para começar."
+          action={{ label: "Novo Lançamento", onClick: () => setIsDialogOpen(true) }}
+        />
+      ) : (
+        <>
+          <AccountsReceivableSummary accounts={accounts} />
+          <AgingList accounts={accounts} />
 
-      <ReceivableFilters
-        searchTerm={searchTerm} onSearchChange={setSearchTerm}
-        statusFilter={statusFilter} onStatusChange={setStatusFilter}
-        categoryFilter={categoryFilter} onCategoryChange={setCategoryFilter}
-        categories={categories}
-        filteredAccounts={filteredAccounts}
-      />
+          <ReceivableFilters
+            searchTerm={searchTerm} onSearchChange={setSearchTerm}
+            statusFilter={statusFilter} onStatusChange={setStatusFilter}
+            categoryFilter={categoryFilter} onCategoryChange={setCategoryFilter}
+            categories={categories}
+            filteredAccounts={filteredAccounts}
+          />
 
-      <ReceivableTable
-        accounts={filteredAccounts}
-        now={now}
-        onReceive={openReceiveDialog}
-        onView={(a) => { setSelectedAccount(a as typeof accounts[0]); setIsDetailOpen(true); }}
-        onDelete={(id) => deleteMutation.mutate(id)}
-      />
+          <ReceivableTable
+            accounts={filteredAccounts}
+            now={now}
+            onReceive={openReceiveDialog}
+            onView={(a) => { setSelectedAccount(a as typeof accounts[0]); setIsDetailOpen(true); }}
+            onDelete={(id) => deleteMutation.mutate(id)}
+          />
+        </>
+      )}
 
       <ReceivePaymentDialog
         open={isReceiveDialogOpen}
