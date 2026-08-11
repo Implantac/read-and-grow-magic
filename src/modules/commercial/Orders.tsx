@@ -21,7 +21,8 @@ import { toastError, toastSuccess } from '@/lib/toastHelpers';
 import { filterFields, statusFlow } from './orders/constants';
 import { OrdersTable } from './orders/OrdersTable';
 import { SalesKanbanBoard } from './orders/SalesKanbanBoard';
-import { CreateOrderDialog } from './orders/CreateOrderDialog';
+import { OrderWizard } from './orders/components/OrderWizard';
+import { Dialog, DialogContent } from '@/ui/base/dialog';
 import { ViewOrderDialog } from './orders/ViewOrderDialog';
 import { DeleteOrderDialog } from './orders/DeleteOrderDialog';
 import { CancelOrderDialog } from './orders/CancelOrderDialog';
@@ -235,29 +236,19 @@ export default function OrdersPage() {
         />
       )}
 
-      <CreateOrderDialog
-        open={isFormOpen}
-        onOpenChange={setIsFormOpen}
-        formClient={formClient}
-        setFormClient={setFormClient}
-        formItems={formItems}
-        setFormItems={setFormItems}
-        formPayment={formPayment}
-        setFormPayment={setFormPayment}
-        formCondition={formCondition}
-        setFormCondition={setFormCondition}
-        formPriority={formPriority}
-        setFormPriority={setFormPriority}
-        formDelivery={formDelivery}
-        setFormDelivery={setFormDelivery}
-        formShipping={formShipping}
-        setFormShipping={setFormShipping}
-        formNotes={formNotes}
-        setFormNotes={setFormNotes}
-        orderValidations={orderValidations}
-        isPending={createOrder.isPending}
-        onSubmit={handleCreate}
-      />
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto p-0 border-none bg-transparent shadow-none">
+          <div className="bg-background rounded-2xl border border-border shadow-2xl p-6">
+            <OrderWizard 
+              onSuccess={() => {
+                setIsFormOpen(false);
+                resetForm();
+              }} 
+              onCancel={() => setIsFormOpen(false)} 
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <ViewOrderDialog
         open={isViewOpen}
