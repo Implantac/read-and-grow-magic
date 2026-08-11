@@ -22,6 +22,8 @@ import { filterFields, statusFlow } from './orders/constants';
 import { OrdersTable } from './orders/OrdersTable';
 import { SalesKanbanBoard } from './orders/SalesKanbanBoard';
 import { CreateOrderDialog } from './orders/CreateOrderDialog';
+import { OrderWizard } from './orders/components/OrderWizard';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/ui/base/dialog';
 import { ViewOrderDialog } from './orders/ViewOrderDialog';
 import { DeleteOrderDialog } from './orders/DeleteOrderDialog';
 import { CancelOrderDialog } from './orders/CancelOrderDialog';
