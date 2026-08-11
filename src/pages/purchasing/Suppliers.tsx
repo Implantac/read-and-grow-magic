@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
-import { Star, Plus, Search, Eye, Edit, Trash2, Mail, Phone, MapPin, MoreHorizontal, Loader2 } from 'lucide-react';
+import { Star, Plus, Search, Eye, Edit, Trash2, Mail, Phone, MapPin, MoreHorizontal, Loader2, ExternalLink } from 'lucide-react';
 import { usePurchasing } from '@/hooks/purchasing/usePurchasingQuery';
+import { Supplier360Drawer } from '@/modules/purchasing/components/Supplier360Drawer';
 import { ExportButton } from '@/shared/components/ExportButton';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
@@ -62,7 +63,13 @@ export default function SuppliersPage() {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isViewOpen, setIsViewOpen] = useState(false);
+  const [is360Open, setIs360Open] = useState(false);
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
+
+  const handleOpen360 = (supplier: Supplier) => {
+    setSelectedSupplier(supplier);
+    setIs360Open(true);
+  };
   const [formData, setFormData] = useState<Partial<Supplier>>({});
   const cnpjLookup = useCnpjLookup();
 
@@ -199,6 +206,7 @@ export default function SuppliersPage() {
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleOpen360(supplier)}><ExternalLink className="mr-2 h-4 w-4" />Visão 360°</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => { setSelectedSupplier(supplier); setIsViewOpen(true); }}><Eye className="mr-2 h-4 w-4" />Visualizar</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => { setSelectedSupplier(supplier); setFormData(supplier); setIsFormOpen(true); }}><Edit className="mr-2 h-4 w-4" />Editar</DropdownMenuItem>
                       </DropdownMenuContent>
@@ -211,7 +219,11 @@ export default function SuppliersPage() {
         </CardContent>
       </Card>
 
-      {/* Dialogs would go here - simplified for brevity of refactoring */}
+      <Supplier360Drawer 
+        open={is360Open} 
+        onOpenChange={setIs360Open} 
+        supplier={selectedSupplier} 
+      />
     </PageContainer>
   );
 }

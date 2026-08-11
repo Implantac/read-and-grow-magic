@@ -23,7 +23,9 @@ export type EntityKey =
   | "pipeline_amount"
   | "conversion_rate"
   | "churn_rate"
-  | "nfe_rejected";
+  | "nfe_rejected"
+  | "product_360"
+  | "supplier_360";
 
 export interface EntityDefinition {
   key: EntityKey;
@@ -201,6 +203,38 @@ export const entityRegistry: Record<EntityKey, EntityDefinition> = {
       what: "Notas rejeitadas pela SEFAZ.",
       why: "Divergência cadastral, CST ou CFOP incorretos.",
       next: "Corrigir cadastro e retransmitir; revisar regra fiscal.",
+    },
+  },
+  product_360: {
+    key: "product_360",
+    label: "Visão 360 do Produto",
+    unit: "count",
+    agent: "coo",
+    sourceTable: "products",
+    related: [
+      { label: "Movimentações", table: "wms_inventory_movements", fk: "product_id" },
+      { label: "Custos", table: "product_costs", fk: "product_id" },
+    ],
+    narrative: {
+      what: "Análise multidimensional do SKU (estoque, vendas, custos).",
+      why: "Garantir disponibilidade com o menor custo de estoque possível.",
+      next: "Ajustar estoque de segurança e revisar margem de contribuição.",
+    },
+  },
+  supplier_360: {
+    key: "supplier_360",
+    label: "Visão 360 do Fornecedor",
+    unit: "count",
+    agent: "coo",
+    sourceTable: "suppliers",
+    related: [
+      { label: "Pedidos", table: "purchase_orders", fk: "supplier_id" },
+      { label: "Contas a Pagar", table: "accounts_payable", fk: "supplier_id" },
+    ],
+    narrative: {
+      what: "Desempenho e saúde financeira do fornecedor.",
+      why: "Monitorar lead time, qualidade e pontualidade de entrega.",
+      next: "Renegociar prazos e volumes baseado no rating de entrega.",
     },
   },
 };

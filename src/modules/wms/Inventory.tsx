@@ -11,9 +11,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { Progress } from '@/ui/base/progress';
-import { Search, Package, AlertTriangle, ClipboardList, DollarSign } from 'lucide-react';
+import { Search, Package, AlertTriangle, ClipboardList, DollarSign, ExternalLink } from 'lucide-react';
 import { useWMSInventory } from '@/hooks/wms/useWMSInventory';
 import { RealtimeStatus } from '@/modules/wms/components/RealtimeStatus';
+import { Product360Drawer } from '@/modules/wms/components/Product360Drawer';
+import { Button } from '@/ui/base/button';
 import type { InventoryStatus } from '@/types/wms';
 
 
@@ -24,6 +26,13 @@ export default function InventoryPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  const [is360Open, setIs360Open] = useState(false);
+
+  const handleOpen360 = (id: string) => {
+    setSelectedProductId(id);
+    setIs360Open(true);
+  };
 
   const categories = [...new Set(items.map(i => i.category).filter(Boolean))];
 
@@ -126,6 +135,7 @@ export default function InventoryPage() {
                     <TableHead className="text-right">Disponível</TableHead>
                     <TableHead>Cobertura</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -154,6 +164,16 @@ export default function InventoryPage() {
                           </TableCell>
                           <TableCell>
                             <StatusBadge status={item.status} type="inventory" />
+                          </TableCell>
+                          <TableCell>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8"
+                              onClick={() => handleOpen360(item.id)}
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </Button>
                           </TableCell>
                         </TableRow>
                       );
@@ -205,6 +225,12 @@ export default function InventoryPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Product360Drawer 
+        open={is360Open} 
+        onOpenChange={setIs360Open} 
+        productId={selectedProductId} 
+      />
     </PageContainer>
   );
 }
