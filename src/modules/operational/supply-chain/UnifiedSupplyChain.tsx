@@ -149,9 +149,11 @@ export default function UnifiedSupplyChain() {
                               variant="secondary" 
                               className="h-8 font-black text-[9px] uppercase"
                               onClick={() => handleNextStep(m)}
+                              disabled={['delivered', 'checked', 'completed', 'divergent'].includes(m.status)}
                             >
-                              Avançar Etapa
+                              {m.status === 'requested' ? 'Aprovar Solicitação' : 'Avançar Etapa'}
                             </Button>
+
                           </div>
                         </div>
 

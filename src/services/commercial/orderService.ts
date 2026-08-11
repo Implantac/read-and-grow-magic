@@ -144,7 +144,7 @@ export class OrderService extends BaseService<'orders'> {
 
     const { order_items, ...orderData } = deletedOrder;
     
-    const { data: restored, error: restError } = await supabase.from('orders').insert(orderData as never).select().single();
+    const { data: restored, error: restError } = await supabase.from('orders').insert(orderData as any).select().single();
     if (restError) throw restError;
 
     if (order_items && order_items.length > 0) {
@@ -152,7 +152,8 @@ export class OrderService extends BaseService<'orders'> {
         ...item,
         order_id: restored.id
       }));
-      const { error: itemsError } = await supabase.from('order_items').insert(restoredItems as never);
+      const { error: itemsError } = await supabase.from('order_items').insert(restoredItems as any);
+
       if (itemsError) throw itemsError;
     }
 
