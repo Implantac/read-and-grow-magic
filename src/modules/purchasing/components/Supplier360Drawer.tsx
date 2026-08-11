@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/ui/base/sheet';
 import { Badge } from '@/ui/base/badge';
-import { Card, CardContent } from '@/ui/base/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Skeleton } from '@/ui/base/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { ScrollArea } from '@/ui/base/scroll-area';
