@@ -19,8 +19,8 @@ export function useOEEMetrics() {
   const fetchMetrics = useCallback(async () => {
     setLoading(true);
     try {
-      // Cast to any to avoid TS checking for a table that might not be in types.ts yet
-      const { data, error } = await (supabase.from('oee_metrics' as any) as any)
+      const { data, error } = await supabase
+        .from('oee_metrics')
         .select('*')
         .order('timestamp', { ascending: false })
         .limit(100);
