@@ -45,7 +45,9 @@ export default function EnterpriseConfig() {
       logistics: true,
       production: false,
       financial: true,
-      fiscal: true
+      fiscal: true,
+      governance: true,
+      audit: true
     },
     approvals: {
       discount_threshold: 10,
