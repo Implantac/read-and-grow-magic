@@ -44,17 +44,26 @@ export function useSupplyChain(filters?: { status?: MovementStatus[] }) {
   };
 
   const getMovementLedger = async (movementId: string) => {
-    const { data, error } = await supabase
-      .from('supply_chain_ledger' as any)
-      .select('*')
-      .eq('movement_id', movementId)
-      .order('created_at', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('supply_chain_ledger' as any)
+        .select('*')
+        .eq('movement_id', movementId)
+        .order('created_at', { ascending: false });
 
-    if (error) {
+      if (error) {
+        // Se a tabela não existir, retorna array vazio silenciosamente para não quebrar a UI
+        if (error.code === 'PGRST116' || error.message?.includes('does not exist')) {
+          console.warn('supply_chain_ledger table not found, skipping history');
+          return [];
+        }
+        throw error;
+      }
+      return data || [];
+    } catch (error) {
       console.error('Error fetching ledger:', error);
       return [];
     }
-    return data || [];
   };
 
   return {
