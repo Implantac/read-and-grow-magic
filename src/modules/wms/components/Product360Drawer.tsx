@@ -6,9 +6,10 @@ import { Skeleton } from '@/ui/base/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { ScrollArea } from '@/ui/base/scroll-area';
 import { formatBRL, formatDate } from '@/lib/formatters';
-import { Package, History, TrendingUp, AlertTriangle, Box, ArrowRightLeft, DollarSign } from 'lucide-react';
+import { Package, History, TrendingUp, AlertTriangle, Box, ArrowRightLeft, DollarSign, BrainCircuit, Zap } from 'lucide-react';
 import { useWMSInventory } from '@/hooks/wms/useWMSInventory';
 import { useProductCosts } from '@/hooks/production/useProductCosts';
+import { usePredictiveIntelligence } from '@/hooks/ai/usePredictiveIntelligence';
 import { StatusBadge } from '@/shared/components/StatusBadge';
 
 interface Props {
@@ -21,6 +22,7 @@ interface Props {
 export function Product360Drawer({ open, onOpenChange, productId, productName }: Props) {
   const { items, loading: loadingInventory } = useWMSInventory();
   const { costs, loading: loadingCosts } = useProductCosts();
+  const { demand, loading: loadingDemand } = usePredictiveIntelligence(productId);
 
   const product = useMemo(() => 
     items.find(i => i.id === productId || i.productCode === productId),
@@ -128,6 +130,63 @@ export function Product360Drawer({ open, onOpenChange, productId, productName }:
                       </div>
                     </CardContent>
                   </Card>
+                )}
+                {demand && (
+                  <Card className="border-accent/20 bg-accent/5">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <BrainCircuit className="h-4 w-4 text-accent" />
+                        <span className="text-sm font-bold">Projeção Digital Twin (30 dias)</span>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-end">
+                          <div>
+                            <p className="text-[10px] uppercase text-muted-foreground font-bold">Demanda Prevista</p>
+                            <p className="text-2xl font-black text-accent">{demand.predicted_demand} <span className="text-xs font-normal text-muted-foreground">{product.unit}</span></p>
+                          </div>
+                          <Badge variant="secondary" className="bg-accent/10 text-accent border-accent/20 text-[10px] flex gap-1 items-center">
+                            <Zap className="h-2 w-2" /> {Math.round(demand.confidence_score * 100)}% Confiança
+                          </Badge>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground leading-tight italic">
+                          "{demand.reasoning}"
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </TabsContent>
+
+              <TabsContent value="logistics" className="space-y-4 mt-4">
+                {demand && (
+                  <div className="p-4 border border-accent/20 bg-accent/5 rounded-lg space-y-3">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-accent" />
+                      <p className="text-xs font-bold uppercase text-accent">Análise de Reabastecimento IA</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-[10px] text-muted-foreground uppercase font-bold">Sugestão de Compra</p>
+                        <p className="text-lg font-black text-accent">
+                          {Math.max(0, demand.predicted_demand - product.availableQty)} <span className="text-xs font-normal">{product.unit}</span>
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-muted-foreground uppercase font-bold">Cobertura Estimada</p>
+                        <p className="text-lg font-black">
+                          {Math.round((product.availableQty / (demand.predicted_demand / 30)) || 0)} <span className="text-xs font-normal">dias</span>
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="pt-2 border-t border-accent/10">
+                      <div className="flex items-center gap-2 text-[10px] text-accent font-medium">
+                        <Zap className="h-3 w-3" />
+                        <span>Ponto de Ressuprimento Sugerido: {Math.round(demand.predicted_demand * 0.3)} {product.unit}</span>
+                      </div>
+                    </div>
+                  </div>
                 )}
               </TabsContent>
 
