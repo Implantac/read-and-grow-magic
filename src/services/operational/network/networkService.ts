@@ -38,14 +38,14 @@ export const networkService = {
   },
 
   async getStockBalances(companyId: string, unitId?: string) {
-    let query = supabase
+    let query = (supabase as any)
       .from('stock_balances')
       .select('*, operational_units(name), stock_locations(name), products(name, code)')
       .eq('company_id', companyId)
       .limit(1000);
     
     if (unitId) {
-      query = query.eq('branch_id' as any, unitId);
+      query = query.eq('branch_id', unitId);
     }
 
     const { data, error } = await query;

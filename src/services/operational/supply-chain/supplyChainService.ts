@@ -76,7 +76,7 @@ export const supplyChainService = {
   },
 
   async createRequest(request: Partial<SupplyChainMovement> & { items: Partial<SupplyChainItem>[] }) {
-    const { data, error: mError } = await (supabase as any)
+    const { data, error: mError } = await supabase
       .from('supply_chain_movements')
       .insert({
         origin_id: request.origin_id,
@@ -99,7 +99,7 @@ export const supplyChainService = {
       movement_id: movement.id
     }));
 
-    const { error: iError } = await (supabase as any)
+    const { error: iError } = await supabase
       .from('supply_chain_items')
       .insert(items);
 
@@ -109,7 +109,7 @@ export const supplyChainService = {
   },
 
   async updateStatus(movementId: string, status: MovementStatus) {
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from('supply_chain_movements')
       .update({ status, updated_at: new Date().toISOString() })
       .eq('id', movementId);

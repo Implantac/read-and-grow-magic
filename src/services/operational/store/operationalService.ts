@@ -13,8 +13,8 @@ export interface OperationalTask {
 
 export const operationalService = {
   async getMyTasks(branchId: string): Promise<OperationalTask[]> {
-    const { data, error } = await (supabase as any)
-      .from('operational_tasks')
+    const { data, error } = await supabase
+      .from('operational_tasks' as any)
       .select('*')
       .eq('branch_id', branchId)
       .order('priority', { ascending: false })
@@ -26,8 +26,8 @@ export const operationalService = {
   },
 
   async createTask(task: any) {
-    const { data, error } = await (supabase as any)
-      .from('operational_tasks')
+    const { data, error } = await supabase
+      .from('operational_tasks' as any)
       .insert(task)
       .select()
       .single();
@@ -37,8 +37,8 @@ export const operationalService = {
   },
 
   async resolveDiscrepancy(discrepancyId: string, resolution: { resolution_notes: string; status: string }) {
-    const { data, error } = await (supabase as any)
-      .from('operational_discrepancies')
+    const { data, error } = await supabase
+      .from('operational_discrepancies' as any)
       .update({
         ...resolution,
         resolved_at: new Date().toISOString(),
@@ -55,7 +55,7 @@ export const operationalService = {
   async getSmartInventorySuggestions(branchId: string) {
     // Busca produtos com estoque baixo ou alta movimentação sem contagem recente
     // Esta lógica seria idealmente uma VIEW ou RPC no Postgres
-    const { data: suggestions, error } = await (supabase as any)
+    const { data: suggestions, error } = await supabase
       .from('replenishment_policies')
       .select('*, product:products(name, code, unit)')
       .eq('branch_id', branchId)

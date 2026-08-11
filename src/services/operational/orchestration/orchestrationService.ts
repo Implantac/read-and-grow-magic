@@ -33,7 +33,7 @@ export class OrchestrationService {
         branchId: targetBranchId,
         leadTimeDays: 0,
         cost: 0,
-        stockAvailable: (localStock as any).balance
+        stockAvailable: (localStock as any).quantity
       });
     }
 
@@ -64,7 +64,7 @@ export class OrchestrationService {
    * Create an orchestrated order
    */
   async createOrchestratedOrder(orderData: any, sourcing: SourcingOption) {
-    const { data: order, error } = await (supabase as any)
+    const { data: order, error } = await supabase
       .from('storefront_orders')
       .insert({
         ...orderData,
@@ -79,7 +79,7 @@ export class OrchestrationService {
     if (error) throw error;
 
     if (sourcing.type === 'crossdock') {
-      await (supabase as any).from('stock_transfer_orders').insert({
+      await supabase.from('stock_movements' as any).insert({
         company_id: order.company_id,
         origin_unit_id: sourcing.branchId,
         destination_unit_id: orderData.branch_id,
