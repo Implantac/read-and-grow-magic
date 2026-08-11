@@ -11,9 +11,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { Progress } from '@/ui/base/progress';
-import { Search, Package, AlertTriangle, ClipboardList, DollarSign } from 'lucide-react';
+import { Search, Package, AlertTriangle, ClipboardList, DollarSign, ExternalLink } from 'lucide-react';
 import { useWMSInventory } from '@/hooks/wms/useWMSInventory';
 import { RealtimeStatus } from '@/modules/wms/components/RealtimeStatus';
+import { Product360Drawer } from '@/modules/wms/components/Product360Drawer';
+import { Button } from '@/ui/base/button';
 import type { InventoryStatus } from '@/types/wms';
 
 
