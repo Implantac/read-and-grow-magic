@@ -225,6 +225,12 @@ export default function InventoryPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Product360Drawer 
+        open={is360Open} 
+        onOpenChange={setIs360Open} 
+        productId={selectedProductId} 
+      />
     </PageContainer>
   );
 }
