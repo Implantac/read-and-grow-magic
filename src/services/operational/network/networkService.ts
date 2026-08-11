@@ -8,8 +8,8 @@ export type StockBalance = Database['public']['Tables']['stock_balances']['Row']
 export type SupplyChainMovement = Database['public']['Tables']['supply_chain_movements']['Row'];
 
 export interface StockTransfer extends SupplyChainMovement {
-  origin?: { name: string };
-  destination?: { name: string };
+  origin?: { name: string } | null;
+  destination?: { name: string } | null;
 }
 
 export const networkService = {
@@ -37,7 +37,7 @@ export const networkService = {
 
     const { data, error } = await query;
     if (error) throw error;
-    return data || [];
+    return (data || []) as any[];
   },
 
   async createTransfer(params: Database['public']['Tables']['supply_chain_movements']['Insert']) {
@@ -68,15 +68,27 @@ export const networkService = {
       .from('supply_chain_movements')
       .select(`
         *,
-        origin:operational_units!origin_id(name),
-        destination:operational_units!destination_id(name)
+        origin:operational_units!supply_chain_movements_origin_id_fkey(name),
+        destination:operational_units!supply_chain_movements_destination_id_fkey(name)
       `)
       .eq('company_id', companyId)
       .order('created_at', { ascending: false })
       .limit(1000);
 
-    if (error) throw error;
-    return (data || []) as StockTransfer[];
+    if (error) {
+      // Fallback para quando as fkeys não são resolvidas pelo nome automático do PostgREST
+      const { data: fallbackData, error: fallbackError } = await supabase
+        .from('supply_chain_movements')
+        .select('*')
+        .eq('company_id', companyId)
+        .order('created_at', { ascending: false })
+        .limit(1000);
+      
+      if (fallbackError) throw fallbackError;
+      return (fallbackData || []) as StockTransfer[];
+    }
+    
+    return (data || []) as unknown as StockTransfer[];
   },
 
   async getPosTerminals(unitId: string) {
