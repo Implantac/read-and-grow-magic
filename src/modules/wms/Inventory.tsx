@@ -135,6 +135,7 @@ export default function InventoryPage() {
                     <TableHead className="text-right">Disponível</TableHead>
                     <TableHead>Cobertura</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
