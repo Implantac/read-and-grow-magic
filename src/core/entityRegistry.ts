@@ -23,7 +23,9 @@ export type EntityKey =
   | "pipeline_amount"
   | "conversion_rate"
   | "churn_rate"
-  | "nfe_rejected";
+  | "nfe_rejected"
+  | "product_360"
+  | "supplier_360";
 
 export interface EntityDefinition {
   key: EntityKey;
