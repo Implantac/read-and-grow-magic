@@ -65,14 +65,14 @@ const HardeningDashboard = () => {
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
   const phases = [
-    { id: '2A', title: 'Rede Operacional', status: 'completed', description: 'Hierarquia de Lojas/CD/Fábrica, Estoque em Trânsito.' },
-    { id: '2B', title: 'Orquestração & Logística', status: 'completed', description: 'Sourcing Inteligente, Last Mile, Rastreabilidade Ledger.' },
-    { id: '2C', title: 'Especificação & Blueprint', status: 'completed', description: 'Mapeamento de Atores, Operações Críticas e Regras de Autorização.' },
-    { id: '3', title: 'Inteligência Logística IA', status: 'in-progress', description: 'Otimização de Slotting, IA Preditiva, Digital Twin.' },
-
-    { id: '4', title: 'Auditoria & Compliance', status: 'completed', description: 'UEEF SEC-LEVEL 3, Certificação RLS, LGPD GA.' },
-    { id: '5', title: 'Expansão & Ecossistema', status: 'completed', description: 'Marketplace, Multi-moeda, Expansão Global.' },
+    { id: '1', title: 'Profissionalização Operacional', status: 'completed', description: 'Design System, Skeletons e Feedback Orientado.' },
+    { id: '2', title: 'Processos Integrados', status: 'completed', description: 'O2C/P2P/WMS integrados como organismo único.' },
+    { id: '3', title: 'Governança & Auditoria', status: 'completed', description: 'Ledger Logístico Imutável e RLS Hardening.' },
+    { id: '4', title: 'Expansão UX Pro', status: 'completed', description: 'OrderWizard, Procurement MRP e UEEF SEC-LEVEL 3.' },
+    { id: '5', title: 'Inteligência Preditiva', status: 'in-progress', description: 'Digital Twin e Otimização de Slotting IA.' },
+    { id: '6', title: 'Ecossistema Global', status: 'pending', description: 'Marketplace, Multi-moeda e Expansão Global.' },
   ];
+
 
   const blueprintItems = [
     { 
