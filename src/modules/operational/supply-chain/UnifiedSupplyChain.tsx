@@ -7,13 +7,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { 
   Package, Truck, Factory, Store, ArrowRightLeft, 
   Download, Upload, AlertTriangle, ClipboardList, Search, Plus, 
-  CheckCircle2, Clock, ChevronRight, Activity, Zap
+  CheckCircle2, Clock, ChevronRight, Activity, Zap, History
 } from 'lucide-react';
 import { useSupplyChain } from '@/hooks/operational/supply-chain/useSupplyChain';
 import { MovementStatus } from '@/services/operational/supply-chain/supplyChainService';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { MovementLedger } from './components/MovementLedger';
 
 const STATUS_MAP: Record<MovementStatus, { label: string, color: string, icon: any }> = {
   requested: { label: 'Solicitado', color: 'bg-blue-500/10 text-blue-500', icon: Clock },
@@ -132,6 +133,17 @@ export default function UnifiedSupplyChain() {
                             </Badge>
                             <Button 
                               size="sm" 
+                              variant="ghost" 
+                              className={cn(
+                                "h-8 w-8 p-0 rounded-full",
+                                selectedMovement === m.id ? "bg-primary text-primary-foreground" : ""
+                              )}
+                              onClick={() => setSelectedMovement(selectedMovement === m.id ? null : m.id)}
+                            >
+                              <History className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              size="sm" 
                               variant="secondary" 
                               className="h-8 font-black text-[9px] uppercase"
                               onClick={() => handleNextStep(m)}
@@ -140,6 +152,12 @@ export default function UnifiedSupplyChain() {
                             </Button>
                           </div>
                         </div>
+
+                        {selectedMovement === m.id && (
+                          <div className="mt-4 pt-4 border-t animate-in slide-in-from-top-2 duration-300">
+                            <MovementLedger movementId={m.id} />
+                          </div>
+                        )}
                         
                         {/* Status Lifecycle Indicator */}
                         <div className="mt-4 flex items-center gap-1 w-full opacity-60">

@@ -83,7 +83,7 @@ export function MovementLedger({ movementId }: MovementLedgerProps) {
                   <User className="h-3 w-3 text-muted-foreground" />
                   <span className="text-[9px] font-bold uppercase text-muted-foreground">Sistema / Auditoria</span>
                 </div>
-                <Badge variant="ghost" className="text-[8px] font-bold opacity-40">
+                <Badge variant="outline" className="text-[8px] font-bold opacity-40">
                   #{entry.id.split('-')[0].toUpperCase()}
                 </Badge>
               </div>
