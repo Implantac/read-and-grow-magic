@@ -6,14 +6,14 @@ import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 export function useSupplyChain(filters?: { status?: MovementStatus[] }) {
-  const { currentBranch } = useEnterprise();
+  const { currentBranch, isLoading: isEnterpriseLoading } = useEnterprise();
   const [movements, setMovements] = useState<SupplyChainMovement[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isDataLoading, setIsDataLoading] = useState(false);
 
   const fetchMovements = async () => {
     if (!currentBranch?.id) return;
     
-    setIsLoading(true);
+    setIsDataLoading(true);
     try {
       const data = await supplyChainService.getMovements({
         unit_id: currentBranch.id,
@@ -24,13 +24,15 @@ export function useSupplyChain(filters?: { status?: MovementStatus[] }) {
       console.error('Error in useSupplyChain:', error);
       toast.error('Erro ao carregar movimentações');
     } finally {
-      setIsLoading(false);
+      setIsDataLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchMovements();
-  }, [currentBranch?.id, JSON.stringify(filters?.status)]);
+    if (!isEnterpriseLoading && currentBranch?.id) {
+      fetchMovements();
+    }
+  }, [currentBranch?.id, JSON.stringify(filters?.status), isEnterpriseLoading]);
 
   const updateStatus = async (id: string, status: MovementStatus) => {
     try {
@@ -44,22 +46,31 @@ export function useSupplyChain(filters?: { status?: MovementStatus[] }) {
   };
 
   const getMovementLedger = async (movementId: string) => {
-    const { data, error } = await supabase
-      .from('supply_chain_ledger' as any)
-      .select('*')
-      .eq('movement_id', movementId)
-      .order('created_at', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('supply_chain_ledger' as any)
+        .select('*')
+        .eq('movement_id', movementId)
+        .order('created_at', { ascending: false });
 
-    if (error) {
+      if (error) {
+        // Se a tabela não existir, retorna array vazio silenciosamente para não quebrar a UI
+        if (error.code === 'PGRST116' || error.message?.includes('does not exist')) {
+          console.warn('supply_chain_ledger table not found, skipping history');
+          return [];
+        }
+        throw error;
+      }
+      return data || [];
+    } catch (error) {
       console.error('Error fetching ledger:', error);
       return [];
     }
-    return data || [];
   };
 
   return {
     movements,
-    isLoading,
+    isLoading: isEnterpriseLoading || isDataLoading,
     refresh: fetchMovements,
     updateStatus,
     getMovementLedger

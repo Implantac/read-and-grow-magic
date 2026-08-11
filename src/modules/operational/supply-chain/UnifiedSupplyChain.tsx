@@ -33,8 +33,10 @@ const STATUS_MAP: Record<MovementStatus, { label: string, color: string, icon: a
 };
 
 export default function UnifiedSupplyChain() {
-  const { currentBranch } = useEnterprise();
-  const { movements, isLoading, updateStatus } = useSupplyChain();
+  const { currentBranch, isLoading: isEnterpriseLoading } = useEnterprise();
+  const { movements, isLoading: isSupplyLoading, updateStatus } = useSupplyChain();
+  
+  const isLoading = isEnterpriseLoading || isSupplyLoading;
   const { logAudit } = useComplianceValidation();
   const [selectedMovement, setSelectedMovement] = useState<any>(null);
 
