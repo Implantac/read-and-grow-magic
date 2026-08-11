@@ -28,7 +28,7 @@ export const useReplenishmentPolicies = () => {
     queryKey: ['replenishment_policies', currentCompany?.id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('replenishment_policies' as any)
+        .from('replenishment_policies')
         .select('*, product:products(name, code)')
         .eq('company_id', currentCompany?.id)
         .limit(200);
@@ -55,7 +55,7 @@ export const useSupplyChainStats = () => {
     queryKey: ['supply_chain_stats', currentCompany?.id],
     queryFn: async () => {
       const { data: movements } = await supabase
-        .from('supply_chain_movements' as any)
+        .from('supply_chain_movements')
         .select('status')
         .eq('company_id', currentCompany?.id)
         .limit(2000);
@@ -63,7 +63,7 @@ export const useSupplyChainStats = () => {
       const inTransit = movements?.filter((m: any) => m.status === 'in_transit' || m.status === 'shipped').length || 0;
       
       const { count: lowStock } = await supabase
-        .from('stock_balances' as any)
+        .from('stock_balances')
         .select('*', { count: 'exact', head: true })
         .eq('company_id', currentCompany?.id)
         .lt('quantity', 10); // Simple threshold for mock

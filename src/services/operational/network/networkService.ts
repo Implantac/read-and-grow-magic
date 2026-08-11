@@ -28,24 +28,24 @@ export interface StockTransfer {
 export const networkService = {
   async getOperationalUnits(companyId: string) {
     const { data, error } = await supabase
-      .from('operational_units' as any)
+      .from('operational_units')
       .select('*')
       .eq('company_id', companyId)
       .limit(100);
     
     if (error) throw error;
-    return (data || []) as unknown as OperationalUnit[];
+    return (data || []) as any[];
   },
 
   async getStockBalances(companyId: string, unitId?: string) {
-    let query = supabase
-      .from('stock_balances' as any)
+    let query = (supabase as any)
+      .from('stock_balances')
       .select('*, operational_units(name), stock_locations(name), products(name, code)')
       .eq('company_id', companyId)
       .limit(1000);
     
     if (unitId) {
-      query = query.eq('unit_id', unitId);
+      query = query.eq('branch_id', unitId);
     }
 
     const { data, error } = await query;
@@ -56,12 +56,12 @@ export const networkService = {
   async createTransfer(params: Omit<StockTransfer, 'id' | 'created_at' | 'reference_number'>) {
     const ref = `TRF-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
     const { data, error } = await supabase
-      .from('stock_movements' as any)
+      .from('stock_movements')
       .insert([{ 
         ...params, 
-        reference_number: ref,
-        status: 'requested' 
-      }])
+        document_number: ref,
+        direction: 'out'
+      } as any])
       .select()
       .single();
     
@@ -69,10 +69,10 @@ export const networkService = {
     return data as unknown as StockTransfer;
   },
 
-  async updateTransferStatus(transferId: string, status: StockTransfer['status']) {
+  async updateTransferStatus(transferId: string, status: string) {
     const { data, error } = await supabase
-      .from('stock_movements' as any)
-      .update({ status })
+      .from('stock_movements')
+      .update({ notes: `Status: ${status}` } as any)
       .eq('id', transferId)
       .select()
       .single();
@@ -83,7 +83,7 @@ export const networkService = {
 
   async getTransfers(companyId: string): Promise<StockTransfer[]> {
     const { data, error } = await supabase
-      .from('supply_chain_movements' as any)
+      .from('supply_chain_movements')
       .select(`
         *,
         origin:operational_units!origin_id(name),
@@ -99,9 +99,9 @@ export const networkService = {
 
   async getPosTerminals(unitId: string) {
     const { data, error } = await supabase
-      .from('pos_terminals' as any)
+      .from('pos_terminals')
       .select('*')
-      .eq('unit_id', unitId)
+      .eq('branch_id', unitId)
       .limit(100);
     
     if (error) throw error;

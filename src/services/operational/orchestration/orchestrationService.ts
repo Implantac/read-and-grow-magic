@@ -20,30 +20,30 @@ export class OrchestrationService {
 
     // Use a generic query to avoid TS deep instantiation issues with complex generated types
     // 1. Check local stock
-    const { data: localStock } = await (supabase as any)
-      .from('inventory_levels')
-      .select('balance')
-      .eq('product_id', productId)
-      .eq('branch_id', targetBranchId)
+    const { data: localStock } = await supabase
+      .from('stock_balances')
+      .select('quantity')
+      .eq('product_id', productId as any)
+      .eq('branch_id', targetBranchId as any)
       .single();
 
-    if (localStock && (localStock as any).balance >= quantity) {
+    if (localStock && (localStock as any).quantity >= quantity) {
       options.push({
         type: 'local',
         branchId: targetBranchId,
         leadTimeDays: 0,
         cost: 0,
-        stockAvailable: (localStock as any).balance
+        stockAvailable: (localStock as any).quantity
       });
     }
 
     // 2. Check network stock (Cross-docking candidate)
-    const { data: networkStock } = await (supabase as any)
-      .from('inventory_levels')
-      .select('branch_id, balance')
-      .eq('product_id', productId)
-      .neq('branch_id', targetBranchId)
-      .gt('balance', 0);
+    const { data: networkStock } = await supabase
+      .from('stock_balances')
+      .select('branch_id, quantity')
+      .eq('product_id', productId as any)
+      .neq('branch_id', targetBranchId as any)
+      .gt('quantity', 0);
 
     if (networkStock) {
       (networkStock as any[]).forEach(item => {
@@ -52,7 +52,7 @@ export class OrchestrationService {
           branchId: item.branch_id,
           leadTimeDays: 2,
           cost: 15.00,
-          stockAvailable: item.balance
+          stockAvailable: item.quantity as number
         });
       });
     }
@@ -64,7 +64,7 @@ export class OrchestrationService {
    * Create an orchestrated order
    */
   async createOrchestratedOrder(orderData: any, sourcing: SourcingOption) {
-    const { data: order, error } = await (supabase as any)
+    const { data: order, error } = await supabase
       .from('storefront_orders')
       .insert({
         ...orderData,
@@ -79,7 +79,7 @@ export class OrchestrationService {
     if (error) throw error;
 
     if (sourcing.type === 'crossdock') {
-      await (supabase as any).from('stock_transfer_orders').insert({
+      await supabase.from('stock_movements' as any).insert({
         company_id: order.company_id,
         origin_unit_id: sourcing.branchId,
         destination_unit_id: orderData.branch_id,
