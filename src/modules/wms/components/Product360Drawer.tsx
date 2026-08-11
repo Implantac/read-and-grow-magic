@@ -154,6 +154,35 @@ export function Product360Drawer({ open, onOpenChange, productId, productName }:
                         </div>
                       </CardContent>
                     </Card>
+                  {demand && (
+                    <div className="p-4 border border-accent/20 bg-accent/5 rounded-lg space-y-3">
+                      <div className="flex items-center gap-2">
+                        <TrendingUp className="h-4 w-4 text-accent" />
+                        <p className="text-xs font-bold uppercase text-accent">Análise de Reabastecimento IA</p>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-[10px] text-muted-foreground uppercase font-bold">Sugestão de Compra</p>
+                          <p className="text-lg font-black text-accent">
+                            {Math.max(0, demand.predicted_demand - product.availableQty)} <span className="text-xs font-normal">{product.unit}</span>
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-muted-foreground uppercase font-bold">Cobertura Estimada</p>
+                          <p className="text-lg font-black">
+                            {Math.round((product.availableQty / (demand.predicted_demand / 30)))} <span className="text-xs font-normal">dias</span>
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="pt-2 border-t border-accent/10">
+                        <div className="flex items-center gap-2 text-[10px] text-accent font-medium">
+                          <Zap className="h-3 w-3" />
+                          <span>Ponto de Ressuprimento Sugerido: {Math.round(demand.predicted_demand * 0.3)} {product.unit}</span>
+                        </div>
+                      </div>
+                    </div>
                   )}
                 </TabsContent>
 
