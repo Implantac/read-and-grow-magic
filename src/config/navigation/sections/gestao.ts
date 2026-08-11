@@ -20,6 +20,8 @@ export const gestaoSection: NavSection = {
       children: [
         { title: 'Usuários & Permissões', href: '/admin/usuarios', icon: 'Users' },
         { title: 'Empresas & Filiais', href: '/admin/empresas', icon: 'Building' },
+        { title: 'Configuração da Empresa', href: '/admin/empresa', icon: 'Building2' },
+
         { title: 'Parâmetros do Sistema', href: '/admin/parametros', icon: 'Sliders' },
         { title: 'Configurações Globais', href: '/admin/configuracoes', icon: 'Settings' },
 
