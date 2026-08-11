@@ -13,6 +13,7 @@ import { EmptyState } from '@/shared/components/EmptyState';
 import { useSupplyChain } from '@/hooks/operational/supply-chain/useSupplyChain';
 import { MovementStatus } from '@/services/operational/supply-chain/supplyChainService';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
+import { useComplianceValidation } from '@/hooks/compliance/useComplianceValidation';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { MovementLedger } from './components/MovementLedger';
@@ -34,6 +35,7 @@ const STATUS_MAP: Record<MovementStatus, { label: string, color: string, icon: a
 export default function UnifiedSupplyChain() {
   const { currentBranch } = useEnterprise();
   const { movements, isLoading, updateStatus } = useSupplyChain();
+  const { logAudit } = useComplianceValidation();
   const [selectedMovement, setSelectedMovement] = useState<any>(null);
 
   const unitType = (currentBranch as any)?.tipo?.toLowerCase() || 'store';
@@ -45,9 +47,31 @@ export default function UnifiedSupplyChain() {
 
     const currentIndex = statusOrder.indexOf(m.status);
     if (currentIndex !== -1 && currentIndex < statusOrder.length - 1) {
-      const nextStatus = statusOrder[currentIndex + 1];
+      const nextStatus = statusFlow[m.status] || statusOrder[currentIndex + 1];
+      
       await updateStatus(m.id, nextStatus as any);
+      
+      // Log de Auditoria Compliance UEEF SEC-LEVEL 3
+      await logAudit('movement_status_change', {
+        movement_id: m.id,
+        from_status: m.status,
+        to_status: nextStatus,
+        severity: 'info'
+      });
+      
+      toast.success(`Status da movimentação #${m.id.split('-')[0]} atualizado.`);
     }
+  };
+
+  const statusFlow: Record<string, MovementStatus> = {
+    'requested': 'approved',
+    'approved': 'reserved',
+    'reserved': 'picking',
+    'picking': 'shipped',
+    'shipped': 'in_transit',
+    'in_transit': 'delivered',
+    'delivered': 'checked',
+    'checked': 'completed'
   };
 
   return (
