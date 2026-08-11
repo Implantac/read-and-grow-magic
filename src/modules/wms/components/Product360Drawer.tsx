@@ -203,7 +203,7 @@ export function Product360Drawer({ open, onOpenChange, productId, productName }:
                           </div>
                         </div>
 
-                        <DemandProjectionChart predictedDemand={demand.predicted_demand} unit={product.unit} />
+                        <DemandProjectionChart predictedDemand={demand.predicted_demand} unit={product.unit} periodDays={period} />
 
                         <p className="text-[10px] text-muted-foreground leading-tight bg-accent/10 p-2 rounded border border-accent/10 italic">
                           "{demand.reasoning}"
