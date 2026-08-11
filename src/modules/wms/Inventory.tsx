@@ -6,6 +6,7 @@ import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { StatusBadge } from '@/shared/components/StatusBadge';
+import { Badge } from '@/ui/base/badge';
 import { Input } from '@/ui/base/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';

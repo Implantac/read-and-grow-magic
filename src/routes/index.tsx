@@ -4,7 +4,6 @@
  * FASE 5: INTELIGÊNCIA PREDITIVA — Transformando dados em decisões autônomas.
  * ok prossiga com as implementações
  * 
-
  * DIRETRIZ DA EQUIPE (Analista de Dados, Engenheiro, Designer, Fullstack):
  * Transformar a amplitude funcional em profundidade operacional e coesão sistêmica.
  * O foco mudou de "Adicionar Recursos" para "Consolidar Fluxos Ponta a Ponta (O2C/P2P)".
@@ -18,12 +17,7 @@
  *
  * Auditoria de Software House completa realizada em 11/08/2026.
  * Status: Fase 5 Avançada. ✅ Produto 360 (IA Integrada), ✅ Fornecedor 360. 🚀 Digital Twin Ativo.
-
  */
-
-
-
-
 
 import { Suspense, useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
