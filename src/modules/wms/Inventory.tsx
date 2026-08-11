@@ -26,6 +26,13 @@ export default function InventoryPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  const [is360Open, setIs360Open] = useState(false);
+
+  const handleOpen360 = (id: string) => {
+    setSelectedProductId(id);
+    setIs360Open(true);
+  };
 
   const categories = [...new Set(items.map(i => i.category).filter(Boolean))];
 
