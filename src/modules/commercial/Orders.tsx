@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { CheckCircle, Clock, DollarSign, Package, Plus, LayoutGrid, Table as TableIcon } from 'lucide-react';
+import { CheckCircle, Clock, DollarSign, Package, Plus, LayoutGrid, Table as TableIcon, AlertCircle } from 'lucide-react';
 import { formatBRL, formatDate } from '@/lib/formatters';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
@@ -8,6 +8,8 @@ import { KPICard } from '@/shared/components/KPICard';
 import { ExportButton } from '@/shared/components/ExportButton';
 import { Button } from '@/ui/base/button';
 import { AdvancedFilters } from '@/shared/components/AdvancedFilters';
+import { OperationalFeedback } from '@/components/shared/OperationalFeedback';
+import { EmptyState } from '@/shared/components/EmptyState';
 import {
   useCreateOrder, useDeleteOrder, useOrders, useUpdateOrderFields, useUpdateOrderStatus,
   type DbOrder,
@@ -146,16 +148,7 @@ export default function OrdersPage() {
   const handleAdvanceStatus = (order: DbOrder) => {
     const nextStatus = statusFlow[order.status];
     if (!nextStatus) return;
-    updateStatus.mutate({ id: order.id, status: nextStatus }, {
-      onSuccess: () => {
-        if (nextStatus === 'confirmed') {
-          toastSuccess('🏭 Picking WMS gerado', 'Uma ordem de separação foi criada automaticamente no WMS.');
-        }
-        if (nextStatus === 'invoiced') {
-          toastSuccess('📄 NF-e gerada automaticamente', 'Uma NF-e de saída foi criada como rascunho no módulo Fiscal.');
-        }
-      },
-    });
+    updateStatus.mutate({ id: order.id, status: nextStatus });
   };
 
   const handleCancel = () => {
@@ -215,7 +208,14 @@ export default function OrdersPage() {
         </ToggleGroup>
       </div>
 
-      {viewMode === 'table' ? (
+      {filteredOrders.length === 0 ? (
+        <EmptyState 
+          variant="search"
+          title="Nenhum pedido encontrado" 
+          description="Tente ajustar os filtros ou crie um novo pedido de venda para começar."
+          action={{ label: "Novo Pedido", onClick: () => { resetForm(); setIsFormOpen(true); } }}
+        />
+      ) : viewMode === 'table' ? (
         <OrdersTable
           orders={filteredOrders}
           selectedOrder={selectedOrder}
