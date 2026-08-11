@@ -188,6 +188,7 @@ export function Product360Drawer({ open, onOpenChange, productId, productName }:
                     </div>
                   </div>
                 )}
+              </TabsContent>
 
               <TabsContent value="logistics" className="space-y-4 mt-4">
                 <div className="space-y-2">
