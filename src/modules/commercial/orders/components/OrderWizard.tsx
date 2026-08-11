@@ -28,7 +28,7 @@ import { Separator } from '@/ui/base/separator';
 import { ProfitabilityCard } from '../ProfitabilityCard';
 import { CreditBadge } from '../CreditBadge';
 import { useCreateOrder } from '@/hooks/commercial/orders/useCreateOrder';
-import { OperationalFeedback } from '@/components/feedback/OperationalFeedback';
+import { OperationalFeedback } from '@/components/shared/OperationalFeedback';
 
 const STEPS = [
   { id: 'client', title: 'Cliente & Origem', icon: User },
