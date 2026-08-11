@@ -63,11 +63,11 @@ export default function SystemManual() {
         <Card className="border-l-4 border-l-primary bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer group">
           <CardHeader className="p-4">
             <div className="flex items-center gap-2 mb-2">
-              <FileText className="h-5 w-5 text-primary" />
-              <h3 className="font-bold text-sm uppercase tracking-wider text-primary">Status do Hardening</h3>
+              <ShieldCheck className="h-5 w-5 text-primary" />
+              <h3 className="font-bold text-sm uppercase tracking-wider text-primary">Status da Governança</h3>
             </div>
             <CardDescription className="text-xs font-medium text-foreground">
-              Core Hardened: <strong>Constraints & RLS</strong> validados. Próximo: Refatoração de Componentes.
+              Fase 3 Concluída: <strong>Ledger Logístico Imutável</strong> ativo e auditando movimentações.
             </CardDescription>
           </CardHeader>
         </Card>
