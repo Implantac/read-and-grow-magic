@@ -101,7 +101,7 @@ export const supplyChainService = {
 
     const { error: iError } = await supabase
       .from('supply_chain_items')
-      .insert(items);
+      .insert(items as any);
 
     if (iError) throw iError;
 

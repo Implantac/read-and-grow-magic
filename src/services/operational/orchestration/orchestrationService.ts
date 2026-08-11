@@ -38,12 +38,12 @@ export class OrchestrationService {
     }
 
     // 2. Check network stock (Cross-docking candidate)
-    const { data: networkStock } = await (supabase as any)
-      .from('inventory_levels')
-      .select('branch_id, balance')
-      .eq('product_id', productId)
-      .neq('branch_id', targetBranchId)
-      .gt('balance', 0);
+    const { data: networkStock } = await supabase
+      .from('stock_balances')
+      .select('branch_id, quantity')
+      .eq('product_id', productId as any)
+      .neq('branch_id', targetBranchId as any)
+      .gt('quantity', 0);
 
     if (networkStock) {
       (networkStock as any[]).forEach(item => {
@@ -52,7 +52,7 @@ export class OrchestrationService {
           branchId: item.branch_id,
           leadTimeDays: 2,
           cost: 15.00,
-          stockAvailable: item.balance
+          stockAvailable: item.quantity as number
         });
       });
     }

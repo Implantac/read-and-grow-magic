@@ -22,7 +22,7 @@ export const operationalService = {
       .limit(200);
 
     if (error) throw error;
-    return (data || []) as OperationalTask[];
+    return (data || []) as any[];
   },
 
   async createTask(task: any) {
