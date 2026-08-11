@@ -28,7 +28,7 @@ export interface StockTransfer {
 export const networkService = {
   async getOperationalUnits(companyId: string) {
     const { data, error } = await supabase
-      .from('operational_units' as any)
+      .from('operational_units')
       .select('*')
       .eq('company_id', companyId)
       .limit(100);
@@ -39,7 +39,7 @@ export const networkService = {
 
   async getStockBalances(companyId: string, unitId?: string) {
     let query = supabase
-      .from('stock_balances' as any)
+      .from('stock_balances')
       .select('*, operational_units(name), stock_locations(name), products(name, code)')
       .eq('company_id', companyId)
       .limit(1000);
@@ -56,7 +56,7 @@ export const networkService = {
   async createTransfer(params: Omit<StockTransfer, 'id' | 'created_at' | 'reference_number'>) {
     const ref = `TRF-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
     const { data, error } = await supabase
-      .from('stock_movements' as any)
+      .from('stock_movements')
       .insert([{ 
         ...params, 
         reference_number: ref,
@@ -71,7 +71,7 @@ export const networkService = {
 
   async updateTransferStatus(transferId: string, status: StockTransfer['status']) {
     const { data, error } = await supabase
-      .from('stock_movements' as any)
+      .from('stock_movements')
       .update({ status })
       .eq('id', transferId)
       .select()
@@ -83,7 +83,7 @@ export const networkService = {
 
   async getTransfers(companyId: string): Promise<StockTransfer[]> {
     const { data, error } = await supabase
-      .from('supply_chain_movements' as any)
+      .from('supply_chain_movements')
       .select(`
         *,
         origin:operational_units!origin_id(name),
@@ -99,7 +99,7 @@ export const networkService = {
 
   async getPosTerminals(unitId: string) {
     const { data, error } = await supabase
-      .from('pos_terminals' as any)
+      .from('pos_terminals')
       .select('*')
       .eq('unit_id', unitId)
       .limit(100);

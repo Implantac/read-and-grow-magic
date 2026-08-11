@@ -48,7 +48,7 @@ export const supplyChainService = {
     status?: MovementStatus[];
   }): Promise<SupplyChainMovement[]> {
     let query = supabase
-      .from('supply_chain_movements' as any)
+      .from('supply_chain_movements')
       .select('*');
 
     if (filters.unit_id) {
