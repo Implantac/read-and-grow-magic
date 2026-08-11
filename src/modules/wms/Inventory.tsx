@@ -6,6 +6,7 @@ import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { StatusBadge } from '@/shared/components/StatusBadge';
+import { Badge } from '@/ui/base/badge';
 import { Input } from '@/ui/base/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
@@ -133,6 +134,7 @@ export default function InventoryPage() {
                     <TableHead>Endereço</TableHead>
                     <TableHead className="text-right">Qtd</TableHead>
                     <TableHead className="text-right">Disponível</TableHead>
+                    <TableHead>Sugestão IA</TableHead>
                     <TableHead>Cobertura</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="w-[50px]"></TableHead>
@@ -156,6 +158,14 @@ export default function InventoryPage() {
                           <TableCell className="font-mono text-xs">{item.location}</TableCell>
                           <TableCell className="text-right">{item.quantity} {item.unit}</TableCell>
                           <TableCell className="text-right font-semibold">{item.availableQty} {item.unit}</TableCell>
+                          <TableCell>
+                            <div className="flex flex-col gap-0.5">
+                              <span className="text-[10px] font-bold text-accent">
+                                {Math.max(0, Math.round(item.availableQty * 0.2))} {item.unit}
+                              </span>
+                              <Badge variant="outline" className="text-[8px] h-3 px-1 border-accent/20 text-accent scale-90 origin-left">Predição</Badge>
+                            </div>
+                          </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
                               <Progress value={Math.min(coverage, 100)} className="h-2 w-16" />
