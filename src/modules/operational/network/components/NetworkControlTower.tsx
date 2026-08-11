@@ -13,7 +13,8 @@ import {
   Monitor,
   ShieldAlert,
   ShoppingCart,
-  Brain
+  Brain,
+  ClipboardList
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/ui/base/skeleton";
@@ -189,6 +190,20 @@ export default function NetworkControlTower() {
                 <p className="text-xs opacity-80">Transferência entre unidades excedeu o Lead Time previsto.</p>
               </div>
               <Badge variant="outline" className="border-amber-300 text-amber-700 bg-white">PEDIDOS</Badge>
+            </div>
+
+            {/* Ledger Logístico (Fase 3) */}
+            <div className="flex items-start gap-3 p-3 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-900 animate-in fade-in zoom-in duration-300">
+              <ClipboardList className="h-5 w-5 shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-bold">Ledger Logístico Ativo</p>
+                <p className="text-xs opacity-80">Rastreabilidade imutável em tempo real iniciada para a malha.</p>
+                <div className="mt-2 flex gap-2">
+                  <Badge variant="outline" className="text-[9px] border-indigo-300">Fase 3</Badge>
+                  <Badge variant="outline" className="text-[9px] border-indigo-300">Imutável</Badge>
+                </div>
+              </div>
+              <Badge variant="outline" className="border-indigo-300 text-indigo-700 bg-white">LEDGER</Badge>
             </div>
 
             {/* Auditoria & Segurança */}
