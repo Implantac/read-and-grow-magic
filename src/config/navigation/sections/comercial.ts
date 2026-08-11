@@ -8,7 +8,7 @@ export const comercialSection: NavSection = {
       href: '/comercial/dashboard',
       icon: 'Users',
       children: [
-        { title: 'Painel Único (PDV)', href: '/comercial/dashboard', icon: 'ShoppingCart' },
+        { title: 'Painel Único (PDV)', href: '/comercial/pdv', icon: 'ShoppingCart' },
         { title: 'CRM Enterprise', href: '/comercial/crm', icon: 'Target' },
         { title: 'Dashboard Comercial', href: '/comercial/dashboard', icon: 'BarChart3' },
         { title: 'Funil de Vendas', href: '/comercial/funil', icon: 'Filter' },
