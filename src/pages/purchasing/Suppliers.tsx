@@ -206,6 +206,7 @@ export default function SuppliersPage() {
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleOpen360(supplier)}><ExternalLink className="mr-2 h-4 w-4" />Visão 360°</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => { setSelectedSupplier(supplier); setIsViewOpen(true); }}><Eye className="mr-2 h-4 w-4" />Visualizar</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => { setSelectedSupplier(supplier); setFormData(supplier); setIsFormOpen(true); }}><Edit className="mr-2 h-4 w-4" />Editar</DropdownMenuItem>
                       </DropdownMenuContent>
