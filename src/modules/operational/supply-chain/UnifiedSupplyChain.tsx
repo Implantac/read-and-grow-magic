@@ -7,8 +7,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { 
   Package, Truck, Factory, Store, ArrowRightLeft, 
   Download, Upload, AlertTriangle, ClipboardList, Search, Plus, 
-  CheckCircle2, Clock, ChevronRight, Activity, Zap, History
+  CheckCircle2, Clock, ChevronRight, Activity, Zap, History, SearchX
 } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { useSupplyChain } from '@/hooks/operational/supply-chain/useSupplyChain';
 import { MovementStatus } from '@/services/operational/supply-chain/supplyChainService';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
@@ -99,10 +100,11 @@ export default function UnifiedSupplyChain() {
               <CardContent>
                 <div className="space-y-4">
                   {movements.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground border-2 border-dashed rounded-lg">
-                      <Package className="h-12 w-12 opacity-20 mb-4" />
-                      <p className="font-medium">Nenhuma movimentação registrada.</p>
-                    </div>
+                    <EmptyState 
+                      title="Nenhuma movimentação registrada"
+                      description="A malha logística está sem solicitações ativas no momento. Crie uma nova transferência para iniciar o fluxo."
+                      action={{ label: "Nova Solicitação", onClick: () => toast.info("Funcionalidade de nova solicitação em desenvolvimento.") }}
+                    />
                   ) : (
                     movements.map(m => (
                       <div key={m.id} className="group border rounded-xl p-4 hover:border-primary/50 transition-all bg-card shadow-sm">

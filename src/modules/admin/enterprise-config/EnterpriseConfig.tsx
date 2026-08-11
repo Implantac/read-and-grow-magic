@@ -21,7 +21,10 @@ import {
   FileText,
   UserCheck,
   Zap,
-  ChevronRight
+  ChevronRight,
+  History,
+  Lock,
+  Workflow
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -29,6 +32,7 @@ import { useEnterprise } from "@/core/auth/EnterpriseContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/base/tabs";
 import { Badge } from "@/ui/base/badge";
 import { Separator } from "@/ui/base/separator";
+import { OperationalFeedback } from "@/components/shared/OperationalFeedback";
 
 export default function EnterpriseConfig() {
   const { currentCompany: company, isLoading: loadingCompany } = useEnterprise();
@@ -109,6 +113,7 @@ export default function EnterpriseConfig() {
           <TabsTrigger value="modules">Módulos Habilitados</TabsTrigger>
           <TabsTrigger value="processes">Regras & Aprovações</TabsTrigger>
           <TabsTrigger value="fiscal">Fiscal & Contábil</TabsTrigger>
+          <TabsTrigger value="governance">Governança</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general" className="space-y-6">
@@ -274,6 +279,79 @@ export default function EnterpriseConfig() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="governance" className="space-y-6">
+          <Card className="border-l-4 border-l-primary shadow-sm overflow-hidden">
+            <CardHeader className="bg-primary/5 pb-4">
+              <div className="flex items-center gap-3">
+                <ShieldCheck className="h-6 w-6 text-primary" />
+                <div>
+                  <CardTitle className="text-lg font-black uppercase tracking-tight text-primary">Controle de Governança & Auditoria</CardTitle>
+                  <CardDescription className="text-xs font-medium">Configurações de conformidade, trilha imutável e segurança UEEF SEC-LEVEL 3.</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-6 space-y-6">
+              <OperationalFeedback 
+                type="info"
+                title="Governança Fase 3 Ativa"
+                message="O Ledger Logístico Imutável está operando em 100% da malha de abastecimento. Alterações em status críticos agora exigem trilha de auditoria digital."
+              />
+
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="flex flex-row items-center justify-between rounded-lg border p-4 bg-muted/20 hover:bg-muted/30 transition-colors">
+                  <div className="space-y-0.5">
+                    <Label className="text-sm font-bold flex items-center gap-2">
+                      <History className="h-4 w-4 text-primary" />
+                      Ledger Logístico Imutável
+                    </Label>
+                    <p className="text-[10px] text-muted-foreground font-medium uppercase">Registrar cada mudança de estado (Requested {"->"} Received)</p>
+                  </div>
+                  <Switch 
+                    checked={settings.modules.governance}
+                    onCheckedChange={(v) => setSettings({ ...settings, modules: { ...settings.modules, governance: v } })}
+                  />
+                </div>
+
+                <div className="flex flex-row items-center justify-between rounded-lg border p-4 bg-muted/20 hover:bg-muted/30 transition-colors">
+                  <div className="space-y-0.5">
+                    <Label className="text-sm font-bold flex items-center gap-2">
+                      <Lock className="h-4 w-4 text-primary" />
+                      Trilha de Auditoria do Sistema
+                    </Label>
+                    <p className="text-[10px] text-muted-foreground font-medium uppercase">Log de atividades administrativas e acessos sensíveis</p>
+                  </div>
+                  <Switch 
+                    checked={settings.modules.audit}
+                    onCheckedChange={(v) => setSettings({ ...settings, modules: { ...settings.modules, audit: v } })}
+                  />
+                </div>
+              </div>
+
+              <Separator />
+              
+              <div className="space-y-4">
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                  <Workflow className="h-3 w-3" /> Automação e Alçadas
+                </h4>
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div className="space-y-2 border p-3 rounded-lg bg-muted/10">
+                    <Label className="text-xs font-bold uppercase">Alçada de Compra</Label>
+                    <p className="text-[9px] text-muted-foreground leading-tight">Valor máximo para aprovação automática sem intervenção da diretoria.</p>
+                  </div>
+                  <div className="space-y-2 border p-3 rounded-lg bg-muted/10">
+                    <Label className="text-xs font-bold uppercase">Faturamento Automático</Label>
+                    <p className="text-[9px] text-muted-foreground leading-tight">Disparo automático de NF-e ao concluir separação WMS.</p>
+                  </div>
+                  <div className="space-y-2 border p-3 rounded-lg bg-muted/10">
+                    <Label className="text-xs font-bold uppercase">Restrição de Tenant</Label>
+                    <p className="text-[9px] text-muted-foreground leading-tight">Bloqueio estrito de company_id em nível de trigger no Postgres.</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </PageContainer>
