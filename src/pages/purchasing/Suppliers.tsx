@@ -63,7 +63,13 @@ export default function SuppliersPage() {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isViewOpen, setIsViewOpen] = useState(false);
+  const [is360Open, setIs360Open] = useState(false);
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
+
+  const handleOpen360 = (supplier: Supplier) => {
+    setSelectedSupplier(supplier);
+    setIs360Open(true);
+  };
   const [formData, setFormData] = useState<Partial<Supplier>>({});
   const cnpjLookup = useCnpjLookup();
 
