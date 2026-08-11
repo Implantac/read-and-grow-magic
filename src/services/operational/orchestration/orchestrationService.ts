@@ -20,14 +20,14 @@ export class OrchestrationService {
 
     // Use a generic query to avoid TS deep instantiation issues with complex generated types
     // 1. Check local stock
-    const { data: localStock } = await (supabase as any)
-      .from('inventory_levels')
-      .select('balance')
-      .eq('product_id', productId)
-      .eq('branch_id', targetBranchId)
+    const { data: localStock } = await supabase
+      .from('stock_balances')
+      .select('quantity')
+      .eq('product_id', productId as any)
+      .eq('branch_id', targetBranchId as any)
       .single();
 
-    if (localStock && (localStock as any).balance >= quantity) {
+    if (localStock && (localStock as any).quantity >= quantity) {
       options.push({
         type: 'local',
         branchId: targetBranchId,

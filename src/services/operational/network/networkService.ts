@@ -34,7 +34,7 @@ export const networkService = {
       .limit(100);
     
     if (error) throw error;
-    return (data || []) as unknown as OperationalUnit[];
+    return (data || []) as any[];
   },
 
   async getStockBalances(companyId: string, unitId?: string) {
@@ -45,7 +45,7 @@ export const networkService = {
       .limit(1000);
     
     if (unitId) {
-      query = query.eq('unit_id', unitId);
+      query = query.eq('branch_id' as any, unitId);
     }
 
     const { data, error } = await query;
@@ -59,9 +59,9 @@ export const networkService = {
       .from('stock_movements')
       .insert([{ 
         ...params, 
-        reference_number: ref,
-        status: 'requested' 
-      }])
+        document_number: ref,
+        direction: 'out'
+      } as any])
       .select()
       .single();
     
@@ -69,10 +69,10 @@ export const networkService = {
     return data as unknown as StockTransfer;
   },
 
-  async updateTransferStatus(transferId: string, status: StockTransfer['status']) {
+  async updateTransferStatus(transferId: string, status: string) {
     const { data, error } = await supabase
       .from('stock_movements')
-      .update({ status })
+      .update({ notes: `Status: ${status}` } as any)
       .eq('id', transferId)
       .select()
       .single();
@@ -101,7 +101,7 @@ export const networkService = {
     const { data, error } = await supabase
       .from('pos_terminals')
       .select('*')
-      .eq('unit_id', unitId)
+      .eq('branch_id', unitId)
       .limit(100);
     
     if (error) throw error;
