@@ -6,11 +6,13 @@ import { Skeleton } from '@/ui/base/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { ScrollArea } from '@/ui/base/scroll-area';
 import { formatBRL, formatDate } from '@/lib/formatters';
-import { Package, History, TrendingUp, AlertTriangle, Box, ArrowRightLeft, DollarSign, BrainCircuit, Zap } from 'lucide-react';
+import { Package, History, TrendingUp, AlertTriangle, Box, ArrowRightLeft, DollarSign, BrainCircuit, Zap, Info } from 'lucide-react';
 import { useWMSInventory } from '@/hooks/wms/useWMSInventory';
 import { useProductCosts } from '@/hooks/production/useProductCosts';
 import { usePredictiveIntelligence } from '@/hooks/ai/usePredictiveIntelligence';
 import { StatusBadge } from '@/shared/components/StatusBadge';
+import { DemandProjectionChart } from './DemandProjectionChart';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/ui/base/tooltip';
 
 interface Props {
   open: boolean;
@@ -138,17 +140,32 @@ export function Product360Drawer({ open, onOpenChange, productId, productName }:
                         <BrainCircuit className="h-4 w-4 text-accent" />
                         <span className="text-sm font-bold">Projeção Digital Twin (30 dias)</span>
                       </div>
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-end">
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-start">
                           <div>
                             <p className="text-[10px] uppercase text-muted-foreground font-bold">Demanda Prevista</p>
                             <p className="text-2xl font-black text-accent">{demand.predicted_demand} <span className="text-xs font-normal text-muted-foreground">{product.unit}</span></p>
                           </div>
-                          <Badge variant="secondary" className="bg-accent/10 text-accent border-accent/20 text-[10px] flex gap-1 items-center">
-                            <Zap className="h-2 w-2" /> {Math.round(demand.confidence_score * 100)}% Confiança
-                          </Badge>
+                          <div className="flex flex-col items-end gap-1">
+                            <Badge variant="secondary" className="bg-accent/10 text-accent border-accent/20 text-[10px] flex gap-1 items-center">
+                              <Zap className="h-2 w-2" /> {Math.round(demand.confidence_score * 100)}% Confiança
+                            </Badge>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  <Info className="h-3 w-3 text-muted-foreground" />
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-[200px] text-[10px]">
+                                  {demand.reasoning}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
                         </div>
-                        <p className="text-[11px] text-muted-foreground leading-tight italic">
+
+                        <DemandProjectionChart predictedDemand={demand.predicted_demand} unit={product.unit} />
+
+                        <p className="text-[10px] text-muted-foreground leading-tight bg-accent/10 p-2 rounded border border-accent/10 italic">
                           "{demand.reasoning}"
                         </p>
                       </div>
@@ -159,33 +176,43 @@ export function Product360Drawer({ open, onOpenChange, productId, productName }:
 
               <TabsContent value="logistics" className="space-y-4 mt-4">
                 {demand && (
-                  <div className="p-4 border border-accent/20 bg-accent/5 rounded-lg space-y-3">
-                    <div className="flex items-center gap-2">
-                      <TrendingUp className="h-4 w-4 text-accent" />
-                      <p className="text-xs font-bold uppercase text-accent">Análise de Reabastecimento IA</p>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-[10px] text-muted-foreground uppercase font-bold">Sugestão de Compra</p>
-                        <p className="text-lg font-black text-accent">
-                          {Math.max(0, demand.predicted_demand - product.availableQty)} <span className="text-xs font-normal">{product.unit}</span>
-                        </p>
-                        <p className="text-[9px] text-muted-foreground mt-0.5">Baseado na projeção IA</p>
+                  <div className="space-y-4">
+                    <div className="p-4 border border-accent/20 bg-accent/5 rounded-lg space-y-4">
+                      <div className="flex items-center gap-2">
+                        <BrainCircuit className="h-4 w-4 text-accent" />
+                        <p className="text-xs font-bold uppercase text-accent">Inteligência de Ressuprimento</p>
                       </div>
-                      <div>
-                        <p className="text-[10px] text-muted-foreground uppercase font-bold">Cobertura Estimada</p>
-                        <p className="text-lg font-black">
-                          {Math.round((product.availableQty / (demand.predicted_demand / 30)) || 0)} <span className="text-xs font-normal">dias</span>
-                        </p>
-                        <Badge variant="outline" className="text-[8px] h-3 px-1 mt-1 border-accent/30 text-accent bg-accent/5">Fase 5 - Predictive</Badge>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <p className="text-[10px] text-muted-foreground uppercase font-bold">Sugestão de Compra</p>
+                          <p className="text-2xl font-black text-accent">
+                            {Math.max(0, demand.predicted_demand - product.availableQty)} <span className="text-sm font-normal">{product.unit}</span>
+                          </p>
+                          <div className="flex items-center gap-1">
+                            <Progress value={Math.min(100, (product.availableQty / demand.predicted_demand) * 100)} className="h-1.5 w-full bg-accent/10" />
+                          </div>
+                          <p className="text-[9px] text-muted-foreground">Baseado no déficit projetado</p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-[10px] text-muted-foreground uppercase font-bold">Cobertura de Estoque</p>
+                          <p className="text-2xl font-black">
+                            {Math.round((product.availableQty / (demand.predicted_demand / 30)) || 0)} <span className="text-sm font-normal">dias</span>
+                          </p>
+                          <Badge variant="outline" className="text-[8px] h-4 px-1 border-accent/30 text-accent bg-accent/5">Fase 5 - Predictive</Badge>
+                          <p className="text-[9px] text-muted-foreground">Atendimento da demanda atual</p>
+                        </div>
                       </div>
-                    </div>
-                    
-                    <div className="pt-2 border-t border-accent/10">
-                      <div className="flex items-center gap-2 text-[10px] text-accent font-medium">
-                        <Zap className="h-3 w-3" />
-                        <span>Ponto de Ressuprimento Sugerido: {Math.round(demand.predicted_demand * 0.3)} {product.unit}</span>
+                      
+                      <div className="pt-3 border-t border-accent/10 grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-[9px] text-muted-foreground uppercase">Ponto de Pedido IA</p>
+                          <p className="text-sm font-bold">{Math.round(demand.predicted_demand * 0.3)} {product.unit}</p>
+                        </div>
+                        <div>
+                          <p className="text-[9px] text-muted-foreground uppercase">Lote Econômico (EOQ)</p>
+                          <p className="text-sm font-bold text-success">{Math.round(demand.predicted_demand * 0.5)} {product.unit}</p>
+                        </div>
                       </div>
                     </div>
                   </div>
