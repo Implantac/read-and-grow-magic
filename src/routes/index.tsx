@@ -8,49 +8,11 @@
  * 1. 🔴 PROFISSIONALIZAÇÃO OPERACIONAL (Fase 1): Padronização de UX/UI, Lifecycle e Feedback.
  * 2. 🔴 PROCESSOS PONTA A PONTA (Fase 2): Order-to-Cash, Procure-to-Pay, WMS, etc.
  * 3. 🔴 GOVERNANÇA (Fase 3): RBAC granular, Workflow Engine e Configuração Empresarial.
- */
-
- * ok agora execute o que foi pedido
-
- * Master Plan — Dashboard de Hardening e Roadmap de Evolução.
+ *
  * Auditoria profunda de Segurança e Banco de Dados executada em 09/08/2026.
- *
- * A própria auditoria já aponta componentes muito grandes e recomenda refatoração por coesão, sem alterar comportamento.
- * Minha prioridade para o READ & GROW agora
- * Eu colocaria assim:
- *
- * Prioridade | Ajuste | Impacto
- * 🔴 1 | Fechar os fluxos ponta a ponta | Crítico
- * 🔴 2 | Padronizar UX/UI do sistema inteiro | Crítico
- * 🔴 3 | Corrigir navegação e arquitetura de menus | Crítico
- * 🔴 4 | Estados, validações e feedbacks profissionais | Crítico
- * 🔴 5 | Transformar configurações em algo realmente empresarial | Muito alto
- * 🟠 6 | Refatorar componentes gigantes | Alto
- * 🟠 7 | Permissões e auditoria por operação | Alto
- * 🟠 8 | Dashboard e indicadores realmente úteis | Alto
- * 🟠 9 | Documentação e governança técnica | Médio/alto
- * 🟡 10 | Performance, testes e observabilidade | Médio/alto
- *
- * E eu faria nessa ordem.
- *
- * 1. 🔴 Primeiro: fechar os processos
- * Esse é, para mim, o problema mais importante.
- * Um ERP profissional não é definido pela quantidade de páginas.
- * É definido por: "Eu consigo começar uma operação e terminá-la sem precisar improvisar?"
- * Por exemplo, venda precisa funcionar assim:
- * Cliente ↓ Orçamento ↓ Aprovação ↓ Pedido ↓ Reserva de estoque ↓ Separação ↓ Expedição ↓ NF-e ↓ Financeiro ↓ Baixa ↓ Comissão ↓ BI ↓ NPS
- * Se uma dessas etapas existe apenas como tela isolada, o sistema parece grande, mas não parece profissional.
- *
- * Eu fecharia primeiro estes 8 fluxos:
- * 1. Order-to-Cash: Lead → Cliente → Orçamento → Pedido → Estoque/WMS → NF → Financeiro
- * 2. Procure-to-Pay: Solicitação → Cotação → Aprovação → Pedido → Recebimento → NF → Contas a pagar
- * 3. Produção: Demanda → MRP → PCP → OP → Consumo → Apontamento → Produto acabado → Estoque
- * 4. WMS: Recebimento → Conferência → Putaway → Estoque → Picking → Packing → Expedição
- * 5. Financeiro: Título → Aprovação → Pagamento/Recebimento → Banco → Conciliação → Baixa
- * 6. Fiscal: Operação → Documento fiscal → SEFAZ → Autorização → Escrituração → Financeiro/contábil
- * 7. Devolução: Cliente → Solicitação → Aprovação → Recebimento → Conferência → Estoque → NF → Financeiro
- * 8. Transferência: Origem → Solicitação → Aprovação → Separação → Transporte → Recebimento → Destino
+ * RLS (Row Level Security) validado para multi-tenancy rigoroso.
  */
+
 import { Suspense, useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/ui/base/card";
