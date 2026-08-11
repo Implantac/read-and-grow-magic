@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/ui/base/card';
 import { Skeleton } from '@/ui/base/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { ScrollArea } from '@/ui/base/scroll-area';
+import { Progress } from '@/ui/base/progress';
 import { formatBRL, formatDate } from '@/lib/formatters';
 import { Package, History, TrendingUp, AlertTriangle, Box, ArrowRightLeft, DollarSign, BrainCircuit, Zap, Info } from 'lucide-react';
 import { useWMSInventory } from '@/hooks/wms/useWMSInventory';
