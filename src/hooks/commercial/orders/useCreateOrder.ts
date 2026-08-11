@@ -114,7 +114,7 @@ export function useCreateOrder() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['orders'] });
-      toastSuccess('Pedido criado com sucesso!');
+      toastSuccess('Pedido criado!', 'O pedido foi registrado e aguarda confirmação para iniciar o fluxo logístico.');
     },
     onError: (e: Error) => {
       console.error('Error creating order:', e);
