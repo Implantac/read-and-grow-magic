@@ -219,7 +219,11 @@ export default function SuppliersPage() {
         </CardContent>
       </Card>
 
-      {/* Dialogs would go here - simplified for brevity of refactoring */}
+      <Supplier360Drawer 
+        open={is360Open} 
+        onOpenChange={setIs360Open} 
+        supplier={selectedSupplier} 
+      />
     </PageContainer>
   );
 }
