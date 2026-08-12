@@ -27,6 +27,8 @@ interface HierarchyRow {
   level: string;
 }
 
+export type OperationType = string | { key: string; label?: string };
+
 export interface Policy {
   replenishmentMethod: string;
   transferApprovalLimit: number;
