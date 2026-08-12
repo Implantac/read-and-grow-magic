@@ -302,7 +302,7 @@ export function UnifiedGovernanceDashboard() {
                   garantindo que o contexto de <code>company_id</code> seja inviolável.
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline" className="bg-white">SEC-LEVEL 3</Badge>
+                  <Badge variant="outline" className="bg-white">SEC-LEVEL 4</Badge>
                   <Badge variant="outline" className="bg-white">MULTI-TENANT ISOLATED</Badge>
                   <Badge variant="outline" className="bg-white">AUDIT TRIGGER ENABLED</Badge>
                 </div>
