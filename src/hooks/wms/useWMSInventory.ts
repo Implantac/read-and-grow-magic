@@ -3,10 +3,13 @@ import { supabase } from '@/integrations/supabase/client';
 import type { InventoryItem, InventoryCount } from '@/types/wms';
 import { toast } from 'sonner';
 
+export type RealtimeStatus = 'connected' | 'reconnecting' | 'error';
+
 export function useWMSInventory() {
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [counts, setCounts] = useState<InventoryCount[]>([]);
   const [loading, setLoading] = useState(true);
+  const [realtimeStatus, setRealtimeStatus] = useState<RealtimeStatus>('reconnecting');
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -97,11 +100,13 @@ export function useWMSInventory() {
         .subscribe((status: string) => {
           if (status === 'SUBSCRIBED') {
             console.log('Realtime subscribed successfully for WMS inventory');
+            setRealtimeStatus('connected');
             retryCount = 0; // Reset retry count on success
           }
 
           if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
             if (mounted && retryCount < MAX_RETRIES) {
+              setRealtimeStatus('reconnecting');
               const backoff = INITIAL_BACKOFF * Math.pow(2, retryCount);
               console.warn(`WMS Realtime connection failed. Retrying in ${backoff}ms... (Attempt ${retryCount + 1}/${MAX_RETRIES})`);
               
@@ -113,6 +118,7 @@ export function useWMSInventory() {
                 }
               }, backoff);
             } else if (retryCount >= MAX_RETRIES) {
+              setRealtimeStatus('error');
               console.error('WMS Realtime: Max retries reached. Please check your connection.');
               toast.error('Falha na conexão em tempo real do WMS');
             }
@@ -130,5 +136,5 @@ export function useWMSInventory() {
     };
   }, [fetchData]);
 
-  return { items, counts, loading, refetch: fetchData };
+  return { items, counts, loading, realtimeStatus, refetch: fetchData };
 }
