@@ -73,6 +73,10 @@ const CHART_DATA = [
 
 export function GovernanceDrillDown({ type, module, onBack }: GovernanceDrillDownProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterUser, setFilterUser] = useState('all');
+  const [filterSeverity, setFilterSeverity] = useState('all');
+  const [filterStatus, setFilterStatus] = useState('all');
+
 
   const getTitle = () => {
     switch (type) {
@@ -187,26 +191,94 @@ export function GovernanceDrillDown({ type, module, onBack }: GovernanceDrillDow
 
       <Card>
         <CardHeader className="pb-0">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <CardTitle className="text-base font-bold">Timeline Detalhada</CardTitle>
-              <CardDescription>Rastreabilidade imutável de cada ação no sistema</CardDescription>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div>
+                <CardTitle className="text-base font-bold">Timeline Detalhada</CardTitle>
+                <CardDescription>Rastreabilidade imutável de cada ação no sistema</CardDescription>
+              </div>
+              <div className="relative w-full sm:w-[300px]">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  placeholder="Buscar por usuário, ação ou hash..." 
+                  className="pl-9"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
             </div>
-            <div className="relative w-full sm:w-[300px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input 
-                placeholder="Filtrar eventos..." 
-                className="pl-9"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+            
+            <div className="flex flex-wrap gap-2 pb-4">
+              <div className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-lg border text-xs">
+                <span className="text-muted-foreground font-medium">Usuário:</span>
+                <select 
+                  className="bg-transparent border-none focus:ring-0 p-0 text-[11px] font-bold"
+                  value={filterUser}
+                  onChange={(e) => setFilterUser(e.target.value)}
+                >
+                  <option value="all">Todos</option>
+                  <option value="admin@empresa.com">admin@empresa.com</option>
+                  <option value="ia.autopilot">IA Autopilot</option>
+                  <option value="gerente.vendas">Gerente Vendas</option>
+                </select>
+              </div>
+
+              {type === 'security' && (
+                <div className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-lg border text-xs">
+                  <span className="text-muted-foreground font-medium">Severidade:</span>
+                  <select 
+                    className="bg-transparent border-none focus:ring-0 p-0 text-[11px] font-bold"
+                    value={filterSeverity}
+                    onChange={(e) => setFilterSeverity(e.target.value)}
+                  >
+                    <option value="all">Todas</option>
+                    <option value="high">Alta</option>
+                    <option value="low">Baixa</option>
+                  </select>
+                </div>
+              )}
+
+              {type === 'ledger' && (
+                <div className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-lg border text-xs">
+                  <span className="text-muted-foreground font-medium">Status:</span>
+                  <select 
+                    className="bg-transparent border-none focus:ring-0 p-0 text-[11px] font-bold"
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                  >
+                    <option value="all">Todos</option>
+                    <option value="confirmed">Confirmado</option>
+                    <option value="warning">Alerta</option>
+                  </select>
+                </div>
+              )}
+
+              <Button variant="ghost" size="sm" className="h-8 text-[10px] font-bold uppercase ml-auto" onClick={() => {
+                setSearchTerm('');
+                setFilterUser('all');
+                setFilterSeverity('all');
+                setFilterStatus('all');
+              }}>
+                Limpar Filtros
+              </Button>
             </div>
           </div>
+
         </CardHeader>
         <CardContent className="pt-6">
           <ScrollArea className="h-[400px]">
             <div className="space-y-4">
-              {type === 'ledger' && MOCK_EVENTS.ledger.map((event) => (
+              {type === 'ledger' && MOCK_EVENTS.ledger
+                .filter(event => {
+                  const matchSearch = event.user.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                                     event.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                     event.hash.toLowerCase().includes(searchTerm.toLowerCase());
+                  const matchUser = filterUser === 'all' || event.user === filterUser;
+                  const matchStatus = filterStatus === 'all' || event.status === filterStatus;
+                  return matchSearch && matchUser && matchStatus;
+                })
+                .map((event) => (
+
                 <div key={event.id} className="flex items-center gap-4 p-4 rounded-xl border hover:bg-muted/30 transition-colors group">
                   <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                     <History className="h-5 w-5 text-blue-600" />
@@ -231,7 +303,15 @@ export function GovernanceDrillDown({ type, module, onBack }: GovernanceDrillDow
                 </div>
               ))}
 
-              {type === 'security' && MOCK_EVENTS.security.map((event) => (
+              {type === 'security' && MOCK_EVENTS.security
+                .filter(event => {
+                  const matchSearch = event.detail.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                                     event.type.toLowerCase().includes(searchTerm.toLowerCase());
+                  const matchSeverity = filterSeverity === 'all' || event.severity === filterSeverity;
+                  return matchSearch && matchSeverity;
+                })
+                .map((event) => (
+
                 <div key={event.id} className="flex items-center gap-4 p-4 rounded-xl border hover:bg-muted/30 transition-colors group">
                   <div className={cn(
                     "h-10 w-10 rounded-full flex items-center justify-center shrink-0",
@@ -257,7 +337,14 @@ export function GovernanceDrillDown({ type, module, onBack }: GovernanceDrillDow
                 </div>
               ))}
 
-              {type === 'ai' && MOCK_EVENTS.ai.map((event) => (
+              {type === 'ai' && MOCK_EVENTS.ai
+                .filter(event => {
+                  const matchSearch = event.decision.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                                     event.model.toLowerCase().includes(searchTerm.toLowerCase());
+                  return matchSearch;
+                })
+                .map((event) => (
+
                 <div key={event.id} className="flex items-center gap-4 p-4 rounded-xl border hover:bg-muted/30 transition-colors group">
                   <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
                     <Brain className="h-5 w-5 text-amber-600" />
