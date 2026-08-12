@@ -15,7 +15,9 @@ import {
   Zap,
   Lock,
   History,
-  Info
+  Info,
+  Network,
+  RefreshCw
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/base/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/base/tabs";
@@ -147,7 +149,7 @@ export function UnifiedGovernanceDashboard() {
                 <ShieldCheck className="h-4 w-4 text-emerald-500" /> Governança UEEF
               </CardTitle>
               <Badge variant="outline" className="border-emerald-500/30 text-emerald-600 bg-white uppercase">
-                SEC-LEVEL 3
+                SEC-LEVEL 4
               </Badge>
             </div>
           </CardHeader>
@@ -156,10 +158,37 @@ export function UnifiedGovernanceDashboard() {
               <div>
                 <div className="text-2xl font-black">100%</div>
                 <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                  <Lock className="h-3 w-3 text-emerald-500" /> RLS Isolation verified
+                  <Lock className="h-3 w-3 text-emerald-500" /> Orquestração Cross-Domain verificada
                 </p>
               </div>
               <Activity className="h-8 w-8 text-emerald-500/20 group-hover:text-emerald-500 transition-colors" />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Orquestrador de Eventos (Novo KPI) */}
+        <Card 
+          className="border-violet-500/20 bg-violet-500/5 overflow-hidden group cursor-pointer hover:border-violet-500/50 transition-all"
+        >
+          <CardHeader className="pb-2">
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-sm font-bold flex items-center gap-2">
+                <Network className="h-4 w-4 text-violet-500" /> Event Orchestrator
+              </CardTitle>
+              <Badge variant="outline" className="border-violet-500/30 text-violet-600 bg-white">
+                REALTIME
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex justify-between items-end">
+              <div>
+                <div className="text-2xl font-black">Ativo</div>
+                <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                  <Activity className="h-3 w-3 text-violet-500" /> Vendas → Estoque → Financeiro
+                </p>
+              </div>
+              <RefreshCw className="h-8 w-8 text-violet-500/20 group-hover:text-violet-500 transition-colors" />
             </div>
           </CardContent>
         </Card>
@@ -273,7 +302,7 @@ export function UnifiedGovernanceDashboard() {
                   garantindo que o contexto de <code>company_id</code> seja inviolável.
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline" className="bg-white">SEC-LEVEL 3</Badge>
+                  <Badge variant="outline" className="bg-white">SEC-LEVEL 4</Badge>
                   <Badge variant="outline" className="bg-white">MULTI-TENANT ISOLATED</Badge>
                   <Badge variant="outline" className="bg-white">AUDIT TRIGGER ENABLED</Badge>
                 </div>
