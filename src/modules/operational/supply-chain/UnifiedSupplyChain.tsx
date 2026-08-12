@@ -17,6 +17,7 @@ import { useComplianceValidation } from '@/hooks/compliance/useComplianceValidat
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { MovementLedger } from './components/MovementLedger';
+import { NewTransferDialog } from '@/modules/wms/TransferenciasCanal';
 
 const STATUS_MAP: Record<MovementStatus, { label: string, color: string, icon: any }> = {
   requested: { label: 'Solicitado', color: 'bg-blue-500/10 text-blue-500', icon: Clock },
@@ -39,6 +40,7 @@ export default function UnifiedSupplyChain() {
   const isLoading = isEnterpriseLoading || isSupplyLoading;
   const { logAudit } = useComplianceValidation();
   const [selectedMovement, setSelectedMovement] = useState<any>(null);
+  const [isTransferDialogOpen, setIsTransferDialogOpen] = useState(false);
 
   const unitType = (currentBranch as any)?.tipo?.toLowerCase() || 'store';
 
@@ -92,9 +94,17 @@ export default function UnifiedSupplyChain() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button className="gap-2 font-bold uppercase text-xs">
+            <Button 
+              className="gap-2 font-bold uppercase text-xs"
+              onClick={() => setIsTransferDialogOpen(true)}
+            >
               <Plus className="h-4 w-4" /> Nova Solicitação
             </Button>
+            <NewTransferDialog 
+              open={isTransferDialogOpen} 
+              onOpenChange={setIsTransferDialogOpen}
+              trigger={null} 
+            />
             <Button variant="outline" className="gap-2 font-bold uppercase text-xs">
               <Search className="h-4 w-4" /> Consultar Rede
             </Button>
