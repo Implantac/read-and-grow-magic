@@ -27,7 +27,7 @@ export function InventoryDialog({ isOpen, onClose }: InventoryDialogProps) {
 
   const filteredProducts = products?.filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    p.sku?.toLowerCase().includes(searchTerm.toLowerCase())
+    (p as any).sku?.toLowerCase().includes(searchTerm.toLowerCase())
   ).slice(0, 10);
 
   const addItem = (product: any) => {
@@ -108,10 +108,10 @@ export function InventoryDialog({ isOpen, onClose }: InventoryDialogProps) {
                 <div className="space-y-3">
                   {items.map(item => (
                     <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg bg-muted/10">
-                      <div>
-                        <p className="text-sm font-bold">{item.name}</p>
-                        <p className="text-[10px] text-muted-foreground">{item.sku}</p>
-                      </div>
+                    <div>
+                      <p className="text-sm font-bold">{item.name}</p>
+                      <p className="text-[10px] text-muted-foreground">{(item as any).sku || 'SEM SKU'}</p>
+                    </div>
                       <div className="flex items-center gap-3">
                         <Input 
                           type="number" 
