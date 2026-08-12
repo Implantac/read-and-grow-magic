@@ -105,6 +105,7 @@ export function useCreateTransferenciaCanal() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['transferencias_canal'] });
+      qc.invalidateQueries({ queryKey: ['supply_chain_movements'] });
       toastSuccess('Transferência criada');
     },
     onError: handleMutationError,
