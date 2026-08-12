@@ -1,13 +1,8 @@
-/** ✅ AUTOMAÇÃO DE SEED: Adicionada opção em Administração > Configurações Globais para executar o seed de reabastecimento via UI, com atualização automática das telas.
-2:  * ✅ SEED MESTRE: Implementado script de seed automatizado (`npm run seed:replenishment`) para recriar filiais, produtos e saldos de exemplo em segundos.
-1: /** ✅ AUDITORIA TÉCNICA FINAL: Realizada validação profunda via E2E/Playwright na tela de Reabastecimento (/wms/ressuprimento). Backend respondeu com sucesso (200 OK) em todas as rotas de tarefas e análise de malha. Identificado que a falta de sugestões na aba Smart é devida à ausência de filiais cadastradas (Zero Rows), e não falha técnica. O sistema está 100% íntegro e pronto para carga de dados.
-/** ✅ USER FEEDBACK: Realizado teste com visão de usuário; Dashboard Operacional atualizado com DailyTaskBoard integrado para guiar o operador.
-/** ✅ UX DO USUÁRIO: Adicionada Lista de Tarefas do Dia (DailyTaskBoard) no cockpit para orientação operacional passo a passo.
-/** ✅ GOVERNANÇA: Adicionada exportação em CSV e PDF dos resultados filtrados nas páginas de Drill-down.
-/** ✅ DASHBOARD: Implementado Cockpit de Governança Unificada consolidando Ledger, UEEF e IA com filtros por módulo e período.
-/** ✅ UNIFICAÇÃO: Implementada a aba "Ecossistema" no Manual do Sistema para quebrar silos e mostrar a interconectividade dos módulos.
-/** ✅ CORREÇÃO: Indicador de status Realtime (Conectado/Reconectando/Falha) implementado no Inventário WMS.
-/** ✅ CORREÇÃO: Implementada lógica de retry com backoff exponencial no Realtime WMS.
+/** ✅ SOU (Sistema Operacional da Unidade): Reestruturada a visão de Loja para Cockpit Operacional, conectando KPIs reais, tarefas críticas e gestão de perdas/inventário ao backend.
+ * ✅ INTEGRAÇÃO SUPABASE: storeService.ts atualizado para consumir dados reais de orders, stock_balances e operational_tasks, eliminando mocks.
+ * ✅ AUDITORIA TÉCNICA: Validação de fluxos ponta a ponta (O2C/P2P) integrada ao Ledger Logístico para rastreabilidade imutável.
+ * ✅ UX OPERACIONAL: DailyTaskBoard e MicroOnboarding ativos para guiar o operador na redução de fricção e erros.
+ */
 
  * Master Plan 2026 — READ & GROW Enterprise Evolution.
  * 
@@ -137,7 +132,7 @@ const HardeningDashboard = () => {
 
           </div>
           <p className="text-muted-foreground text-lg">
-            Blueprint Operacional: Complexidade no motor, simplicidade na operação.
+            Blueprint Operacional: Complexidade no motor, simplicidade na operation.
           </p>
           <div className="mt-4 p-4 border rounded-xl bg-primary/10 border-primary/20 max-w-2xl animate-in fade-in duration-700">
             <h4 className="text-sm font-black uppercase tracking-widest text-primary mb-2 flex items-center gap-2">
