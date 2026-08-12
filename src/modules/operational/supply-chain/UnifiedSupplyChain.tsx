@@ -139,7 +139,7 @@ export default function UnifiedSupplyChain() {
                     <EmptyState 
                       title="Nenhuma movimentação registrada"
                       description="A malha logística está sem solicitações ativas no momento. Crie uma nova transferência para iniciar o fluxo."
-                      action={{ label: "Nova Solicitação", onClick: () => toast.info("Funcionalidade de nova solicitação em desenvolvimento.") }}
+                      action={{ label: "Nova Solicitação", onClick: () => setIsTransferDialogOpen(true) }}
                     />
                   ) : (
                     movements.map(m => (
