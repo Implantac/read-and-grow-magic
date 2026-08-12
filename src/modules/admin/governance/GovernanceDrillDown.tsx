@@ -18,8 +18,10 @@ import {
   ArrowUpRight,
   Zap,
   Lock,
-  ExternalLink
+  ExternalLink,
+  FileText
 } from 'lucide-react';
+
 import { Input } from "@/ui/base/input";
 import { ScrollArea } from "@/ui/base/scroll-area";
 import { cn } from "@/lib/utils";
@@ -77,6 +79,110 @@ export function GovernanceDrillDown({ type, module, onBack }: GovernanceDrillDow
   const [filterSeverity, setFilterSeverity] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
 
+  const getFilteredData = () => {
+    switch (type) {
+      case 'ledger':
+        return MOCK_EVENTS.ledger.filter(event => {
+          const matchSearch = event.user.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                             event.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                             event.hash.toLowerCase().includes(searchTerm.toLowerCase());
+          const matchUser = filterUser === 'all' || event.user === filterUser;
+          const matchStatus = filterStatus === 'all' || event.status === filterStatus;
+          return matchSearch && matchUser && matchStatus;
+        });
+      case 'security':
+        return MOCK_EVENTS.security.filter(event => {
+          const matchSearch = event.detail.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                             event.type.toLowerCase().includes(searchTerm.toLowerCase());
+          const matchSeverity = filterSeverity === 'all' || event.severity === filterSeverity;
+          const matchUser = filterUser === 'all' || (event.detail.toLowerCase().includes(filterUser.toLowerCase()));
+          return matchSearch && matchSeverity && matchUser;
+        });
+      case 'ai':
+        return MOCK_EVENTS.ai.filter(event => {
+          const matchSearch = event.decision.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                             event.model.toLowerCase().includes(searchTerm.toLowerCase());
+          const matchUser = filterUser === 'all' || (event.model.toLowerCase().includes(filterUser.toLowerCase()));
+          return matchSearch && matchUser;
+        });
+      default:
+        return [];
+    }
+  };
+
+  const filteredData = getFilteredData();
+
+  const handleExportCSV = () => {
+    const headers = type === 'ledger' 
+      ? 'Time,User,Action,Status,Module,Hash'
+      : type === 'security'
+      ? 'Time,Type,Detail,Severity,Module'
+      : 'Time,Model,Decision,Confidence,Module';
+
+    const rows = filteredData.map(item => {
+      if (type === 'ledger') return `${item.time},${item.user},${item.action},${item.status},${item.module},${item.hash}`;
+      if (type === 'security') return `${item.time},${item.type},${item.detail},${item.severity},${item.module}`;
+      return `${item.time},${item.model},${item.decision},${item.confidence},${item.module}`;
+    });
+
+    const csvContent = [headers, ...rows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `governance_${type}_export.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleExportPDF = () => {
+    // Simulação de exportação PDF para interface
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+    
+    const html = `
+      <html>
+        <head>
+          <title>Exportação Governança - ${getTitle()}</title>
+          <style>
+            body { font-family: sans-serif; padding: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
+            th { background-color: #f2f2f2; }
+            h1 { font-size: 18px; }
+          </style>
+        </head>
+        <body>
+          <h1>${getTitle()}</h1>
+          <p>Módulo: ${module} | Filtros: ${searchTerm || 'Nenhum'}</p>
+          <table>
+            <thead>
+              ${type === 'ledger' ? '<tr><th>Time</th><th>User</th><th>Action</th><th>Status</th></tr>' : ''}
+              ${type === 'security' ? '<tr><th>Time</th><th>Type</th><th>Detail</th><th>Severity</th></tr>' : ''}
+              ${type === 'ai' ? '<tr><th>Time</th><th>Model</th><th>Decision</th><th>Confidence</th></tr>' : ''}
+            </thead>
+            <tbody>
+              ${filteredData.map(item => `
+                <tr>
+                  <td>${item.time}</td>
+                  ${type === 'ledger' ? `<td>${item.user}</td><td>${item.action}</td><td>${item.status}</td>` : ''}
+                  ${type === 'security' ? `<td>${item.type}</td><td>${item.detail}</td><td>${item.severity}</td>` : ''}
+                  ${type === 'ai' ? `<td>${item.model}</td><td>${item.decision}</td><td>${item.confidence}</td>` : ''}
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.print();
+  };
+
+
 
   const getTitle = () => {
     switch (type) {
@@ -116,13 +222,17 @@ export function GovernanceDrillDown({ type, module, onBack }: GovernanceDrillDow
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="font-bold">
+          <Button variant="outline" size="sm" className="font-bold" onClick={handleExportCSV}>
             <Download className="h-4 w-4 mr-2" /> Exportar CSV
+          </Button>
+          <Button variant="outline" size="sm" className="font-bold" onClick={handleExportPDF}>
+            <FileText className="h-4 w-4 mr-2" /> Exportar PDF
           </Button>
           <Button size="sm" className="font-bold">
             <Search className="h-4 w-4 mr-2" /> Auditoria Completa
           </Button>
         </div>
+
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
@@ -268,16 +378,8 @@ export function GovernanceDrillDown({ type, module, onBack }: GovernanceDrillDow
         <CardContent className="pt-6">
           <ScrollArea className="h-[400px]">
             <div className="space-y-4">
-              {type === 'ledger' && MOCK_EVENTS.ledger
-                .filter(event => {
-                  const matchSearch = event.user.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                                     event.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                     event.hash.toLowerCase().includes(searchTerm.toLowerCase());
-                  const matchUser = filterUser === 'all' || event.user === filterUser;
-                  const matchStatus = filterStatus === 'all' || event.status === filterStatus;
-                  return matchSearch && matchUser && matchStatus;
-                })
-                .map((event) => (
+              {type === 'ledger' && filteredData.map((event: any) => (
+
 
                 <div key={event.id} className="flex items-center gap-4 p-4 rounded-xl border hover:bg-muted/30 transition-colors group">
                   <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
@@ -303,14 +405,8 @@ export function GovernanceDrillDown({ type, module, onBack }: GovernanceDrillDow
                 </div>
               ))}
 
-              {type === 'security' && MOCK_EVENTS.security
-                .filter(event => {
-                  const matchSearch = event.detail.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                                     event.type.toLowerCase().includes(searchTerm.toLowerCase());
-                  const matchSeverity = filterSeverity === 'all' || event.severity === filterSeverity;
-                  return matchSearch && matchSeverity;
-                })
-                .map((event) => (
+              {type === 'security' && filteredData.map((event: any) => (
+
 
                 <div key={event.id} className="flex items-center gap-4 p-4 rounded-xl border hover:bg-muted/30 transition-colors group">
                   <div className={cn(
@@ -337,13 +433,8 @@ export function GovernanceDrillDown({ type, module, onBack }: GovernanceDrillDow
                 </div>
               ))}
 
-              {type === 'ai' && MOCK_EVENTS.ai
-                .filter(event => {
-                  const matchSearch = event.decision.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                                     event.model.toLowerCase().includes(searchTerm.toLowerCase());
-                  return matchSearch;
-                })
-                .map((event) => (
+              {type === 'ai' && filteredData.map((event: any) => (
+
 
                 <div key={event.id} className="flex items-center gap-4 p-4 rounded-xl border hover:bg-muted/30 transition-colors group">
                   <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0">

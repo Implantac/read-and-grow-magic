@@ -1,4 +1,4 @@
-/** ✅ GOVERNANÇA: Implementados busca e filtros avançados (usuário, severidade, status) nas páginas de drill-down do Cockpit.
+/** ✅ GOVERNANÇA: Adicionada exportação em CSV e PDF dos resultados filtrados nas páginas de Drill-down.
 /** ✅ DASHBOARD: Implementado Cockpit de Governança Unificada consolidando Ledger, UEEF e IA com filtros por módulo e período.
 /** ✅ UNIFICAÇÃO: Implementada a aba "Ecossistema" no Manual do Sistema para quebrar silos e mostrar a interconectividade dos módulos.
 /** ✅ CORREÇÃO: Indicador de status Realtime (Conectado/Reconectando/Falha) implementado no Inventário WMS.
