@@ -31,7 +31,6 @@ export interface StoreHealth {
 
 export const storeService = {
   async getStoreKPIs(branchId: string): Promise<StoreKPIs> {
-    // Busca contagem real de tarefas e rupturas
     const { data: tasks } = await (supabase as any)
       .from('operational_tasks')
       .select('status, category')
@@ -42,14 +41,37 @@ export const storeService = {
     const transfers = tasks?.filter((t: any) => t.category === 'transfer').length || 0;
     const receiving = tasks?.filter((t: any) => t.category === 'receiving').length || 0;
 
+    const { data: stock } = await (supabase as any)
+      .from('stock_balances')
+      .select('quantity, products(cost_price)')
+      .eq('branch_id', branchId);
+
+    const stockValue = stock?.reduce((acc: number, item: any) => {
+      const price = item.products?.cost_price || 0;
+      return acc + (item.quantity * price);
+    }, 0) || 0;
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    
+    const { data: sales } = await (supabase as any)
+      .from('orders')
+      .select('total_amount')
+      .eq('branch_id', branchId)
+      .gte('created_at', today.toISOString())
+      .not('status', 'eq', 'cancelled');
+
+    const totalSales = sales?.reduce((acc: number, order: any) => acc + Number(order.total_amount), 0) || 0;
+    const ticketAverage = sales?.length ? totalSales / sales.length : 0;
+
     return {
-      sales: 18430.50, // Ainda mockado até PDV integrar Ledger
-      ticketAverage: 87.40,
-      stockValue: 242000,
+      sales: totalSales,
+      ticketAverage: ticketAverage,
+      stockValue: stockValue,
       ruptures,
       transfers,
       receiving,
-      openCashiers: 4
+      openCashiers: 0
     };
   },
 
@@ -88,7 +110,6 @@ export const storeService = {
   async getStoreHealth(branchId: string): Promise<StoreHealth> {
     const reliability = await this.getStockReliability(branchId);
     
-    // Lógica de Score: penaliza rupturas e tarefas atrasadas
     const { count: pendingCritical } = await (supabase as any)
       .from('operational_tasks')
       .select('*', { count: 'exact', head: true })
@@ -111,7 +132,6 @@ export const storeService = {
   },
 
   async getStockReliability(branchId: string): Promise<number> {
-    // Busca divergências recentes para calcular a acuracidade
     const { data: discrepancies } = await (supabase as any)
       .from('operational_discrepancies')
       .select('expected_qty, actual_qty')
@@ -127,6 +147,52 @@ export const storeService = {
     
     const accuracy = (1 - Math.abs(totalExpected - totalActual) / totalExpected) * 100;
     return Math.min(100, Math.max(0, accuracy));
+  },
+
+  async registerLoss(data: {
+    branch_id: string;
+    product_id: string;
+    quantity: number;
+    reason: string;
+    notes?: string;
+  }) {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) throw new Error("Usuário não autenticado");
+
+    const companyId = await this.getCompanyId(data.branch_id);
+
+    const { error: ledgerError } = await (supabase as any)
+      .from('supply_chain_ledger')
+      .insert({
+        company_id: companyId,
+        branch_id: data.branch_id,
+        product_id: data.product_id,
+        quantity: -Math.abs(data.quantity),
+        movement_type: 'adjustment',
+        origin_type: 'loss',
+        status: 'completed',
+        notes: `Perda registrada: ${data.reason}. ${data.notes || ''}`,
+        created_by: userData.user.id
+      });
+
+    if (ledgerError) throw ledgerError;
+
+    const { error: stockError } = await (supabase as any).rpc('adjust_stock', {
+      p_branch_id: data.branch_id,
+      p_product_id: data.product_id,
+      p_quantity: -Math.abs(data.quantity)
+    });
+
+    return { success: !stockError };
+  },
+
+  async getCompanyId(branchId: string): Promise<string> {
+    const { data } = await (supabase as any)
+      .from('branches')
+      .select('company_id')
+      .eq('id', branchId)
+      .single();
+    return data?.company_id || '';
   }
 };
 

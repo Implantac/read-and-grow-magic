@@ -27,7 +27,7 @@ import { Link } from "react-router-dom";
 import { Skeleton } from "@/ui/base/skeleton";
 
 export default function StoreCentral() {
-  const { kpis, alerts, health, reliability, isLoading } = useStoreCentral();
+  const { kpis, alerts, health, reliability, isLoading, refetch } = useStoreCentral();
 
   if (isLoading) {
     return (
@@ -56,8 +56,8 @@ export default function StoreCentral() {
           <Badge variant="outline" className="bg-success/10 text-success border-success/20">
             Loja Operacional
           </Badge>
-          <Button variant="outline" size="sm" className="gap-2">
-            <RefreshCw className="h-3 w-3" /> Atualizar
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => refetch()}>
+            <RefreshCw className={cn("h-3 w-3", isLoading && "animate-spin")} /> Atualizar
           </Button>
         </div>
       </PageHeader>
