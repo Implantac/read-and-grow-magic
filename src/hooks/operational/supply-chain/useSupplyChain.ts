@@ -32,6 +32,26 @@ export function useSupplyChain(filters?: { status?: MovementStatus[] }) {
     if (!isEnterpriseLoading && currentBranch?.id) {
       fetchMovements();
     }
+    
+    // Inscrição em Realtime para atualizações na tabela
+    const channel = supabase
+      .channel('public:supply_chain_movements')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'supply_chain_movements'
+        },
+        () => {
+          fetchMovements();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [currentBranch?.id, JSON.stringify(filters?.status), isEnterpriseLoading]);
 
   const updateStatus = async (id: string, status: MovementStatus) => {
