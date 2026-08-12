@@ -31,8 +31,7 @@ export interface StoreHealth {
 
 export const storeService = {
   async getStoreKPIs(branchId: string): Promise<StoreKPIs> {
-    // Busca contagem real de tarefas e rupturas
-    const { data: tasks } = await supabase
+    const { data: tasks } = await (supabase as any)
       .from('operational_tasks')
       .select('status, category')
       .eq('branch_id', branchId)
@@ -42,8 +41,7 @@ export const storeService = {
     const transfers = tasks?.filter((t: any) => t.category === 'transfer').length || 0;
     const receiving = tasks?.filter((t: any) => t.category === 'receiving').length || 0;
 
-    // Busca valor de estoque real da filial
-    const { data: stock } = await supabase
+    const { data: stock } = await (supabase as any)
       .from('stock_balances')
       .select('quantity, products(cost_price)')
       .eq('branch_id', branchId);
@@ -53,11 +51,10 @@ export const storeService = {
       return acc + (item.quantity * price);
     }, 0) || 0;
 
-    // Busca vendas do dia (usando orders que é a fonte mais confiável no momento)
     const today = new Date();
     today.setHours(0,0,0,0);
     
-    const { data: sales } = await supabase
+    const { data: sales } = await (supabase as any)
       .from('orders')
       .select('total_amount')
       .eq('branch_id', branchId)
@@ -74,7 +71,7 @@ export const storeService = {
       ruptures,
       transfers,
       receiving,
-      openCashiers: 0 // TODO: Integrar com tabela de sessões de caixa quando disponível
+      openCashiers: 0
     };
   },
 
@@ -113,7 +110,6 @@ export const storeService = {
   async getStoreHealth(branchId: string): Promise<StoreHealth> {
     const reliability = await this.getStockReliability(branchId);
     
-    // Lógica de Score: penaliza rupturas e tarefas atrasadas
     const { count: pendingCritical } = await (supabase as any)
       .from('operational_tasks')
       .select('*', { count: 'exact', head: true })
@@ -136,7 +132,6 @@ export const storeService = {
   },
 
   async getStockReliability(branchId: string): Promise<number> {
-    // Busca divergências recentes para calcular a acuracidade
     const { data: discrepancies } = await (supabase as any)
       .from('operational_discrepancies')
       .select('expected_qty, actual_qty')
@@ -161,14 +156,15 @@ export const storeService = {
     reason: string;
     notes?: string;
   }) {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user.user) throw new Error("Usuário não autenticado");
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) throw new Error("Usuário não autenticado");
 
-    // Registra a perda no Ledger Logístico (como uma saída de ajuste)
-    const { error: ledgerError } = await supabase
+    const companyId = await this.getCompanyId(data.branch_id);
+
+    const { error: ledgerError } = await (supabase as any)
       .from('supply_chain_ledger')
       .insert({
-        company_id: (await this.getCompanyId(data.branch_id)),
+        company_id: companyId,
         branch_id: data.branch_id,
         product_id: data.product_id,
         quantity: -Math.abs(data.quantity),
@@ -176,13 +172,12 @@ export const storeService = {
         origin_type: 'loss',
         status: 'completed',
         notes: `Perda registrada: ${data.reason}. ${data.notes || ''}`,
-        created_by: user.user.id
+        created_by: userData.user.id
       });
 
     if (ledgerError) throw ledgerError;
 
-    // Atualiza o saldo de estoque
-    const { error: stockError } = await supabase.rpc('adjust_stock', {
+    const { error: stockError } = await (supabase as any).rpc('adjust_stock', {
       p_branch_id: data.branch_id,
       p_product_id: data.product_id,
       p_quantity: -Math.abs(data.quantity)
@@ -192,7 +187,7 @@ export const storeService = {
   },
 
   async getCompanyId(branchId: string): Promise<string> {
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from('branches')
       .select('company_id')
       .eq('id', branchId)
