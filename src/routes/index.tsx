@@ -4,6 +4,7 @@
  * ✅ UX OPERACIONAL: DailyTaskBoard e MicroOnboarding ativos para guiar o operador na redução de fricção e erros.
  */
 
+/** 
  * Master Plan 2026 — READ & GROW Enterprise Evolution.
  * 
  * FASE 5: INTELIGÊNCIA PREDITIVA — Transformando dados em decisões autônomas.
@@ -132,7 +133,7 @@ const HardeningDashboard = () => {
 
           </div>
           <p className="text-muted-foreground text-lg">
-            Blueprint Operacional: Complexidade no motor, simplicidade na operation.
+            Blueprint Operacional: Complexidade no motor, simplicidade na operação.
           </p>
           <div className="mt-4 p-4 border rounded-xl bg-primary/10 border-primary/20 max-w-2xl animate-in fade-in duration-700">
             <h4 className="text-sm font-black uppercase tracking-widest text-primary mb-2 flex items-center gap-2">
@@ -295,7 +296,7 @@ const HardeningDashboard = () => {
                 </div>
                 <div className="p-3 rounded-lg border bg-info/5 border-info/20">
                   <p className="font-bold text-info mb-1">Segregação de Funções</p>
-                  <p className="text-xs text-muted-foreground">Solicita, Aprova e Executa devem ser pessoas diferentes para operações críticas.</p>
+                  <p className="text-xs text-muted-foreground">Solicita, Aprova e Executa devem ser pessoas differentes para operações críticas.</p>
                 </div>
                 <div className="p-3 rounded-lg border bg-warning/5 border-warning/20">
                   <p className="font-bold text-warning mb-1">Rastreabilidade Visual</p>
