@@ -117,9 +117,9 @@ export function LossDialog({ isOpen, onClose }: LossDialogProps) {
           <Button 
             className="bg-red-600 hover:bg-red-700" 
             onClick={handleSubmit}
-            loading={loading}
+            disabled={loading}
           >
-            REGISTRAR BAIXA
+            {loading ? "Processando..." : "REGISTRAR BAIXA"}
           </Button>
         </DialogFooter>
       </DialogContent>
