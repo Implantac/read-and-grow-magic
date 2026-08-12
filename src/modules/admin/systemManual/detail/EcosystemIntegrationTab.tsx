@@ -58,7 +58,7 @@ export function EcosystemIntegrationTab({ manual }: { manual: ModuleManual }) {
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle className="text-sm flex items-center gap-2">
@@ -79,6 +79,17 @@ export function EcosystemIntegrationTab({ manual }: { manual: ModuleManual }) {
           <CardContent className="text-xs text-muted-foreground leading-relaxed">
             Este módulo segue rigorosamente o <strong>SEC-LEVEL 3</strong>, protegendo dados entre multi-tenants 
             e garantindo que permissões de 'Operador' não acessem funções de 'Estratégico'.
+          </CardContent>
+        </Card>
+        <Card className="border-amber-500/20 bg-amber-500/5">
+          <CardHeader>
+            <CardTitle className="text-sm flex items-center gap-2 text-amber-600">
+              <Zap className="h-4 w-4" /> Autopilot Inteligente
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-xs text-muted-foreground leading-relaxed">
+            Dados deste módulo alimentam o <strong>Cérebro Digital</strong> para previsões de demanda e 
+            sugestões automáticas de abastecimento (MRP Preditivo) na Fase 5.
           </CardContent>
         </Card>
       </div>
