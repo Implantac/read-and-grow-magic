@@ -39,9 +39,13 @@ import { RequirePermission } from '@/components/auth/RequirePermission';
 import { useLowMarginAlertsRealtime } from '@/hooks/commercial/useLowMarginAlertsRealtime';
 import { WorkflowSwitcher } from '@/modules/core/components/WorkflowSwitcher';
 
+import { useInventoryOrchestrator } from '@/core/orchestration/InventoryOrchestrator';
+import { useFinancialOrchestrator } from '@/core/orchestration/FinancialOrchestrator';
 
 const RealtimeAlertsBridge = () => {
   useLowMarginAlertsRealtime();
+  useInventoryOrchestrator();
+  useFinancialOrchestrator();
   return null;
 };
 

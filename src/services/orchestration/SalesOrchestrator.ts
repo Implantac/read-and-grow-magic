@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { useEventBus } from '@/core/events/useEventBus';
+import { toastSuccess } from '@/lib/toastHelpers';
 
 export class SalesOrchestrator {
   static async completeSale(orderId: string, companyId: string) {
@@ -12,6 +13,8 @@ export class SalesOrchestrator {
       .eq('id', orderId);
       
     if (updateError) throw updateError;
+    
+    toastSuccess('Venda Concluída', `O pedido ${orderId.split('-')[0]} foi processado pelo orquestrador.`);
 
     // 2. Publish Event
     const eventBus = useEventBus.getState();
