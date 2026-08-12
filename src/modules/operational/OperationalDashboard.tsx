@@ -13,6 +13,8 @@ import { differenceInDays, differenceInHours, parseISO } from 'date-fns';
 
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--warning))', 'hsl(var(--info))', 'hsl(var(--success))', 'hsl(var(--destructive))', 'hsl(var(--muted-foreground))'];
 
+import { DailyTaskBoard } from './components/DailyTaskBoard';
+
 export default function OperationalDashboard() {
   const { data: orders } = useOrders();
   const { orders: productionOrders } = useProductionOrders();
@@ -108,8 +110,10 @@ export default function OperationalDashboard() {
     <PageContainer>
       <PageHeader title="Dashboard Operacional" description="Visão integrada do fluxo comercial → produção → expedição → faturamento" />
 
-      {/* Primary KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div className="lg:col-span-2 space-y-6">
+          {/* Primary KPIs */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {kpis.map(k => (
           <Card key={k.label}>
             <CardContent className="p-4 flex items-center gap-3">
@@ -137,8 +141,14 @@ export default function OperationalDashboard() {
           </Card>
         ))}
       </div>
+    </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <div className="lg:col-span-1">
+      <DailyTaskBoard />
+    </div>
+  </div>
+
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <Card>
           <CardHeader><CardTitle>Pedidos por Status</CardTitle></CardHeader>
           <CardContent>
