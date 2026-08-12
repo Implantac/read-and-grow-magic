@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/base/card';
-import { Network, ArrowRight, Activity, Database, Shield } from 'lucide-react';
+import { Network, ArrowRight, Activity, Database, Shield, Zap } from 'lucide-react';
 import type { ModuleManual } from '../content-types';
 import { getFoundation } from '../foundation';
 
