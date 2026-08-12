@@ -1,7 +1,7 @@
 /** ✅ ECOSSISTEMA GLOBAL: Consolidando o Core Empresarial como um organismo único e orquestrado.
- * ✅ OPERAÇÃO FLUIDA: O2C e P2P integrados via SalesOrchestrator e EventBus para automação ponta a ponta.
- * ✅ INTELIGÊNCIA DE CONTEXTO: Políticas de negócio dinâmicas por segmento via PolicyEngine.
- * ✅ GOVERNANÇA TOTAL: Rastreabilidade imutável e auditoria em tempo real integrada ao fluxo operacional.
+ * ✅ ORQUESTRAÇÃO DE EVENTOS: Domínios (Comercial, Estoque, Financeiro) integrados via EventBus e Realtime.
+ * ✅ MOTOR DE POLÍTICAS: Comportamentos adaptativos automáticos baseados no segmento e diretrizes UEEF.
+ * ✅ RASTREABILIDADE TOTAL: Auditoria imutável via Ledger presente em cada ponto de contato operacional.
  */
 
 /** 
