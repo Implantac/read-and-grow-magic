@@ -149,12 +149,22 @@ export default function TransferenciasCanal() {
   );
 }
 
-function NewTransferDialog() {
+export function NewTransferDialog({ 
+  open: externalOpen, 
+  onOpenChange: externalOnOpenChange,
+  trigger
+}: { 
+  open?: boolean; 
+  onOpenChange?: (open: boolean) => void;
+  trigger?: React.ReactNode;
+}) {
   const { data: branches = [] } = useBranches();
   const { data: products = [] } = useProducts();
   const create = useCreateTransferenciaCanal();
 
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = externalOpen !== undefined ? externalOpen : internalOpen;
+  const setOpen = externalOnOpenChange !== undefined ? externalOnOpenChange : setInternalOpen;
   const [origem, setOrigem] = useState('');
   const [destino, setDestino] = useState('');
   const [obs, setObs] = useState('');
@@ -205,11 +215,15 @@ function NewTransferDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" /> Nova transferência
-        </Button>
-      </DialogTrigger>
+      {trigger !== null && (
+        <DialogTrigger asChild>
+          {trigger || (
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" /> Nova transferência
+            </Button>
+          )}
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Nova transferência entre canais</DialogTitle>
