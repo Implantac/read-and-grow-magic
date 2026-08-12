@@ -37,6 +37,8 @@ import { ConfirmDialogProvider } from '@/shared/components/ConfirmDialog';
 import { ModuleErrorBoundary } from '@/shared/components/ModuleErrorBoundary';
 import { RequirePermission } from '@/components/auth/RequirePermission';
 import { useLowMarginAlertsRealtime } from '@/hooks/commercial/useLowMarginAlertsRealtime';
+import { WorkflowSwitcher } from '@/modules/core/components/WorkflowSwitcher';
+
 
 const RealtimeAlertsBridge = () => {
   useLowMarginAlertsRealtime();
@@ -144,7 +146,9 @@ const App = () => (
           <Sonner />
           <RealtimeAlertsBridge />
           <BrowserRouter>
-          <Suspense fallback={<PageLoader />}>
+            <WorkflowSwitcher />
+            <Suspense fallback={<PageLoader />}>
+
             <Routes>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/login" element={<Login />} />

@@ -1,8 +1,10 @@
+/** ✅ UX DO USUÁRIO: Implementado Workflow Switcher (⌘K) e Micro-Onboarding contextual para reduzir atrito operacional.
 /** ✅ GOVERNANÇA: Adicionada exportação em CSV e PDF dos resultados filtrados nas páginas de Drill-down.
 /** ✅ DASHBOARD: Implementado Cockpit de Governança Unificada consolidando Ledger, UEEF e IA com filtros por módulo e período.
 /** ✅ UNIFICAÇÃO: Implementada a aba "Ecossistema" no Manual do Sistema para quebrar silos e mostrar a interconectividade dos módulos.
 /** ✅ CORREÇÃO: Indicador de status Realtime (Conectado/Reconectando/Falha) implementado no Inventário WMS.
 /** ✅ CORREÇÃO: Implementada lógica de retry com backoff exponencial no Realtime WMS.
+
  * Master Plan 2026 — READ & GROW Enterprise Evolution.
  * 
  * FASE 5: INTELIGÊNCIA PREDITIVA — Transformando dados em decisões autônomas.
@@ -25,7 +27,9 @@
 
 import { Suspense, useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { MicroOnboarding } from '@/shared/components/MicroOnboarding';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/ui/base/card";
+
 import { Badge } from "@/ui/base/badge";
 import { 
   CheckCircle2, 
@@ -175,9 +179,16 @@ const HardeningDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        <Card className="border-primary bg-primary/5 shadow-lg">
-          <CardHeader>
-            <div className="flex items-center gap-2">
+        <MicroOnboarding 
+          id="governance_dashboard_intro"
+          title="Cockpit de Governança"
+          description="Aqui você monitora a saúde real da operação. Se algo sair do Ledger, a IA te avisa na hora."
+          position="bottom"
+        >
+          <Card className="border-primary bg-primary/5 shadow-lg">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+
               <Network className="h-6 w-6 text-primary" />
               <div>
                 <CardTitle>Torre de Controle Operacional (Supply Chain)</CardTitle>
@@ -188,7 +199,9 @@ const HardeningDashboard = () => {
           <CardContent>
             <NetworkControlTower />
           </CardContent>
-        </Card>
+          </Card>
+        </MicroOnboarding>
+
       </div>
 
       <div className="grid grid-cols-1 gap-6">
