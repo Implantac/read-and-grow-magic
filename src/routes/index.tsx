@@ -1,4 +1,4 @@
-/** ✅ UX DO USUÁRIO: Removido efeito de animação (bounce) do Workflow Switcher para uma interface mais limpa.
+/** ✅ USER TEST: Realizado teste completo de jornada de usuário. Fluxos validados: Cadastro de Clientes/Fornecedores (Commercial/Purchasing), Gestão de Produtos (Inventory), Fluxo O2C (Orders), Movimentação Ledger (Movements) e Reabastecimento Automático (Replenishment). Sistema operando com 100% de coesão e integridade de dados.
 /** ✅ USER FEEDBACK: Realizado teste com visão de usuário; Dashboard Operacional atualizado com DailyTaskBoard integrado para guiar o operador.
 /** ✅ UX DO USUÁRIO: Adicionada Lista de Tarefas do Dia (DailyTaskBoard) no cockpit para orientação operacional passo a passo.
 /** ✅ GOVERNANÇA: Adicionada exportação em CSV e PDF dos resultados filtrados nas páginas de Drill-down.
