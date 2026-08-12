@@ -30,6 +30,7 @@ import {
   AreaChart,
   Area
 } from 'recharts';
+import { GovernanceDrillDown } from './GovernanceDrillDown';
 
 // Mock data for the dashboard
 const LEDGER_HISTORY = [
@@ -63,8 +64,6 @@ export function UnifiedGovernanceDashboard() {
       />
     );
   }
-
-
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -165,7 +164,7 @@ export function UnifiedGovernanceDashboard() {
           </CardContent>
         </Card>
 
-        {/* Autopilot KPI */}
+        {/* Autopilot IA */}
         <Card 
           className="border-amber-500/20 bg-amber-500/5 overflow-hidden group cursor-pointer hover:border-amber-500/50 transition-all"
           onClick={() => setDrillDown({ type: 'ai', module })}
