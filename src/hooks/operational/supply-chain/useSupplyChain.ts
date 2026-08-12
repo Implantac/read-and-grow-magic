@@ -46,6 +46,11 @@ export function useSupplyChain(filters?: { status?: MovementStatus[] }) {
         (payload) => {
           console.log('Supply Chain Realtime Update:', payload);
           fetchMovements();
+          if (payload.eventType === 'INSERT') {
+            toast.success('Nova movimentação detectada e lista atualizada.');
+          } else {
+            toast.info('A lista de movimentações foi atualizada.');
+          }
         }
       )
       .subscribe((status) => {
