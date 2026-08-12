@@ -101,8 +101,8 @@ export default function StoreCentral() {
             <CardHeader className="pb-3 border-b border-border/40">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-lg">O que precisa da sua atenção?</CardTitle>
-                  <CardDescription>Pendências críticas e exceções operacionais</CardDescription>
+                  <CardTitle className="text-lg">Prioridades Operacionais (Orquestradas)</CardTitle>
+                  <CardDescription>Pendências críticas detectadas pelo Ecossistema Global</CardDescription>
                 </div>
                 <Badge variant="outline" className="text-destructive border-destructive/20 bg-destructive/5">
                   {alerts?.filter(a => a.type === 'critical').length} Críticos
