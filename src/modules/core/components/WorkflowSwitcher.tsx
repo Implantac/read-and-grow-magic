@@ -85,7 +85,7 @@ export const WorkflowSwitcher = () => {
     <>
       <Button 
         variant="outline" 
-        className="fixed bottom-6 right-6 shadow-2xl border-primary/20 bg-background/80 backdrop-blur-sm z-50 h-12 px-6 rounded-full gap-2 animate-bounce hover:animate-none group"
+        className="fixed bottom-6 right-6 shadow-2xl border-primary/20 bg-background/80 backdrop-blur-sm z-50 h-12 px-6 rounded-full gap-2 group transition-all hover:scale-105 active:scale-95"
         onClick={() => setOpen(true)}
       >
         <Search className="h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
