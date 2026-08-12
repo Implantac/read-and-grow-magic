@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { TablesInsert } from '@/integrations/supabase/types';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
+import { SalesOrchestrator } from '@/services/orchestration/SalesOrchestrator';
 import type { CreateOrderInput } from './types';
 
 export function useCreateOrder() {
@@ -109,6 +110,9 @@ export function useCreateOrder() {
         await supabase.from('orders').delete().eq('id', order.id);
         throw itemsError;
       }
+
+      // 3. Orquestração Enterprise: Aciona o SalesOrchestrator para gerir o ciclo de vida
+      await SalesOrchestrator.completeSale(order.id, currentCompany.id);
 
       return order;
     },
