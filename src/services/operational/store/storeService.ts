@@ -32,7 +32,7 @@ export interface StoreHealth {
 export const storeService = {
   async getStoreKPIs(branchId: string): Promise<StoreKPIs> {
     // Busca contagem real de tarefas e rupturas
-    const { data: tasks } = await (supabase as any)
+    const { data: tasks } = await supabase
       .from('operational_tasks')
       .select('status, category')
       .eq('branch_id', branchId)
@@ -42,14 +42,39 @@ export const storeService = {
     const transfers = tasks?.filter((t: any) => t.category === 'transfer').length || 0;
     const receiving = tasks?.filter((t: any) => t.category === 'receiving').length || 0;
 
+    // Busca valor de estoque real da filial
+    const { data: stock } = await supabase
+      .from('stock_balances')
+      .select('quantity, products(cost_price)')
+      .eq('branch_id', branchId);
+
+    const stockValue = stock?.reduce((acc: number, item: any) => {
+      const price = item.products?.cost_price || 0;
+      return acc + (item.quantity * price);
+    }, 0) || 0;
+
+    // Busca vendas do dia (usando orders que é a fonte mais confiável no momento)
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    
+    const { data: sales } = await supabase
+      .from('orders')
+      .select('total_amount')
+      .eq('branch_id', branchId)
+      .gte('created_at', today.toISOString())
+      .not('status', 'eq', 'cancelled');
+
+    const totalSales = sales?.reduce((acc: number, order: any) => acc + Number(order.total_amount), 0) || 0;
+    const ticketAverage = sales?.length ? totalSales / sales.length : 0;
+
     return {
-      sales: 18430.50, // Ainda mockado até PDV integrar Ledger
-      ticketAverage: 87.40,
-      stockValue: 242000,
+      sales: totalSales,
+      ticketAverage: ticketAverage,
+      stockValue: stockValue,
       ruptures,
       transfers,
       receiving,
-      openCashiers: 4
+      openCashiers: 0 // TODO: Integrar com tabela de sessões de caixa quando disponível
     };
   },
 
@@ -127,6 +152,52 @@ export const storeService = {
     
     const accuracy = (1 - Math.abs(totalExpected - totalActual) / totalExpected) * 100;
     return Math.min(100, Math.max(0, accuracy));
+  },
+
+  async registerLoss(data: {
+    branch_id: string;
+    product_id: string;
+    quantity: number;
+    reason: string;
+    notes?: string;
+  }) {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error("Usuário não autenticado");
+
+    // Registra a perda no Ledger Logístico (como uma saída de ajuste)
+    const { error: ledgerError } = await supabase
+      .from('supply_chain_ledger')
+      .insert({
+        company_id: (await this.getCompanyId(data.branch_id)),
+        branch_id: data.branch_id,
+        product_id: data.product_id,
+        quantity: -Math.abs(data.quantity),
+        movement_type: 'adjustment',
+        origin_type: 'loss',
+        status: 'completed',
+        notes: `Perda registrada: ${data.reason}. ${data.notes || ''}`,
+        created_by: user.user.id
+      });
+
+    if (ledgerError) throw ledgerError;
+
+    // Atualiza o saldo de estoque
+    const { error: stockError } = await supabase.rpc('adjust_stock', {
+      p_branch_id: data.branch_id,
+      p_product_id: data.product_id,
+      p_quantity: -Math.abs(data.quantity)
+    });
+
+    return { success: !stockError };
+  },
+
+  async getCompanyId(branchId: string): Promise<string> {
+    const { data } = await supabase
+      .from('branches')
+      .select('company_id')
+      .eq('id', branchId)
+      .single();
+    return data?.company_id || '';
   }
 };
 
