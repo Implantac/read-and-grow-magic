@@ -20,6 +20,7 @@ import { FaqTab } from './detail/FaqTab';
 import { TroubleshootingTab } from './detail/TroubleshootingTab';
 import { ModuleSidebar } from './detail/ModuleSidebar';
 import { ModuleNavigation } from './detail/ModuleNavigation';
+import { EcosystemIntegrationTab } from './detail/EcosystemIntegrationTab';
 
 export default function ModuleManualDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -100,9 +101,10 @@ export default function ModuleManualDetail() {
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="space-y-6 min-w-0">
           <Tabs defaultValue="beginner">
-            <TabsList className="grid grid-cols-4 sm:grid-cols-8 w-full">
+            <TabsList className="grid grid-cols-5 sm:grid-cols-9 w-full">
               <TabsTrigger value="beginner">👋 Leigos</TabsTrigger>
               <TabsTrigger value="foundation">🎯 Fundamentos</TabsTrigger>
+              <TabsTrigger value="ecosystem">🕸️ Ecossistema</TabsTrigger>
               <TabsTrigger value="rules">📏 Regras</TabsTrigger>
               <TabsTrigger value="overview">Visão geral</TabsTrigger>
               <TabsTrigger value="steps">Passo a passo</TabsTrigger>
@@ -113,6 +115,7 @@ export default function ModuleManualDetail() {
 
             <TabsContent value="beginner"><BeginnerTab beginner={beginner} /></TabsContent>
             <TabsContent value="foundation"><FoundationTab foundation={foundation} /></TabsContent>
+            <TabsContent value="ecosystem"><EcosystemIntegrationTab manual={manual} /></TabsContent>
             <TabsContent value="rules"><RulesTab foundation={foundation} /></TabsContent>
             <TabsContent value="overview"><OverviewTab manual={manual} /></TabsContent>
             <TabsContent value="steps"><StepsTab manual={manual} /></TabsContent>

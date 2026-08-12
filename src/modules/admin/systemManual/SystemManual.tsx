@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { Search, GraduationCap, Sparkles, AlertCircle, FileText, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
@@ -21,7 +21,19 @@ import { CertificateCard } from './home/CertificateCard';
 export default function SystemManual() {
   const [q, setQ] = useState('');
   const [cat, setCat] = useState<string>('all');
+  const searchRef = useRef<HTMLInputElement>(null);
   const { isDone, count, reset } = useManualProgress();
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const filtered = useMemo(() => {
     const t = q.trim().toLowerCase();
@@ -118,7 +130,8 @@ export default function SystemManual() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar módulo, categoria ou palavra-chave..."
+            ref={searchRef}
+            placeholder="Buscar módulo, categoria ou palavra-chave... (Ctrl+K)"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             className="pl-9"

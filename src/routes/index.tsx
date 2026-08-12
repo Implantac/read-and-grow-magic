@@ -1,3 +1,4 @@
+/** ✅ UNIFICAÇÃO: Implementada a aba "Ecossistema" no Manual do Sistema para quebrar silos e mostrar a interconectividade dos módulos.
 /** ✅ CORREÇÃO: Indicador de status Realtime (Conectado/Reconectando/Falha) implementado no Inventário WMS.
 /** ✅ CORREÇÃO: Implementada lógica de retry com backoff exponencial no Realtime WMS.
 /** ✅ CORREÇÃO: Tela de Inventário restaurada no menu WMS Avançado.
