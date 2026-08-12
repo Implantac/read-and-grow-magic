@@ -1,3 +1,4 @@
+/** ✅ CORREÇÃO: Implementada lógica de retry com backoff exponencial no Realtime WMS.
 /** ✅ CORREÇÃO: Erro de Realtime (postgres_changes after subscribe) corrigido com registro seguro de callbacks e ID de canal único.
 /** ✅ CORREÇÃO: Tela de Inventário restaurada no menu WMS Avançado.
  * Master Plan 2026 — READ & GROW Enterprise Evolution.

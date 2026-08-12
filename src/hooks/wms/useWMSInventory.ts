@@ -68,33 +68,65 @@ export function useWMSInventory() {
   // Realtime: qualquer mudança nas tabelas do WMS re-busca os dados
   useEffect(() => {
     let mounted = true;
-    const channelName = `wms-inventory-${Math.random().toString(36).substring(7)}`;
-    const channel = supabase.channel(channelName);
-    
-    const handleChanges = () => {
-      if (mounted) fetchData();
+    let retryCount = 0;
+    const MAX_RETRIES = 5;
+    const INITIAL_BACKOFF = 1000;
+    let channel: any = null;
+
+    const setupChannel = () => {
+      if (!mounted) return;
+
+      const channelName = `wms-inventory-${Math.random().toString(36).substring(7)}`;
+      channel = supabase.channel(channelName);
+      
+      const handleChanges = () => {
+        if (mounted) fetchData();
+      };
+
+      channel
+        .on(
+          'postgres_changes', 
+          { event: '*', schema: 'public', table: 'wms_inventory_items' }, 
+          handleChanges
+        )
+        .on(
+          'postgres_changes', 
+          { event: '*', schema: 'public', table: 'wms_inventory_counts' }, 
+          handleChanges
+        )
+        .subscribe((status: string) => {
+          if (status === 'SUBSCRIBED') {
+            console.log('Realtime subscribed successfully for WMS inventory');
+            retryCount = 0; // Reset retry count on success
+          }
+
+          if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+            if (mounted && retryCount < MAX_RETRIES) {
+              const backoff = INITIAL_BACKOFF * Math.pow(2, retryCount);
+              console.warn(`WMS Realtime connection failed. Retrying in ${backoff}ms... (Attempt ${retryCount + 1}/${MAX_RETRIES})`);
+              
+              setTimeout(() => {
+                if (mounted) {
+                  retryCount++;
+                  supabase.removeChannel(channel);
+                  setupChannel();
+                }
+              }, backoff);
+            } else if (retryCount >= MAX_RETRIES) {
+              console.error('WMS Realtime: Max retries reached. Please check your connection.');
+              toast.error('Falha na conexão em tempo real do WMS');
+            }
+          }
+        });
     };
 
-    channel
-      .on(
-        'postgres_changes', 
-        { event: '*', schema: 'public', table: 'wms_inventory_items' }, 
-        handleChanges
-      )
-      .on(
-        'postgres_changes', 
-        { event: '*', schema: 'public', table: 'wms_inventory_counts' }, 
-        handleChanges
-      )
-      .subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
-          console.log('Realtime subscribed successfully for WMS inventory');
-        }
-      });
+    setupChannel();
 
     return () => {
       mounted = false;
-      supabase.removeChannel(channel);
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
     };
   }, [fetchData]);
 
