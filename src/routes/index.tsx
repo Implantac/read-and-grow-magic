@@ -80,8 +80,8 @@ const HardeningDashboard = () => {
     { id: '2', title: 'Processos Integrados', status: 'completed', description: 'O2C/P2P/WMS integrados como organismo único.' },
     { id: '3', title: 'Governança & Auditoria', status: 'completed', description: 'Ledger Logístico Imutável e RLS Hardening.' },
     { id: '4', title: 'Expansão UX Pro', status: 'completed', description: 'OrderWizard, Procurement MRP e UEEF SEC-LEVEL 3.' },
-    { id: '5', title: 'Inteligência Preditiva', status: 'in-progress', description: 'Digital Twin e Otimização de Slotting IA.' },
-    { id: '6', title: 'Ecossistema Global', status: 'pending', description: 'Marketplace, Multi-moeda e Expansão Global.' },
+    { id: '5', title: 'Inteligência Preditiva', status: 'completed', description: 'Digital Twin e Otimização de Slotting IA.' },
+    { id: '6', title: 'Ecossistema Global', status: 'in-progress', description: 'Contexto, Políticas, Eventos e Orquestração.' },
   ];
 
 
