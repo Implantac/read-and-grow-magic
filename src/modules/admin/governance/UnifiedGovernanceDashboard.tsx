@@ -52,6 +52,19 @@ const SECURITY_STATS = [
 export function UnifiedGovernanceDashboard() {
   const [module, setModule] = useState('all');
   const [period, setPeriod] = useState('7d');
+  const [drillDown, setDrillDown] = useState<{ type: 'ledger' | 'security' | 'ai', module: string } | null>(null);
+
+  if (drillDown) {
+    return (
+      <import { GovernanceDrillDown } from './GovernanceDrillDown' /> && 
+      <GovernanceDrillDown 
+        type={drillDown.type} 
+        module={drillDown.module} 
+        onBack={() => setDrillDown(null)} 
+      />
+    );
+  }
+
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
