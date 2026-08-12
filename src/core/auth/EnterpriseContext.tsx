@@ -27,7 +27,12 @@ interface HierarchyRow {
   level: string;
 }
 
-export type OperationType = string | { key: string; label?: string };
+export interface Policy {
+  replenishmentMethod: string;
+  transferApprovalLimit: number;
+  inventoryAdjustmentPolicy: string;
+  salesCreditCheck: string;
+}
 
 interface EnterpriseContextType {
   currentTenant: TenantRef | null;
@@ -40,6 +45,7 @@ interface EnterpriseContextType {
   companySize: string;
   taxRegime: string;
   operationTypes: OperationType[];
+  policies: Policy;
   isLoading: boolean;
   setCompany: (id: string) => Promise<void>;
   setBranch: (id: string | null) => void;
@@ -63,6 +69,12 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
   const [companySize, setCompanySize] = useState<string>('Pequeno');
   const [taxRegime, setTaxRegime] = useState<string>('Simples Nacional');
   const [operationTypes, setOperationTypes] = useState<OperationType[]>([]);
+  const [policies, setPolicies] = useState<Policy>({
+    replenishmentMethod: 'MIN_MAX',
+    transferApprovalLimit: 0,
+    inventoryAdjustmentPolicy: 'AUTO',
+    salesCreditCheck: 'NONE'
+  });
   const [isLoading, setIsLoading] = useState(true);
 
   const executiveCouncil = {
@@ -82,13 +94,17 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const applyCompany = (company: CompanyRow) => {
+  const applyCompany = async (company: CompanyRow) => {
+    const { getEnterprisePolicies } = await import('@/core/orchestration/policyEngine');
+    
     setCurrentCompany(company);
-    setSegment((company.segment as Segment | null) ?? 'general');
+    const seg = (company.segment as Segment | null) ?? 'general';
+    setSegment(seg);
     setSubSegment(company.sub_segment ?? '');
     setCompanySize(company.company_size ?? 'Pequeno');
     setTaxRegime((company.tax_regime as string | null) ?? 'Simples Nacional');
     setOperationTypes((company.operation_types as OperationType[] | null) ?? []);
+    setPolicies(getEnterprisePolicies(seg));
   };
 
   const loadActiveTenant = async () => {
@@ -173,6 +189,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
       companySize,
       taxRegime,
       operationTypes,
+      policies,
       isLoading,
       setCompany,
       setBranch,
