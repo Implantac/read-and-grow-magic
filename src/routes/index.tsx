@@ -1,4 +1,4 @@
-/** ✅ UX DO USUÁRIO: Implementado Workflow Switcher (⌘K) e Micro-Onboarding contextual para reduzir atrito operacional.
+/** ✅ UX DO USUÁRIO: Adicionada Lista de Tarefas do Dia (DailyTaskBoard) no cockpit para orientação operacional passo a passo.
 /** ✅ GOVERNANÇA: Adicionada exportação em CSV e PDF dos resultados filtrados nas páginas de Drill-down.
 /** ✅ DASHBOARD: Implementado Cockpit de Governança Unificada consolidando Ledger, UEEF e IA com filtros por módulo e período.
 /** ✅ UNIFICAÇÃO: Implementada a aba "Ecossistema" no Manual do Sistema para quebrar silos e mostrar a interconectividade dos módulos.
@@ -29,6 +29,8 @@ import { Suspense, useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { MicroOnboarding } from '@/shared/components/MicroOnboarding';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/ui/base/card";
+import { DailyTaskBoard } from '@/modules/operational/components/DailyTaskBoard';
+
 
 import { Badge } from "@/ui/base/badge";
 import { 
@@ -277,12 +279,15 @@ const HardeningDashboard = () => {
         </Card>
 
         <div className="space-y-6">
+          <DailyTaskBoard />
+
           <Card className="border-primary/20 bg-background shadow-md">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2 text-primary font-black">
                 <Zap className="h-5 w-5" /> REGRAS DE OURO
               </CardTitle>
             </CardHeader>
+
             <CardContent className="space-y-4">
               <div className="space-y-4 text-sm">
                 <div className="p-3 rounded-lg border bg-success/5 border-success/20">
