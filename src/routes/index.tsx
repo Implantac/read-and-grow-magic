@@ -1,3 +1,4 @@
+/** ✅ UX DO USUÁRIO: Removido efeito de animação (bounce) do Workflow Switcher para uma interface mais limpa.
 /** ✅ USER FEEDBACK: Realizado teste com visão de usuário; Dashboard Operacional atualizado com DailyTaskBoard integrado para guiar o operador.
 /** ✅ UX DO USUÁRIO: Adicionada Lista de Tarefas do Dia (DailyTaskBoard) no cockpit para orientação operacional passo a passo.
 /** ✅ GOVERNANÇA: Adicionada exportação em CSV e PDF dos resultados filtrados nas páginas de Drill-down.
