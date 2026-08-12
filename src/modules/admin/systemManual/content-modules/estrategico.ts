@@ -9,8 +9,8 @@ export const ESTRATEGICO_MODULES: ModuleManual[] = [
     icon: LayoutDashboard,
     short: 'Visão consolidada de KPIs, alertas e atividades em tempo real.',
     overview: [
-      'O Dashboard é a porta de entrada do sistema. Ele consolida indicadores de todos os módulos ativos e destaca alertas que exigem ação imediata.',
-      'Os cartões são adaptativos: variam conforme o segmento (têxtil, farma, distribuição) e o plano contratado.',
+      'O Dashboard é a porta de entrada do sistema. Ele consolida indicadores de todos os módulos ativos, destaca alertas que exigem ação imediata e integra o **Cockpit de Governança Unificada** (Ledger, UEEF e IA).',
+      'Os cartões são adaptativos: variam conforme o segmento e o plano contratado, oferecendo filtros por módulo e período para análises transversais.',
     ],
     routes: [{ label: 'Início', path: '/' }],
     personas: ['Diretor', 'Gerente', 'Administrador'],
