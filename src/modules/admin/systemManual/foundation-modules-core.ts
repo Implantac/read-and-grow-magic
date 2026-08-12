@@ -19,6 +19,7 @@ export const CORE_FOUNDATION: Record<string, ModuleFoundation> = {
     ],
     integrations: [
       { with: 'Todos os módulos', what: 'Consome KPIs consolidados; sem lançamento nos módulos, cartões ficam zerados.' },
+      { with: 'Governança UEEF', what: 'Consolida auditoria de Ledger e RLS em visão única.' },
       { with: 'IA Executiva', what: 'Cérebro pode responder "por que este KPI caiu?" com drill-down automático.' },
     ],
     antipatterns: [
