@@ -1,4 +1,4 @@
-import { Ban, Gauge, Link2, Target, XCircle } from 'lucide-react';
+import { Ban, Gauge, Link2, Target, XCircle, Activity, ArrowRight } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/base/card';
 import type { ModuleFoundation } from '../foundation-types';
 
@@ -39,21 +39,31 @@ export function FoundationTab({ foundation }: { foundation: ModuleFoundation }) 
       )}
 
       {foundation.integrations.length > 0 && (
-        <Card>
+        <Card className="border-primary/20 bg-primary/5">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Link2 className="h-4 w-4 text-primary" /> Como se conecta ao resto do ERP
+              <Link2 className="h-4 w-4 text-primary" /> Ecossistema & Dependências
             </CardTitle>
+            <CardDescription>Este módulo faz parte de um organismo vivo. Veja as conexões.</CardDescription>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-2">
+            <div className="space-y-3">
               {foundation.integrations.map((it, i) => (
-                <li key={i} className="grid sm:grid-cols-[180px_1fr] gap-1 sm:gap-4 text-sm border-b pb-2 last:border-0 last:pb-0">
-                  <span className="font-semibold text-primary">{it.with}</span>
-                  <span className="text-muted-foreground">{it.what}</span>
-                </li>
+                <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-background border hover:border-primary/40 transition-colors">
+                  <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <Activity className="h-3 w-3 text-primary" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-bold text-primary uppercase text-[10px] tracking-wider">{it.with}</p>
+                    <p className="text-sm text-foreground/80 leading-relaxed">{it.what}</p>
+                  </div>
+                </div>
               ))}
-            </ul>
+              <div className="mt-4 p-3 rounded-lg border border-dashed border-primary/30 flex items-center justify-between group cursor-pointer hover:bg-primary/5 transition-colors" onClick={() => document.querySelector<HTMLButtonElement>('[value="ecosystem"]')?.click()}>
+                <span className="text-xs font-medium text-muted-foreground">Ver mapa completo no Ecossistema</span>
+                <ArrowRight className="h-3 w-3 text-primary group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
           </CardContent>
         </Card>
       )}
