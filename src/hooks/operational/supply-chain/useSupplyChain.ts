@@ -43,11 +43,14 @@ export function useSupplyChain(filters?: { status?: MovementStatus[] }) {
           schema: 'public',
           table: 'supply_chain_movements'
         },
-        () => {
+        (payload) => {
+          console.log('Supply Chain Realtime Update:', payload);
           fetchMovements();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Supply Chain Realtime Subscription Status:', status);
+      });
 
     return () => {
       supabase.removeChannel(channel);
