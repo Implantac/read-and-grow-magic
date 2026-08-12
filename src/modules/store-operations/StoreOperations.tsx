@@ -25,6 +25,7 @@ import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { cn } from '@/lib/utils';
 import { ReceivingDialog } from './components/ReceivingDialog';
 import { RequestDialog } from './components/RequestDialog';
+import { LossDialog } from './components/LossDialog';
 
 export default function StoreOperations() {
   const { currentBranch } = useEnterprise();
@@ -32,6 +33,7 @@ export default function StoreOperations() {
   const [activeTab, setActiveTab] = useState<'resumo' | 'solicitacoes' | 'recebimentos' | 'transferencias' | 'estoque' | 'ocorrencias'>('resumo');
   const [isReceivingOpen, setIsReceivingOpen] = useState(false);
   const [isRequestOpen, setIsRequestOpen] = useState(false);
+  const [isLossOpen, setIsLossOpen] = useState(false);
 
 
 
@@ -78,6 +80,7 @@ export default function StoreOperations() {
               onClick={() => {
                 if (action.id === 'receive') setIsReceivingOpen(true);
                 if (action.id === 'request' || action.id === 'transfer') setIsRequestOpen(true);
+                if (action.id === 'loss') setIsLossOpen(true);
               }}
               className="group relative flex flex-col items-center justify-center p-4 rounded-xl border-2 border-transparent bg-muted/30 hover:bg-muted/50 hover:border-primary/20 transition-all text-center"
             >
@@ -259,6 +262,10 @@ export default function StoreOperations() {
       <RequestDialog
         isOpen={isRequestOpen}
         onClose={() => setIsRequestOpen(false)}
+      />
+      <LossDialog 
+        isOpen={isLossOpen}
+        onClose={() => setIsLossOpen(false)}
       />
     </PageContainer>
   );
