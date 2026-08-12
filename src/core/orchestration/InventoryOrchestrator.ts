@@ -14,7 +14,7 @@ export const useInventoryOrchestrator = () => {
     const unsubscribe = eventBus.subscribe('SALE_COMPLETED', async (payload) => {
       console.log('[InventoryOrchestrator] Sale completed, processing stock update', payload);
       
-      toastInfo(`Pedido ${payload.orderId.split('-')[0]} confirmado. Movimentação de estoque iniciada.`);
+      toastSuccess(`Pedido ${payload.orderId.split('-')[0]} confirmado. Movimentação de estoque iniciada.`);
       
       // Aqui poderiam ser disparados gatilhos de WMS ou PCP se necessário
       await eventBus.publish('STOCK_MOVED', { 
