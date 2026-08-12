@@ -90,7 +90,7 @@ export function InventoryDialog({ isOpen, onClose }: InventoryDialogProps) {
                   >
                     <div>
                       <p className="text-sm font-bold">{p.name}</p>
-                      <p className="text-[10px] text-muted-foreground font-mono">{p.sku || 'SEM SKU'}</p>
+                      <p className="text-[10px] text-muted-foreground font-mono">{(p as any).sku || 'SEM SKU'}</p>
                     </div>
                     <Badge variant="outline">Adicionar</Badge>
                   </button>
