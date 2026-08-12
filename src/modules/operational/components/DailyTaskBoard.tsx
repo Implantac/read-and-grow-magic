@@ -24,11 +24,11 @@ interface Task {
 
 export const DailyTaskBoard = () => {
   const [tasks, setTasks] = useState<Task[]>([
-    { id: '1', title: 'Conferir Recebimento NF #882', module: 'WMS', priority: 'high', status: 'in_progress', timeEstimate: '15 min' },
+    { id: '1', title: 'Conferir Recebimento NF #882', module: 'Operação Loja', priority: 'high', status: 'in_progress', timeEstimate: '15 min' },
     { id: '2', title: 'Liberar Pedidos Bloqueados (Crédito)', module: 'Comercial', priority: 'high', status: 'pending', timeEstimate: '10 min' },
-    { id: '3', title: 'Ajuste de Estoque - Curva A', module: 'Estoque', priority: 'medium', status: 'pending', timeEstimate: '30 min' },
+    { id: '3', title: 'Ajuste de Estoque - Curva A', module: 'Operação Loja', priority: 'medium', status: 'pending', timeEstimate: '30 min' },
     { id: '4', title: 'Auditoria de Ledger - Fechamento Ontem', module: 'Governança', priority: 'medium', status: 'completed', timeEstimate: '20 min' },
-    { id: '5', title: 'Sincronizar Terminais PDV', module: 'Rede', priority: 'low', status: 'pending', timeEstimate: '5 min' },
+    { id: '5', title: 'Sincronizar Terminais PDV', module: 'Operação Loja', priority: 'low', status: 'pending', timeEstimate: '5 min' },
   ]);
 
   const toggleTask = (id: string) => {
