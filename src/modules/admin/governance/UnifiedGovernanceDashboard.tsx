@@ -56,7 +56,6 @@ export function UnifiedGovernanceDashboard() {
 
   if (drillDown) {
     return (
-      <import { GovernanceDrillDown } from './GovernanceDrillDown' /> && 
       <GovernanceDrillDown 
         type={drillDown.type} 
         module={drillDown.module} 
@@ -64,6 +63,7 @@ export function UnifiedGovernanceDashboard() {
       />
     );
   }
+
 
 
   return (
