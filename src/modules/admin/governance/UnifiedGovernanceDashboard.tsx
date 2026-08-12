@@ -30,6 +30,7 @@ import {
   AreaChart,
   Area
 } from 'recharts';
+import { GovernanceDrillDown } from './GovernanceDrillDown';
 
 // Mock data for the dashboard
 const LEDGER_HISTORY = [
@@ -52,6 +53,17 @@ const SECURITY_STATS = [
 export function UnifiedGovernanceDashboard() {
   const [module, setModule] = useState('all');
   const [period, setPeriod] = useState('7d');
+  const [drillDown, setDrillDown] = useState<{ type: 'ledger' | 'security' | 'ai', module: string } | null>(null);
+
+  if (drillDown) {
+    return (
+      <GovernanceDrillDown 
+        type={drillDown.type} 
+        module={drillDown.module} 
+        onBack={() => setDrillDown(null)} 
+      />
+    );
+  }
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -91,7 +103,10 @@ export function UnifiedGovernanceDashboard() {
       {/* Primary KPI Row */}
       <div className="grid gap-4 md:grid-cols-3">
         {/* Ledger KPI */}
-        <Card className="border-blue-500/20 bg-blue-500/5 overflow-hidden group">
+        <Card 
+          className="border-blue-500/20 bg-blue-500/5 overflow-hidden group cursor-pointer hover:border-blue-500/50 transition-all"
+          onClick={() => setDrillDown({ type: 'ledger', module })}
+        >
           <CardHeader className="pb-2">
             <div className="flex justify-between items-center">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
@@ -122,7 +137,10 @@ export function UnifiedGovernanceDashboard() {
         </Card>
 
         {/* Governance KPI */}
-        <Card className="border-emerald-500/20 bg-emerald-500/5 overflow-hidden group">
+        <Card 
+          className="border-emerald-500/20 bg-emerald-500/5 overflow-hidden group cursor-pointer hover:border-emerald-500/50 transition-all"
+          onClick={() => setDrillDown({ type: 'security', module })}
+        >
           <CardHeader className="pb-2">
             <div className="flex justify-between items-center">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
@@ -146,8 +164,11 @@ export function UnifiedGovernanceDashboard() {
           </CardContent>
         </Card>
 
-        {/* Autopilot KPI */}
-        <Card className="border-amber-500/20 bg-amber-500/5 overflow-hidden group">
+        {/* Autopilot IA */}
+        <Card 
+          className="border-amber-500/20 bg-amber-500/5 overflow-hidden group cursor-pointer hover:border-amber-500/50 transition-all"
+          onClick={() => setDrillDown({ type: 'ai', module })}
+        >
           <CardHeader className="pb-2">
             <div className="flex justify-between items-center">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
@@ -286,7 +307,14 @@ export function UnifiedGovernanceDashboard() {
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">{item.desc}</p>
                     </div>
-                    <Button variant="ghost" size="sm" className="shrink-0 text-primary">Ver Detalhes</Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="shrink-0 text-primary"
+                      onClick={() => setDrillDown({ type: 'ai', module })}
+                    >
+                      Ver Detalhes
+                    </Button>
                   </div>
                 ))}
               </div>
