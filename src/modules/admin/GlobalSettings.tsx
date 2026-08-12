@@ -7,7 +7,8 @@ import { Switch } from "@/ui/base/switch";
 import { Button } from "@/ui/base/button";
 import { Input } from "@/ui/base/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/base/select";
-import { Settings, Building2, Store, Truck, ShieldCheck, Save, RefreshCw } from "lucide-react";
+import { Settings, Building2, Store, Truck, ShieldCheck, Save, RefreshCw, Database } from "lucide-react";
+import { DevSeedControl } from "./components/DevSeedControl";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useEnterprise } from "@/core/auth/EnterpriseContext";
@@ -145,6 +146,10 @@ export default function GlobalSettings() {
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6">
+          <DevSeedControl />
         </div>
 
         <div className="flex justify-end gap-3">
