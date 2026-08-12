@@ -120,9 +120,9 @@ export default function StoreCentral() {
                   alerts.map((alert) => (
                     <div key={alert.id} className="p-4 flex items-start gap-4 hover:bg-muted/50 transition-colors group">
                       <div className={cn(
-                        "p-2 rounded-full",
-                        alert.type === 'critical' ? "bg-destructive/10 text-destructive" : 
-                        alert.type === 'warning' ? "bg-warning/10 text-warning" : "bg-primary/10 text-primary"
+                        "p-2 rounded-full ring-1 ring-inset",
+                        alert.type === 'critical' ? "bg-destructive/10 text-destructive ring-destructive/20" : 
+                        alert.type === 'warning' ? "bg-warning/10 text-warning ring-warning/20" : "bg-primary/10 text-primary ring-primary/20"
                       )}>
                         {alert.category === 'rupture' && <AlertTriangle className="h-5 w-5" />}
                         {alert.category === 'receiving' && <Package className="h-5 w-5" />}
