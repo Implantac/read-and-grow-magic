@@ -146,7 +146,9 @@ const App = () => (
           <Sonner />
           <RealtimeAlertsBridge />
           <BrowserRouter>
-          <Suspense fallback={<PageLoader />}>
+            <WorkflowSwitcher />
+            <Suspense fallback={<PageLoader />}>
+
             <Routes>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/login" element={<Login />} />
