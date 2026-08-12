@@ -279,12 +279,15 @@ const HardeningDashboard = () => {
         </Card>
 
         <div className="space-y-6">
+          <DailyTaskBoard />
+
           <Card className="border-primary/20 bg-background shadow-md">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2 text-primary font-black">
                 <Zap className="h-5 w-5" /> REGRAS DE OURO
               </CardTitle>
             </CardHeader>
+
             <CardContent className="space-y-4">
               <div className="space-y-4 text-sm">
                 <div className="p-3 rounded-lg border bg-success/5 border-success/20">
