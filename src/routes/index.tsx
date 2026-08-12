@@ -37,6 +37,7 @@ import {
   AlertTriangle,
   LayoutDashboard,
   Network,
+  Scale,
   RefreshCw,
   BookOpen,
   ChevronDown,
@@ -55,6 +56,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/ui/base/button";
 import { Separator } from "@/ui/base/separator";
 import NetworkControlTower from '@/modules/operational/network/components/NetworkControlTower';
+import { UnifiedGovernanceDashboard } from '@/modules/admin/governance/UnifiedGovernanceDashboard';
 
 const PageLoader = () => (
   <div className="flex min-h-[40vh] items-center justify-center">
@@ -184,6 +186,26 @@ const HardeningDashboard = () => {
           </CardHeader>
           <CardContent>
             <NetworkControlTower />
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6">
+        <Card className="border-emerald-500/30 bg-emerald-500/5 shadow-lg">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Scale className="h-6 w-6 text-emerald-600" />
+                <div>
+                  <CardTitle>Cockpit de Governança Unificada</CardTitle>
+                  <CardDescription>Ledger Logístico, Segurança UEEF e Autopilot de IA em uma única visão</CardDescription>
+                </div>
+              </div>
+              <Badge className="bg-emerald-600 text-white font-black">UEEF COMPLIANT</Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <UnifiedGovernanceDashboard />
           </CardContent>
         </Card>
       </div>
