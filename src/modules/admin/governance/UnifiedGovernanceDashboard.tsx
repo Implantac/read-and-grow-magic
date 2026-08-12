@@ -15,7 +15,9 @@ import {
   Zap,
   Lock,
   History,
-  Info
+  Info,
+  Network,
+  RefreshCw
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/base/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/base/tabs";
