@@ -20,6 +20,7 @@ import { FaqTab } from './detail/FaqTab';
 import { TroubleshootingTab } from './detail/TroubleshootingTab';
 import { ModuleSidebar } from './detail/ModuleSidebar';
 import { ModuleNavigation } from './detail/ModuleNavigation';
+import { EcosystemIntegrationTab } from './detail/EcosystemIntegrationTab';
 
 export default function ModuleManualDetail() {
   const { slug } = useParams<{ slug: string }>();
