@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/ui/base/card";
 import { Badge } from "@/ui/base/badge";
+import { Button } from "@/ui/base/button";
+import { cn } from "@/lib/utils";
 import { 
   BarChart3, 
   ShieldCheck, 
