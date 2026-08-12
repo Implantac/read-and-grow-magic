@@ -1,7 +1,7 @@
 import { useEventBus } from '@/core/events/useEventBus';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { useEffect } from 'react';
-import { toastInfo } from '@/lib/toastHelpers';
+import { toastSuccess } from '@/lib/toastHelpers';
 
 export const useInventoryOrchestrator = () => {
   const { currentCompany } = useEnterprise();
