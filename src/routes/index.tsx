@@ -29,6 +29,8 @@ import { Suspense, useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { MicroOnboarding } from '@/shared/components/MicroOnboarding';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/ui/base/card";
+import { DailyTaskBoard } from '@/modules/operational/components/DailyTaskBoard';
+
 
 import { Badge } from "@/ui/base/badge";
 import { 
