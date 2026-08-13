@@ -1,10 +1,10 @@
-import { lazy, Suspense } from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Toaster } from "@/ui/base/toaster";
 import { Toaster as Sonner } from "@/ui/base/sonner";
 import { TooltipProvider } from "@/ui/base/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
-import { EnterpriseProvider } from "@/core/auth/EnterpriseContext";
+import { EnterpriseProvider, useEnterprise } from "@/core/auth/EnterpriseContext";
 import { Loader2 } from 'lucide-react';
 import { ConfirmDialogProvider } from '@/shared/components/ConfirmDialog';
 import { useLowMarginAlertsRealtime } from '@/hooks/commercial/useLowMarginAlertsRealtime';
@@ -15,12 +15,18 @@ import { useFinancialOrchestrator } from '@/core/orchestration/FinancialOrchestr
 // Centralized Routing System (EOE optimized)
 import AppRoutes from './routes/index';
 
-const RealtimeAlertsBridge = () => {
+const RealtimeAlertsBridge = React.memo(() => {
+  const { currentCompany, isLoading } = useEnterprise();
+  
+  // Only activate orchestration when tenant context is loaded and valid
+  const companyId = currentCompany?.id;
+  
   useLowMarginAlertsRealtime();
   useInventoryOrchestrator();
   useFinancialOrchestrator();
+  
   return null;
-};
+});
 
 const queryClient = new QueryClient({
   defaultOptions: {

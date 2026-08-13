@@ -1,10 +1,11 @@
 /* eslint-disable react-refresh/only-export-components -- shadcn pattern: variants/utilities co-localizados com o componente */
 import { useTheme } from "next-themes";
+import * as React from "react";
 import { Toaster as Sonner, toast } from "sonner";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
-const Toaster = ({ ...props }: ToasterProps) => {
+const Toaster = React.forwardRef<HTMLDivElement, ToasterProps>(({ ...props }, ref) => {
   const { theme = "system" } = useTheme();
 
   return (
@@ -23,6 +24,6 @@ const Toaster = ({ ...props }: ToasterProps) => {
       {...props}
     />
   );
-};
+});
 
 export { Toaster, toast };

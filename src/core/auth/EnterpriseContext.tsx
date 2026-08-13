@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, forwardRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -63,7 +63,7 @@ interface EnterpriseContextType {
 
 const EnterpriseContext = createContext<EnterpriseContextType | undefined>(undefined);
 
-export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) => {
+export const EnterpriseProvider = forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ children }, ref) => {
   const [currentTenant, setCurrentTenant] = useState<TenantRef | null>(null);
   const [currentGroup, setCurrentGroup] = useState<GroupRef | null>(null);
   const [currentCompany, setCurrentCompany] = useState<CompanyRow | null>(null);
@@ -98,16 +98,11 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     mission: 'Construir uma plataforma ERP Enterprise Multivertical, Multiempresa, Inteligente, Adaptativa, Escalável e Orientada a Dados.'
   };
 
-  useEffect(() => {
-    loadActiveTenant();
-    // loadActiveTenant captures only stable setters; running once on mount is intentional.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const applyCompany = async (company: CompanyRow) => {
+  const applyCompany = useCallback(async (company: CompanyRow) => {
+    if (!company) return;
     const { getEnterprisePolicies } = await import('@/core/orchestration/policyEngine');
     
-    setCurrentCompany(company);
+    setCurrentCompany(prev => (prev?.id === company.id ? prev : company));
     const seg = (company.segment as Segment | null) ?? 'general';
     setSegment(seg);
     setSubSegment(company.sub_segment ?? '');
@@ -115,19 +110,24 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     setTaxRegime((company.tax_regime as string | null) ?? 'Simples Nacional');
     setOperationTypes((company.operation_types as OperationType[] | null) ?? []);
     setPolicies(getEnterprisePolicies(seg));
-  };
+  }, []);
 
-  const loadActiveTenant = async () => {
+  const loadActiveTenant = useCallback(async (isMounted: () => boolean) => {
     setIsLoading(true);
     try {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError) throw userError;
+      
+      if (!isMounted()) return;
+
       if (user) {
         // Optimistically fetch company and branches in parallel
         const [{ data: companies }, { data: profile }] = await Promise.all([
           supabase.from('companies').select('*').limit(1),
           supabase.from('profiles').select('default_branch_id').eq('id', user.id).maybeSingle()
         ]);
+
+        if (!isMounted()) return;
 
         if (companies && companies.length > 0) {
           const company = companies[0];
@@ -138,6 +138,8 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
             .select('id, name, type, is_active')
             .eq('company_id', company.id);
           
+          if (!isMounted()) return;
+
           if (units) {
             const mappedUnits = units.map((u: any) => ({
               id: u.id,
@@ -148,7 +150,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
             setAllBranches(mappedUnits);
             
             const defaultBranch = mappedUnits.find(b => b.id === profile?.default_branch_id) || mappedUnits[0] || null;
-            setCurrentBranch(defaultBranch);
+            setCurrentBranch(prev => prev?.id === defaultBranch?.id ? prev : defaultBranch);
             
             if (defaultBranch) {
               const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
@@ -160,21 +162,36 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     } catch (error: unknown) {
       console.error('Enterprise context error:', error);
     } finally {
-      setIsLoading(false);
+      if (isMounted()) setIsLoading(false);
     }
-  };
+  }, [applyCompany]);
+
+  useEffect(() => {
+    let mounted = true;
+    const isMounted = () => mounted;
+    
+    const init = async () => {
+      await loadActiveTenant(isMounted);
+    };
+    
+    init();
+    
+    return () => {
+      mounted = false;
+    };
+  }, [loadActiveTenant]);
 
 
-  const setCompany = async (id: string) => {
+  const setCompany = useCallback(async (id: string) => {
     const { data } = await supabase.from('companies').select('*').eq('id', id).maybeSingle();
     if (data) {
       applyCompany(data as CompanyRow);
       const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
       useEnterpriseStore.getState().setActiveCompanyId(id);
     }
-  };
+  }, [applyCompany]);
 
-  const setBranch = async (id: string | null) => {
+  const setBranch = useCallback(async (id: string | null) => {
     if (!id) {
       setCurrentBranch(null);
       const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
@@ -183,35 +200,40 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     }
     const branch = allBranches.find(b => b.id === id);
     if (branch) {
-      setCurrentBranch(branch);
+      setCurrentBranch(prev => prev?.id === branch.id ? prev : branch);
       const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
       useEnterpriseStore.getState().setActiveBranchId(id);
     }
-  };
+  }, [allBranches]);
+
+  const value = useMemo(() => ({
+    currentTenant,
+    currentGroup,
+    currentCompany,
+    currentBranch,
+    allBranches,
+    segment,
+    subSegment,
+    companySize,
+    taxRegime,
+    operationTypes,
+    policies,
+    isLoading,
+    setCompany,
+    setBranch,
+    executiveCouncil
+  }), [
+    currentTenant, currentGroup, currentCompany, currentBranch, allBranches,
+    segment, subSegment, companySize, taxRegime, operationTypes,
+    policies, isLoading, setCompany, setBranch
+  ]);
 
   return (
-    <EnterpriseContext.Provider value={{
-      // AUD-1: nunca expor sentinela de tenant/grupo — consumers devem tratar null enquanto isLoading.
-      currentTenant,
-      currentGroup,
-      currentCompany,
-      currentBranch,
-      allBranches,
-      segment,
-      subSegment,
-      companySize,
-      taxRegime,
-      operationTypes,
-      policies,
-      isLoading,
-      setCompany,
-      setBranch,
-      executiveCouncil
-    }}>
+    <EnterpriseContext.Provider value={value}>
       {children}
     </EnterpriseContext.Provider>
   );
-};
+});
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useEnterprise = () => {
