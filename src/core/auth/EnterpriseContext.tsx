@@ -127,12 +127,16 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
 
   const loadActiveTenant = useCallback(async (isMounted: MutableRefObject<boolean>) => {
     if (!isMounted.current) return;
+    
+    // Check if we already have a loaded state to avoid unnecessary spinner flickers
+    // but only if it's the same mount cycle
     setIsLoading(true);
+
     try {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError) throw sessionError;
       if (!session?.user) {
-        setIsLoading(false);
+        if (isMounted.current) setIsLoading(false);
         return;
       }
 
@@ -140,13 +144,16 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
       
       const [companiesRes, profileRes] = await Promise.all([
         supabase.from('companies').select('*').limit(1),
-        supabase.from('profiles').select('default_branch_id').eq('id', user.id).maybeSingle()
+        supabase.from('profiles').select('default_branch_id, company_id').eq('id', user.id).maybeSingle()
       ]);
 
       if (!isMounted.current) return;
 
       if (companiesRes.data && companiesRes.data.length > 0) {
-        const company = companiesRes.data[0];
+        // Prefer the company linked to the profile if available
+        const company = companiesRes.data.find(c => c.id === profileRes.data?.company_id) || companiesRes.data[0];
+        
+        // applyCompany is already wrapped in useCallback and uses functional state updates
         await applyCompany(company as CompanyRow);
         
         const { data: units } = await supabase
