@@ -12,35 +12,49 @@ export function useLowMarginAlertsRealtime() {
   const qc = useQueryClient();
 
   useEffect(() => {
-    const channel = supabase
-      .channel('commercial_alerts_low_margin')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'commercial_alerts',
-          filter: 'alert_type=eq.low_margin',
-        },
-        (payload) => {
-          const row: any = payload.new;
-          const severity = row?.severity ?? 'high';
-          const title = row?.title ?? 'Alerta de margem crítica';
-          const description = row?.description ?? undefined;
+    let channel: any = null;
+    let isMounted = true;
 
-          if (severity === 'critical') {
-            toast.error(title, { description, duration: 8000 });
-          } else {
-            toast.warning(title, { description, duration: 6000 });
-          }
+    const setupChannel = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session || !isMounted) return;
 
-          qc.invalidateQueries({ queryKey: ['commercial_alerts'] });
-        },
-      )
-      .subscribe();
+      channel = supabase
+        .channel('commercial_alerts_low_margin')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'commercial_alerts',
+            filter: 'alert_type=eq.low_margin',
+          },
+          (payload) => {
+            const row: any = payload.new;
+            const severity = row?.severity ?? 'high';
+            const title = row?.title ?? 'Alerta de margem crítica';
+            const description = row?.description ?? undefined;
+
+            if (severity === 'critical') {
+              toast.error(title, { description, duration: 8000 });
+            } else {
+              toast.warning(title, { description, duration: 6000 });
+            }
+
+            qc.invalidateQueries({ queryKey: ['commercial_alerts'] });
+          },
+        )
+        .subscribe();
+    };
+
+    setupChannel();
 
     return () => {
-      supabase.removeChannel(channel);
+      isMounted = false;
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
     };
   }, [qc]);
 }
+
