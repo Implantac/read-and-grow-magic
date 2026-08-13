@@ -23,10 +23,11 @@ export function useSupabaseQuery<T>(
         throw err;
       }
     },
-    staleTime: 60000, // Increased to 60s
-    gcTime: 5 * 60000,
+    staleTime: 5 * 60 * 1000, // 5 minutes standard
+    gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
-    refetchOnMount: false, // Prevent refetching on every mount if data is not stale
+    refetchOnMount: false,
+    retry: 1,
     ...options,
   });
 }

@@ -125,18 +125,24 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     });
   }, []);
 
+  const isSyncing = useRef(false);
+
   const loadActiveTenant = useCallback(async (isMounted: MutableRefObject<boolean>) => {
-    if (!isMounted.current) return;
+    if (!isMounted.current || isSyncing.current) return;
     
-    // Check if we already have a loaded state to avoid unnecessary spinner flickers
-    // but only if it's the same mount cycle
+    isSyncing.current = true;
     setIsLoading(true);
 
     try {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError) throw sessionError;
+      
       if (!session?.user) {
-        if (isMounted.current) setIsLoading(false);
+        if (isMounted.current) {
+          setCurrentCompany(null);
+          setCurrentBranch(null);
+          setAllBranches([]);
+        }
         return;
       }
 
@@ -150,10 +156,8 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
       if (!isMounted.current) return;
 
       if (companiesRes.data && companiesRes.data.length > 0) {
-        // Prefer the company linked to the profile if available
         const company = companiesRes.data.find(c => c.id === profileRes.data?.company_id) || companiesRes.data[0];
         
-        // applyCompany is already wrapped in useCallback and uses functional state updates
         await applyCompany(company as CompanyRow);
         
         const { data: units } = await supabase
@@ -197,7 +201,10 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
         console.error('Enterprise context error:', error);
       }
     } finally {
-      if (isMounted.current) setIsLoading(false);
+      if (isMounted.current) {
+        setIsLoading(false);
+        isSyncing.current = false;
+      }
     }
   }, [applyCompany]);
 
@@ -205,9 +212,24 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     mounted.current = true;
     const isMounted = mounted;
+    
+    // Initial load
     loadActiveTenant(isMounted);
+
+    // Sync with auth changes to prevent stale data causing loops
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (isMounted.current && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
+        loadActiveTenant(isMounted);
+      } else if (event === 'SIGNED_OUT') {
+        setCurrentCompany(null);
+        setCurrentBranch(null);
+        setAllBranches([]);
+      }
+    });
+
     return () => {
       mounted.current = false;
+      subscription.unsubscribe();
     };
   }, [loadActiveTenant]);
 

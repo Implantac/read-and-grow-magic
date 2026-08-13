@@ -19,19 +19,10 @@ const RealtimeAlertsBridge = React.memo(() => {
   const { currentCompany, isLoading } = useEnterprise();
   const companyId = currentCompany?.id;
   
-  const isMounted = React.useRef(true);
-  React.useEffect(() => {
-    isMounted.current = true;
-    return () => { isMounted.current = false; };
-  }, []);
-  
-  // Guard initialization with a ref and stable companyId
-  const initializedId = React.useRef<string | null>(null);
-
-  // Separate effect for stability
+  // Use stableId to avoid re-renders during loading transitions
   const stableId = React.useMemo(() => (!isLoading && companyId) ? companyId : null, [isLoading, companyId]);
 
-  // Use refs for orchestrators that manage their own subscriptions
+  // Orchestrators are called with stableId
   useLowMarginAlertsRealtime(stableId || undefined);
   useInventoryOrchestrator(stableId || undefined);
   useFinancialOrchestrator(stableId || undefined);
