@@ -176,14 +176,14 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
   };
 
 
-  const setCompany = async (id: string) => {
+  const setCompany = useCallback(async (id: string) => {
     const { data } = await supabase.from('companies').select('*').eq('id', id).maybeSingle();
     if (data) {
       applyCompany(data as CompanyRow);
       const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
       useEnterpriseStore.getState().setActiveCompanyId(id);
     }
-  };
+  }, []);
 
   const setBranch = async (id: string | null) => {
     if (!id) {
