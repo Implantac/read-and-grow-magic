@@ -1,380 +1,82 @@
-/**
- * Analise completamente toda a aplicação antes de realizar qualquer alteração e execute uma auditoria profunda de SEGURANÇA e BANCO DE DADOS em todo o sistema.
- * 
- * Seu objetivo é identificar vulnerabilidades, falhas de segurança, riscos de exposição de dados, problemas de autenticação/autorização e otimizar toda a estrutura do banco de dados para garantir máxima segurança, integridade e confiabilidade.
- * 
- * DIRETRIZES DE SEGURANÇA (UEEF SEC-LEVEL 4):
- * 1. RLS MANDATÓRIO: Nenhuma tabela pública pode ter políticas 'USING (true)'.
- * 2. ISOLAMENTO DE TENANT: Todo filtro deve usar 'company_id = get_user_company_id(auth.uid())'.
- * 3. INTEGRIDADE DE ESCRITA: Triggers devem garantir que 'company_id' seja gravado corretamente via 'set_company_id_from_user()'.
- * 4. PROTEÇÃO DE DADOS: Colunas sensíveis (custos, dados pessoais) devem ter RLS granular ou criptografia onde aplicável.
- * 5. SECURITY DEFINER: Funções com privilégios elevados devem ter 'search_path = public' e filtros de tenant rigorosos.
- * 
- * EOE (Enterprise Operating Ecosystem) - Visão de Destino
-...
- * 
- * FASE 7 — Workflow Engine
- * Sequência de processo configurável (Solicitação a Conclusão).
- * 
- * FASE 8 — Business Transactions
- * Espinha dorsal: BT-XXXX (Relaciona Pedido, Venda, Estoque, NF, Financeiro, CRM).
- * 
- * FASE 9 — Event Bus
- * Orquestração assíncrona: Evento -> Impacto em múltiplos domínios (Ex: SALE_COMPLETED -> Fiscal, Financeiro, CRM).
- * 
- * FASE 10 — Auditoria empresarial
- * Rastreabilidade total: Quem, O quê, Quando, Onde, Valor anterior/novo, Motivo, Documento.
- * 
- * FASE 11 — Timeline universal
- * Linha do tempo visual de toda transação (Solicitação -> Recebimento).
- * 
- * FASE 12 — Central de tarefas (Minha Operação)
- * Experiência orientada a ações urgentes/pendentes, abstraindo a complexidade de módulos.
- * 
- * FASE 13 — Gestão por exceção
- * Foco do gestor: Rupturas, Divergências, Atrasos, Estoque anormal.
- * 
- * FASE 14 — Busca universal
- * Pesquisa global por Documento, Processo, Transação, Cliente, Produto ou Evento.
- * 
- * FASE 15 — "Explicar"
- * Origem de cálculos e recomendações (Ex: Motivo da reposição de 22 unidades).
- * 
- * FASE 16 — Reconstrução da experiência de Loja
- * Visão operacional unificada (Vendas, Estoque, Recebimentos, Alertas) sobre o motor logístico.
- * 
- * FASE 17 — Reconstrução dos demais domínios
- * Integração profunda de Comercial, Compras, Produção e Financeiro via fundação de processos.
- * 
- * FASE 18 — Dashboard orientado a decisões
- * Foco em RESULTADOS, ATENÇÃO, EXCEÇÕES, RISCO e AÇÃO RECOMENDADA.
- * 
- * FASE 19 — IA empresarial
- * Análise de causas (Causal Inference) respeitando permissões, RLS e contexto do Tenant.
- * 
- * FASE 20 — Observabilidade e qualidade
- * Testes de Workflow/Políticas/RLS e métricas de eficiência operacional.
- * 
- * REGRA: O READ & GROW não é um conjunto de módulos independentes. É um ecossistema.
- * A interface esconde complexidade sem esconder informação gerencial.
- */
+import { Suspense, lazy } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import Dashboard from '@/modules/dashboard/Dashboard';
+import Login from '@/modules/auth/Login';
+import Register from '@/modules/auth/Register';
+import { ProtectedRoute } from '@/shared/components/ProtectedRoute';
+import { AppLayout } from '@/shared/layouts/AppLayout';
+import ErrorBoundary from '@/shared/components/ErrorBoundary';
 
-import { Suspense, useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
-import { MicroOnboarding } from '@/shared/components/MicroOnboarding';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/ui/base/card";
-import { DailyTaskBoard } from '@/modules/operational/components/DailyTaskBoard';
-
-
-import { Badge } from "@/ui/base/badge";
-import { 
-  CheckCircle2, 
-  Clock, 
-  ArrowRight, 
-  ShieldCheck, 
-  Store,
-  Truck,
-  Package,
-  AlertTriangle,
-  LayoutDashboard,
-  Network,
-  Scale,
-  RefreshCw,
-  BookOpen,
-  ChevronDown,
-  ChevronUp,
-  Zap,
-  Shield,
-  Search,
-  CheckSquare,
-  BarChart3,
-  ClipboardList,
-  Brain,
-  Monitor
-} from 'lucide-react';
-import { ScrollArea } from "@/ui/base/scroll-area";
-import { cn } from "@/lib/utils";
-import { Button } from "@/ui/base/button";
-import { Separator } from "@/ui/base/separator";
-import NetworkControlTower from '@/modules/operational/network/components/NetworkControlTower';
-import { UnifiedGovernanceDashboard } from '@/modules/admin/governance/UnifiedGovernanceDashboard';
+// Lazy load modules for better performance
+const OperationalModule = lazy(() => import('@/modules/operational/OperationalModule'));
+const FinancialModule = lazy(() => import('@/modules/financial/FinancialModule'));
+const InventoryModule = lazy(() => import('@/modules/inventory/InventoryModule'));
+const SalesModule = lazy(() => import('@/modules/sales/SalesModule'));
+const PurchasingModule = lazy(() => import('@/modules/purchasing/PurchasingModule'));
+const ProductionModule = lazy(() => import('@/modules/production/ProductionModule'));
+const WMSModule = lazy(() => import('@/modules/wms/WMSModule'));
+const TMSModule = lazy(() => import('@/modules/tms/TMSModule'));
+const RelationshipModule = lazy(() => import('@/modules/relationship/RelationshipModule'));
+const AdminModule = lazy(() => import('@/modules/admin/AdminModule'));
+const FiscalModule = lazy(() => import('@/modules/fiscal/FiscalModule'));
+const NetworkArchitecture = lazy(() => import('@/modules/operational/network/NetworkArchitecture'));
+const UnifiedSupplyChain = lazy(() => import('@/modules/operational/supply-chain/UnifiedSupplyChain'));
+const StoreCentral = lazy(() => import('@/modules/operational/store/StoreCentral'));
+const ManualModule = lazy(() => import('@/modules/admin/systemManual/SystemManual'));
 
 const PageLoader = () => (
-  <div className="flex min-h-[40vh] items-center justify-center">
-    <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+  <div className="flex h-screen w-full items-center justify-center bg-background/50 backdrop-blur-sm">
+    <div className="flex flex-col items-center gap-4">
+      <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent shadow-xl" />
+      <p className="text-sm font-medium animate-pulse text-muted-foreground">Carregando ecossistema...</p>
+    </div>
   </div>
 );
 
-const HardeningDashboard = () => {
-  const [expandedSection, setExpandedSection] = useState<string | null>(null);
-
-  const phases = [
-    { id: '1', title: 'Profissionalização Operacional', status: 'completed', description: 'Design System, Skeletons e Feedback Orientado.' },
-    { id: '2', title: 'Processos Integrados', status: 'completed', description: 'O2C/P2P/WMS integrados como organismo único.' },
-    { id: '3', title: 'Governança & Auditoria', status: 'completed', description: 'Ledger Logístico Imutável e RLS Hardening.' },
-    { id: '4', title: 'Expansão UX Pro', status: 'completed', description: 'OrderWizard, Procurement MRP e UEEF SEC-LEVEL 3.' },
-    { id: '5', title: 'Inteligência Preditiva', status: 'completed', description: 'Digital Twin e Otimização de Slotting IA.' },
-    { id: '6', title: 'Ecossistema Global', status: 'completed', description: 'Contexto, Políticas, Eventos e Orquestração Total.' },
-  ];
-
-
-  const blueprintItems = [
-    { 
-      id: 'sourcing_ia', 
-      title: '1. Orquestração de Sourcing IA', 
-      icon: <Brain className="h-4 w-4" />,
-      content: `Motor de decisão que escolhe a melhor origem para o pedido: Loja Local (Pick-up), CD (Transfer) ou Fábrica (Direct-to-Store). Foco em redução de Lead Time e Custo.`
-    },
-    { 
-      id: 'last_mile', 
-      title: '2. Logística de Last Mile & Manifestos', 
-      icon: <Truck className="h-4 w-4" />,
-      content: `Criação automática de manifestos de transporte e romaneios de carga. Integração com transportadoras e rastreabilidade em tempo real do veículo.`
-    },
-    { 
-      id: 'ledger_logistico', 
-      title: '3. Ledger Logístico Imutável', 
-      icon: <ClipboardList className="h-4 w-4" />,
-      content: `Cada etapa da movimentação (Aprovado -> Picking -> Expedido -> Trânsito -> Recebido) gera um registro imutável no Ledger, garantindo auditoria total.`
-    },
-    { 
-      id: 'cockpit_excecoes', 
-      title: '4. Cockpit de Exceções (Exception Hub)', 
-      icon: <AlertTriangle className="h-4 w-4" />,
-      content: `Painel único para tratar atrasos no trânsito, rupturas de estoque na origem ou divergências no recebimento. Ação corretiva imediata.`
-    },
-    { 
-      id: 'terminais_pdv', 
-      title: '5. Blindagem de Terminais PDV', 
-      icon: <Monitor className="h-4 w-4" />,
-      content: `Gestão de identidades únicas por terminal físico. Bloqueio de vendas fora do contexto da unidade e autenticação por hardware.`
-    },
-    { 
-      id: 'inventario_ciclico', 
-      title: '6. Inventário Cíclico Inteligente', 
-      icon: <RefreshCw className="h-4 w-4" />,
-      content: `Sugestões de contagem baseadas em rotatividade (ABC) e discrepâncias detectadas pelo motor de anomalias. Ajuste de estoque auditado.`
-    }
-  ];
-
+const AppRoutes = () => {
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Ecossistema Operacional Empresarial (EOE)</h1>
+    <ErrorBoundary>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
-          </div>
-          <p className="text-muted-foreground text-lg">
-            A solução não é esconder complexidade. É tirar a complexidade do caminho do usuário e preservá-la por baixo, de forma controlada e rastreável para quem precisa gerenciá-la.
-          </p>
-          <div className="mt-4 p-4 border rounded-xl bg-primary/10 border-primary/20 max-w-2xl animate-in fade-in duration-700">
-            <h4 className="text-sm font-black uppercase tracking-widest text-primary mb-2 flex items-center gap-2">
-              <Store className="h-4 w-4" /> Hardening Operacional: Central de Abastecimento e Movimentação
-            </h4>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              O conceito de "Operação da Loja" foi evoluído para uma <strong>Central de Abastecimento Unificada</strong> conforme o Padrão Operacional, Arquitetural e de UX (Skill Central de Abastecimento). Agora, Fábricas, CDs e Lojas operam sob o mesmo motor logístico, permitindo fluxos ponta a ponta e movimentações laterais com rastreabilidade total, auditoria e gestão por exceção.
-            </p>
-            <div className="mt-4 flex gap-2">
-              <Button size="sm" variant="default" className="font-bold text-[10px] uppercase h-8" asChild>
-                <a href="/operacional/abastecimento">Acessar Central Unificada</a>
-              </Button>
-              <Button size="sm" variant="outline" className="font-bold text-[10px] uppercase h-8" asChild>
-                <a href="/operacional/loja/central">Ver Painel Gerencial</a>
-              </Button>
-            </div>
-          </div>
-        </div>
-        <Badge variant="outline" className="text-primary border-primary bg-primary/5 px-4 py-1 text-sm font-semibold">
-          BLUEPRINT V3.0 — EOE
-        </Badge>
-      </div>
+          <Route
+            element={
+              <ProtectedRoute>
+                <AppLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="/" element={<Dashboard />} />
+            
+            {/* Operational Domain */}
+            <Route path="/operacional/*" element={<OperationalModule />} />
+            <Route path="/operacional/rede" element={<NetworkArchitecture />} />
+            <Route path="/operacional/abastecimento" element={<UnifiedSupplyChain />} />
+            <Route path="/operacional/loja/central" element={<StoreCentral />} />
+            
+            {/* Business Domains */}
+            <Route path="/financeiro/*" element={<FinancialModule />} />
+            <Route path="/estoque/*" element={<InventoryModule />} />
+            <Route path="/comercial/*" element={<SalesModule />} />
+            <Route path="/compras/*" element={<PurchasingModule />} />
+            <Route path="/producao/*" element={<ProductionModule />} />
+            <Route path="/wms/*" element={<WMSModule />} />
+            <Route path="/tms/*" element={<TMSModule />} />
+            <Route path="/relacionamento/*" element={<RelationshipModule />} />
+            <Route path="/fiscal/*" element={<FiscalModule />} />
+            
+            {/* Administrative Domain */}
+            <Route path="/admin/*" element={<AdminModule />} />
+            <Route path="/admin/manual" element={<ManualModule />} />
+          </Route>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        {phases.map((phase) => (
-          <Card key={phase.id} className={cn(
-            "transition-all hover:shadow-md",
-            phase.status === 'completed' ? 'border-primary/20 bg-primary/5' : 'border-border'
-          )}>
-            <CardHeader className="p-4 space-y-1">
-              <div className="flex justify-between items-start">
-                <Badge variant={phase.status === 'completed' ? 'default' : 'outline'} className="text-[10px] h-5">
-                  PHASE {phase.id}
-                </Badge>
-                {phase.status === 'completed' ? (
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                ) : (
-                  <Clock className="h-4 w-4 text-muted-foreground animate-pulse" />
-                )}
-              </div>
-              <CardTitle className="text-sm font-bold truncate">{phase.title}</CardTitle>
-            </CardHeader>
-          </Card>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 gap-6">
-        <MicroOnboarding 
-          id="governance_dashboard_intro"
-          title="Cockpit de Governança"
-          description="Aqui você monitora a saúde real da operação. Se algo sair do Ledger, a IA te avisa na hora."
-          position="bottom"
-        >
-          <Card className="border-primary bg-primary/5 shadow-lg">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Network className="h-6 w-6 text-primary" />
-                <div>
-                  <CardTitle>Torre de Controle Operacional (Supply Chain)</CardTitle>
-                  <CardDescription>Monitoramento centralizado de saúde da rede e exceções logísticas</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <NetworkControlTower />
-            </CardContent>
-          </Card>
-        </MicroOnboarding>
-      </div>
-
-      <div className="grid grid-cols-1 gap-6">
-        <Card className="border-emerald-500/30 bg-emerald-500/5 shadow-lg">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Scale className="h-6 w-6 text-emerald-600" />
-                <div>
-                  <CardTitle>Cockpit de Governança Unificada</CardTitle>
-                  <CardDescription>Ledger Logístico, Segurança UEEF e Autopilot de IA em uma única visão</CardDescription>
-                </div>
-              </div>
-              <Badge className="bg-emerald-600 text-white font-black">UEEF COMPLIANT</Badge>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <UnifiedGovernanceDashboard />
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2 border-primary bg-primary/5 shadow-lg overflow-hidden">
-          <CardHeader className="bg-primary/10 border-b border-primary/20">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <BookOpen className="h-6 w-6 text-primary" />
-                <div>
-                  <CardTitle>Blueprint Operacional: Critérios de Aceite</CardTitle>
-                  <CardDescription>Regras mandatórias para a robustez da plataforma</CardDescription>
-                </div>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="p-0">
-            <ScrollArea className="h-[500px]">
-              <div className="p-6 space-y-4">
-                {blueprintItems.map((req) => (
-                  <div key={req.id} className="border rounded-lg bg-background overflow-hidden transition-all border-primary/20 shadow-sm">
-                    <button 
-                      onClick={() => setExpandedSection(expandedSection === req.id ? null : req.id)}
-                      className="w-full flex items-center justify-between p-4 text-left hover:bg-primary/5 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-md bg-primary/10 text-primary">
-                          {req.icon}
-                        </div>
-                        <span className="font-bold text-sm text-foreground">{req.title}</span>
-                      </div>
-                      {expandedSection === req.id ? <ChevronUp className="h-4 w-4 text-primary" /> : <ChevronDown className="h-4 w-4 text-primary" />}
-                    </button>
-                    {expandedSection === req.id && (
-                      <div className="px-4 pb-4 text-sm text-muted-foreground animate-in fade-in slide-in-from-top-2">
-                        <Separator className="mb-4 bg-primary/10" />
-                        <p className="leading-relaxed font-medium">{req.content}</p>
-                      </div>
-                    )}
-                  </div>
-                ))}
-
-                <div className="pt-4 px-2 bg-muted/20 p-4 rounded-lg">
-                  <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-4">Atores da Operação</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {['Operador PDV', 'Caixa', 'Estoquista', 'Gerente', 'Regional', 'CD Manager', 'Financeiro', 'Fiscal'].map(role => (
-                      <Badge key={role} variant="secondary" className="bg-background text-foreground border-border">{role}</Badge>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </ScrollArea>
-          </CardContent>
-        </Card>
-
-        <div className="space-y-6">
-          <DailyTaskBoard />
-
-          <Card className="border-primary/20 bg-background shadow-md">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2 text-primary font-black">
-                <Zap className="h-5 w-5" /> REGRAS DE OURO
-              </CardTitle>
-            </CardHeader>
-
-            <CardContent className="space-y-4">
-              <div className="space-y-4 text-sm">
-                <div className="p-3 rounded-lg border bg-success/5 border-success/20">
-                  <p className="font-bold text-success mb-1">Trabalhar por Exceção</p>
-                  <p className="text-xs text-muted-foreground">O usuário não confere o que o sistema valida. Divergência exige motivo, evidência e aprovação.</p>
-                </div>
-                <div className="p-3 rounded-lg border bg-info/5 border-info/20">
-                  <p className="font-bold text-info mb-1">Segregação de Funções</p>
-                  <p className="text-xs text-muted-foreground">Solicita, Aprova e Executa devem ser pessoas differentes para operações críticas.</p>
-                </div>
-                <div className="p-3 rounded-lg border bg-warning/5 border-warning/20">
-                  <p className="font-bold text-warning mb-1">Rastreabilidade Visual</p>
-                  <p className="text-xs text-muted-foreground">Toda transferência deve mostrar o pipeline: Solicitada → Aprovada → Separada → Expedida → Trânsito → Recebida.</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-primary/20 bg-background shadow-md relative overflow-hidden">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2 font-black uppercase text-primary">
-                <Search className="h-5 w-5" /> Status do Hardening
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center justify-between text-xs">
-                <span>Database Constraints</span>
-                <Badge className="bg-success text-white">HARDENED</Badge>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <span>RLS Policies</span>
-                <Badge className="bg-success text-white">SECURE</Badge>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <span>Audit Ledger</span>
-                <Badge className="bg-info text-white">ACTIVE</Badge>
-              </div>
-              <Separator />
-              <Button size="sm" className="w-full text-xs font-bold" variant="outline" asChild>
-                <a href="/admin/manual">Ver Auditoria UEEF</a>
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </div>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
+    </ErrorBoundary>
   );
 };
 
-export default function MasterPlanRoutes() {
-  return (
-    <Suspense fallback={<PageLoader />}>
-      <Routes>
-        <Route index element={<HardeningDashboard />} />
-      </Routes>
-    </Suspense>
-  );
-}
+export default AppRoutes;
