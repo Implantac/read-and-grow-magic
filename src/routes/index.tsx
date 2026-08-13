@@ -282,7 +282,7 @@ const HardeningDashboard = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <UnifiedGovernanceDashboard />
+            {/* <UnifiedGovernanceDashboard /> */}
           </CardContent>
         </Card>
       </div>
