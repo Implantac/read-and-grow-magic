@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/ui/base/sonner";
 import { TooltipProvider } from "@/ui/base/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
-import { EnterpriseProvider } from "@/core/auth/EnterpriseContext";
+import { EnterpriseProvider, useEnterprise } from "@/core/auth/EnterpriseContext";
 import { Loader2 } from 'lucide-react';
 import { ConfirmDialogProvider } from '@/shared/components/ConfirmDialog';
 import { useLowMarginAlertsRealtime } from '@/hooks/commercial/useLowMarginAlertsRealtime';
