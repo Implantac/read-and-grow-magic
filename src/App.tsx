@@ -22,6 +22,15 @@ const RealtimeAlertsBridge = React.memo(() => {
   // Use stableId to avoid re-renders during loading transitions
   const stableId = React.useMemo(() => (!isLoading && companyId) ? companyId : null, [isLoading, companyId]);
 
+  // Use a ref to ensure orchestrators are only initialized once per stableId
+  const lastInitializedId = React.useRef<string | null>(null);
+
+  React.useEffect(() => {
+    if (stableId && stableId !== lastInitializedId.current) {
+      lastInitializedId.current = stableId;
+    }
+  }, [stableId]);
+
   // Orchestrators are called with stableId
   useLowMarginAlertsRealtime(stableId || undefined);
   useInventoryOrchestrator(stableId || undefined);
