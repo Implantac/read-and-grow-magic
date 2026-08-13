@@ -101,7 +101,6 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
   const applyCompany = useCallback(async (company: CompanyRow) => {
     if (!company) return;
     
-    // Use functional update to check ID equality before state update
     setCurrentCompany(prev => {
       if (prev?.id === company.id) return prev;
       return { ...company };
@@ -110,12 +109,20 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     const { getEnterprisePolicies } = await import('@/core/orchestration/policyEngine');
     const seg = (company.segment as Segment | null) ?? 'general';
     
-    setSegment(seg);
-    setSubSegment(company.sub_segment ?? '');
-    setCompanySize(company.company_size ?? 'Pequeno');
-    setTaxRegime((company.tax_regime as string | null) ?? 'Simples Nacional');
-    setOperationTypes((company.operation_types as OperationType[] | null) ?? []);
-    setPolicies(getEnterprisePolicies(seg));
+    setSegment(prev => prev === seg ? prev : seg);
+    setSubSegment(prev => prev === (company.sub_segment ?? '') ? prev : (company.sub_segment ?? ''));
+    setCompanySize(prev => prev === (company.company_size ?? 'Pequeno') ? prev : (company.company_size ?? 'Pequeno'));
+    setTaxRegime(prev => prev === ((company.tax_regime as string | null) ?? 'Simples Nacional') ? prev : ((company.tax_regime as string | null) ?? 'Simples Nacional'));
+    setOperationTypes(prev => {
+      const next = (company.operation_types as OperationType[] | null) ?? [];
+      if (JSON.stringify(prev) === JSON.stringify(next)) return prev;
+      return next;
+    });
+    setPolicies(prev => {
+      const next = getEnterprisePolicies(seg);
+      if (JSON.stringify(prev) === JSON.stringify(next)) return prev;
+      return next;
+    });
   }, []);
 
   const loadActiveTenant = useCallback(async (isMounted: MutableRefObject<boolean>) => {
