@@ -12,44 +12,72 @@ type EventType =
 type SubscriptionCallback = (payload: any) => void;
 
 interface EventBusState {
-  subscribers: Record<string, SubscriptionCallback[]>;
+  subscribers: Record<string, Set<SubscriptionCallback>>;
   publish: (event: EventType, payload: any) => Promise<void>;
   subscribe: (event: EventType, callback: SubscriptionCallback) => () => void;
 }
 
+// Global store to avoid unnecessary re-renders in hooks
 export const useEventBus = create<EventBusState>((set, get) => ({
   subscribers: {},
 
   publish: async (event, payload) => {
-    console.log(`[EventBus] Publishing ${event}`, payload);
-    const eventSubscribers = get().subscribers[event] || [];
+    const allSubscribers = get().subscribers;
+    const eventSubscribers = allSubscribers[event];
     
-    // Executa callbacks em paralelo
-    await Promise.all(eventSubscribers.map(cb => {
-      try {
-        return Promise.resolve(cb(payload));
-      } catch (err) {
-        console.error(`[EventBus] Error in subscriber for ${event}:`, err);
-        return Promise.resolve();
-      }
-    }));
+    if (!eventSubscribers || eventSubscribers.size === 0) return;
+
+    // Use Set to ensure we don't call the same callback multiple times
+    // and convert to array to iterate
+    const callbacks = Array.from(eventSubscribers);
+    
+    // Execute callbacks asynchronously to avoid blocking the caller
+    // and to prevent recursive update loops (Error #185)
+    setTimeout(() => {
+      callbacks.forEach(cb => {
+        try {
+          cb(payload);
+        } catch (err) {
+          console.error(`[EventBus] Error in subscriber for ${event}:`, err);
+        }
+      });
+    }, 0);
   },
 
   subscribe: (event, callback) => {
-    set((state) => ({
-      subscribers: {
-        ...state.subscribers,
-        [event]: [...(state.subscribers[event] || []), callback]
-      }
-    }));
-
-    return () => {
-      set((state) => ({
+    // We use functional updates to ensure we have the latest state
+    // and avoid recursion issues during subscribe/unsubscribe
+    set((state) => {
+      const current = state.subscribers[event] || new Set();
+      if (current.has(callback)) return state;
+      
+      const next = new Set(current);
+      next.add(callback);
+      
+      return {
         subscribers: {
           ...state.subscribers,
-          [event]: state.subscribers[event].filter(cb => cb !== callback)
+          [event]: next
         }
-      }));
+      };
+    });
+
+    return () => {
+      set((state) => {
+        const current = state.subscribers[event];
+        if (!current || !current.has(callback)) return state;
+        
+        const next = new Set(current);
+        next.delete(callback);
+        
+        return {
+          subscribers: {
+            ...state.subscribers,
+            [event]: next
+          }
+        };
+      });
     };
   }
 }));
+
