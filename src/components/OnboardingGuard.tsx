@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { withRenderMonitor } from '@/core/debug/RenderDepthMonitor';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,7 +9,7 @@ import { useAppStore } from '@/stores/useAppStore';
  * Blocks access to the app shell until the authenticated user is linked to
  * a tenant (profiles.company_id). Otherwise redirects to /onboarding.
  */
-export function OnboardingGuard() {
+export const OnboardingGuard = withRenderMonitor(() => {
   const { user, isAuthenticated } = useAppStore();
   const navigate = useNavigate();
   const location = useLocation();
@@ -46,4 +47,4 @@ export function OnboardingGuard() {
   }
 
   return <Outlet />;
-}
+}, 'OnboardingGuard');

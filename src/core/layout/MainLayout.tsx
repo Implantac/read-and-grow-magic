@@ -1,4 +1,5 @@
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
+import { withRenderMonitor } from '@/core/debug/RenderDepthMonitor';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAppStore } from '@/stores/useAppStore';
 import { useAuth } from '@/hooks/system/useAuth';
@@ -11,7 +12,7 @@ import { DrillDownDrawer } from '@/shared/components/DrillDownDrawer';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 
-export function MainLayout() {
+export const MainLayout = withRenderMonitor(() => {
   const { isAuthenticated, sidebarCollapsed, theme, user } = useAppStore();
   const { loading } = useAuth();
   const navigate = useNavigate();
