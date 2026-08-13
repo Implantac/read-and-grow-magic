@@ -251,16 +251,9 @@ const HardeningDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        <MicroOnboarding 
-          id="governance_dashboard_intro"
-          title="Cockpit de Governança"
-          description="Aqui você monitora a saúde real da operação. Se algo sair do Ledger, a IA te avisa na hora."
-          position="bottom"
-        >
-          <Card className="border-primary bg-primary/5 shadow-lg">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-
+        <Card className="border-primary bg-primary/5 shadow-lg">
+          <CardHeader>
+            <div className="flex items-center gap-2">
               <Network className="h-6 w-6 text-primary" />
               <div>
                 <CardTitle>Torre de Controle Operacional (Supply Chain)</CardTitle>
@@ -271,9 +264,7 @@ const HardeningDashboard = () => {
           <CardContent>
             <NetworkControlTower />
           </CardContent>
-          </Card>
-        </MicroOnboarding>
-
+        </Card>
       </div>
 
       <div className="grid grid-cols-1 gap-6">
