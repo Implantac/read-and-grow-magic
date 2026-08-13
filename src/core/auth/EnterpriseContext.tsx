@@ -98,20 +98,6 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     mission: 'Construir uma plataforma ERP Enterprise Multivertical, Multiempresa, Inteligente, Adaptativa, Escalável e Orientada a Dados.'
   };
 
-  useEffect(() => {
-    let mounted = true;
-    
-    const init = async () => {
-      if (mounted) await loadActiveTenant();
-    };
-    
-    init();
-    
-    return () => {
-      mounted = false;
-    };
-  }, [loadActiveTenant]);
-
   const applyCompany = useCallback(async (company: CompanyRow) => {
     if (!company) return;
     const { getEnterprisePolicies } = await import('@/core/orchestration/policyEngine');
@@ -172,6 +158,20 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
       setIsLoading(false);
     }
   }, [applyCompany]);
+
+  useEffect(() => {
+    let mounted = true;
+    
+    const init = async () => {
+      if (mounted) await loadActiveTenant();
+    };
+    
+    init();
+    
+    return () => {
+      mounted = false;
+    };
+  }, [loadActiveTenant]);
 
 
   const setCompany = useCallback(async (id: string) => {
