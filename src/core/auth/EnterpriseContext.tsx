@@ -63,7 +63,7 @@ interface EnterpriseContextType {
 
 const EnterpriseContext = createContext<EnterpriseContextType | undefined>(undefined);
 
-export const EnterpriseProvider = forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ children }, ref) => {
+export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentTenant, setCurrentTenant] = useState<TenantRef | null>(null);
   const [currentGroup, setCurrentGroup] = useState<GroupRef | null>(null);
   const [currentCompany, setCurrentCompany] = useState<CompanyRow | null>(null);
@@ -227,7 +227,7 @@ export const EnterpriseProvider = forwardRef<HTMLDivElement, { children: React.R
       {children}
     </EnterpriseContext.Provider>
   );
-});
+};
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useEnterprise = () => {

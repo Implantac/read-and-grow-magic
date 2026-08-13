@@ -30,7 +30,7 @@ const ConfirmCtx = createContext<ConfirmFn | null>(null);
  * Provider global de confirmação destrutiva unificada.
  * Uso: `const confirm = useConfirm(); if (await confirm({ title: 'Excluir?' })) { ... }`.
  */
-export const ConfirmDialogProvider = React.forwardRef<HTMLDivElement, { children: ReactNode }>(({ children }, _ref) => {
+export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => {
   const [open, setOpen] = useState(false);
   const [opts, setOpts] = useState<ConfirmOptions | null>(null);
   const resolverRef = useRef<((v: boolean) => void) | null>(null);
@@ -83,7 +83,7 @@ export const ConfirmDialogProvider = React.forwardRef<HTMLDivElement, { children
       </AlertDialog>
     </ConfirmCtx.Provider>
   );
-});
+};
 
 export function useConfirm(): ConfirmFn {
   const ctx = useContext(ConfirmCtx);
