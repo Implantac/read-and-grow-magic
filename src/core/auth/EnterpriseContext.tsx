@@ -100,10 +100,16 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
 
   const applyCompany = useCallback(async (company: CompanyRow) => {
     if (!company) return;
-    const { getEnterprisePolicies } = await import('@/core/orchestration/policyEngine');
     
-    setCurrentCompany(prev => (prev?.id === company.id ? prev : { ...company }));
+    // Use functional update to check ID equality before state update
+    setCurrentCompany(prev => {
+      if (prev?.id === company.id) return prev;
+      return { ...company };
+    });
+
+    const { getEnterprisePolicies } = await import('@/core/orchestration/policyEngine');
     const seg = (company.segment as Segment | null) ?? 'general';
+    
     setSegment(seg);
     setSubSegment(company.sub_segment ?? '');
     setCompanySize(company.company_size ?? 'Pequeno');
@@ -150,7 +156,10 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
             setAllBranches(mappedUnits);
             
             const defaultBranch = mappedUnits.find(b => b.id === profile?.default_branch_id) || mappedUnits[0] || null;
-            setCurrentBranch(prev => prev?.id === defaultBranch?.id ? prev : (defaultBranch ? { ...defaultBranch } : null));
+            setCurrentBranch(prev => {
+              if (prev?.id === defaultBranch?.id) return prev;
+              return defaultBranch ? { ...defaultBranch } : null;
+            });
             
             if (defaultBranch) {
               const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
@@ -195,7 +204,10 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     }
     const branch = allBranches.find(b => b.id === id);
     if (branch) {
-      setCurrentBranch(prev => prev?.id === branch.id ? prev : { ...branch });
+      setCurrentBranch(prev => {
+        if (prev?.id === branch.id) return prev;
+        return { ...branch };
+      });
       const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
       useEnterpriseStore.getState().setActiveBranchId(id);
     }

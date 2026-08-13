@@ -4,12 +4,12 @@ import { useEffect } from 'react';
 import { toastSuccess } from '@/lib/toastHelpers';
 
 export const useInventoryOrchestrator = (providedCompanyId?: string) => {
-  const { currentCompany } = useEnterprise();
+  const { currentCompany, isLoading: isContextLoading } = useEnterprise();
   const companyId = providedCompanyId || currentCompany?.id;
   const eventBus = useEventBus();
 
   useEffect(() => {
-    if (!companyId) return;
+    if (!companyId || isContextLoading) return;
 
     // Quando uma venda é concluída, o estoque deve ser alertado para possível separação
     const unsubscribe = eventBus.subscribe('SALE_COMPLETED', async (payload) => {
