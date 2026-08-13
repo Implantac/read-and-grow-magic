@@ -49,22 +49,19 @@ export function useAuth(options: UseAuthOptions = {}) {
     }
 
     try {
-      const { data: userResponse, error: userError } = await supabase.auth.getUser();
-      const verifiedUser = userResponse.user;
+      // Use maybeSingle and profile selection first to minimize data transfer
+      const [userResponse, profileResponse, roleResponse] = await Promise.all([
+        supabase.auth.getUser(),
+        supabase.from('profiles').select('name').eq('id', sessionUser.id).maybeSingle(),
+        supabase.rpc('get_user_role', { _user_id: sessionUser.id })
+      ]);
 
-      if (userError || !verifiedUser || verifiedUser.id !== sessionUser.id) {
+      const verifiedUser = userResponse.data.user;
+
+      if (userResponse.error || !verifiedUser || verifiedUser.id !== sessionUser.id) {
         await clearInvalidSession();
         return;
       }
-
-      const [profileResponse, roleResponse] = await Promise.all([
-        supabase
-          .from('profiles')
-          .select('name')
-          .eq('id', verifiedUser.id)
-          .maybeSingle(),
-        supabase.rpc('get_user_role', { _user_id: verifiedUser.id })
-      ]);
 
       if (isAuthSessionError(profileResponse.error) || isAuthSessionError(roleResponse.error)) {
         await clearInvalidSession();
@@ -73,6 +70,8 @@ export function useAuth(options: UseAuthOptions = {}) {
 
       const role = roleResponse.data || 'viewer';
       const appUser = mapSupabaseUser(verifiedUser, profileResponse.data?.name, role);
+      
+      // Update store with functional updates if supported or just check values
       setUser(appUser);
       setUserRole(role);
     } catch (e) {

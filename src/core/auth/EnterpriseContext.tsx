@@ -108,6 +108,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
 
     const { getEnterprisePolicies } = await import('@/core/orchestration/policyEngine');
     const seg = (company.segment as Segment | null) ?? 'general';
+    const nextPolicies = getEnterprisePolicies(seg);
     
     setSegment(prev => prev === seg ? prev : seg);
     setSubSegment(prev => prev === (company.sub_segment ?? '') ? prev : (company.sub_segment ?? ''));
@@ -119,9 +120,8 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
       return next;
     });
     setPolicies(prev => {
-      const next = getEnterprisePolicies(seg);
-      if (JSON.stringify(prev) === JSON.stringify(next)) return prev;
-      return next;
+      if (JSON.stringify(prev) === JSON.stringify(nextPolicies)) return prev;
+      return nextPolicies;
     });
   }, []);
 
