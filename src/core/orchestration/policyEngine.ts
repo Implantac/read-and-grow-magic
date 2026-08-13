@@ -5,6 +5,8 @@ export interface Policy {
   transferApprovalLimit: number;
   inventoryAdjustmentPolicy: 'AUTO' | 'MANAGER_APPROVAL' | 'AUDIT_REQUIRED';
   salesCreditCheck: 'NONE' | 'BASIC' | 'STRICT';
+  workflowEnabled: boolean;
+  eventOrchestrationEnabled: boolean;
 }
 
 const DEFAULT_POLICIES: Record<string, Policy> = {
@@ -12,19 +14,25 @@ const DEFAULT_POLICIES: Record<string, Policy> = {
     replenishmentMethod: 'AI_ASSISTED',
     transferApprovalLimit: 5000,
     inventoryAdjustmentPolicy: 'MANAGER_APPROVAL',
-    salesCreditCheck: 'STRICT'
+    salesCreditCheck: 'STRICT',
+    workflowEnabled: true,
+    eventOrchestrationEnabled: true
   },
   industry: {
     replenishmentMethod: 'MRP',
     transferApprovalLimit: 10000,
     inventoryAdjustmentPolicy: 'AUDIT_REQUIRED',
-    salesCreditCheck: 'BASIC'
+    salesCreditCheck: 'BASIC',
+    workflowEnabled: true,
+    eventOrchestrationEnabled: true
   },
   general: {
     replenishmentMethod: 'MIN_MAX',
     transferApprovalLimit: 2000,
     inventoryAdjustmentPolicy: 'AUTO',
-    salesCreditCheck: 'NONE'
+    salesCreditCheck: 'NONE',
+    workflowEnabled: false,
+    eventOrchestrationEnabled: false
   }
 };
 
