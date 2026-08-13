@@ -1,53 +1,17 @@
 /**
+ * Analise completamente toda a aplicação antes de realizar qualquer alteração e execute uma auditoria profunda de SEGURANÇA e BANCO DE DADOS em todo o sistema.
+ * 
+ * Seu objetivo é identificar vulnerabilidades, falhas de segurança, riscos de exposição de dados, problemas de autenticação/autorização e otimizar toda a estrutura do banco de dados para garantir máxima segurança, integridade e confiabilidade.
+ * 
+ * DIRETRIZES DE SEGURANÇA (UEEF SEC-LEVEL 4):
+ * 1. RLS MANDATÓRIO: Nenhuma tabela pública pode ter políticas 'USING (true)'.
+ * 2. ISOLAMENTO DE TENANT: Todo filtro deve usar 'company_id = get_user_company_id(auth.uid())'.
+ * 3. INTEGRIDADE DE ESCRITA: Triggers devem garantir que 'company_id' seja gravado corretamente via 'set_company_id_from_user()'.
+ * 4. PROTEÇÃO DE DADOS: Colunas sensíveis (custos, dados pessoais) devem ter RLS granular ou criptografia onde aplicável.
+ * 5. SECURITY DEFINER: Funções com privilégios elevados devem ter 'search_path = public' e filtros de tenant rigorosos.
+ * 
  * EOE (Enterprise Operating Ecosystem) - Visão de Destino
- * 
- * O sistema deve evoluir de:
- * Módulos → Telas → CRUDs
- * 
- * para:
- * CONTEXTO DO CLIENTE
- *         ↓
- * PROCESSO EMPRESARIAL
- *         ↓
- * REGRAS / POLÍTICAS
- *         ↓
- * WORKFLOW
- *         ↓
- * OPERAÇÕES
- *         ↓
- * EVENTOS
- *         ↓
- * MÓDULOS IMPACTADOS
- *         ↓
- * AUDITORIA
- *         ↓
- * GESTÃO / INDICADORES
- * 
- * O usuário trabalha no processo.
- * O gestor acompanha o processo + exceções + resultados.
- * O ERP controla os dados + regras + eventos + rastreabilidade.
- * 
- * FASE 0 — Congelamento e diagnóstico
- * Objetivo: Impedir aumento de complexidade enquanto a arquitetura é reorganizada.
- * Ações: Inventário real (Core, Modules, Services, Hooks, Pages, Database, etc.) e mapeamento por domínio (Entidade -> Tabela -> Service -> Hook -> Tela -> Ops).
- * 
- * FASE 1 — Mapa do ecossistema empresarial
- * Foco nos processos: Comercial (Lead a Devolução), Compras (Solicitação a Devolução), Estoque (Movimentação a Reserva), Loja (Reposição a Avaria), Produção (PCP a Qualidade), Financeiro e Fiscal.
- * 
- * FASE 2 — Enterprise Core
- * Camada central robusta: Tenant, Company, Branch, Unit, User, Role, Customer, Supplier, Product, Transaction, Event, Audit, Config.
- * 
- * FASE 3 — Contexto empresarial
- * Enterprise Context: Conhecimento profundo do Tenant, Nicho, Modelo de Negócio, Políticas e Workflows (Ex: Aprovação se Transferência > R$10k).
- * 
- * FASE 4 — Configuração empresarial real
- * Evolução do adaptive.ts: Segmento ↓ Modelo operacional ↓ Capacidades ↓ Políticas ↓ Workflows ↓ Aprovações ↓ Parâmetros ↓ Integ.
- * 
- * FASE 5 — Capability Engine
- * Granularidade: Módulo (Estoque) -> Capacidade (Transferência) -> Operação (Aprovar).
- * 
- * FASE 6 — Policy Engine
- * Cérebro de regras (WHO, WHERE, WHEN, HOW MUCH, WHAT).
+...
  * 
  * FASE 7 — Workflow Engine
  * Sequência de processo configurável (Solicitação a Conclusão).
