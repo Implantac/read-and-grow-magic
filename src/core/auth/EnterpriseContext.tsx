@@ -112,17 +112,22 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     setPolicies(getEnterprisePolicies(seg));
   }, []);
 
-  const loadActiveTenant = useCallback(async () => {
+  const loadActiveTenant = useCallback(async (isMounted: () => boolean) => {
     setIsLoading(true);
     try {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError) throw userError;
+      
+      if (!isMounted()) return;
+
       if (user) {
         // Optimistically fetch company and branches in parallel
         const [{ data: companies }, { data: profile }] = await Promise.all([
           supabase.from('companies').select('*').limit(1),
           supabase.from('profiles').select('default_branch_id').eq('id', user.id).maybeSingle()
         ]);
+
+        if (!isMounted()) return;
 
         if (companies && companies.length > 0) {
           const company = companies[0];
@@ -133,6 +138,8 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
             .select('id, name, type, is_active')
             .eq('company_id', company.id);
           
+          if (!isMounted()) return;
+
           if (units) {
             const mappedUnits = units.map((u: any) => ({
               id: u.id,
@@ -154,18 +161,17 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
       }
     } catch (error: unknown) {
       console.error('Enterprise context error:', error);
-      // Evita loops se o erro for persistente, mas garante que o estado de loading seja limpo
-      if (mounted) setIsLoading(false);
     } finally {
-      setIsLoading(false);
+      if (isMounted()) setIsLoading(false);
     }
   }, [applyCompany]);
 
   useEffect(() => {
     let mounted = true;
+    const isMounted = () => mounted;
     
     const init = async () => {
-      if (mounted) await loadActiveTenant();
+      await loadActiveTenant(isMounted);
     };
     
     init();
