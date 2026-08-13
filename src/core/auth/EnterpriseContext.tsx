@@ -159,7 +159,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
             setAllBranches(mappedUnits);
             
             const defaultBranch = mappedUnits.find(b => b.id === profile?.default_branch_id) || mappedUnits[0] || null;
-            setCurrentBranch(defaultBranch);
+            setCurrentBranch(prev => prev?.id === defaultBranch?.id ? prev : defaultBranch);
             
             if (defaultBranch) {
               const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
