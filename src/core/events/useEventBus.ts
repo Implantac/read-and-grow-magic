@@ -31,10 +31,9 @@ export const useEventBus = create<EventBusState>((set, get) => ({
     // and convert to array to iterate
     const callbacks = Array.from(eventSubscribers);
     
-    // Execute callbacks asynchronously to avoid blocking the caller
-    // and to prevent recursive update loops (Error #185)
-    setTimeout(() => {
-      // Re-get subscribers in case it changed during the timeout
+    // Execute callbacks in a non-blocking microtask to prevent recursive update loops (Error #185)
+    queueMicrotask(() => {
+      // Re-get subscribers in case it changed
       const currentSubscribers = get().subscribers[event];
       if (!currentSubscribers) return;
 
@@ -46,7 +45,7 @@ export const useEventBus = create<EventBusState>((set, get) => ({
           console.error(`[EventBus] Error in subscriber for ${event}:`, err);
         }
       });
-    }, 0);
+    });
   },
 
   subscribe: (event, callback) => {

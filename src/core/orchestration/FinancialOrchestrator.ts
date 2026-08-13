@@ -1,6 +1,6 @@
 import { useEventBus } from '@/core/events/useEventBus';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
-import { useEffect, useRef } from 'react';
+import { useEffect, useCallback } from 'react';
 import { toastSuccess } from '@/lib/toastHelpers';
 
 export const useFinancialOrchestrator = (providedCompanyId?: string) => {
@@ -8,34 +8,30 @@ export const useFinancialOrchestrator = (providedCompanyId?: string) => {
   const companyId = providedCompanyId || currentCompany?.id;
   const eventBus = useEventBus();
 
-  const isSubscribed = useRef(false);
+  const handleSaleCompleted = useCallback((payload: any) => {
+    // Ignorar eventos de outras empresas
+    if (payload.companyId !== companyId) return;
 
-  useEffect(() => {
-    if (!companyId || isContextLoading || isSubscribed.current) return;
-
-    isSubscribed.current = true;
+    console.log('[FinancialOrchestrator] Sale completed, generating ledger entry', payload);
     
-    // Quando uma venda é concluída, o financeiro gera o contas a receber
-    const unsubscribe = eventBus.subscribe('SALE_COMPLETED', (payload) => {
-      // Ignorar eventos de outras empresas
-      if (payload.companyId !== companyId) return;
-
-      console.log('[FinancialOrchestrator] Sale completed, generating ledger entry', payload);
-      
-      toastSuccess(`Título financeiro gerado para o pedido ${payload.orderId.split('-')[0]}.`);
-      
-      // Publicar de forma assíncrona para evitar ciclos síncronos, 
-      // embora o EventBus já faça isso via setTimeout
+    toastSuccess(`Título financeiro gerado para o pedido ${payload.orderId.split('-')[0]}.`);
+    
+    queueMicrotask(() => {
       eventBus.publish('PAYMENT_SETTLED', { 
         orderId: payload.orderId,
         status: 'PENDING',
         companyId: payload.companyId 
       });
     });
+  }, [companyId, eventBus]);
+
+  useEffect(() => {
+    if (!companyId || isContextLoading) return;
+    
+    const unsubscribe = eventBus.subscribe('SALE_COMPLETED', handleSaleCompleted);
 
     return () => {
       unsubscribe();
-      isSubscribed.current = false;
     };
-  }, [companyId, eventBus, isContextLoading]);
+  }, [companyId, eventBus, isContextLoading, handleSaleCompleted]);
 };
