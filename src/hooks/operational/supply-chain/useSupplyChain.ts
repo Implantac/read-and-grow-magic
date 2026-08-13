@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { supplyChainService, SupplyChainMovement, MovementStatus } from '@/services/operational/supply-chain/supplyChainService';
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +10,7 @@ export function useSupplyChain(filters?: { status?: MovementStatus[] }) {
   const [movements, setMovements] = useState<SupplyChainMovement[]>([]);
   const [isDataLoading, setIsDataLoading] = useState(false);
 
-  const fetchMovements = async () => {
+  const fetchMovements = React.useCallback(async () => {
     if (!currentBranch?.id) return;
     
     setIsDataLoading(true);
@@ -26,13 +26,14 @@ export function useSupplyChain(filters?: { status?: MovementStatus[] }) {
     } finally {
       setIsDataLoading(false);
     }
-  };
+  }, [currentBranch?.id, filtersString]);
 
+  const filtersString = JSON.stringify(filters?.status);
   useEffect(() => {
     if (!isEnterpriseLoading && currentBranch?.id) {
       fetchMovements();
     }
-  }, [currentBranch?.id, isEnterpriseLoading, JSON.stringify(filters?.status)]);
+  }, [currentBranch?.id, isEnterpriseLoading, filtersString]);
 
   useEffect(() => {
     if (isEnterpriseLoading || !currentBranch?.id) return;
@@ -61,7 +62,7 @@ export function useSupplyChain(filters?: { status?: MovementStatus[] }) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [currentBranch?.id, isEnterpriseLoading]);
+  }, [currentBranch?.id, isEnterpriseLoading, fetchMovements]);
 
   const updateStatus = async (id: string, status: MovementStatus) => {
     try {
