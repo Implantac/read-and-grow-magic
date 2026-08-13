@@ -126,46 +126,59 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
   }, []);
 
   const isSyncing = useRef(false);
-  const lastSessionId = useRef<string | null>(null);
+  const lastSyncUser = useRef<string | null>(null);
 
   const loadActiveTenant = useCallback(async (isMounted: MutableRefObject<boolean>) => {
     if (!isMounted.current || isSyncing.current) return;
     
-    try {
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError) throw sessionError;
-
-      // Avoid redundant loads if session ID hasn't changed
-      if (session?.user?.id === lastSessionId.current && session?.user?.id) {
-        return;
-      }
-      lastSessionId.current = session?.user?.id ?? null;
-
-      isSyncing.current = true;
-      setIsLoading(true);
-
-
+    isSyncing.current = true;
+    
     try {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError) throw sessionError;
       
-      if (!session?.user) {
+      const user = session?.user;
+
+      if (!user) {
         if (isMounted.current) {
           setCurrentCompany(null);
           setCurrentBranch(null);
           setAllBranches([]);
+          setIsLoading(false);
         }
+        lastSyncUser.current = null;
         return;
       }
 
-      const user = session.user;
+      // Skip if user hasn't changed to prevent render loops
+      if (user.id === lastSyncUser.current) {
+        return;
+      }
+      lastSyncUser.current = user.id;
       
-      const [companiesRes, profileRes] = await Promise.all([
+      setIsLoading(true);
+
+      const [companiesRes, profileRes, roleRes] = await Promise.all([
         supabase.from('companies').select('*').limit(1),
-        supabase.from('profiles').select('default_branch_id, company_id').eq('id', user.id).maybeSingle()
+        supabase.from('profiles').select('default_branch_id, company_id, name').eq('id', user.id).maybeSingle(),
+        supabase.rpc('get_user_role', { _user_id: user.id })
       ]);
 
       if (!isMounted.current) return;
+
+      // Update global app store with profile/role info once
+      const { useAppStore } = await import('@/stores/useAppStore');
+      const store = useAppStore.getState();
+      const role = (roleRes.data as any) || 'viewer';
+      
+      store.setUser({
+        id: user.id,
+        name: profileRes.data?.name || user.user_metadata?.name || user.email?.split('@')[0] || 'Usuário',
+        email: user.email || '',
+        role: role,
+        permissions: ['all'],
+      });
+      store.setUserRole(role);
 
       if (companiesRes.data && companiesRes.data.length > 0) {
         const company = companiesRes.data.find(c => c.id === profileRes.data?.company_id) || companiesRes.data[0];
@@ -201,9 +214,9 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
           
           if (defaultBranch) {
             const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
-            const store = useEnterpriseStore.getState();
-            if (store.activeBranchId !== defaultBranch.id) {
-              store.setActiveBranchId(defaultBranch.id);
+            const enterpriseStore = useEnterpriseStore.getState();
+            if (enterpriseStore.activeBranchId !== defaultBranch.id) {
+              enterpriseStore.setActiveBranchId(defaultBranch.id);
             }
           }
         }
@@ -225,6 +238,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
   
   useEffect(() => {
     mounted.current = true;
+
     renderCount.current++;
     
     if (renderCount.current > 100) {
