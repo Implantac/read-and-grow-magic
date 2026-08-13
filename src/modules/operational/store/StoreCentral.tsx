@@ -102,6 +102,7 @@ export default function StoreCentral() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-lg">Prioridades Operacionais (Orquestradas)</CardTitle>
+
                   <CardDescription>Pendências críticas detectadas pelo Ecossistema Global (EOE)</CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
