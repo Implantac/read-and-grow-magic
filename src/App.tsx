@@ -12,8 +12,10 @@ import { WorkflowSwitcher } from '@/modules/core/components/WorkflowSwitcher';
 import { useInventoryOrchestrator } from '@/core/orchestration/InventoryOrchestrator';
 import { useFinancialOrchestrator } from '@/core/orchestration/FinancialOrchestrator';
 
+import { withRenderMonitor } from '@/core/debug/RenderDepthMonitor';
+
 // Centralized Routing System (EOE optimized)
-const AppRoutes = React.memo(lazy(() => import('./routes/index')));
+const AppRoutes = withRenderMonitor(React.memo(lazy(() => import('./routes/index'))), 'AppRoutes');
 
 const RealtimeAlertsBridge = React.memo(() => {
   const { currentCompany, isLoading } = useEnterprise();
