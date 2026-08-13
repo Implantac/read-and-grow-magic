@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, forwardRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, forwardRef, useRef, type MutableRefObject } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -63,7 +63,7 @@ interface EnterpriseContextType {
 
 const EnterpriseContext = createContext<EnterpriseContextType | undefined>(undefined);
 
-export const EnterpriseProvider = forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ children }, ref) => {
+export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentTenant, setCurrentTenant] = useState<TenantRef | null>(null);
   const [currentGroup, setCurrentGroup] = useState<GroupRef | null>(null);
   const [currentCompany, setCurrentCompany] = useState<CompanyRow | null>(null);
@@ -112,13 +112,13 @@ export const EnterpriseProvider = forwardRef<HTMLDivElement, { children: React.R
     setPolicies(getEnterprisePolicies(seg));
   }, []);
 
-  const loadActiveTenant = useCallback(async (isMounted: () => boolean) => {
+  const loadActiveTenant = useCallback(async (isMounted: MutableRefObject<boolean>) => {
     setIsLoading(true);
     try {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError) throw userError;
       
-      if (!isMounted()) return;
+      if (!isMounted.current) return;
 
       if (user) {
         // Optimistically fetch company and branches in parallel
@@ -127,7 +127,7 @@ export const EnterpriseProvider = forwardRef<HTMLDivElement, { children: React.R
           supabase.from('profiles').select('default_branch_id').eq('id', user.id).maybeSingle()
         ]);
 
-        if (!isMounted()) return;
+        if (!isMounted.current) return;
 
         if (companies && companies.length > 0) {
           const company = companies[0];
@@ -138,7 +138,7 @@ export const EnterpriseProvider = forwardRef<HTMLDivElement, { children: React.R
             .select('id, name, type, is_active')
             .eq('company_id', company.id);
           
-          if (!isMounted()) return;
+          if (!isMounted.current) return;
 
           if (units) {
             const mappedUnits = units.map((u: any) => ({
@@ -162,22 +162,16 @@ export const EnterpriseProvider = forwardRef<HTMLDivElement, { children: React.R
     } catch (error: unknown) {
       console.error('Enterprise context error:', error);
     } finally {
-      if (isMounted()) setIsLoading(false);
+      if (isMounted.current) setIsLoading(false);
     }
   }, [applyCompany]);
 
+  const mounted = useRef(true);
   useEffect(() => {
-    let mounted = true;
-    const isMounted = () => mounted;
-    
-    const init = async () => {
-      await loadActiveTenant(isMounted);
-    };
-    
-    init();
-    
+    mounted.current = true;
+    loadActiveTenant(mounted);
     return () => {
-      mounted = false;
+      mounted.current = false;
     };
   }, [loadActiveTenant]);
 
@@ -233,7 +227,7 @@ export const EnterpriseProvider = forwardRef<HTMLDivElement, { children: React.R
       {children}
     </EnterpriseContext.Provider>
   );
-});
+};
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useEnterprise = () => {
