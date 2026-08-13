@@ -1,15 +1,15 @@
-Analise completamente toda a aplicação antes de realizar qualquer alteração e execute uma auditoria profunda de SEGURANÇA e BANCO DE DADOS em todo o sistema.
-
-Seu objetivo é identificar vulnerabilidades, falhas de segurança, riscos de exposição de dados, problemas de autenticação/autorização e otimizar toda a estrutura do banco de dados para garantir máxima segurança, integridade e confiabilidade.
-
-DIRETRIZES DE SEGURANÇA (UEEF SEC-LEVEL 4):
-1. RLS MANDATÓRIO: Nenhuma tabela pública pode ter políticas 'USING (true)'.
-2. ISOLAMENTO DE TENANT: Todo filtro deve usar 'company_id = get_user_company_id(auth.uid())'.
-3. INTEGRIDADE DE ESCRITA: Triggers devem garantir que 'company_id' seja gravado corretamente via 'set_company_id_from_user()'.
-4. PROTEÇÃO DE DADOS: Colunas sensíveis (custos, dados pessoais) devem ter RLS granular ou criptografia onde aplicável.
-5. SECURITY DEFINER: Funções com privilégios elevados devem ter 'search_path = public' e filtros de tenant rigorosos.
-
 /**
+ * Analise completamente toda a aplicação antes de realizar qualquer alteração e execute uma auditoria profunda de SEGURANÇA e BANCO DE DADOS em todo o sistema.
+ * 
+ * Seu objetivo é identificar vulnerabilidades, falhas de segurança, riscos de exposição de dados, problemas de autenticação/autorização e otimizar toda a estrutura do banco de dados para garantir máxima segurança, integridade e confiabilidade.
+ * 
+ * DIRETRIZES DE SEGURANÇA (UEEF SEC-LEVEL 4):
+ * 1. RLS MANDATÓRIO: Nenhuma tabela pública pode ter políticas 'USING (true)'.
+ * 2. ISOLAMENTO DE TENANT: Todo filtro deve usar 'company_id = get_user_company_id(auth.uid())'.
+ * 3. INTEGRIDADE DE ESCRITA: Triggers devem garantir que 'company_id' seja gravado corretamente via 'set_company_id_from_user()'.
+ * 4. PROTEÇÃO DE DADOS: Colunas sensíveis (custos, dados pessoais) devem ter RLS granular ou criptografia onde aplicável.
+ * 5. SECURITY DEFINER: Funções com privilégios elevados devem ter 'search_path = public' e filtros de tenant rigorosos.
+ * 
  * EOE (Enterprise Operating Ecosystem) - Visão de Destino
 ...
  * 
