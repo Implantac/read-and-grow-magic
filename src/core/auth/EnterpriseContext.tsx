@@ -169,7 +169,8 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
   const mounted = useRef(true);
   useEffect(() => {
     mounted.current = true;
-    loadActiveTenant(mounted);
+    const isMounted = mounted;
+    loadActiveTenant(isMounted);
     return () => {
       mounted.current = false;
     };

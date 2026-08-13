@@ -16,14 +16,15 @@ import { useFinancialOrchestrator } from '@/core/orchestration/FinancialOrchestr
 const AppRoutes = React.memo(lazy(() => import('./routes/index')));
 
 const RealtimeAlertsBridge = React.memo(() => {
-  const { currentCompany, isLoading } = useEnterprise();
+  const { currentCompany } = useEnterprise();
   
-  // Only activate orchestration when tenant context is loaded and valid
+  // Only activate orchestration when tenant context is loaded
   const companyId = currentCompany?.id;
   
-  useLowMarginAlertsRealtime();
-  useInventoryOrchestrator();
-  useFinancialOrchestrator();
+  // Pass companyId to hooks to ensure they re-sync only when company changes
+  useLowMarginAlertsRealtime(companyId);
+  useInventoryOrchestrator(companyId);
+  useFinancialOrchestrator(companyId);
   
   return null;
 });

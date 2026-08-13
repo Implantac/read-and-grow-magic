@@ -3,12 +3,12 @@ import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { useEffect } from 'react';
 import { toastSuccess } from '@/lib/toastHelpers';
 
-export const useFinancialOrchestrator = () => {
+export const useFinancialOrchestrator = (providedCompanyId?: string) => {
   const { currentCompany } = useEnterprise();
+  const companyId = providedCompanyId || currentCompany?.id;
   const eventBus = useEventBus();
 
   useEffect(() => {
-    const companyId = currentCompany?.id;
     if (!companyId) return;
 
     // Quando uma venda é concluída, o financeiro gera o contas a receber
@@ -28,5 +28,5 @@ export const useFinancialOrchestrator = () => {
     });
 
     return () => unsubscribe();
-  }, [currentCompany?.id, eventBus]);
+  }, [companyId, eventBus]);
 };

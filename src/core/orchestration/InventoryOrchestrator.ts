@@ -3,12 +3,12 @@ import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { useEffect } from 'react';
 import { toastSuccess } from '@/lib/toastHelpers';
 
-export const useInventoryOrchestrator = () => {
+export const useInventoryOrchestrator = (providedCompanyId?: string) => {
   const { currentCompany } = useEnterprise();
+  const companyId = providedCompanyId || currentCompany?.id;
   const eventBus = useEventBus();
 
   useEffect(() => {
-    const companyId = currentCompany?.id;
     if (!companyId) return;
 
     // Quando uma venda é concluída, o estoque deve ser alertado para possível separação
@@ -29,5 +29,5 @@ export const useInventoryOrchestrator = () => {
     });
 
     return () => unsubscribe();
-  }, [currentCompany?.id, eventBus]);
+  }, [companyId, eventBus]);
 };
