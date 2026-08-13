@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, forwardRef, useRef, type MutableRefObject } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef, type MutableRefObject } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -101,7 +101,6 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
   const applyCompany = useCallback(async (company: CompanyRow) => {
     if (!company) return;
     
-    // Use functional update to check ID equality before state update
     setCurrentCompany(prev => {
       if (prev?.id === company.id) return prev;
       return { ...company };
@@ -110,12 +109,20 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     const { getEnterprisePolicies } = await import('@/core/orchestration/policyEngine');
     const seg = (company.segment as Segment | null) ?? 'general';
     
-    setSegment(seg);
-    setSubSegment(company.sub_segment ?? '');
-    setCompanySize(company.company_size ?? 'Pequeno');
-    setTaxRegime((company.tax_regime as string | null) ?? 'Simples Nacional');
-    setOperationTypes((company.operation_types as OperationType[] | null) ?? []);
-    setPolicies(getEnterprisePolicies(seg));
+    setSegment(prev => prev === seg ? prev : seg);
+    setSubSegment(prev => prev === (company.sub_segment ?? '') ? prev : (company.sub_segment ?? ''));
+    setCompanySize(prev => prev === (company.company_size ?? 'Pequeno') ? prev : (company.company_size ?? 'Pequeno'));
+    setTaxRegime(prev => prev === ((company.tax_regime as string | null) ?? 'Simples Nacional') ? prev : ((company.tax_regime as string | null) ?? 'Simples Nacional'));
+    setOperationTypes(prev => {
+      const next = (company.operation_types as OperationType[] | null) ?? [];
+      if (JSON.stringify(prev) === JSON.stringify(next)) return prev;
+      return next;
+    });
+    setPolicies(prev => {
+      const next = getEnterprisePolicies(seg);
+      if (JSON.stringify(prev) === JSON.stringify(next)) return prev;
+      return next;
+    });
   }, []);
 
   const loadActiveTenant = useCallback(async (isMounted: MutableRefObject<boolean>) => {
@@ -131,7 +138,6 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
 
       const user = session.user;
       
-      // Batch fetch initial context data
       const [companiesRes, profileRes] = await Promise.all([
         supabase.from('companies').select('*').limit(1),
         supabase.from('profiles').select('default_branch_id').eq('id', user.id).maybeSingle()
@@ -159,8 +165,8 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
           }));
           
           setAllBranches(prev => {
-            const hasChanged = JSON.stringify(prev) !== JSON.stringify(mappedUnits);
-            return hasChanged ? mappedUnits : prev;
+            if (prev.length === mappedUnits.length && prev.every((v, i) => v.id === mappedUnits[i].id)) return prev;
+            return mappedUnits;
           });
           
           const defaultBranch = mappedUnits.find(b => b.id === profileRes.data?.default_branch_id) || mappedUnits[0] || null;

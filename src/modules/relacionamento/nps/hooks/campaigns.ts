@@ -38,10 +38,19 @@ export function useCreateCampaign() {
       
       const { data, error } = await supabase
         .from('nps_campaigns')
-        .insert({ ...input, company_id: effectiveCompanyId } as TablesInsert<'nps_campaigns'>)
+        .insert({ 
+          ...input, 
+          company_id: effectiveCompanyId,
+          created_by: user.id
+        } as TablesInsert<'nps_campaigns'>)
         .select()
-        .single();
-      if (error) throw error;
+        .maybeSingle();
+        
+      if (error) {
+        console.error('[useCreateCampaign] RLS or DB Error:', error);
+        throw error;
+      }
+      return data;
       return data;
     },
     onSuccess: () => {

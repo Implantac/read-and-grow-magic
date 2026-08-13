@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
@@ -14,9 +14,12 @@ export function useLowMarginAlertsRealtime(providedCompanyId?: string) {
   const { currentCompany, isLoading: isContextLoading } = useEnterprise();
   const companyId = providedCompanyId || currentCompany?.id;
 
-  useEffect(() => {
-    if (!companyId || isContextLoading) return;
+  const isSubscribed = useRef(false);
 
+  useEffect(() => {
+    if (!companyId || isContextLoading || isSubscribed.current) return;
+
+    isSubscribed.current = true;
     let channel: any = null;
     let isMounted = true;
 
@@ -56,10 +59,11 @@ export function useLowMarginAlertsRealtime(providedCompanyId?: string) {
 
     return () => {
       isMounted = false;
+      isSubscribed.current = false;
       if (channel) {
         supabase.removeChannel(channel);
       }
     };
-  }, [qc, companyId]);
+  }, [qc, companyId, isContextLoading]);
 }
 
