@@ -254,12 +254,12 @@ export const PDVCatalogPanel = forwardRef<HTMLDivElement, PDVCatalogPanelProps>(
                     <span className="text-[9px] text-muted-foreground font-black tracking-widest bg-muted/50 px-2 py-0.5 rounded-md border border-primary/5">
                       {p.code}
                     </span>
-                    {p.current_stock !== undefined && (
+                    {p.min_stock !== undefined && (
                       <Badge variant="outline" className={cn(
                         "text-[8px] h-4 px-1.5 font-black uppercase",
-                        (p.current_stock ?? 0) > 10 ? "text-emerald-600 bg-emerald-500/5 border-emerald-500/20" : "text-rose-600 bg-rose-500/5 border-rose-500/20"
+                        (p.min_stock ?? 0) > 0 ? "text-emerald-600 bg-emerald-500/5 border-emerald-500/20" : "text-rose-600 bg-rose-500/5 border-rose-500/20"
                       )}>
-                        Estoque: {p.current_stock}
+                        Estoque OK
                       </Badge>
                     )}
                   </div>
@@ -299,7 +299,7 @@ export const PDVCatalogPanel = forwardRef<HTMLDivElement, PDVCatalogPanelProps>(
                     <div className="font-black text-sm truncate uppercase tracking-tight group-hover:text-primary transition-colors">{p.name}</div>
                     <div className="flex items-center gap-2 mt-0.5">
                       <span className="text-[10px] text-muted-foreground font-black tracking-widest bg-muted/50 px-1.5 rounded-md">{p.code}</span>
-                      <span className="text-[9px] text-muted-foreground/60 font-bold uppercase">• Em estoque: {p.current_stock || 0}</span>
+                      <span className="text-[9px] text-muted-foreground/60 font-bold uppercase">• Estoque Mínimo: {p.min_stock || 0}</span>
                     </div>
                   </div>
                   <div className="text-right shrink-0 px-4 border-l border-primary/5">
