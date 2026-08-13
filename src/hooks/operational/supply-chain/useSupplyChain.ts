@@ -9,7 +9,7 @@ export function useSupplyChain(filters?: { status?: MovementStatus[] }) {
   const [movements, setMovements] = useState<SupplyChainMovement[]>([]);
   const [isDataLoading, setIsDataLoading] = useState(false);
 
-  const filtersString = JSON.stringify(filters?.status);
+  
 
   const fetchMovements = React.useCallback(async () => {
     if (!currentBranch?.id) return;
@@ -27,13 +27,13 @@ export function useSupplyChain(filters?: { status?: MovementStatus[] }) {
     } finally {
       setIsDataLoading(false);
     }
-  }, [currentBranch?.id, filtersString]);
+  }, [currentBranch?.id, filters?.status]);
 
   useEffect(() => {
     if (!isEnterpriseLoading && currentBranch?.id) {
       fetchMovements();
     }
-  }, [currentBranch?.id, isEnterpriseLoading, fetchMovements]);
+  }, [fetchMovements, isEnterpriseLoading, currentBranch?.id]);
 
   useEffect(() => {
     if (isEnterpriseLoading || !currentBranch?.id) return;
