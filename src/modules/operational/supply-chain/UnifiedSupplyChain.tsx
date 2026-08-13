@@ -12,7 +12,7 @@ import {
 import { EmptyState } from '@/shared/components/EmptyState';
 import { useSupplyChain } from '@/hooks/operational/supply-chain/useSupplyChain';
 import { MovementStatus } from '@/services/operational/supply-chain/supplyChainService';
-import { useEnterprise } from '@/core/auth/EnterpriseContext';
+import { useActiveTenant } from '@/hooks/shared/useActiveTenant';
 import { useComplianceValidation } from '@/hooks/compliance/useComplianceValidation';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -34,7 +34,7 @@ const STATUS_MAP: Record<MovementStatus, { label: string, color: string, icon: a
 };
 
 export default function UnifiedSupplyChain() {
-  const { currentBranch, isLoading: isEnterpriseLoading } = useEnterprise();
+  const { branch: currentBranch, isLoading: isEnterpriseLoading } = useActiveTenant();
   const { movements, isLoading: isSupplyLoading, updateStatus } = useSupplyChain();
   
   const isLoading = isEnterpriseLoading || isSupplyLoading;
