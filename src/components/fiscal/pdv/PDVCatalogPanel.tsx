@@ -1,5 +1,5 @@
 import { forwardRef, type RefObject } from 'react';
-import { Camera, CameraOff, Keyboard, LayoutGrid, Package, QrCode, ScanLine, Search } from 'lucide-react';
+import { Camera, CameraOff, Keyboard, LayoutGrid, Package, QrCode, ScanLine, Search, Plus } from 'lucide-react';
 import { Input } from '@/ui/base/input';
 import { Badge } from '@/ui/base/badge';
 import { Button } from '@/ui/base/button';
@@ -162,18 +162,31 @@ export const PDVCatalogPanel = forwardRef<HTMLDivElement, PDVCatalogPanelProps>(
           {filteredProducts.length === 0 ? (
             <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">Nenhum produto encontrado.</div>
           ) : (
-            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-              {filteredProducts.slice(0, 12).map((p) => (
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
+              {filteredProducts.slice(0, 18).map((p) => (
                 <button
                   key={p.id}
-                  className="flex flex-col text-left p-2.5 rounded-lg bg-background border hover:border-primary hover:shadow-md transition-all group"
+                  className="flex flex-col text-left p-2.5 rounded-xl bg-background border hover:border-primary hover:shadow-lg hover:-translate-y-0.5 transition-all group relative overflow-hidden"
                   onClick={() => onPickProduct(p)}
                 >
-                  <div className="font-semibold text-xs line-clamp-2 leading-tight mb-1 min-h-[2rem]">{p.name}</div>
-                  <div className="text-[9px] text-muted-foreground font-mono mb-1 truncate">{p.code}</div>
-                  <div className="mt-auto flex items-center justify-between">
-                    <div className="text-sm font-black text-primary tabular-nums">{formatBRL(p.sale_price)}</div>
-                    <span className="text-[9px] uppercase text-muted-foreground">{p.unit}</span>
+                  <div className="absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="bg-primary text-primary-foreground rounded-bl-lg rounded-tr-lg p-1">
+                      <Plus className="h-3 w-3" />
+                    </div>
+                  </div>
+                  <div className="font-bold text-xs line-clamp-2 leading-tight mb-1 min-h-[2rem] group-hover:text-primary transition-colors">
+                    {p.name}
+                  </div>
+                  <div className="text-[9px] text-muted-foreground font-mono mb-2 truncate bg-muted/30 px-1.5 py-0.5 rounded w-fit">
+                    {p.code}
+                  </div>
+                  <div className="mt-auto pt-2 border-t border-dashed flex items-center justify-between">
+                    <div className="text-sm font-black text-primary tabular-nums">
+                      {formatBRL(p.sale_price)}
+                    </div>
+                    <span className="text-[9px] font-bold uppercase text-muted-foreground bg-muted px-1 rounded">
+                      {p.unit}
+                    </span>
                   </div>
                 </button>
               ))}
