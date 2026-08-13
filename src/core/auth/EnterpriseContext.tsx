@@ -126,12 +126,24 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
   }, []);
 
   const isSyncing = useRef(false);
+  const lastSessionId = useRef<string | null>(null);
 
   const loadActiveTenant = useCallback(async (isMounted: MutableRefObject<boolean>) => {
     if (!isMounted.current || isSyncing.current) return;
     
-    isSyncing.current = true;
-    setIsLoading(true);
+    try {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+
+      // Avoid redundant loads if session ID hasn't changed
+      if (session?.user?.id === lastSessionId.current && session?.user?.id) {
+        return;
+      }
+      lastSessionId.current = session?.user?.id ?? null;
+
+      isSyncing.current = true;
+      setIsLoading(true);
+
 
     try {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
