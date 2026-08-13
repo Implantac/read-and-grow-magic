@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { NFCe, NFCeItem, NFCePaymentMethod, NFCeStatus } from '@/types/fiscal';
@@ -7,10 +7,19 @@ export function useNFCe() {
   const [nfces, setNfces] = useState<NFCe[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const isFetching = useRef(false);
   const fetchNFCes = useCallback(async () => {
+    if (isFetching.current) return;
+    isFetching.current = true;
     setLoading(true);
-    const { data, error } = await supabase.from('nfce').select('*').order('issue_date', { ascending: false });
-    if (error) { console.error(error); toast.error('Erro ao carregar NFC-e'); setLoading(false); return; }
+    const { data, error } = await supabase.from('nfce').select('*').order('issue_date', { ascending: false }).limit(200);
+    if (error) { 
+      console.error(error); 
+      toast.error('Erro ao carregar NFC-e'); 
+      setLoading(false); 
+      isFetching.current = false;
+      return; 
+    }
 
     const { data: itemsData } = await supabase.from('nfce_items').select('*');
     const itemsMap = new Map<string, NFCeItem[]>();
@@ -63,6 +72,7 @@ export function useNFCe() {
 
     setNfces(mapped);
     setLoading(false);
+    isFetching.current = false;
   }, []);
 
 
