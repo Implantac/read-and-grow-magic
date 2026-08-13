@@ -3,33 +3,11 @@ import { Toaster } from "@/ui/base/toaster";
 import { Toaster as Sonner } from "@/ui/base/sonner";
 import { TooltipProvider } from "@/ui/base/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 import { MainLayout } from "@/core/layout/MainLayout";
 import { Loader2 } from 'lucide-react';
 import { EnterpriseProvider } from "@/core/auth/EnterpriseContext";
 
-// Routes
-import { CommercialRoutes } from './routes/CommercialRoutes';
-import { FinancialRoutes } from './routes/FinancialRoutes';
-import { AccountingRoutes } from './routes/AccountingRoutes';
-import { ProductionRoutes } from './routes/ProductionRoutes';
-import { WMSRoutes } from './routes/WMSRoutes';
-import { AdminRoutes } from './routes/AdminRoutes';
-import { OperationalRoutes } from './routes/OperationalRoutes';
-import { MiscellaneousRoutes } from './routes/MiscellaneousRoutes';
-import { FiscalRoutes } from './routes/FiscalRoutes';
-import { NetworkRoutes } from './routes/NetworkRoutes';
-const NetworkControlTower = lazy(() => import('@/modules/operational/network/components/NetworkControlTower'));
-const PosTerminals = lazy(() => import('@/modules/operational/network/PosTerminals'));
-const StockTransfers = lazy(() => import('@/modules/operational/network/StockTransfers'));
-const ReplenishmentIntelligence = lazy(() => import('@/modules/operational/network/ReplenishmentIntelligence'));
-const StoreOperations = lazy(() => import('@/modules/store-operations/StoreOperations'));
-const StoreCentral = lazy(() => import('@/modules/operational/store/StoreCentral'));
-import { VerticalPackRoutes } from './core/routes/VerticalPackRoutes';
-const UnifiedSupplyChain = lazy(() => import('@/modules/operational/supply-chain/UnifiedSupplyChain'));
-import { EvolutionAuditRoutes } from './routes/EvolutionAuditRoutes';
-import { ExecutiveRoutes } from './routes/ExecutiveRoutes';
-import { RelacionamentoRoutes } from './routes/RelacionamentoRoutes';
 import { FeatureGate } from '@/components/plan/FeatureGate';
 import { GatedOutlet } from '@/components/plan/GatedOutlet';
 import { OnboardingGuard } from '@/components/OnboardingGuard';
@@ -38,6 +16,12 @@ import { ModuleErrorBoundary } from '@/shared/components/ModuleErrorBoundary';
 import { RequirePermission } from '@/components/auth/RequirePermission';
 import { useLowMarginAlertsRealtime } from '@/hooks/commercial/useLowMarginAlertsRealtime';
 import { WorkflowSwitcher } from '@/modules/core/components/WorkflowSwitcher';
+
+import { useInventoryOrchestrator } from '@/core/orchestration/InventoryOrchestrator';
+import { useFinancialOrchestrator } from '@/core/orchestration/FinancialOrchestrator';
+
+import AppRoutes from './routes/index';
+
 
 import { useInventoryOrchestrator } from '@/core/orchestration/InventoryOrchestrator';
 import { useFinancialOrchestrator } from '@/core/orchestration/FinancialOrchestrator';
