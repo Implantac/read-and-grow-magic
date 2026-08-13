@@ -21,13 +21,17 @@ export const MainLayout = withRenderMonitor(() => {
   const isBypassPage = ['/upgrade', '/subscribe'].includes(pathname);
 
   // Handle auto-login if session exists but store is empty
+  const lastNavPath = useRef<string | null>(null);
   useEffect(() => {
-    // Redireciona imediatamente se não houver loading e não estiver autenticado.
-    // O useAuth já cuida de atualizar o isAuthenticated no store.
     if (!loading && !isAuthenticated && !isBypassPage) {
-      navigate('/login');
+      if (lastNavPath.current !== '/login') {
+        lastNavPath.current = '/login';
+        navigate('/login', { replace: true });
+      }
+    } else {
+      lastNavPath.current = pathname;
     }
-  }, [isAuthenticated, loading, navigate]);
+  }, [isAuthenticated, loading, navigate, isBypassPage, pathname]);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');

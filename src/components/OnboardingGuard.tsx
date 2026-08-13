@@ -15,6 +15,7 @@ export const OnboardingGuard = withRenderMonitor(() => {
   const location = useLocation();
   const [checked, setChecked] = useState(false);
 
+  const lastNav = useRef<string | null>(null);
   useEffect(() => {
     if (!isAuthenticated || !user?.id) {
       setChecked(true);
@@ -29,7 +30,12 @@ export const OnboardingGuard = withRenderMonitor(() => {
         .maybeSingle();
       if (!active) return;
       if (!data?.company_id && location.pathname !== '/onboarding') {
-        navigate('/onboarding', { replace: true });
+        if (lastNav.current !== '/onboarding') {
+          lastNav.current = '/onboarding';
+          navigate('/onboarding', { replace: true });
+        }
+      } else {
+        lastNav.current = location.pathname;
       }
       setChecked(true);
     })();
