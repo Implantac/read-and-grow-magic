@@ -5,59 +5,68 @@ import { supabase } from '@/integrations/supabase/client';
 
 export const useNetworkArchitecture = () => {
   const { currentCompany } = useEnterprise();
+  const companyId = currentCompany?.id;
   
   return useQuery({
-    queryKey: ['operational_units', currentCompany?.id],
-    queryFn: () => networkService.getOperationalUnits(currentCompany!.id),
-    enabled: !!currentCompany?.id
+    queryKey: ['operational_units', companyId],
+    queryFn: () => networkService.getOperationalUnits(companyId!),
+    enabled: !!companyId
   });
 };
 
 export const usePosTerminals = () => {
   const { currentBranch } = useEnterprise();
+  const branchId = currentBranch?.id;
+  
   return useQuery({
-    queryKey: ['pos_terminals', currentBranch?.id],
-    queryFn: () => networkService.getPosTerminals(currentBranch!.id),
-    enabled: !!currentBranch?.id
+    queryKey: ['pos_terminals', branchId],
+    queryFn: () => networkService.getPosTerminals(branchId!),
+    enabled: !!branchId
   });
 };
 
 export const useReplenishmentPolicies = () => {
   const { currentCompany } = useEnterprise();
+  const companyId = currentCompany?.id;
+  
   return useQuery({
-    queryKey: ['replenishment_policies', currentCompany?.id],
+    queryKey: ['replenishment_policies', companyId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('replenishment_policies')
         .select('*, product:products(name, code)')
-        .eq('company_id', currentCompany?.id)
+        .eq('company_id', companyId)
         .limit(200);
       
       if (error) throw error;
       return data || [];
     },
-    enabled: !!currentCompany?.id
+    enabled: !!companyId
   });
 };
 
 export const useTransferOrders = () => {
   const { currentCompany } = useEnterprise();
+  const companyId = currentCompany?.id;
+  
   return useQuery({
-    queryKey: ['transfer_orders', currentCompany?.id],
-    queryFn: () => networkService.getTransfers(currentCompany!.id),
-    enabled: !!currentCompany?.id
+    queryKey: ['transfer_orders', companyId],
+    queryFn: () => networkService.getTransfers(companyId!),
+    enabled: !!companyId
   });
 };
 
 export const useSupplyChainStats = () => {
   const { currentCompany } = useEnterprise();
+  const companyId = currentCompany?.id;
+  
   return useQuery({
-    queryKey: ['supply_chain_stats', currentCompany?.id],
+    queryKey: ['supply_chain_stats', companyId],
     queryFn: async () => {
       const { data: movements } = await supabase
         .from('supply_chain_movements')
         .select('status')
-        .eq('company_id', currentCompany?.id)
+        .eq('company_id', companyId)
         .limit(2000);
 
       const inTransit = movements?.filter((m: any) => m.status === 'in_transit' || m.status === 'shipped').length || 0;
@@ -65,7 +74,7 @@ export const useSupplyChainStats = () => {
       const { count: lowStock } = await supabase
         .from('stock_balances')
         .select('*', { count: 'exact', head: true })
-        .eq('company_id', currentCompany?.id)
+        .eq('company_id', companyId)
         .lt('quantity', 10); // Simple threshold for mock
 
       return {
@@ -74,6 +83,6 @@ export const useSupplyChainStats = () => {
         accuracy: 94
       };
     },
-    enabled: !!currentCompany?.id
+    enabled: !!companyId
   });
 };
