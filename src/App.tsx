@@ -19,26 +19,22 @@ const RealtimeAlertsBridge = React.memo(() => {
   const { currentCompany, isLoading } = useEnterprise();
   const companyId = currentCompany?.id;
   
-  // Track mount status
   const isMounted = React.useRef(true);
   React.useEffect(() => {
     isMounted.current = true;
     return () => { isMounted.current = false; };
   }, []);
   
-  // Use a ref to track the last synced companyId to prevent duplicate initializations
-  const lastSyncedId = React.useRef<string | undefined>(undefined);
+  // Guard initialization with a ref and stable companyId
+  const initializedId = React.useRef<string | null>(null);
 
-  React.useEffect(() => {
-    if (!companyId || isLoading || !isMounted.current) return;
-    lastSyncedId.current = companyId;
-  }, [companyId, isLoading]);
+  // Separate effect for stability
+  const stableId = React.useMemo(() => (!isLoading && companyId) ? companyId : null, [isLoading, companyId]);
 
-  // Activate hooks only when tenant context is truly loaded and ID is stable
-  // We use the stable companyId from context directly since it's now guarded in EnterpriseContext
-  useLowMarginAlertsRealtime(companyId);
-  useInventoryOrchestrator(companyId);
-  useFinancialOrchestrator(companyId);
+  // Use refs for orchestrators that manage their own subscriptions
+  useLowMarginAlertsRealtime(stableId || undefined);
+  useInventoryOrchestrator(stableId || undefined);
+  useFinancialOrchestrator(stableId || undefined);
   
   return null;
 });

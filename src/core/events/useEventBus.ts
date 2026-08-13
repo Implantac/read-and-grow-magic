@@ -33,9 +33,16 @@ export const useEventBus = create<EventBusState>((set, get) => ({
     
     // Execute callbacks asynchronously to avoid blocking the caller
     // and to prevent recursive update loops (Error #185)
+    // Execute callbacks asynchronously to avoid blocking the caller
+    // and to prevent recursive update loops (Error #185)
+    // Using queueMicrotask or Promise.resolve().then() for better timing
+    // than setTimeout(0) if high priority, but setTimeout(0) is safer for React loops
     setTimeout(() => {
-      // Create a snapshot of callbacks to prevent mutation issues during execution
-      const callbacksSnapshot = Array.from(eventSubscribers);
+      // Re-get subscribers in case it changed during the timeout
+      const currentSubscribers = get().subscribers[event];
+      if (!currentSubscribers) return;
+
+      const callbacksSnapshot = Array.from(currentSubscribers);
       callbacksSnapshot.forEach(cb => {
         try {
           cb(payload);
