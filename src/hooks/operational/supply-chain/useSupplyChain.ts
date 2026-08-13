@@ -41,7 +41,10 @@ export function useSupplyChain(filters?: { status?: MovementStatus[] }) {
 
   useEffect(() => {
     if (!isEnterpriseLoading && branchId) {
-      fetchMovements();
+      const timer = setTimeout(() => {
+        fetchMovements();
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [branchId, isEnterpriseLoading]); // removed fetchMovements from deps to prevent sync loops
 

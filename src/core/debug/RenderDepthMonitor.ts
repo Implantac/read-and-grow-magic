@@ -64,7 +64,12 @@ export function withRenderMonitor<P extends object>(
   const name = componentName || Component.displayName || Component.name || 'UnknownComponent';
   
   return (props: P) => {
+    const isInitialRender = React.useRef(true);
     React.useEffect(() => {
+      if (isInitialRender.current) {
+        isInitialRender.current = false;
+        return;
+      }
       monitor.trackUpdate(name);
     });
 
