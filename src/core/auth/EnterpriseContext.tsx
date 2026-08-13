@@ -248,22 +248,29 @@ export const EnterpriseProvider = withRenderMonitor(({ children }: { children: R
 
     const isMounted = mounted;
     
-    // Initial load
-    loadActiveTenant(isMounted);
+    // Initial load - use a small delay to let auth stabilize
+    const timeout = setTimeout(() => {
+      loadActiveTenant(isMounted);
+    }, 50);
 
-    // Sync with auth changes to prevent stale data causing loops
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (isMounted.current && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
+    // Sync with auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!isMounted.current) return;
+      
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         loadActiveTenant(isMounted);
       } else if (event === 'SIGNED_OUT') {
+        lastSyncUser.current = null;
         setCurrentCompany(null);
         setCurrentBranch(null);
         setAllBranches([]);
+        setIsLoading(false);
       }
     });
 
     return () => {
       mounted.current = false;
+      clearTimeout(timeout);
       subscription.unsubscribe();
     };
   }, [loadActiveTenant]);
