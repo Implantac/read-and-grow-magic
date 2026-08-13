@@ -1,17 +1,113 @@
-/** ✅ READ & GROW — ENTERPRISE OPERATING ECOSYSTEM (EOE).
- * A solução não é esconder complexidade. É tirar a complexidade do caminho do usuário e preservá-la por baixo, de forma controlada e rastreável para quem precisa gerenciá-la.
+/** Visão de destino
  *
- * Eu adotaria um princípio central:
- * O usuário trabalha com intenções e processos. O ERP trabalha com documentos, regras, eventos e rastreabilidade.
+ * O sistema deve evoluir de:
+ * Módulos → Telas → CRUDs
  *
- * 1. Dois níveis de experiência sobre o mesmo processo (Simplicidade na Operação vs Profundidade na Gestão)
- * 2. Camada "Minha Operação": Foco em trabalho/tarefas em vez de módulos isolados.
- * 3. Passaporte da Operação: Identificador único (ex: TR-000182) para rastreabilidade ponta a ponta.
- * 4. Linha do Tempo Empresarial: Histórico detalhado de eventos, não apenas status.
- * 5. Motor de Políticas: Automação inteligente baseada em regras de negócio (limites, aprovações).
- * 6. Gestão por Exceção: O sistema vigia o normal; o gestor trata o que sai do esperado.
- * 7. IA Copiloto: Sugestões explicáveis e justificadas baseadas em dados reais.
- * 8. Experience Layer: Busca Universal, Central de Documentos e Espaços de Trabalho personalizados.
+ * para:
+ * CONTEXTO DO CLIENTE
+ *         ↓
+ * PROCESSO EMPRESARIAL
+ *         ↓
+ * REGRAS / POLÍTICAS
+ *         ↓
+ * WORKFLOW
+ *         ↓
+ * OPERAÇÕES
+ *         ↓
+ * EVENTOS
+ *         ↓
+ * MÓDULOS IMPACTADOS
+ *         ↓
+ * AUDITORIA
+ *         ↓
+ * GESTÃO / INDICADORES
+ *
+ * O usuário trabalha no processo.
+ * O gestor acompanha o processo + exceções + resultados.
+ * O ERP controla os dados + regras + eventos + rastreabilidade.
+ *
+ * FASE 0 — Congelamento e diagnóstico
+ * Objetivo: Antes de alterar muita coisa, precisamos impedir que o Lovable continue aumentando a complexidade enquanto a arquitetura ainda está sendo reorganizada.
+ * O que fazer: Criar um inventário real do projeto (Core, Modules, Services, Hooks, Pages, Components, Database, Functions, Policies, Routes, Stores, Configs, Integrations).
+ * E para cada domínio: Entidade ↓ Tabela ↓ Service ↓ Hook ↓ Tela ↓ Operações ↓ Dependências ↓ Outros módulos afetados.
+ * Entregável: Mapa Técnico Atual do READ & GROW.
+ *
+ * FASE 1 — Mapa do ecossistema empresarial
+ * Aqui deixamos de pensar: "Quais módulos temos?" e passamos a pensar: "Quais processos empresariais o ERP suporta?"
+ * Catálogo: Comercial (Lead, Cliente, Cotação, Pedido, Venda, Cancelamento, Devolução), Compras (Solicitação, Cotação, Pedido, Recebimento, Conferência, Divergência, Devolução), Estoque (Entrada, Saída, Transferência, Ajuste, Inventário, Reserva, Bloqueio), Loja (Reposição, Transferência, Recebimento, Inventário, Venda, Devolução, Avaria), Produção (Planejamento, OP, Reserva, Consumo, Produção, Qualidade, Produto acabado), Financeiro (Contas a pagar, Contas a receber, Pagamento, Recebimento, Conciliação, Estorno), Fiscal (Documento, Emissão, Entrada, Cancelamento, Devolução).
+ *
+ * FASE 2 — Enterprise Core
+ * Criar/fortalecer uma camada central: Enterprise Core (Tenant, Company, Branch, Operational Unit, User, Role, Customer, Supplier, Product, Service, Document, Business Transaction, Event, Audit, Configuration).
+ * O objetivo é impedir que cada módulo comece a inventar sua própria versão de conceitos fundamentais.
+ *
+ * FASE 3 — Contexto empresarial
+ * Criar o: Enterprise Context (Tenant, Empresa, CNPJ, Filial, Unidade, Nicho, Modelo de negócio, Regime fiscal, Perfil do usuário, Permissões, Módulos, Capacidades, Políticas, Workflows, Integ.).
+ * Ex: Cliente: Rede varejista; Empresa: ABC Comércio; Unidades: CD, Loja 01, Loja 02, Loja 03; Capacidades: PDV, Estoque, WMS, Compras, Transferência, CRM, Financeiro; Políticas: Transferência > R$10.000 → aprovação.
+ *
+ * FASE 4 — Transformar adaptive.ts em configuração empresarial real
+ * O mecanismo de adaptação existente evolui: Segmento ↓ Modelo operacional ↓ Capacidades ↓ Políticas ↓ Workflows ↓ Aprovações ↓ Parâmetros ↓ Integ.
+ * O código fornece defaults. A configuração do cliente determina o comportamento real.
+ *
+ * FASE 5 — Capability Engine
+ * Separar três conceitos: Módulo (Estoque), Capacidade (Transferência, Inventário, Reposição, Reserva), Operação (Criar, Aprovar, Expedir, Receber transf.).
+ * Assim podemos ter Estoque com Transferência/Inventário/Reserva ativos e Lote inativo sem desativar o módulo inteiro.
+ *
+ * FASE 6 — Policy Engine
+ * Cérebro das regras: TRANSFER_APPROVAL (IF valor > limite THEN aprovação necessária).
+ * Considera: WHO (perfil), WHERE (unidades), WHEN (quando), HOW MUCH (limite), WHAT (operação).
+ * Ex: Loja → CD: Até R$5k (auto), R$5k-20k (gerente), > R$20k (gerente regional).
+ *
+ * FASE 7 — Workflow Engine
+ * Sequência do processo configurável: Solicitação ↓ Validação ↓ Aprovação ↓ Separação ↓ Expedição ↓ Transporte ↓ Recebimento ↓ Conferência ↓ Conclusão.
+ *
+ * FASE 8 — Business Transactions
+ * Espinha dorsal: BT-000182 VENDA (relaciona Pedido, Venda, Pagamento, Estoque, NF, Financeiro, Contabilidade, CRM).
+ * BT-000183 COMPRA (relaciona Solicitação, Cotação, Pedido, Recebimento, NF, Estoque, Financeiro, Contabilidade).
+ *
+ * FASE 9 — Event Bus
+ * Eventos disparam ações: SALE_COMPLETED → Baixa Estoque, NF Fiscal, Financeiro Recebível, CRM Histórico, NPS, BI, Contábil.
+ * PURCHASE_RECEIVED → Estoque, WMS, Fiscal, Financeiro, Contabilidade, Qualidade.
+ * Fim das integrações diretas frágeis.
+ *
+ * FASE 10 — Auditoria empresarial
+ * Registro robusto: Quem, O quê, Quando, Onde (Empresa, Filial, Dispositivo), Valor anterior/novo, Motivo, Documento, Transação, Evento.
+ * Ex: Transf TR-00182 (Qtd 20 → 30, Usuário João, Motivo Demanda Extra, Aprovado Maria).
+ *
+ * FASE 11 — Timeline universal
+ * Toda transação importante tem linha do tempo: 09:12 Solicitada, 09:18 Aprovada, 10:03 Separação Iniciada... 15:04 Estoque Atualizado.
+ *
+ * FASE 12 — Central de tarefas
+ * "Minha Operação": Usuário vê o que é urgente/pendente (Conferir recebimento, Separar transf, Fazer inventário) sem caçar módulos.
+ *
+ * FASE 13 — Gestão por exceção
+ * Gestor foca nas exceções: Rupturas, Divergências, Atrasos, Estoque anormal, Aprovações pendentes (Ex: 20 exceções em 1.000 operações).
+ *
+ * FASE 14 — Busca universal
+ * Pesquisa global (TR-00182, NF-92821, SKU-182, João, Cliente ABC) retorna Documento, Processo, Transação, Evento, Histórico.
+ *
+ * FASE 15 — "Explicar"
+ * Tudo que o ERP calcula deve ser explicável: "Por que repor 22 un?" (Estoque, Mínimo, Venda Média, Demanda prevista, Trânsito, Risco Ruptura).
+ *
+ * FASE 16 — Reconstrução da experiência de Loja
+ * Experiência operacional sobre o ecossistema (Minha Loja Hoje: Vendas, Estoque, Recebimentos, Alertas).
+ * Por trás: Store ↓ Replenishment ↓ Inventory ↓ Supply ↓ WMS ↓ Logistics.
+ *
+ * FASE 17 — Reconstrução dos demais domínios
+ * Comercial, Compras, Produção e Financeiro integrados profundamente via fundação de processos.
+ *
+ * FASE 18 — Dashboard orientado a decisões
+ * Gráficos → Decisões: Resultados (Vendas/Margem), Atenção (Estoque parado), Exceções (Atrasos), Risco (Ruptura), Ação Recomendada.
+ *
+ * FASE 19 — IA empresarial
+ * Responde "Por que as vendas caíram?" analisando SKUs, tráfego, concorrente e ticket médio, respeitando permissões/RLS.
+ *
+ * FASE 20 — Observabilidade e qualidade
+ * Testes unitários/E2E/Workflow/Políticas/RLS + Métricas (Tempo de processo, Taxa de erro, Retrabalho).
+ *
+ * ROADMAP: Onda 1 (Diagnóstico), 2 (Core+Context), 3 (Capabilities+Policies), 4 (BT+Events), 5 (Workflow+Audit), 6 (UX Operacional), 7 (Deep Integration), 8 (IA+Escala).
+ *
+ * O que NÃO fazer: Criar módulos isolados, duplicar entidades, espalhar regras de segmento, integração direta indiscriminada, telas só de dados.
+ * REGRA: READ & GROW não é um conjunto de módulos independentes. Toda nova funcionalidade deve ser analisada como parte do ecossistema.
  */
 
 import { Suspense, useState } from 'react';
