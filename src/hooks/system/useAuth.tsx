@@ -1,83 +1,15 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAppStore } from '@/stores/useAppStore';
-import type { User as AppUser } from '@/types';
-import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface UseAuthOptions {
   initialize?: boolean;
 }
 
-function isAuthSessionError(error?: { status?: number; message?: string } | null) {
-  if (!error) return false;
-  const message = error.message?.toLowerCase() || '';
-  return (
-    error.status === 401 ||
-    error.status === 403 ||
-    message.includes('jwt') ||
-    message.includes('token') ||
-    message.includes('session') ||
-    message.includes('not authenticated')
-  );
-}
-
-function mapSupabaseUser(user: SupabaseUser, profileName?: string, role?: string): AppUser {
-  return {
-    id: user.id,
-    name: profileName || user.user_metadata?.name || user.email?.split('@')[0] || 'Usuário',
-    email: user.email || '',
-    role: (role as AppUser['role']) || 'viewer',
-    permissions: ['all'],
-  };
-}
-
 export function useAuth(options: UseAuthOptions = {}) {
   const { initialize = true } = options;
-  const { setUser, setUserRole, logout: storeLogout } = useAppStore();
-
+  const { logout: storeLogout } = useAppStore();
   const [loading, setLoading] = useState(initialize);
-
-  const clearInvalidSession = useCallback(async () => {
-    await supabase.auth.signOut().catch(() => undefined);
-    storeLogout();
-  }, [storeLogout]);
-
-  const syncAuthState = useCallback(async (sessionUser: SupabaseUser | null) => {
-    if (!sessionUser) {
-      storeLogout();
-      return;
-    }
-
-    try {
-      // Use maybeSingle and profile selection first to minimize data transfer
-      const [userResponse, profileResponse, roleResponse] = await Promise.all([
-        supabase.auth.getUser(),
-        supabase.from('profiles').select('name').eq('id', sessionUser.id).maybeSingle(),
-        supabase.rpc('get_user_role', { _user_id: sessionUser.id })
-      ]);
-
-      const verifiedUser = userResponse.data.user;
-
-      if (userResponse.error || !verifiedUser || verifiedUser.id !== sessionUser.id) {
-        await clearInvalidSession();
-        return;
-      }
-
-      if (isAuthSessionError(profileResponse.error) || isAuthSessionError(roleResponse.error)) {
-        await clearInvalidSession();
-        return;
-      }
-
-      const role = roleResponse.data || 'viewer';
-      const appUser = mapSupabaseUser(verifiedUser, profileResponse.data?.name, role);
-      
-      // Update store with functional updates if supported or just check values
-      setUser(appUser);
-      setUserRole(role);
-    } catch (e) {
-      console.error('Auth sync error:', e);
-    }
-  }, [clearInvalidSession, setUser, setUserRole, storeLogout]);
 
   useEffect(() => {
     if (!initialize) {
@@ -86,38 +18,34 @@ export function useAuth(options: UseAuthOptions = {}) {
     }
 
     let mounted = true;
-    const isSyncing = { current: false };
 
-    const runSync = async (sessionUser: SupabaseUser | null) => {
-      if (!mounted || isSyncing.current) return;
-      isSyncing.current = true;
+    // We only need to check the session here to manage the "loading" state of the app entry.
+    // The actual profile/store synchronization is handled by EnterpriseProvider
+    // to avoid multiple listeners causing Maximum update depth exceeded (Error #185).
+    const checkSession = async () => {
       try {
-        await syncAuthState(sessionUser);
-      } finally {
-        if (mounted) {
-          setLoading(false);
-          isSyncing.current = false;
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session && mounted) {
+          storeLogout();
         }
+      } finally {
+        if (mounted) setLoading(false);
       }
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (mounted) {
-        setTimeout(() => {
-          if (mounted) void runSync(session?.user ?? null);
-        }, 0);
-      }
-    });
+    checkSession();
 
-    void supabase.auth.getSession().then(({ data: { session } }) => {
-      if (mounted) void runSync(session?.user ?? null);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT' && mounted) {
+        storeLogout();
+      }
     });
 
     return () => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [initialize, syncAuthState]);
+  }, [initialize, storeLogout]);
 
   const signIn = useCallback(async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
