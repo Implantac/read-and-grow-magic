@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef, type MutableRefObject } from 'react';
+import { withRenderMonitor } from '@/core/debug/RenderDepthMonitor';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -63,7 +64,7 @@ interface EnterpriseContextType {
 
 const EnterpriseContext = createContext<EnterpriseContextType | undefined>(undefined);
 
-export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) => {
+export const EnterpriseProvider = withRenderMonitor(({ children }: { children: React.ReactNode }) => {
   const [currentTenant, setCurrentTenant] = useState<TenantRef | null>(null);
   const [currentGroup, setCurrentGroup] = useState<GroupRef | null>(null);
   const [currentCompany, setCurrentCompany] = useState<CompanyRow | null>(null);
@@ -322,7 +323,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
       {children}
     </EnterpriseContext.Provider>
   );
-};
+}, 'EnterpriseProvider');
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useEnterprise = () => {
