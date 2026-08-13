@@ -16,8 +16,15 @@ export function useSupabaseQuery<T>(
   return useQuery({
     queryKey,
     queryFn: async () => {
-      return await queryFn();
+      try {
+        return await queryFn();
+      } catch (err) {
+        console.error(`[useSupabaseQuery] Error fetching ${JSON.stringify(queryKey)}:`, err);
+        throw err;
+      }
     },
+    staleTime: 30000, // 30s default to prevent immediate refetches
+    refetchOnWindowFocus: false, // Reduced noise
     ...options,
   });
 }

@@ -122,49 +122,59 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     if (!isMounted.current) return;
     setIsLoading(true);
     try {
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError) throw userError;
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+      if (!session?.user) {
+        setIsLoading(false);
+        return;
+      }
+
+      const user = session.user;
       
+      // Batch fetch initial context data
+      const [companiesRes, profileRes] = await Promise.all([
+        supabase.from('companies').select('*').limit(1),
+        supabase.from('profiles').select('default_branch_id').eq('id', user.id).maybeSingle()
+      ]);
+
       if (!isMounted.current) return;
 
-      if (user) {
-        // Optimistically fetch company and branches in parallel
-        const [{ data: companies }, { data: profile }] = await Promise.all([
-          supabase.from('companies').select('*').limit(1),
-          supabase.from('profiles').select('default_branch_id').eq('id', user.id).maybeSingle()
-        ]);
-
+      if (companiesRes.data && companiesRes.data.length > 0) {
+        const company = companiesRes.data[0];
+        await applyCompany(company as CompanyRow);
+        
+        const { data: units } = await supabase
+          .from('operational_units' as any)
+          .select('id, name, type, is_active')
+          .eq('company_id', company.id);
+        
         if (!isMounted.current) return;
 
-        if (companies && companies.length > 0) {
-          const company = companies[0];
-          await applyCompany(company as CompanyRow);
+        if (units) {
+          const mappedUnits = units.map((u: any) => ({
+            id: u.id,
+            name: u.name,
+            tipo: u.type.toUpperCase() as BranchRef['tipo'],
+            is_active: u.is_active
+          }));
           
-          const { data: units } = await supabase
-            .from('operational_units' as any)
-            .select('id, name, type, is_active')
-            .eq('company_id', company.id);
+          setAllBranches(prev => {
+            const hasChanged = JSON.stringify(prev) !== JSON.stringify(mappedUnits);
+            return hasChanged ? mappedUnits : prev;
+          });
           
-          if (!isMounted.current) return;
-
-          if (units) {
-            const mappedUnits = units.map((u: any) => ({
-              id: u.id,
-              name: u.name,
-              tipo: u.type.toUpperCase() as BranchRef['tipo'],
-              is_active: u.is_active
-            }));
-            setAllBranches(mappedUnits);
-            
-            const defaultBranch = mappedUnits.find(b => b.id === profile?.default_branch_id) || mappedUnits[0] || null;
-            setCurrentBranch(prev => {
-              if (prev?.id === defaultBranch?.id) return prev;
-              return defaultBranch ? { ...defaultBranch } : null;
-            });
-            
-            if (defaultBranch) {
-              const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
-              useEnterpriseStore.getState().setActiveBranchId(defaultBranch.id);
+          const defaultBranch = mappedUnits.find(b => b.id === profileRes.data?.default_branch_id) || mappedUnits[0] || null;
+          
+          setCurrentBranch(prev => {
+            if (prev?.id === defaultBranch?.id) return prev;
+            return defaultBranch ? { ...defaultBranch } : null;
+          });
+          
+          if (defaultBranch) {
+            const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
+            const store = useEnterpriseStore.getState();
+            if (store.activeBranchId !== defaultBranch.id) {
+              store.setActiveBranchId(defaultBranch.id);
             }
           }
         }

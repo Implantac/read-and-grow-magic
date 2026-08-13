@@ -39,6 +39,7 @@ export function useSupplyChain(filters?: { status?: MovementStatus[] }) {
   useEffect(() => {
     if (isEnterpriseLoading || !branchId) return;
 
+    let debounce: ReturnType<typeof setTimeout> | null = null;
     const channelName = `supply_chain_movements_${branchId}`;
     const channel = supabase
       .channel(channelName)
@@ -47,21 +48,23 @@ export function useSupplyChain(filters?: { status?: MovementStatus[] }) {
         {
           event: '*',
           schema: 'public',
-          table: 'supply_chain_movements'
+          table: 'supply_chain_movements',
+          filter: `unit_id=eq.${branchId}`
         },
         (payload) => {
-          console.log('Supply Chain Realtime Update:', payload);
-          fetchMovements();
-          if (payload.eventType === 'INSERT') {
-            toast.success('Nova movimentação detectada e lista atualizada.');
-          } else {
-            toast.info('A lista de movimentações foi atualizada.');
-          }
+          if (debounce) clearTimeout(debounce);
+          debounce = setTimeout(() => {
+            fetchMovements();
+            if (payload.eventType === 'INSERT') {
+              toast.success('Nova movimentação detectada.');
+            }
+          }, 500);
         }
       )
       .subscribe();
 
     return () => {
+      if (debounce) clearTimeout(debounce);
       supabase.removeChannel(channel);
     };
   }, [branchId, isEnterpriseLoading, fetchMovements]);
