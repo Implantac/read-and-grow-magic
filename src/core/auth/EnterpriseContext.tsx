@@ -246,8 +246,10 @@ export const EnterpriseProvider = withRenderMonitor(({ children }: { children: R
     
     // Initial load - use a small delay to let auth stabilize
     const timeout = setTimeout(() => {
-      loadActiveTenant(isMounted);
-    }, 50);
+      if (mounted.current) {
+        loadActiveTenant(isMounted);
+      }
+    }, 100);
 
     // Sync with auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {

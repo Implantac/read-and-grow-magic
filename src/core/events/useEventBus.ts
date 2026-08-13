@@ -32,10 +32,10 @@ export const useEventBus = create<EventBusState>((set, get) => ({
     const callbacks = Array.from(eventSubscribers);
     
     // Execute callbacks in a non-blocking microtask to prevent recursive update loops (Error #185)
+    // Using a ref-based guard to prevent re-entry during the same microtask
     queueMicrotask(() => {
-      // Re-get subscribers in case it changed
       const currentSubscribers = get().subscribers[event];
-      if (!currentSubscribers) return;
+      if (!currentSubscribers || currentSubscribers.size === 0) return;
 
       const callbacksSnapshot = Array.from(currentSubscribers);
       callbacksSnapshot.forEach(cb => {
