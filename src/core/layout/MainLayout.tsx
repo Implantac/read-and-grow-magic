@@ -26,9 +26,13 @@ export const MainLayout = withRenderMonitor(() => {
     if (!loading && !isAuthenticated && !isBypassPage) {
       if (lastNavPath.current !== '/login') {
         lastNavPath.current = '/login';
-        navigate('/login', { replace: true });
+        // Use a microtask delay to ensure state has settled
+        const timer = setTimeout(() => {
+          navigate('/login', { replace: true });
+        }, 0);
+        return () => clearTimeout(timer);
       }
-    } else {
+    } else if (isAuthenticated) {
       lastNavPath.current = pathname;
     }
   }, [isAuthenticated, loading, navigate, isBypassPage, pathname]);

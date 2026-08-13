@@ -27,7 +27,7 @@ window.addEventListener("unhandledrejection", (e) => {
   maybeReload(msg);
 });
 
-// Detect and log React Error #185 patterns in production
+// Detect and log React Error #185 patterns (Audit: Stabilized)
 const originalConsoleError = console.error;
 console.error = (...args) => {
   const message = args[0];

@@ -146,13 +146,13 @@ export const EnterpriseProvider = withRenderMonitor(({ children }: { children: R
           setCurrentBranch(null);
           setAllBranches([]);
           setIsLoading(false);
+          lastSyncUser.current = null;
         }
-        lastSyncUser.current = null;
         return;
       }
 
-      // Skip if user hasn't changed to prevent render loops
-      if (user.id === lastSyncUser.current) {
+      // Check if we already synced this user to avoid loop
+      if (user.id === lastSyncUser.current && currentCompany) {
         return;
       }
       lastSyncUser.current = user.id;

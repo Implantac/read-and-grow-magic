@@ -1,6 +1,6 @@
 import { useEventBus } from '@/core/events/useEventBus';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { toastSuccess } from '@/lib/toastHelpers';
 
 export const useInventoryOrchestrator = (providedCompanyId?: string) => {
@@ -9,29 +9,31 @@ export const useInventoryOrchestrator = (providedCompanyId?: string) => {
   const eventBus = useEventBus();
   const isSubscribed = useRef(false);
 
-  useEffect(() => {
-    if (!companyId || isContextLoading || isSubscribed.current) return;
+  // Define callback with useCallback to ensure stable reference
+  const handleSaleCompleted = useCallback((payload: any) => {
+    if (payload.companyId !== companyId) return;
 
-    isSubscribed.current = true;
+    console.log('[InventoryOrchestrator] Sale completed, processing stock update', payload);
+    toastSuccess(`Pedido ${payload.orderId.split('-')[0]} confirmado. Movimentação de estoque iniciada.`);
     
-    const unsubscribe = eventBus.subscribe('SALE_COMPLETED', (payload) => {
-      if (payload.companyId !== companyId) return;
-
-      console.log('[InventoryOrchestrator] Sale completed, processing stock update', payload);
-      toastSuccess(`Pedido ${payload.orderId.split('-')[0]} confirmado. Movimentação de estoque iniciada.`);
-      
-      // Publish event without awaiting to avoid sync loops
+    // Use queueMicrotask to decouple from the current execution frame
+    queueMicrotask(() => {
       eventBus.publish('STOCK_MOVED', { 
         orderId: payload.orderId, 
         type: 'SALE_OUT',
         companyId: payload.companyId 
       });
     });
+  }, [companyId, eventBus]);
+
+  useEffect(() => {
+    if (!companyId || isContextLoading) return;
+    
+    const unsubscribe = eventBus.subscribe('SALE_COMPLETED', handleSaleCompleted);
 
     return () => {
       unsubscribe();
-      isSubscribed.current = false;
     };
-  }, [companyId, eventBus, isContextLoading]);
+  }, [companyId, eventBus, isContextLoading, handleSaleCompleted]);
 };
 
