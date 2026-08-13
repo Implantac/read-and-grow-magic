@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { supplyChainService, SupplyChainMovement, MovementStatus } from '@/services/operational/supply-chain/supplyChainService';
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 export function useSupplyChain(filters?: { status?: MovementStatus[] }) {
   const { currentBranch, isLoading: isEnterpriseLoading } = useEnterprise();
   const [movements, setMovements] = useState<SupplyChainMovement[]>([]);
   const [isDataLoading, setIsDataLoading] = useState(false);
+
+  const filtersString = JSON.stringify(filters?.status);
 
   const fetchMovements = React.useCallback(async () => {
     if (!currentBranch?.id) return;
@@ -28,12 +29,11 @@ export function useSupplyChain(filters?: { status?: MovementStatus[] }) {
     }
   }, [currentBranch?.id, filtersString]);
 
-  const filtersString = JSON.stringify(filters?.status);
   useEffect(() => {
     if (!isEnterpriseLoading && currentBranch?.id) {
       fetchMovements();
     }
-  }, [currentBranch?.id, isEnterpriseLoading, filtersString]);
+  }, [currentBranch?.id, isEnterpriseLoading, fetchMovements]);
 
   useEffect(() => {
     if (isEnterpriseLoading || !currentBranch?.id) return;
