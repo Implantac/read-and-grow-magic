@@ -43,9 +43,9 @@ import { useInventoryOrchestrator } from '@/core/orchestration/InventoryOrchestr
 import { useFinancialOrchestrator } from '@/core/orchestration/FinancialOrchestrator';
 
 const RealtimeAlertsBridge = () => {
-  useLowMarginAlertsRealtime();
-  useInventoryOrchestrator();
-  useFinancialOrchestrator();
+  // useLowMarginAlertsRealtime();
+  // useInventoryOrchestrator();
+  // useFinancialOrchestrator();
   return null;
 };
 
