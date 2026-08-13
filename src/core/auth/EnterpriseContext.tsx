@@ -159,10 +159,10 @@ export const EnterpriseProvider = withRenderMonitor(({ children }: { children: R
       
       setIsLoading(true);
 
-      const [companiesRes, profileRes, roleRes] = await Promise.all([
-        supabase.from('companies').select('*').limit(1),
-        supabase.from('profiles').select('default_branch_id, company_id, name').eq('id', user.id).maybeSingle(),
-        supabase.rpc('get_user_role', { _user_id: user.id })
+      const [companies, profile, role] = await Promise.all([
+        TenantService.getCompanies(),
+        TenantService.getUserProfile(user.id),
+        TenantService.getUserRole(user.id)
       ]);
 
       if (!isMounted.current) return;
@@ -170,26 +170,23 @@ export const EnterpriseProvider = withRenderMonitor(({ children }: { children: R
       // Update global app store with profile/role info once
       const { useAppStore } = await import('@/stores/useAppStore');
       const store = useAppStore.getState();
-      const role = (roleRes.data as any) || 'viewer';
+      const role = (role as any) || 'viewer';
       
       store.setUser({
         id: user.id,
-        name: profileRes.data?.name || user.user_metadata?.name || user.email?.split('@')[0] || 'Usuário',
+        name: profile?.name || user.user_metadata?.name || user.email?.split('@')[0] || 'Usuário',
         email: user.email || '',
         role: role,
         permissions: ['all'],
       });
       store.setUserRole(role);
 
-      if (companiesRes.data && companiesRes.data.length > 0) {
-        const company = companiesRes.data.find(c => c.id === profileRes.data?.company_id) || companiesRes.data[0];
+      if (companies && companies.length > 0) {
+        const company = companies.find(c => c.id === profile?.company_id) || companies[0];
         
         await applyCompany(company as CompanyRow);
         
-        const { data: units } = await supabase
-          .from('operational_units' as any)
-          .select('id, name, type, is_active')
-          .eq('company_id', company.id);
+        const units = await TenantService.getOperationalUnits(company.id);
         
         if (!isMounted.current) return;
 
@@ -206,7 +203,7 @@ export const EnterpriseProvider = withRenderMonitor(({ children }: { children: R
             return mappedUnits;
           });
           
-          const defaultBranch = mappedUnits.find(b => b.id === profileRes.data?.default_branch_id) || mappedUnits[0] || null;
+          const defaultBranch = mappedUnits.find(b => b.id === profile?.default_branch_id) || mappedUnits[0] || null;
           
           setCurrentBranch(prev => {
             if (prev?.id === defaultBranch?.id) return prev;
