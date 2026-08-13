@@ -181,7 +181,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
       const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
       useEnterpriseStore.getState().setActiveCompanyId(id);
     }
-  }, []);
+  }, [applyCompany]);
 
   const setBranch = useCallback(async (id: string | null) => {
     if (!id) {
