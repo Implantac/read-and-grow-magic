@@ -27,6 +27,8 @@ import { usePDVProductFilter, usePDVClientFilter } from './pdv/usePDVFilters';
 import { usePDVFinalize } from './pdv/usePDVFinalize';
 import { PDVLockOverlay, PDVShortcutsHint } from './pdv/PDVLockOverlay';
 import { PDVDialogsStack } from './pdv/PDVDialogsStack';
+import { useOfflinePDV } from '@/hooks/pdv/useOfflinePDV';
+import { OfflinePDVIndicator } from '../pdv/OfflinePDVIndicator';
 
 
 interface PDVDialogProps {
@@ -102,6 +104,7 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
     openSession, closeSessionSummary, confirmCloseSession, registerMovement,
   } = usePDVCashSession();
 
+  const { online, queueSize, emitOffline } = useOfflinePDV();
   const { parkedList, refreshParked, showParked, setShowParked, discardParked } = usePDVParked();
 
   const searchRef = useRef<HTMLInputElement>(null);
@@ -265,6 +268,15 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
             onCloseSession={requestCloseSession}
             onOpenSession={() => setShowOpenSession(true)}
           />
+
+          {!online && (
+            <div className="bg-amber-500/10 border-b border-amber-500/20 px-6 py-2 flex items-center justify-between">
+              <OfflinePDVIndicator online={online} queueSize={queueSize} />
+              <p className="text-[10px] font-bold uppercase text-amber-600 animate-pulse">
+                Modo Contingência Ativo
+              </p>
+            </div>
+          )}
 
           <div className="flex flex-1 min-h-0 flex-col lg:flex-row">
             <div className="flex-1 flex flex-col border-b lg:border-b-0 lg:border-r bg-muted/10 min-w-0 min-h-0">

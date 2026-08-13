@@ -64,7 +64,7 @@ export function usePDVFinalize(args: UsePDVFinalizeArgs) {
   const [saving, setSaving] = useState(false);
   const [showFinalizeConfirm, setShowFinalizeConfirm] = useState(false);
 
-  const handleFinalize = async (skipConfirm = false) => {
+  const handleFinalize = async (skipConfirm = false, isOffline = false) => {
     if (cart.length === 0) return;
     if (!session) { toastError('Abra o caixa antes de finalizar uma venda.'); setShowOpenSession(true); return; }
     if (splits.length === 0) { toastError('Adicione ao menos uma forma de pagamento.'); return; }
@@ -77,8 +77,16 @@ export function usePDVFinalize(args: UsePDVFinalizeArgs) {
       return;
     }
 
-    const HIGH_VALUE = 1000;
-    const HIGH_ITEMS = 20;
+    if (isOffline) {
+      const allowedOffline = splits.every(s => s.method === 'cash' || s.method === 'pix');
+      if (!allowedOffline) {
+        toastError('Modo offline aceita apenas Dinheiro ou PIX.');
+        return;
+      }
+    }
+
+    const HIGH_VALUE = 2000;
+    const HIGH_ITEMS = 50;
     if (!skipConfirm && (total >= HIGH_VALUE || totalItems >= HIGH_ITEMS)) {
       setShowFinalizeConfirm(true);
       return;
