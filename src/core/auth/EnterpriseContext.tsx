@@ -2,10 +2,9 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { withRenderMonitor } from '@/core/debug/RenderDepthMonitor';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
+import { TenantService, type CompanyRow } from '@/services/admin/TenantService';
 
 export type Segment = 'textile' | 'food_factory' | 'pharma' | 'distribution' | 'services' | 'retail' | 'general' | 'fio' | 'tecelagem' | 'animal_feed' | 'industry' | 'wholesaler' | 'retail_chain' | 'franchise' | 'holding' | 'apparel';
-
-type CompanyRow = Database['public']['Tables']['companies']['Row'];
 
 export interface TenantRef { id: string; name: string }
 export interface GroupRef { id: string; name: string }
@@ -159,7 +158,7 @@ export const EnterpriseProvider = withRenderMonitor(({ children }: { children: R
       
       setIsLoading(true);
 
-      const [companies, profile, role] = await Promise.all([
+      const [companies, profile, userRole] = await Promise.all([
         TenantService.getCompanies(),
         TenantService.getUserProfile(user.id),
         TenantService.getUserRole(user.id)
@@ -170,16 +169,16 @@ export const EnterpriseProvider = withRenderMonitor(({ children }: { children: R
       // Update global app store with profile/role info once
       const { useAppStore } = await import('@/stores/useAppStore');
       const store = useAppStore.getState();
-      const role = (role as any) || 'viewer';
+      const finalRole = (userRole as any) || 'viewer';
       
       store.setUser({
         id: user.id,
         name: profile?.name || user.user_metadata?.name || user.email?.split('@')[0] || 'Usuário',
         email: user.email || '',
-        role: role,
+        role: finalRole,
         permissions: ['all'],
       });
-      store.setUserRole(role);
+      store.setUserRole(finalRole);
 
       if (companies && companies.length > 0) {
         const company = companies.find(c => c.id === profile?.company_id) || companies[0];
