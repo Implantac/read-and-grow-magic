@@ -11,30 +11,39 @@ export function useSupplyChain(filters?: { status?: MovementStatus[] }) {
 
   const branchId = currentBranch?.id;
   const statusFilter = useMemo(() => filters?.status, [JSON.stringify(filters?.status)]);
+  const lastFetchRef = useRef<number>(0);
 
   const fetchMovements = useCallback(async () => {
-    if (!branchId) return;
+    if (!branchId || isEnterpriseLoading) return;
     
+    // Throttling fetches to prevent rapid re-renders
+    const now = Date.now();
+    if (now - lastFetchRef.current < 1000) return;
+    lastFetchRef.current = now;
+
     setIsDataLoading(true);
     try {
       const data = await supplyChainService.getMovements({
         unit_id: branchId,
         status: statusFilter
       });
-      setMovements(data);
+      setMovements(prev => {
+        if (JSON.stringify(prev) === JSON.stringify(data)) return prev;
+        return data;
+      });
     } catch (error) {
       console.error('Error in useSupplyChain:', error);
       toast.error('Erro ao carregar movimentações');
     } finally {
       setIsDataLoading(false);
     }
-  }, [branchId, statusFilter]);
+  }, [branchId, statusFilter, isEnterpriseLoading]);
 
   useEffect(() => {
     if (!isEnterpriseLoading && branchId) {
       fetchMovements();
     }
-  }, [branchId, isEnterpriseLoading, fetchMovements]);
+  }, [branchId, isEnterpriseLoading]); // removed fetchMovements from deps to prevent sync loops
 
   useEffect(() => {
     if (isEnterpriseLoading || !branchId) return;
@@ -67,7 +76,7 @@ export function useSupplyChain(filters?: { status?: MovementStatus[] }) {
       if (debounce) clearTimeout(debounce);
       supabase.removeChannel(channel);
     };
-  }, [branchId, isEnterpriseLoading, fetchMovements]);
+  }, [branchId, isEnterpriseLoading]); // removed fetchMovements from deps
 
   const updateStatus = async (id: string, status: MovementStatus) => {
     try {
