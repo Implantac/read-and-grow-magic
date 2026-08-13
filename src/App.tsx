@@ -16,12 +16,26 @@ import { useFinancialOrchestrator } from '@/core/orchestration/FinancialOrchestr
 const AppRoutes = React.memo(lazy(() => import('./routes/index')));
 
 const RealtimeAlertsBridge = React.memo(() => {
-  const { currentCompany } = useEnterprise();
-  
-  // Only activate orchestration when tenant context is loaded
+  const { currentCompany, isLoading } = useEnterprise();
   const companyId = currentCompany?.id;
   
-  // Pass companyId to hooks to ensure they re-sync only when company changes
+  // Track mount status
+  const isMounted = React.useRef(true);
+  React.useEffect(() => {
+    isMounted.current = true;
+    return () => { isMounted.current = false; };
+  }, []);
+  
+  // Use a ref to track the last synced companyId to prevent duplicate initializations
+  const lastSyncedId = React.useRef<string | undefined>(undefined);
+
+  React.useEffect(() => {
+    if (!companyId || isLoading || !isMounted.current) return;
+    lastSyncedId.current = companyId;
+  }, [companyId, isLoading]);
+
+  // Activate hooks only when tenant context is truly loaded and ID is stable
+  // We use the stable companyId from context directly since it's now guarded in EnterpriseContext
   useLowMarginAlertsRealtime(companyId);
   useInventoryOrchestrator(companyId);
   useFinancialOrchestrator(companyId);

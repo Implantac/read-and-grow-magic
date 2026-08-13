@@ -11,11 +11,11 @@ import { toast } from 'sonner';
  */
 export function useLowMarginAlertsRealtime(providedCompanyId?: string) {
   const qc = useQueryClient();
-  const { currentCompany } = useEnterprise();
+  const { currentCompany, isLoading: isContextLoading } = useEnterprise();
   const companyId = providedCompanyId || currentCompany?.id;
 
   useEffect(() => {
-    if (!companyId) return;
+    if (!companyId || isContextLoading) return;
 
     let channel: any = null;
     let isMounted = true;
