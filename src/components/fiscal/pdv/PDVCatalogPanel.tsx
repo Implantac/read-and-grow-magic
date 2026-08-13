@@ -1,5 +1,5 @@
 import { forwardRef, type RefObject } from 'react';
-import { Camera, CameraOff, Keyboard, LayoutGrid, Package, QrCode, ScanLine, Search } from 'lucide-react';
+import { Camera, CameraOff, Keyboard, LayoutGrid, Package, QrCode, ScanLine, Search, Plus } from 'lucide-react';
 import { Input } from '@/ui/base/input';
 import { Badge } from '@/ui/base/badge';
 import { Button } from '@/ui/base/button';

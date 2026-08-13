@@ -271,7 +271,7 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
 
           {!online && (
             <div className="bg-amber-500/10 border-b border-amber-500/20 px-6 py-2 flex items-center justify-between">
-              <OfflinePDVIndicator online={online} queueSize={queueSize} />
+              <OfflinePDVIndicator />
               <p className="text-[10px] font-bold uppercase text-amber-600 animate-pulse">
                 Modo Contingência Ativo
               </p>
