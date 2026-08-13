@@ -9,10 +9,10 @@ import { toast } from 'sonner';
  * Assina INSERTs em commercial_alerts (alert_type = 'low_margin') e
  * dispara toast + invalida cache para atualizar o painel automaticamente.
  */
-export function useLowMarginAlertsRealtime() {
+export function useLowMarginAlertsRealtime(providedCompanyId?: string) {
   const qc = useQueryClient();
   const { currentCompany } = useEnterprise();
-  const companyId = currentCompany?.id;
+  const companyId = providedCompanyId || currentCompany?.id;
 
   useEffect(() => {
     if (!companyId) return;
