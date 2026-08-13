@@ -194,7 +194,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     }
     const branch = allBranches.find(b => b.id === id);
     if (branch) {
-      setCurrentBranch(branch);
+      setCurrentBranch(prev => prev?.id === branch.id ? prev : branch);
       const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
       useEnterpriseStore.getState().setActiveBranchId(id);
     }
