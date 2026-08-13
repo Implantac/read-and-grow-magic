@@ -128,7 +128,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     setPolicies(getEnterprisePolicies(seg));
   }, []);
 
-  const loadActiveTenant = async () => {
+  const loadActiveTenant = useCallback(async () => {
     setIsLoading(true);
     try {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -173,7 +173,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [applyCompany]);
 
 
   const setCompany = useCallback(async (id: string) => {
