@@ -102,7 +102,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     if (!company) return;
     const { getEnterprisePolicies } = await import('@/core/orchestration/policyEngine');
     
-    setCurrentCompany(prev => (prev?.id === company.id ? prev : company));
+    setCurrentCompany(prev => (prev?.id === company.id ? prev : { ...company }));
     const seg = (company.segment as Segment | null) ?? 'general';
     setSegment(seg);
     setSubSegment(company.sub_segment ?? '');
@@ -150,7 +150,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
             setAllBranches(mappedUnits);
             
             const defaultBranch = mappedUnits.find(b => b.id === profile?.default_branch_id) || mappedUnits[0] || null;
-            setCurrentBranch(prev => prev?.id === defaultBranch?.id ? prev : defaultBranch);
+            setCurrentBranch(prev => prev?.id === defaultBranch?.id ? prev : (defaultBranch ? { ...defaultBranch } : null));
             
             if (defaultBranch) {
               const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
@@ -195,7 +195,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     }
     const branch = allBranches.find(b => b.id === id);
     if (branch) {
-      setCurrentBranch(prev => prev?.id === branch.id ? prev : branch);
+      setCurrentBranch(prev => prev?.id === branch.id ? prev : { ...branch });
       const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
       useEnterpriseStore.getState().setActiveBranchId(id);
     }

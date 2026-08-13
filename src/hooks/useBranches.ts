@@ -12,8 +12,9 @@ export interface Branch {
 
 export function useBranches() {
   const companyId = useEnterpriseStore((s) => s.activeCompanyId);
+  const filterKey = companyId || 'no-tenant';
   return useQuery({
-    queryKey: ['branches', companyId],
+    queryKey: ['branches', filterKey],
     enabled: !!companyId,
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
