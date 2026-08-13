@@ -200,25 +200,30 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     }
   };
 
+  const value = useMemo(() => ({
+    currentTenant,
+    currentGroup,
+    currentCompany,
+    currentBranch,
+    allBranches,
+    segment,
+    subSegment,
+    companySize,
+    taxRegime,
+    operationTypes,
+    policies,
+    isLoading,
+    setCompany,
+    setBranch,
+    executiveCouncil
+  }), [
+    currentTenant, currentGroup, currentCompany, currentBranch, allBranches,
+    segment, subSegment, companySize, taxRegime, operationTypes,
+    policies, isLoading, setCompany, setBranch
+  ]);
+
   return (
-    <EnterpriseContext.Provider value={{
-      // AUD-1: nunca expor sentinela de tenant/grupo — consumers devem tratar null enquanto isLoading.
-      currentTenant,
-      currentGroup,
-      currentCompany,
-      currentBranch,
-      allBranches,
-      segment,
-      subSegment,
-      companySize,
-      taxRegime,
-      operationTypes,
-      policies,
-      isLoading,
-      setCompany,
-      setBranch,
-      executiveCouncil
-    }}>
+    <EnterpriseContext.Provider value={value}>
       {children}
     </EnterpriseContext.Provider>
   );
