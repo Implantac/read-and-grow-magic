@@ -34,7 +34,9 @@ export const useEventBus = create<EventBusState>((set, get) => ({
     // Execute callbacks asynchronously to avoid blocking the caller
     // and to prevent recursive update loops (Error #185)
     setTimeout(() => {
-      callbacks.forEach(cb => {
+      // Create a snapshot of callbacks to prevent mutation issues during execution
+      const callbacksSnapshot = Array.from(eventSubscribers);
+      callbacksSnapshot.forEach(cb => {
         try {
           cb(payload);
         } catch (err) {

@@ -23,8 +23,10 @@ export function useSupabaseQuery<T>(
         throw err;
       }
     },
-    staleTime: 30000, // 30s default to prevent immediate refetches
-    refetchOnWindowFocus: false, // Reduced noise
+    staleTime: 60000, // Increased to 60s
+    gcTime: 5 * 60000,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false, // Prevent refetching on every mount if data is not stale
     ...options,
   });
 }
