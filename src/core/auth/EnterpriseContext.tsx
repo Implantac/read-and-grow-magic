@@ -63,7 +63,7 @@ interface EnterpriseContextType {
 
 const EnterpriseContext = createContext<EnterpriseContextType | undefined>(undefined);
 
-export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) => {
+export const EnterpriseProvider = forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ children }, ref) => {
   const [currentTenant, setCurrentTenant] = useState<TenantRef | null>(null);
   const [currentGroup, setCurrentGroup] = useState<GroupRef | null>(null);
   const [currentCompany, setCurrentCompany] = useState<CompanyRow | null>(null);
