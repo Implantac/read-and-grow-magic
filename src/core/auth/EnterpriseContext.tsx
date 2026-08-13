@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, forwardRef, type MutableRefObject } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, forwardRef, useRef, type MutableRefObject } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 
