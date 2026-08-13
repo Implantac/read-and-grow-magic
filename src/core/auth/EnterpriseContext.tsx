@@ -120,7 +120,11 @@ export const EnterpriseProvider = withRenderMonitor(({ children }: { children: R
       return next;
     });
     setPolicies(prev => {
-      if (JSON.stringify(prev) === JSON.stringify(nextPolicies)) return prev;
+      if (prev.replenishmentMethod === nextPolicies.replenishmentMethod && 
+          prev.workflowEnabled === nextPolicies.workflowEnabled &&
+          prev.eventOrchestrationEnabled === nextPolicies.eventOrchestrationEnabled) {
+        return prev;
+      }
       return nextPolicies;
     });
   }, []);

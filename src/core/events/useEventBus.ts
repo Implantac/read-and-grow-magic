@@ -32,19 +32,21 @@ export const useEventBus = create<EventBusState>((set, get) => ({
     const callbacks = Array.from(eventSubscribers);
     
     // Execute callbacks in a non-blocking microtask to prevent recursive update loops (Error #185)
-    // Using a ref-based guard to prevent re-entry during the same microtask
     queueMicrotask(() => {
+      // Use a snapshot of current subscribers to avoid issues with mutations during iteration
       const currentSubscribers = get().subscribers[event];
       if (!currentSubscribers || currentSubscribers.size === 0) return;
 
       const callbacksSnapshot = Array.from(currentSubscribers);
-      callbacksSnapshot.forEach(cb => {
+      
+      // Use a simple loop for execution to minimize overhead
+      for (let i = 0; i < callbacksSnapshot.length; i++) {
         try {
-          cb(payload);
+          callbacksSnapshot[i](payload);
         } catch (err) {
           console.error(`[EventBus] Error in subscriber for ${event}:`, err);
         }
-      });
+      }
     });
   },
 
