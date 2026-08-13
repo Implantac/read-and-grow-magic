@@ -20,6 +20,7 @@ import { ProductionRoutes } from './ProductionRoutes';
 import { WMSRoutes } from './WMSRoutes';
 import { RelacionamentoRoutes } from './RelacionamentoRoutes';
 import { NetworkRoutes } from './NetworkRoutes';
+import { MiscellaneousRoutes } from './MiscellaneousRoutes';
 
 // Domain-Specific Lazy Components
 const UnifiedSupplyChain = lazy(() => import('@/modules/operational/supply-chain/UnifiedSupplyChain'));
@@ -143,6 +144,9 @@ const AppRoutes = () => {
               <Routes>{AdminRoutes}</Routes>
             </ModuleErrorBoundary>
           } />
+
+          {/* Miscellaneous & Vertical Packs */}
+          {MiscellaneousRoutes}
         </Route>
       </Route>
 
