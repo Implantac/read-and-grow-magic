@@ -123,13 +123,16 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError) throw userError;
       if (user) {
-        // Load all companies user has access to (simplified for this exercise)
-        const { data: companies } = await supabase.from('companies').select('*').limit(1);
+        // Optimistically fetch company and branches in parallel
+        const [{ data: companies }, { data: profile }] = await Promise.all([
+          supabase.from('companies').select('*').limit(1),
+          supabase.from('profiles').select('default_branch_id').eq('id', user.id).maybeSingle()
+        ]);
+
         if (companies && companies.length > 0) {
           const company = companies[0];
-          applyCompany(company as CompanyRow);
+          await applyCompany(company as CompanyRow);
           
-          // Load operational units for this company (Fase 2A)
           const { data: units } = await supabase
             .from('operational_units' as any)
             .select('id, name, type, is_active')
@@ -143,8 +146,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
               is_active: u.is_active
             }));
             setAllBranches(mappedUnits);
-            // Default to first branch or profile default
-            const { data: profile } = await supabase.from('profiles').select('default_branch_id').eq('id', user.id).maybeSingle();
+            
             const defaultBranch = mappedUnits.find(b => b.id === profile?.default_branch_id) || mappedUnits[0] || null;
             setCurrentBranch(defaultBranch);
             
@@ -161,6 +163,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
       setIsLoading(false);
     }
   };
+
 
   const setCompany = async (id: string) => {
     const { data } = await supabase.from('companies').select('*').eq('id', id).maybeSingle();

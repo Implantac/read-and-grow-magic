@@ -4,6 +4,8 @@ import { Loader2 } from 'lucide-react';
 import { OnboardingGuard } from '@/components/OnboardingGuard';
 import { MainLayout } from '@/core/layout/MainLayout';
 import { ModuleErrorBoundary } from '@/shared/components/ModuleErrorBoundary';
+import { PageLoading } from '@/shared/components/PageLoading';
+
 
 // Critical Pages - Eager Load to prevent white screens on initial entry
 import Login from "@/pages/Login";
@@ -31,16 +33,8 @@ const ManualModule = lazy(() => import('@/modules/admin/systemManual/SystemManua
  * Performance-optimized Page Loader
  * Centralized loading state for all lazy-loaded routes
  */
-const PageLoader = () => (
-  <div className="flex h-[60vh] w-full items-center justify-center bg-background/50 backdrop-blur-sm transition-all duration-300">
-    <div className="flex flex-col items-center gap-4">
-      <Loader2 className="h-10 w-10 animate-spin text-primary opacity-80" />
-      <p className="text-sm font-medium animate-pulse text-muted-foreground tracking-wide">
-        Sincronizando Ecossistema...
-      </p>
-    </div>
-  </div>
-);
+const PageLoader = () => <PageLoading message="Sincronizando Ecossistema..." />;
+
 
 /**
  * Enterprise Operating Ecosystem (EOE) Optimized Router
