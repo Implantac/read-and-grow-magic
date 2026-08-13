@@ -110,9 +110,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     return () => {
       mounted = false;
     };
-    // loadActiveTenant is stable, but we explicitly run once on mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadActiveTenant]);
 
   const applyCompany = useCallback(async (company: CompanyRow) => {
     if (!company) return;
