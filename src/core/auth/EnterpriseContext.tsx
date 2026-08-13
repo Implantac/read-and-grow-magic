@@ -36,6 +36,8 @@ export interface Policy {
   salesCreditCheck: 'NONE' | 'BASIC' | 'STRICT';
   workflowEnabled: boolean;
   eventOrchestrationEnabled: boolean;
+  auditLevel: 'NONE' | 'BASIC' | 'FULL';
+  taskBoardEnabled: boolean;
 }
 
 interface EnterpriseContextType {
@@ -79,7 +81,9 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     inventoryAdjustmentPolicy: 'AUTO',
     salesCreditCheck: 'NONE',
     workflowEnabled: false,
-    eventOrchestrationEnabled: false
+    eventOrchestrationEnabled: false,
+    auditLevel: 'BASIC',
+    taskBoardEnabled: true
   });
   const [isLoading, setIsLoading] = useState(true);
 

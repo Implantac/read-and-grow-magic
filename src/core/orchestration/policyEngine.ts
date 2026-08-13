@@ -7,6 +7,8 @@ export interface Policy {
   salesCreditCheck: 'NONE' | 'BASIC' | 'STRICT';
   workflowEnabled: boolean;
   eventOrchestrationEnabled: boolean;
+  auditLevel: 'NONE' | 'BASIC' | 'FULL';
+  taskBoardEnabled: boolean;
 }
 
 const DEFAULT_POLICIES: Record<string, Policy> = {
@@ -16,7 +18,9 @@ const DEFAULT_POLICIES: Record<string, Policy> = {
     inventoryAdjustmentPolicy: 'MANAGER_APPROVAL',
     salesCreditCheck: 'STRICT',
     workflowEnabled: true,
-    eventOrchestrationEnabled: true
+    eventOrchestrationEnabled: true,
+    auditLevel: 'FULL',
+    taskBoardEnabled: true
   },
   industry: {
     replenishmentMethod: 'MRP',
@@ -24,7 +28,9 @@ const DEFAULT_POLICIES: Record<string, Policy> = {
     inventoryAdjustmentPolicy: 'AUDIT_REQUIRED',
     salesCreditCheck: 'BASIC',
     workflowEnabled: true,
-    eventOrchestrationEnabled: true
+    eventOrchestrationEnabled: true,
+    auditLevel: 'FULL',
+    taskBoardEnabled: true
   },
   general: {
     replenishmentMethod: 'MIN_MAX',
@@ -32,7 +38,9 @@ const DEFAULT_POLICIES: Record<string, Policy> = {
     inventoryAdjustmentPolicy: 'AUTO',
     salesCreditCheck: 'NONE',
     workflowEnabled: false,
-    eventOrchestrationEnabled: false
+    eventOrchestrationEnabled: false,
+    auditLevel: 'BASIC',
+    taskBoardEnabled: true
   }
 };
 

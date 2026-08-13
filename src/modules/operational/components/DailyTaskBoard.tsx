@@ -46,7 +46,7 @@ export const DailyTaskBoard = () => {
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <ClipboardList className="h-5 w-5 text-primary" />
-            <CardTitle className="text-lg font-bold">Tarefas do Dia</CardTitle>
+            <CardTitle className="text-lg font-bold">Minha Operação</CardTitle>
           </div>
           <Badge variant="outline" className="bg-background text-xs">
             {completedCount}/{tasks.length} Concluídas
