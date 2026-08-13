@@ -16,9 +16,11 @@ import { useFinancialOrchestrator } from '@/core/orchestration/FinancialOrchestr
 import AppRoutes from './routes/index';
 
 const RealtimeAlertsBridge = React.memo(() => {
-  const { currentCompany } = useEnterprise();
+  const { currentCompany, isLoading } = useEnterprise();
   
-  // Scoped hooks only run when a company is active
+  // Only activate orchestration when tenant context is loaded and valid
+  const companyId = currentCompany?.id;
+  
   useLowMarginAlertsRealtime();
   useInventoryOrchestrator();
   useFinancialOrchestrator();
