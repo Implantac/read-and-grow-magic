@@ -209,8 +209,16 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
   }, [applyCompany]);
 
   const mounted = useRef(true);
+  const renderCount = useRef(0);
+  
   useEffect(() => {
     mounted.current = true;
+    renderCount.current++;
+    
+    if (renderCount.current > 100) {
+      console.warn('[EnterpriseProvider] Excessive re-renders detected in context. Potential loop.');
+    }
+
     const isMounted = mounted;
     
     // Initial load

@@ -27,4 +27,28 @@ window.addEventListener("unhandledrejection", (e) => {
   maybeReload(msg);
 });
 
+// Detect and log React Error #185 patterns in production
+const originalConsoleError = console.error;
+console.error = (...args) => {
+  const message = args[0];
+  if (typeof message === 'string' && (message.includes('Maximum update depth exceeded') || message.includes('Minified React error #185'))) {
+    const errorData = {
+      timestamp: new Date().toISOString(),
+      url: window.location.href,
+      userAgent: navigator.userAgent,
+      message: message,
+      stack: new Error().stack
+    };
+    
+    // Log to a specialized endpoint or just enhanced console
+    originalConsoleError("[REACT-ERROR-185-DETECTED]", errorData);
+    
+    // Attempt to notify the event bus if available
+    try {
+      window.dispatchEvent(new CustomEvent('app:render-loop-error', { detail: errorData }));
+    } catch (e) { /* ignore */ }
+  }
+  originalConsoleError.apply(console, args);
+};
+
 createRoot(document.getElementById("root")!).render(<App />);
