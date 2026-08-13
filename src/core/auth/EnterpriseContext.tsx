@@ -233,7 +233,7 @@ export const EnterpriseProvider = forwardRef<HTMLDivElement, { children: React.R
       {children}
     </EnterpriseContext.Provider>
   );
-};
+});
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useEnterprise = () => {
