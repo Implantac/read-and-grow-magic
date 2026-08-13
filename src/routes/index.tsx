@@ -1,3 +1,9 @@
+/**
+ * EOE ARCHITECTURE ROADMAP & TECHNICAL LOG (STABILIZATION MODE)
+ * 
+ * ISSUE: React Error #185 (Maximum update depth exceeded) detected in production builds.
+ * ACTION: Enabling non-minified mode and granular logging for debugging.
+ */
 import { Suspense, lazy, useMemo, memo } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
