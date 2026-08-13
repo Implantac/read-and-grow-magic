@@ -185,7 +185,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     }
   }, []);
 
-  const setBranch = async (id: string | null) => {
+  const setBranch = useCallback(async (id: string | null) => {
     if (!id) {
       setCurrentBranch(null);
       const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
@@ -198,7 +198,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
       const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
       useEnterpriseStore.getState().setActiveBranchId(id);
     }
-  };
+  }, [allBranches]);
 
   const value = useMemo(() => ({
     currentTenant,
