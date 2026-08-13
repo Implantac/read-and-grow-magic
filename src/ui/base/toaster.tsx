@@ -7,6 +7,7 @@ export const Toaster = React.forwardRef<HTMLDivElement>((_, ref) => {
 
   return (
     <ToastProvider>
+      <div ref={ref} />
       {toasts.map(function ({ id, title, description, action, ...props }) {
         return (
           <Toast key={id} {...props}>
