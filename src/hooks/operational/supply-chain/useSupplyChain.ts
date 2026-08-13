@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { supplyChainService, SupplyChainMovement, MovementStatus } from '@/services/operational/supply-chain/supplyChainService';
 import { supabase } from "@/integrations/supabase/client";
@@ -9,16 +9,17 @@ export function useSupplyChain(filters?: { status?: MovementStatus[] }) {
   const [movements, setMovements] = useState<SupplyChainMovement[]>([]);
   const [isDataLoading, setIsDataLoading] = useState(false);
 
-  
+  const branchId = currentBranch?.id;
+  const statusFilter = useMemo(() => filters?.status, [JSON.stringify(filters?.status)]);
 
-  const fetchMovements = React.useCallback(async () => {
-    if (!currentBranch?.id) return;
+  const fetchMovements = useCallback(async () => {
+    if (!branchId) return;
     
     setIsDataLoading(true);
     try {
       const data = await supplyChainService.getMovements({
-        unit_id: currentBranch.id,
-        status: filters?.status
+        unit_id: branchId,
+        status: statusFilter
       });
       setMovements(data);
     } catch (error) {
@@ -27,19 +28,20 @@ export function useSupplyChain(filters?: { status?: MovementStatus[] }) {
     } finally {
       setIsDataLoading(false);
     }
-  }, [currentBranch?.id, filters?.status]);
+  }, [branchId, statusFilter]);
 
   useEffect(() => {
-    if (!isEnterpriseLoading && currentBranch?.id) {
+    if (!isEnterpriseLoading && branchId) {
       fetchMovements();
     }
-  }, [fetchMovements, isEnterpriseLoading, currentBranch?.id]);
+  }, [branchId, isEnterpriseLoading, fetchMovements]);
 
   useEffect(() => {
-    if (isEnterpriseLoading || !currentBranch?.id) return;
+    if (isEnterpriseLoading || !branchId) return;
 
+    const channelName = `supply_chain_movements_${branchId}`;
     const channel = supabase
-      .channel(`supply_chain_movements_${currentBranch.id}`)
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
@@ -62,7 +64,7 @@ export function useSupplyChain(filters?: { status?: MovementStatus[] }) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [currentBranch?.id, isEnterpriseLoading, fetchMovements]);
+  }, [branchId, isEnterpriseLoading, fetchMovements]);
 
   const updateStatus = async (id: string, status: MovementStatus) => {
     try {
@@ -84,7 +86,6 @@ export function useSupplyChain(filters?: { status?: MovementStatus[] }) {
         .order('created_at', { ascending: false });
 
       if (error) {
-        // Se a tabela não existir, retorna array vazio silenciosamente para não quebrar a UI
         if (error.code === 'PGRST116' || error.message?.includes('does not exist')) {
           console.warn('supply_chain_ledger table not found, skipping history');
           return [];
