@@ -30,10 +30,12 @@ interface HierarchyRow {
 export type OperationType = string | { key: string; label?: string };
 
 export interface Policy {
-  replenishmentMethod: string;
+  replenishmentMethod: 'MIN_MAX' | 'FORECAST' | 'MRP' | 'MANUAL' | 'AI_ASSISTED';
   transferApprovalLimit: number;
-  inventoryAdjustmentPolicy: string;
-  salesCreditCheck: string;
+  inventoryAdjustmentPolicy: 'AUTO' | 'MANAGER_APPROVAL' | 'AUDIT_REQUIRED';
+  salesCreditCheck: 'NONE' | 'BASIC' | 'STRICT';
+  workflowEnabled: boolean;
+  eventOrchestrationEnabled: boolean;
 }
 
 interface EnterpriseContextType {
@@ -75,7 +77,9 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     replenishmentMethod: 'MIN_MAX',
     transferApprovalLimit: 0,
     inventoryAdjustmentPolicy: 'AUTO',
-    salesCreditCheck: 'NONE'
+    salesCreditCheck: 'NONE',
+    workflowEnabled: false,
+    eventOrchestrationEnabled: false
   });
   const [isLoading, setIsLoading] = useState(true);
 

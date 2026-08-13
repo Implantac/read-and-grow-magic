@@ -118,10 +118,13 @@ export default function StoreCentral() {
                   </div>
                 ) : alerts?.length > 0 ? (
                   alerts.map((alert) => (
-                    <div key={alert.id} className="p-4 flex items-start gap-4 hover:bg-muted/50 transition-colors group">
+                    <div key={alert.id} className="p-4 flex items-start gap-4 hover:bg-muted/50 transition-colors group relative overflow-hidden">
+                      {alert.type === 'critical' && (
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-destructive animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
+                      )}
                       <div className={cn(
-                        "p-2 rounded-full ring-1 ring-inset",
-                        alert.type === 'critical' ? "bg-destructive/10 text-destructive ring-destructive/20" : 
+                        "p-2 rounded-full ring-1 ring-inset relative z-10",
+                        alert.type === 'critical' ? "bg-destructive/10 text-destructive ring-destructive/20 shadow-[0_0_10px_rgba(239,68,68,0.2)]" : 
                         alert.type === 'warning' ? "bg-warning/10 text-warning ring-warning/20" : "bg-primary/10 text-primary ring-primary/20"
                       )}>
                         {alert.category === 'rupture' && <AlertTriangle className="h-5 w-5" />}

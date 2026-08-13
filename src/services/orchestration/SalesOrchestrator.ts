@@ -17,6 +17,7 @@ export class SalesOrchestrator {
     toastSuccess('Venda Concluída', `O pedido ${orderId.split('-')[0]} foi processado pelo orquestrador.`);
 
     // 2. Publish Event
+    // Note: useEventBus.getState() is correct for zustand to get current state without hook
     const eventBus = useEventBus.getState();
     await eventBus.publish('SALE_COMPLETED', { orderId, companyId });
     

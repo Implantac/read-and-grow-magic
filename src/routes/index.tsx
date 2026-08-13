@@ -165,7 +165,7 @@ const HardeningDashboard = () => {
     { id: '3', title: 'Governança & Auditoria', status: 'completed', description: 'Ledger Logístico Imutável e RLS Hardening.' },
     { id: '4', title: 'Expansão UX Pro', status: 'completed', description: 'OrderWizard, Procurement MRP e UEEF SEC-LEVEL 3.' },
     { id: '5', title: 'Inteligência Preditiva', status: 'completed', description: 'Digital Twin e Otimização de Slotting IA.' },
-    { id: '6', title: 'Ecossistema Global', status: 'completed', description: 'Contexto, Políticas, Eventos e Orquestração.' },
+    { id: '6', title: 'Ecossistema Global', status: 'completed', description: 'Contexto, Políticas, Eventos e Orquestração Total.' },
   ];
 
 
