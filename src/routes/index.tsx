@@ -262,7 +262,7 @@ const HardeningDashboard = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <NetworkControlTower />
+            {/* <NetworkControlTower /> */}
           </CardContent>
         </Card>
       </div>
