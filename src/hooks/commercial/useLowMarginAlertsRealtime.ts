@@ -10,8 +10,12 @@ import { toast } from 'sonner';
  */
 export function useLowMarginAlertsRealtime() {
   const qc = useQueryClient();
+  const { currentCompany } = useEnterprise();
+  const companyId = currentCompany?.id;
 
   useEffect(() => {
+    if (!companyId) return;
+
     let channel: any = null;
     let isMounted = true;
 
@@ -20,14 +24,14 @@ export function useLowMarginAlertsRealtime() {
       if (!session || !isMounted) return;
 
       channel = supabase
-        .channel('commercial_alerts_low_margin')
+        .channel(`commercial_alerts_low_margin_${companyId}`)
         .on(
           'postgres_changes',
           {
             event: 'INSERT',
             schema: 'public',
             table: 'commercial_alerts',
-            filter: 'alert_type=eq.low_margin',
+            filter: `alert_type=eq.low_margin&company_id=eq.${companyId}`,
           },
           (payload) => {
             const row: any = payload.new;
@@ -55,6 +59,6 @@ export function useLowMarginAlertsRealtime() {
         supabase.removeChannel(channel);
       }
     };
-  }, [qc]);
+  }, [qc, companyId]);
 }
 
