@@ -1,24 +1,17 @@
 /** ✅ READ & GROW — ENTERPRISE OPERATING ECOSYSTEM (EOE).
- * ✅ ARQUITETURA DE INTEGRAÇÃO: Mapeamento completo de Entidades, Domínios e Orquestração (UEEF SEC-LEVEL 4).
- * ✅ EVENTBUS CORE: Comunicação assíncrona desacoplada entre Comercial, Estoque e Financeiro.
- * ✅ POLICY ENGINE: Comportamentos adaptativos injetados por segmento e postura operacional.
- * ✅ ORQUESTRADORES ATIVOS: Inventário, Financeiro e Vendas integrados em tempo real. (SOU: OPERACIONAL)
- */
-
-/** 
- * Master Plan 2026 — READ & GROW Enterprise Evolution.
- * 
- * ESTRATÉGIA: Evolução de "Software de Gestão" para "Ecossistema Operacional Empresarial".
- * Status: ✅ Auditoria de Integração Concluída. ✅ Orquestração Full-Stack Ativa.
- * 
- * PRÓXIMOS PASSOS (DIRETRIZ EOE):
- * 1. ✅ MAPA DE INTEGRAÇÃO: Auditoria arquitetural do repositório concluída.
- * 2. ✅ ORQUESTRAÇÃO DE EVENTOS: Domínios sincronizados via EventBus. (CONCLUÍDO)
- * 3. ✅ SOU (Sistema Operacional da Unidade): Lojas operando como hubs integrados. (ATIVADO)
- * 4. 🚀 WORKFLOW ENGINE: Unificar transições entre módulos (ex: Fiscal -> Financeiro -> WMS).
- * 5. 🚀 CONTEXTO OPERACIONAL: Posturas de negócio (ex: Agressivo/Conservador) dirigindo a IA.
- * 6. 🚀 BLINDAGEM CROSS-DOMAIN: Validações de integridade entre domínios (ex: WMS bloqueia Fiscal).
- * 7. ✅ ECOSSISTEMA GLOBAL: Contexto Empresarial, EventBus e Orquestração. (CONCLUÍDO - FASE 6)
+ * A solução não é esconder complexidade. É tirar a complexidade do caminho do usuário e preservá-la por baixo, de forma controlada e rastreável para quem precisa gerenciá-la.
+ *
+ * Eu adotaria um princípio central:
+ * O usuário trabalha com intenções e processos. O ERP trabalha com documentos, regras, eventos e rastreabilidade.
+ *
+ * 1. Dois níveis de experiência sobre o mesmo processo (Simplicidade na Operação vs Profundidade na Gestão)
+ * 2. Camada "Minha Operação": Foco em trabalho/tarefas em vez de módulos isolados.
+ * 3. Passaporte da Operação: Identificador único (ex: TR-000182) para rastreabilidade ponta a ponta.
+ * 4. Linha do Tempo Empresarial: Histórico detalhado de eventos, não apenas status.
+ * 5. Motor de Políticas: Automação inteligente baseada em regras de negócio (limites, aprovações).
+ * 6. Gestão por Exceção: O sistema vigia o normal; o gestor trata o que sai do esperado.
+ * 7. IA Copiloto: Sugestões explicáveis e justificadas baseadas em dados reais.
+ * 8. Experience Layer: Busca Universal, Central de Documentos e Espaços de Trabalho personalizados.
  */
 
 import { Suspense, useState } from 'react';
@@ -125,11 +118,11 @@ const HardeningDashboard = () => {
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Fase 6: Ecossistema Global (Concluído)</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Master Plan — Ecossistema Operacional Empresarial (EOE)</h1>
 
           </div>
           <p className="text-muted-foreground text-lg">
-            Blueprint Operacional: Complexidade no motor, simplicidade na operação.
+            A solução não é esconder complexidade. É tirar a complexidade do caminho do usuário e preservá-la por baixo, de forma controlada e rastreável para quem precisa gerenciá-la.
           </p>
           <div className="mt-4 p-4 border rounded-xl bg-primary/10 border-primary/20 max-w-2xl animate-in fade-in duration-700">
             <h4 className="text-sm font-black uppercase tracking-widest text-primary mb-2 flex items-center gap-2">
@@ -149,7 +142,7 @@ const HardeningDashboard = () => {
           </div>
         </div>
         <Badge variant="outline" className="text-primary border-primary bg-primary/5 px-4 py-1 text-sm font-semibold">
-          BLUEPRINT V2.0 — OPERATIONAL
+          BLUEPRINT V3.0 — EOE
         </Badge>
       </div>
 
