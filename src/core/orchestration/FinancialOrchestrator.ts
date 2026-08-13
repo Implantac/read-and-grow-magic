@@ -8,10 +8,14 @@ export const useFinancialOrchestrator = () => {
   const eventBus = useEventBus();
 
   useEffect(() => {
-    if (!currentCompany) return;
+    const companyId = currentCompany?.id;
+    if (!companyId) return;
 
     // Quando uma venda é concluída, o financeiro gera o contas a receber
     const unsubscribe = eventBus.subscribe('SALE_COMPLETED', async (payload) => {
+      // Ignorar eventos de outras empresas
+      if (payload.companyId !== companyId) return;
+
       console.log('[FinancialOrchestrator] Sale completed, generating ledger entry', payload);
       
       toastSuccess(`Título financeiro gerado para o pedido ${payload.orderId.split('-')[0]}.`);
@@ -24,5 +28,5 @@ export const useFinancialOrchestrator = () => {
     });
 
     return () => unsubscribe();
-  }, [currentCompany, eventBus]);
+  }, [currentCompany?.id, eventBus]);
 };

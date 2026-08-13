@@ -8,10 +8,14 @@ export const useInventoryOrchestrator = () => {
   const eventBus = useEventBus();
 
   useEffect(() => {
-    if (!currentCompany) return;
+    const companyId = currentCompany?.id;
+    if (!companyId) return;
 
     // Quando uma venda é concluída, o estoque deve ser alertado para possível separação
     const unsubscribe = eventBus.subscribe('SALE_COMPLETED', async (payload) => {
+      // Ignorar eventos de outras empresas
+      if (payload.companyId !== companyId) return;
+
       console.log('[InventoryOrchestrator] Sale completed, processing stock update', payload);
       
       toastSuccess(`Pedido ${payload.orderId.split('-')[0]} confirmado. Movimentação de estoque iniciada.`);
@@ -25,5 +29,5 @@ export const useInventoryOrchestrator = () => {
     });
 
     return () => unsubscribe();
-  }, [currentCompany, eventBus]);
+  }, [currentCompany?.id, eventBus]);
 };
