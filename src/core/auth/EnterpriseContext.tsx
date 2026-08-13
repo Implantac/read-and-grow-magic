@@ -77,7 +77,9 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     replenishmentMethod: 'MIN_MAX',
     transferApprovalLimit: 0,
     inventoryAdjustmentPolicy: 'AUTO',
-    salesCreditCheck: 'NONE'
+    salesCreditCheck: 'NONE',
+    workflowEnabled: false,
+    eventOrchestrationEnabled: false
   });
   const [isLoading, setIsLoading] = useState(true);
 
