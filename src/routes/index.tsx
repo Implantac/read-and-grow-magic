@@ -1,4 +1,4 @@
-import { Suspense, lazy, useMemo } from 'react';
+import { Suspense, lazy, useMemo, memo } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { OnboardingGuard } from '@/components/OnboardingGuard';
@@ -44,7 +44,7 @@ const PageLoader = () => <PageLoading message="Sincronizando Ecossistema..." />;
  * 3. Protected Context (MainLayout & OnboardingGuard)
  * 4. Memoized Route Tree
  */
-const AppRoutes = () => {
+const AppRoutes = memo(() => {
   const routes = useMemo(() => (
     <Routes>
       {/* Public Routes */}
@@ -154,6 +154,6 @@ const AppRoutes = () => {
       {routes}
     </Suspense>
   );
-};
+});
 
 export default AppRoutes;
