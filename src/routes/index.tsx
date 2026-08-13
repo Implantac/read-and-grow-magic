@@ -340,7 +340,7 @@ const HardeningDashboard = () => {
         </Card>
 
         <div className="space-y-6">
-          <DailyTaskBoard />
+          {/* <DailyTaskBoard /> */}
 
           <Card className="border-primary/20 bg-background shadow-md">
             <CardHeader className="pb-3">
