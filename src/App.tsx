@@ -15,12 +15,12 @@ import { useFinancialOrchestrator } from '@/core/orchestration/FinancialOrchestr
 // Centralized Routing System (EOE optimized)
 import AppRoutes from './routes/index';
 
-const RealtimeAlertsBridge = () => {
+const RealtimeAlertsBridge = React.memo(() => {
   useLowMarginAlertsRealtime();
   useInventoryOrchestrator();
   useFinancialOrchestrator();
   return null;
-};
+});
 
 const queryClient = new QueryClient({
   defaultOptions: {
