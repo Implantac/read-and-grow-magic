@@ -114,7 +114,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const applyCompany = async (company: CompanyRow) => {
+  const applyCompany = useCallback(async (company: CompanyRow) => {
     if (!company) return;
     const { getEnterprisePolicies } = await import('@/core/orchestration/policyEngine');
     
@@ -126,7 +126,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     setTaxRegime((company.tax_regime as string | null) ?? 'Simples Nacional');
     setOperationTypes((company.operation_types as OperationType[] | null) ?? []);
     setPolicies(getEnterprisePolicies(seg));
-  };
+  }, []);
 
   const loadActiveTenant = async () => {
     setIsLoading(true);
