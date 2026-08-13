@@ -154,6 +154,8 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
       }
     } catch (error: unknown) {
       console.error('Enterprise context error:', error);
+      // Evita loops se o erro for persistente, mas garante que o estado de loading seja limpo
+      if (mounted) setIsLoading(false);
     } finally {
       setIsLoading(false);
     }
