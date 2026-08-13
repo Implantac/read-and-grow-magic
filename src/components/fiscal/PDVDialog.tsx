@@ -80,6 +80,7 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
   const [showPayment, setShowPayment] = useState(false);
   const [screenLocked, setScreenLocked] = useState(false);
   const [showPixDialog, setShowPixDialog] = useState<{ splitId: string; amount: number } | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const {
     splits, setSplits, splitDrafts, installments, setInstallments,
@@ -296,6 +297,8 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
                 filteredProducts={filteredProducts}
                 term={term}
                 onPickProduct={addToCart}
+                viewMode={viewMode}
+                onChangeViewMode={setViewMode}
               />
 
               <div className="px-6 pt-4 pb-2 flex items-center justify-between border-t mt-4">

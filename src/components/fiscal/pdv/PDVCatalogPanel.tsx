@@ -1,5 +1,5 @@
 import { forwardRef, type RefObject } from 'react';
-import { Camera, CameraOff, Keyboard, LayoutGrid, Package, QrCode, ScanLine, Search, Plus } from 'lucide-react';
+import { Camera, CameraOff, Keyboard, LayoutGrid, Package, QrCode, ScanLine, Search, Plus, List, Grid } from 'lucide-react';
 import { Input } from '@/ui/base/input';
 import { Badge } from '@/ui/base/badge';
 import { Button } from '@/ui/base/button';
@@ -32,6 +32,8 @@ interface PDVCatalogPanelProps {
   filteredProducts: DbProduct[];
   term: string;
   onPickProduct: (p: DbProduct) => void;
+  viewMode?: 'grid' | 'list';
+  onChangeViewMode?: (m: 'grid' | 'list') => void;
 }
 
 const placeholderByMode: Record<InputMode, string> = {
@@ -43,7 +45,7 @@ const placeholderByMode: Record<InputMode, string> = {
 export const PDVCatalogPanel = forwardRef<HTMLDivElement, PDVCatalogPanelProps>(function PDVCatalogPanel({
   inputMode, onChangeInputMode, search, onSearchChange, onSearchKeyDown, searchRef, videoRef,
   productsCount, isLoading, categories, selectedCategoryId, onSelectCategory,
-  filteredProducts, term, onPickProduct,
+  filteredProducts, term, onPickProduct, viewMode = 'grid', onChangeViewMode,
 }, ref) {
   return (
     <div ref={ref}>
@@ -70,9 +72,33 @@ export const PDVCatalogPanel = forwardRef<HTMLDivElement, PDVCatalogPanelProps>(
             </button>
           ))}
         </div>
-        <Badge variant="secondary" className="gap-1 h-7">
-          <Package className="h-3 w-3" /> {productsCount} produtos
-        </Badge>
+        <div className="flex items-center gap-2">
+          {onChangeViewMode && (
+            <div className="flex bg-muted/60 rounded-lg p-1 gap-1">
+              <button
+                onClick={() => onChangeViewMode('grid')}
+                className={cn(
+                  'p-1.5 rounded-md transition-all',
+                  viewMode === 'grid' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground'
+                )}
+              >
+                <Grid className="h-3.5 w-3.5" />
+              </button>
+              <button
+                onClick={() => onChangeViewMode('list')}
+                className={cn(
+                  'p-1.5 rounded-md transition-all',
+                  viewMode === 'list' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground'
+                )}
+              >
+                <List className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
+          <Badge variant="secondary" className="gap-1 h-7">
+            <Package className="h-3 w-3" /> {productsCount} produtos
+          </Badge>
+        </div>
       </div>
 
       {/* Input / Camera area */}
@@ -161,7 +187,7 @@ export const PDVCatalogPanel = forwardRef<HTMLDivElement, PDVCatalogPanelProps>(
           </div>
           {filteredProducts.length === 0 ? (
             <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">Nenhum produto encontrado.</div>
-          ) : (
+          ) : viewMode === 'grid' ? (
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
               {filteredProducts.slice(0, 18).map((p) => (
                 <button
@@ -174,6 +200,15 @@ export const PDVCatalogPanel = forwardRef<HTMLDivElement, PDVCatalogPanelProps>(
                       <Plus className="h-3 w-3" />
                     </div>
                   </div>
+                  {p.image_url ? (
+                    <div className="aspect-square w-full rounded-lg bg-muted mb-2 overflow-hidden border">
+                      <img src={p.image_url} alt={p.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                    </div>
+                  ) : (
+                    <div className="aspect-square w-full rounded-lg bg-muted/30 mb-2 flex items-center justify-center border border-dashed">
+                      <Package className="h-6 w-6 text-muted-foreground/40" />
+                    </div>
+                  )}
                   <div className="font-bold text-xs line-clamp-2 leading-tight mb-1 min-h-[2rem] group-hover:text-primary transition-colors">
                     {p.name}
                   </div>
@@ -187,6 +222,37 @@ export const PDVCatalogPanel = forwardRef<HTMLDivElement, PDVCatalogPanelProps>(
                     <span className="text-[9px] font-bold uppercase text-muted-foreground bg-muted px-1 rounded">
                       {p.unit}
                     </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-1">
+              {filteredProducts.slice(0, 30).map((p) => (
+                <button
+                  key={p.id}
+                  className="w-full flex items-center gap-3 p-2 rounded-lg bg-background border hover:border-primary hover:bg-primary/5 transition-all group"
+                  onClick={() => onPickProduct(p)}
+                >
+                  <div className="w-10 h-10 rounded border bg-muted shrink-0 overflow-hidden">
+                    {p.image_url ? (
+                      <img src={p.image_url} alt={p.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Package className="h-4 w-4 text-muted-foreground/40" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 text-left min-w-0">
+                    <div className="font-bold text-sm truncate">{p.name}</div>
+                    <div className="text-[10px] text-muted-foreground font-mono">{p.code}</div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="text-sm font-black text-primary tabular-nums">{formatBRL(p.sale_price)}</div>
+                    <div className="text-[9px] font-bold uppercase text-muted-foreground">{p.unit}</div>
+                  </div>
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Plus className="h-4 w-4 text-primary" />
                   </div>
                 </button>
               ))}
