@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   AlertDialog,
@@ -29,7 +30,7 @@ const ConfirmCtx = createContext<ConfirmFn | null>(null);
  * Provider global de confirmação destrutiva unificada.
  * Uso: `const confirm = useConfirm(); if (await confirm({ title: 'Excluir?' })) { ... }`.
  */
-export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
+export const ConfirmDialogProvider = React.forwardRef<HTMLDivElement, { children: ReactNode }>(({ children }, ref) => {
   const [open, setOpen] = useState(false);
   const [opts, setOpts] = useState<ConfirmOptions | null>(null);
   const resolverRef = useRef<((v: boolean) => void) | null>(null);
@@ -82,7 +83,7 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
       </AlertDialog>
     </ConfirmCtx.Provider>
   );
-}
+});
 
 export function useConfirm(): ConfirmFn {
   const ctx = useContext(ConfirmCtx);
