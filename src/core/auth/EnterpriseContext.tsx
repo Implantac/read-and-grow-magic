@@ -119,6 +119,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
   }, []);
 
   const loadActiveTenant = useCallback(async (isMounted: MutableRefObject<boolean>) => {
+    if (!isMounted.current) return;
     setIsLoading(true);
     try {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -169,7 +170,9 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
         }
       }
     } catch (error: unknown) {
-      console.error('Enterprise context error:', error);
+      if (isMounted.current) {
+        console.error('Enterprise context error:', error);
+      }
     } finally {
       if (isMounted.current) setIsLoading(false);
     }

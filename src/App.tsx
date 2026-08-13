@@ -19,11 +19,18 @@ const RealtimeAlertsBridge = React.memo(() => {
   const { currentCompany, isLoading } = useEnterprise();
   const companyId = currentCompany?.id;
   
+  // Track mount status
+  const isMounted = React.useRef(true);
+  React.useEffect(() => {
+    isMounted.current = true;
+    return () => { isMounted.current = false; };
+  }, []);
+  
   // Use a ref to track the last synced companyId to prevent duplicate initializations
   const lastSyncedId = React.useRef<string | undefined>(undefined);
 
   React.useEffect(() => {
-    if (!companyId || isLoading) return;
+    if (!companyId || isLoading || !isMounted.current) return;
     lastSyncedId.current = companyId;
   }, [companyId, isLoading]);
 
