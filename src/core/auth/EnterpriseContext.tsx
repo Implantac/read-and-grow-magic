@@ -99,15 +99,26 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
   };
 
   useEffect(() => {
-    loadActiveTenant();
-    // loadActiveTenant captures only stable setters; running once on mount is intentional.
+    let mounted = true;
+    
+    const init = async () => {
+      if (mounted) await loadActiveTenant();
+    };
+    
+    init();
+    
+    return () => {
+      mounted = false;
+    };
+    // loadActiveTenant is stable, but we explicitly run once on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const applyCompany = async (company: CompanyRow) => {
+    if (!company) return;
     const { getEnterprisePolicies } = await import('@/core/orchestration/policyEngine');
     
-    setCurrentCompany(company);
+    setCurrentCompany(prev => (prev?.id === company.id ? prev : company));
     const seg = (company.segment as Segment | null) ?? 'general';
     setSegment(seg);
     setSubSegment(company.sub_segment ?? '');
