@@ -216,14 +216,16 @@ export function useNFCe() {
     let debounce: ReturnType<typeof setTimeout> | null = null;
     const schedule = () => {
       if (debounce) clearTimeout(debounce);
-      debounce = setTimeout(() => { fetchNFCes(); }, 250);
+      debounce = setTimeout(() => { 
+        // Only fetch if tab is active to avoid background loops
+        if (document.visibilityState === 'visible') {
+          fetchNFCes(); 
+        }
+      }, 1000); // Increased debounce for stability
     };
     const channel = supabase
-      .channel('nfce-live')
+      .channel('nfce-live-global')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'nfce' }, schedule)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'nfce_items' }, schedule)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'nfce_returns' }, schedule)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'nfce_return_items' }, schedule)
       .subscribe();
     return () => {
       if (debounce) clearTimeout(debounce);
