@@ -16,14 +16,14 @@ export const useInventoryOrchestrator = (providedCompanyId?: string) => {
     console.log('[InventoryOrchestrator] Sale completed, processing stock update', payload);
     toastSuccess(`Pedido ${payload.orderId.split('-')[0]} confirmado. Movimentação de estoque iniciada.`);
     
-    // Use queueMicrotask to decouple from the current execution frame
-    queueMicrotask(() => {
+    // Use a delay to break the synchronous execution chain
+    setTimeout(() => {
       eventBus.publish('STOCK_MOVED', { 
         orderId: payload.orderId, 
         type: 'SALE_OUT',
         companyId: payload.companyId 
       });
-    });
+    }, 0);
   }, [companyId, eventBus]);
 
   useEffect(() => {
