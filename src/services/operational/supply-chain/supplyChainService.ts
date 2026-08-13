@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
+import { LIST_LIMIT } from "@/lib/queryLimits";
 
 export type MovementStatus = Database['public']['Tables']['supply_chain_movements']['Row']['status'];
 export type SupplyChainMovement = Database['public']['Tables']['supply_chain_movements']['Row'];
@@ -29,7 +30,7 @@ export const supplyChainService = {
       query = query.in('status', filters.status);
     }
 
-    const { data, error } = await query.order('created_at', { ascending: false }).limit(1000);
+    const { data, error } = await query.order('created_at', { ascending: false }).limit(LIST_LIMIT);
     
     if (error) {
       console.error('Error fetching movements:', error);

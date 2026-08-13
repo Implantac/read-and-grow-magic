@@ -11,7 +11,7 @@ import { Skeleton } from '@/ui/base/skeleton';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { isPast } from 'date-fns';
 import { toastSuccess, handleMutationError } from '@/lib/toastHelpers';
-import { useAppStore } from '@/stores/useAppStore';
+import { useActiveTenant } from '@/hooks/shared/useActiveTenant';
 import type { CompanyUser, FilterStatus, Notif } from './divergence-dashboard/types';
 import { DivergenceKPIs } from './divergence-dashboard/DivergenceKPIs';
 import { DivergenceList } from './divergence-dashboard/DivergenceList';
@@ -19,7 +19,7 @@ import { AssignDialog } from './divergence-dashboard/AssignDialog';
 
 export default function DivergenceDashboard() {
   const qc = useQueryClient();
-  const { user, userRole } = useAppStore();
+  const { user, role: userRole } = useActiveTenant();
   const isAdmin = userRole === 'admin' || userRole === 'admin_matriz';
   const [filter, setFilter] = useState<FilterStatus>('open');
 

@@ -28,14 +28,14 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useEnterprise } from "@/core/auth/EnterpriseContext";
+import { useActiveTenant } from '@/hooks/shared/useActiveTenant';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/base/tabs";
 import { Badge } from "@/ui/base/badge";
 import { Separator } from "@/ui/base/separator";
 import { OperationalFeedback } from "@/components/shared/OperationalFeedback";
 
 export default function EnterpriseConfig() {
-  const { currentCompany: company, isLoading: loadingCompany } = useEnterprise();
+  const { company, isLoading: loadingCompany } = useActiveTenant();
   const [loading, setLoading] = useState(false);
   const [settings, setSettings] = useState({
     business_model: 'hybrid',
