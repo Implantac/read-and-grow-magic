@@ -11,10 +11,10 @@ import { Settings, Building2, Store, Truck, ShieldCheck, Save, RefreshCw, Databa
 import { DevSeedControl } from "./components/DevSeedControl";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useEnterprise } from "@/core/auth/EnterpriseContext";
+import { useActiveTenant } from '@/hooks/shared/useActiveTenant';
 
 export default function GlobalSettings() {
-  const { currentCompany: company, isLoading: loadingCompany } = useEnterprise();
+  const { company, isLoading: loadingCompany } = useActiveTenant();
 
   const [loading, setLoading] = useState(false);
   const [settings, setSettings] = useState({
