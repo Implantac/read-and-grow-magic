@@ -16,9 +16,13 @@ import { useFinancialOrchestrator } from '@/core/orchestration/FinancialOrchestr
 import AppRoutes from './routes/index';
 
 const RealtimeAlertsBridge = React.memo(() => {
+  const { currentCompany } = useEnterprise();
+  
+  // Scoped hooks only run when a company is active
   useLowMarginAlertsRealtime();
   useInventoryOrchestrator();
   useFinancialOrchestrator();
+  
   return null;
 });
 
