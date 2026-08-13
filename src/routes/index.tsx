@@ -1,31 +1,34 @@
 import { Suspense, lazy, useMemo } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
-import { ProtectedRoute } from '@/shared/components/ProtectedRoute';
-import { AppLayout } from '@/shared/layouts/AppLayout';
-import ErrorBoundary from '@/shared/components/ErrorBoundary';
+import { OnboardingGuard } from '@/components/OnboardingGuard';
+import { MainLayout } from '@/core/layout/MainLayout';
+import { ModuleErrorBoundary } from '@/shared/components/ModuleErrorBoundary';
 
-// Critical Pages - Eager Load
+// Critical Pages - Eager Load to prevent white screens on initial entry
 import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 
-// Lazy Load Modules for Better Performance & Code Splitting
-const OperationalRoutes = lazy(() => import('./OperationalRoutes').then(m => ({ default: m.OperationalRoutes })));
-const FinancialRoutes = lazy(() => import('./FinancialRoutes').then(m => ({ default: m.FinancialRoutes })));
-const InventoryModule = lazy(() => import('@/modules/inventory/InventoryModule'));
-const SalesModule = lazy(() => import('@/modules/sales/SalesModule'));
-const PurchasingModule = lazy(() => import('@/modules/purchasing/PurchasingModule'));
-const ProductionModule = lazy(() => import('@/modules/production/ProductionModule'));
-const WMSModule = lazy(() => import('@/modules/wms/WMSModule'));
-const RelationshipModule = lazy(() => import('@/modules/relationship/RelationshipModule'));
-const AdminRoutes = lazy(() => import('./AdminRoutes').then(m => ({ default: m.AdminRoutes })));
-const FiscalRoutes = lazy(() => import('./FiscalRoutes').then(m => ({ default: m.FiscalRoutes })));
+// Route Collections - These export arrays of Route elements
+import { CommercialRoutes } from './CommercialRoutes';
+import { FinancialRoutes } from './FinancialRoutes';
+import { OperationalRoutes } from './OperationalRoutes';
+import { AdminRoutes } from './AdminRoutes';
+import { FiscalRoutes } from './FiscalRoutes';
+import { AccountingRoutes } from './AccountingRoutes';
+import { ProductionRoutes } from './ProductionRoutes';
+import { WMSRoutes } from './WMSRoutes';
+import { RelacionamentoRoutes } from './RelacionamentoRoutes';
+import { NetworkRoutes } from './NetworkRoutes';
+
+// Domain-Specific Lazy Components
 const UnifiedSupplyChain = lazy(() => import('@/modules/operational/supply-chain/UnifiedSupplyChain'));
 const StoreCentral = lazy(() => import('@/modules/operational/store/StoreCentral'));
 const ManualModule = lazy(() => import('@/modules/admin/systemManual/SystemManual'));
 
 /**
- * Performance-optimized Page Loader with backdrop blur and smooth animation
+ * Performance-optimized Page Loader
+ * Centralized loading state for all lazy-loaded routes
  */
 const PageLoader = () => (
   <div className="flex h-[60vh] w-full items-center justify-center bg-background/50 backdrop-blur-sm transition-all duration-300">
@@ -40,57 +43,118 @@ const PageLoader = () => (
 
 /**
  * Enterprise Operating Ecosystem (EOE) Optimized Router
- * Implements route-based code splitting and centralized error handling.
+ * Centralizes all application routing with performance best practices:
+ * 1. Code Splitting (Lazy Loading)
+ * 2. Error Boundaries per Module
+ * 3. Protected Context (MainLayout & OnboardingGuard)
+ * 4. Memoized Route Tree
  */
 const AppRoutes = () => {
-  // Memoize routes to prevent unnecessary re-renders of the route tree
   const routes = useMemo(() => (
     <Routes>
+      {/* Public Routes */}
       <Route path="/login" element={<Login />} />
       
-      <Route
-        element={
-          <ProtectedRoute>
-            <AppLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/dashboard" element={<Navigate to="/" replace />} />
-        
-        {/* Domain: Operational & Logistics */}
-        <Route path="/operacional/*" element={<Suspense fallback={<PageLoader />}><Routes>{OperationalRoutes as any}</Routes></Suspense>} />
-        <Route path="/operacional/abastecimento" element={<Suspense fallback={<PageLoader />}><UnifiedSupplyChain /></Suspense>} />
-        <Route path="/operacional/loja/central" element={<Suspense fallback={<PageLoader />}><StoreCentral /></Suspense>} />
-        
-        {/* Domain: Business Intelligence & Execution */}
-        <Route path="/financeiro/*" element={<Suspense fallback={<PageLoader />}><Routes>{FinancialRoutes as any}</Routes></Suspense>} />
-        <Route path="/estoque/*" element={<Suspense fallback={<PageLoader />}><InventoryModule /></Suspense>} />
-        <Route path="/comercial/*" element={<Suspense fallback={<PageLoader />}><SalesModule /></Suspense>} />
-        <Route path="/compras/*" element={<Suspense fallback={<PageLoader />}><PurchasingModule /></Suspense>} />
-        <Route path="/producao/*" element={<Suspense fallback={<PageLoader />}><ProductionModule /></Suspense>} />
-        <Route path="/wms/*" element={<Suspense fallback={<PageLoader />}><WMSModule /></Suspense>} />
-        
-        {/* Domain: Relationship & Compliance */}
-        <Route path="/relacionamento/*" element={<Suspense fallback={<PageLoader />}><RelationshipModule /></Suspense>} />
-        <Route path="/fiscal/*" element={<Suspense fallback={<PageLoader />}><Routes>{FiscalRoutes as any}</Routes></Suspense>} />
-        
-        {/* Domain: Administration & Governance */}
-        <Route path="/admin/*" element={<Suspense fallback={<PageLoader />}><Routes>{AdminRoutes as any}</Routes></Suspense>} />
-        <Route path="/admin/manual" element={<Suspense fallback={<PageLoader />}><ManualModule /></Suspense>} />
+      {/* Protected Layout Scope */}
+      <Route element={<MainLayout />}>
+        <Route element={<OnboardingGuard />}>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Navigate to="/" replace />} />
+          
+          {/* Commercial Domain */}
+          <Route path="/comercial/*" element={
+            <ModuleErrorBoundary moduleName="Comercial">
+              <Routes>{CommercialRoutes}</Routes>
+            </ModuleErrorBoundary>
+          } />
+          
+          {/* Financial Domain */}
+          <Route path="/financeiro/*" element={
+            <ModuleErrorBoundary moduleName="Financeiro">
+              <Routes>{FinancialRoutes}</Routes>
+            </ModuleErrorBoundary>
+          } />
+
+          {/* Logistics & WMS Domain */}
+          <Route path="/wms/*" element={
+            <ModuleErrorBoundary moduleName="WMS">
+              <Routes>{WMSRoutes}</Routes>
+            </ModuleErrorBoundary>
+          } />
+
+          {/* Operational & Supply Chain Domain */}
+          <Route path="/operacional/abastecimento" element={
+            <Suspense fallback={<PageLoader />}>
+              <UnifiedSupplyChain />
+            </Suspense>
+          } />
+          <Route path="/operacional/loja/central" element={
+            <Suspense fallback={<PageLoader />}>
+              <StoreCentral />
+            </Suspense>
+          } />
+          <Route path="/operacional/rede/*" element={
+            <ModuleErrorBoundary moduleName="Rede">
+              <Routes>{NetworkRoutes}</Routes>
+            </ModuleErrorBoundary>
+          } />
+          <Route path="/operacional/*" element={
+            <ModuleErrorBoundary moduleName="Operacional">
+              <Routes>{OperationalRoutes}</Routes>
+            </ModuleErrorBoundary>
+          } />
+
+          {/* Accounting Domain */}
+          <Route path="/contabilidade/*" element={
+            <ModuleErrorBoundary moduleName="Contábil">
+              <Routes>{AccountingRoutes}</Routes>
+            </ModuleErrorBoundary>
+          } />
+
+          {/* Production Domain */}
+          <Route path="/producao/*" element={
+            <ModuleErrorBoundary moduleName="Produção">
+              <Routes>{ProductionRoutes}</Routes>
+            </ModuleErrorBoundary>
+          } />
+
+          {/* Fiscal Domain */}
+          <Route path="/fiscal/*" element={
+            <ModuleErrorBoundary moduleName="Fiscal">
+              <Routes>{FiscalRoutes}</Routes>
+            </ModuleErrorBoundary>
+          } />
+
+          {/* Relationship (CRM/NPS) Domain */}
+          <Route path="/relacionamento/*" element={
+            <ModuleErrorBoundary moduleName="Relacionamento">
+              <Routes>{RelacionamentoRoutes}</Routes>
+            </ModuleErrorBoundary>
+          } />
+
+          {/* Administration & Governance Domain */}
+          <Route path="/admin/manual" element={
+            <Suspense fallback={<PageLoader />}>
+              <ManualModule />
+            </Suspense>
+          } />
+          <Route path="/admin/*" element={
+            <ModuleErrorBoundary moduleName="Admin">
+              <Routes>{AdminRoutes}</Routes>
+            </ModuleErrorBoundary>
+          } />
+        </Route>
       </Route>
 
-      {/* Fallback for undefined routes */}
+      {/* 404 & Redirects */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   ), []);
 
   return (
-    <ErrorBoundary>
-      <Suspense fallback={<PageLoader />}>
-        {routes}
-      </Suspense>
-    </ErrorBoundary>
+    <Suspense fallback={<PageLoader />}>
+      {routes}
+    </Suspense>
   );
 };
 
