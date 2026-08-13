@@ -105,4 +105,4 @@ export const MainLayout = withRenderMonitor(() => {
       </main>
     </div>
   );
-}
+}, 'MainLayout');
