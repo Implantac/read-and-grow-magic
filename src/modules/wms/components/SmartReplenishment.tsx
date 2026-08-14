@@ -249,22 +249,20 @@ export function SmartReplenishment() {
     });
 
     if (corrections > 0) {
-      setEditedQuantities(newEdited);
+      pushToHistory(newEdited);
       toast.success(`${corrections} quantidades corrigidas para o limite máximo.`);
     }
   };
 
   const handleResetAllQuantities = () => {
-    setEditedQuantities({});
+    pushToHistory({});
     toast.info("Todas as quantidades foram restauradas para os valores sugeridos.");
   };
 
   const handleResetQuantity = (id: string) => {
-    setEditedQuantities(prev => {
-      const next = { ...prev };
-      delete next[id];
-      return next;
-    });
+    const next = { ...editedQuantities };
+    delete next[id];
+    pushToHistory(next);
     toast.info("Quantidade restaurada para o valor sugerido.");
   };
 
