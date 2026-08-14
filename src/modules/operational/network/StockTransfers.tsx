@@ -10,7 +10,7 @@ import { EmptyState } from '@/shared/components/EmptyState';
 import { ScrollArea } from '@/ui/base/scroll-area';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/ui/base/dialog';
 import { transferWorkflow, TransferStatus } from '@/services/operational/inventory/transferWorkflow';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/system/useAuth';
 import { toast } from 'sonner';
 import { Separator } from '@/ui/base/separator';
 import { Textarea } from '@/ui/base/textarea';
