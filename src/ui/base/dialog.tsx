@@ -27,12 +27,13 @@ const DialogOverlay = React.forwardRef<
 ));
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
-const DialogContent = React.memo(React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
-    description?: string;
-  }
->(({ className, children, description, ...props }, ref) => {
+const DialogContent = React.memo(
+  React.forwardRef<
+    React.ElementRef<typeof DialogPrimitive.Content>,
+    React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
+      description?: string;
+    }
+  >(({ className, children, description, ...props }, ref) => {
   // Auto-generate a hidden description when none is provided to prevent
   // Radix accessibility warnings ("Missing Description or aria-describedby").
   const autoDescId = React.useId();

@@ -186,10 +186,12 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
         !storeState.isAuthenticated;
 
       if (needsUpdate) {
-        // Use a functional update to ensure we have the absolute latest state from Zustand
         useStore.setState((state) => {
-          if (state.user?.id === user.id && state.userRole === finalRole) return state;
+          // Double check inside to be absolutely sure
+          if (state.user?.id === user.id && state.userRole === finalRole && state.isAuthenticated) return state;
+          
           return {
+            ...state,
             user: {
               id: user.id,
               name: userName,
@@ -272,9 +274,10 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
     // We check if we are already syncing or loading to avoid double trigger
     const timeout = setTimeout(() => {
       if (mounted.current && !isSyncing.current) {
+        console.log('[EnterpriseProvider] Initial load triggered');
         loadActiveTenant(isMounted);
       }
-    }, 150);
+    }, 250);
 
     // Sync with auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {

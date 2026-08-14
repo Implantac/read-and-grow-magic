@@ -15,7 +15,7 @@ import { useFinancialOrchestrator } from '@/core/orchestration/FinancialOrchestr
 import { withRenderMonitor } from '@/core/debug/RenderDepthMonitor';
 
 // Centralized Routing System (EOE optimized)
-const AppRoutes = withRenderMonitor(React.memo(lazy(() => import('./routes/index'))), 'AppRoutes');
+const AppRoutes = React.memo(lazy(() => import('./routes/index')));
 
 const RealtimeAlertsBridge = React.memo(() => {
   const enterprise = useEnterprise();
@@ -25,6 +25,7 @@ const RealtimeAlertsBridge = React.memo(() => {
   // We memoize the initialization to ensure it only happens when companyId truly changes
   return React.useMemo(() => {
     if (!companyId) return null;
+    console.log('[RealtimeAlertsBridge] Re-initializing orchestrators for company:', companyId);
     return <AlertsOrchestratorContainer companyId={companyId} />;
   }, [companyId]);
 });
