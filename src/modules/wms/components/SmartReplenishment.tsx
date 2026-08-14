@@ -228,6 +228,11 @@ export function SmartReplenishment() {
     }
   };
 
+  const handleResetAllQuantities = () => {
+    setEditedQuantities({});
+    toast.info("Todas as quantidades foram restauradas para os valores sugeridos.");
+  };
+
   const handleResetQuantity = (id: string) => {
     setEditedQuantities(prev => {
       const next = { ...prev };
@@ -799,15 +804,30 @@ export function SmartReplenishment() {
               {bulkConfirmStep ? 'Voltar para Revisão' : 'Cancelar'}
             </Button>
             
-            {!bulkConfirmStep && hasInvalidItems && (
-              <Button 
-                variant="outline"
-                className="border-amber-500 text-amber-700 hover:bg-amber-50"
-                onClick={handleAutoCorrectInvalid}
-              >
-                <Brain className="h-4 w-4 mr-2" />
-                Corrigir Invalidos
-              </Button>
+            {!bulkConfirmStep && (
+              <>
+                {Object.keys(editedQuantities).length > 0 && (
+                  <Button 
+                    variant="ghost"
+                    onClick={handleResetAllQuantities}
+                    className="text-muted-foreground"
+                  >
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Restaurar Originais
+                  </Button>
+                )}
+                
+                {hasInvalidItems && (
+                  <Button 
+                    variant="outline"
+                    className="border-amber-500 text-amber-700 hover:bg-amber-50"
+                    onClick={handleAutoCorrectInvalid}
+                  >
+                    <Brain className="h-4 w-4 mr-2" />
+                    Corrigir Invalidos
+                  </Button>
+                )}
+              </>
             )}
 
             {bulkConfirmStep ? (
