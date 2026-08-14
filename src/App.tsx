@@ -21,21 +21,11 @@ const RealtimeAlertsBridge = React.memo(() => {
   const { currentCompany, isLoading } = useEnterprise();
   const companyId = currentCompany?.id;
   
-  const [activeId, setActiveId] = React.useState<string | null>(null);
+  // We use keying to force a clean unmount/remount ONLY when companyId changes.
+  // The null check prevents rendering until we have a real ID.
+  if (isLoading || !companyId) return null;
 
-  React.useEffect(() => {
-    if (!isLoading && companyId && activeId !== companyId) {
-      setActiveId(companyId);
-    }
-  }, [companyId, isLoading, activeId]);
-
-  if (!activeId) return null;
-
-  return <AlertsOrchestratorContainer companyId={activeId} />;
-});
-
-const AlertsOrchestratorContainer = React.memo(({ companyId }: { companyId: string }) => {
-  return <OrchestratorInternal companyId={companyId} />;
+  return <OrchestratorInternal key={companyId} companyId={companyId} />;
 });
 
 const OrchestratorInternal = React.memo(({ companyId }: { companyId: string }) => {
@@ -75,9 +65,9 @@ const App = () => (
     <TooltipProvider>
       <EnterpriseProvider>
         <ConfirmDialogProvider>
+          <RealtimeAlertsBridge />
           <Toaster />
           <Sonner />
-          <RealtimeAlertsBridge />
           <BrowserRouter>
             <WorkflowSwitcher />
             <Suspense fallback={<GlobalLoader />}>
