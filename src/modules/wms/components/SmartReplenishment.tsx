@@ -221,12 +221,13 @@ export function SmartReplenishment() {
                   variant="default" 
                   size="sm" 
                   className="bg-primary hover:bg-primary/90 shadow-lg animate-in fade-in zoom-in duration-300"
-                  onClick={handleBulkApprove}
+                  onClick={() => setShowBulkPreview(true)}
                   disabled={isBulkApproving}
                 >
                   <Rocket className={`h-4 w-4 mr-2 ${isBulkApproving ? 'animate-bounce' : ''}`} />
-                  Aprovar {selectedIds.size} {selectedIds.size === 1 ? 'Sugestão' : 'Sugestões'}
+                  Revisar {selectedIds.size} {selectedIds.size === 1 ? 'Sugestão' : 'Sugestões'}
                 </Button>
+
               )}
               <Badge variant="outline" className="bg-background">IA Analítica Ativa</Badge>
             </div>
