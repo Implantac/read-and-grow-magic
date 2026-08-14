@@ -31,14 +31,13 @@ class RenderDepthMonitor {
     this.updateCounts.set(componentName, currentCount);
 
     if (currentCount > MAX_UPDATES_PER_SECOND) {
-      console.error(
-        `[CRITICAL] Loop de Renderização detectado em: "${componentName}".`,
-        `Frequência: ${currentCount} updates/seg.`,
-        'Verifique se este componente está atualizando estado em um useEffect sem dependências corretas.'
+      console.warn(
+        `[LOOP-PREVENTED] Supressão de renderização em: "${componentName}".`,
+        `Frequência: ${currentCount} updates/seg.`
       );
       
       this.isEnabled = false;
-      setTimeout(() => { this.isEnabled = true; }, 10000);
+      setTimeout(() => { this.isEnabled = true; }, 5000);
       
       // In production, we don't throw to avoid hiding the original React #185 error
       // which is more useful for debugging the root cause.

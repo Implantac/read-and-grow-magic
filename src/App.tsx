@@ -18,10 +18,10 @@ import { withRenderMonitor } from '@/core/debug/RenderDepthMonitor';
 const AppRoutes = React.memo(lazy(() => import('./routes/index')));
 
 const RealtimeAlertsBridge = React.memo(() => {
-  const { currentCompany, isLoading } = useEnterprise();
-  const companyId = currentCompany?.id;
+  const enterprise = useEnterprise();
+  const companyId = enterprise.currentCompany?.id;
   
-  if (isLoading || !companyId) return null;
+  if (enterprise.isLoading || !companyId) return null;
 
   return <OrchestratorInternal companyId={companyId} />;
 });
