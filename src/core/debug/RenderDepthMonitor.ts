@@ -80,11 +80,12 @@ export function withRenderMonitor<P extends object>(
   };
 
   // Only use forwardRef if the underlying component is already a forwardRef component
-  // or a class component, to preserve existing ref behavior without forcing it on others.
+  // or a class component, or if it explicitly supports refs.
   const isForwardRef = (Component as any)?.$$typeof === Symbol.for('react.forward_ref');
   const isClassComponent = Component.prototype?.isReactComponent;
+  const isMemo = (Component as any)?.$$typeof === Symbol.for('react.memo');
 
-  if (isForwardRef || isClassComponent) {
+  if (isForwardRef || isClassComponent || isMemo) {
     const ForwardedMonitor = React.forwardRef<any, P>((props, ref) => {
       const isInitialRender = React.useRef(true);
       
@@ -96,10 +97,12 @@ export function withRenderMonitor<P extends object>(
         monitor.trackUpdate(name);
       });
 
-      return React.createElement(Component as any, { ...props, ref });
+      // Unwrap memo if needed for createElement
+      const componentToRender = isMemo ? (Component as any).type : Component;
+      return React.createElement(componentToRender, { ...props, ref });
     });
     ForwardedMonitor.displayName = `withRenderMonitor(${name})`;
-    return ForwardedMonitor;
+    return isMemo ? React.memo(ForwardedMonitor) : ForwardedMonitor;
   }
 
   MonitorWrapper.displayName = `withRenderMonitor(${name})`;
