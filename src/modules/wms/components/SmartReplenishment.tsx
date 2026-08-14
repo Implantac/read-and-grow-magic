@@ -615,12 +615,17 @@ export function SmartReplenishment() {
                           <div className="text-[10px] text-muted-foreground font-mono">{String(item.productCode)}</div>
                         </TableCell>
                         <TableCell className="py-2 text-right">
-                          <Input
-                            type="number"
-                            value={item.quantidade}
-                            onChange={(e) => handleUpdateQuantity(item.id, Number(e.target.value))}
-                            className="h-7 w-20 ml-auto text-right text-xs font-bold text-primary"
-                          />
+                          <div className="flex flex-col items-end gap-1">
+                            <Input
+                              type="number"
+                              value={item.quantidade}
+                              onChange={(e) => handleUpdateQuantity(item.id, Number(e.target.value), item.maxAvailable)}
+                              className={`h-7 w-20 ml-auto text-right text-xs font-bold ${item.isInvalid ? 'border-destructive text-destructive' : 'text-primary'}`}
+                            />
+                            {item.isInvalid && (
+                              <span className="text-[8px] text-destructive font-semibold">Max: {item.maxAvailable}</span>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell className="py-2 text-right">
                           <Button
