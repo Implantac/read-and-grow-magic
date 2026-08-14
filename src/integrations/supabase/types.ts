@@ -19644,9 +19644,65 @@ export type Database = {
           },
         ]
       }
+      supply_chain_ledger: {
+        Row: {
+          causation_id: string | null
+          company_id: string
+          correlation_id: string | null
+          created_at: string
+          id: string
+          metadata: Json | null
+          movement_id: string
+          new_status: string
+          previous_status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          causation_id?: string | null
+          company_id: string
+          correlation_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          movement_id: string
+          new_status: string
+          previous_status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          causation_id?: string | null
+          company_id?: string
+          correlation_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          movement_id?: string
+          new_status?: string
+          previous_status?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supply_chain_ledger_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supply_chain_ledger_movement_id_fkey"
+            columns: ["movement_id"]
+            isOneToOne: false
+            referencedRelation: "supply_chain_movements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       supply_chain_movements: {
         Row: {
+          causation_id: string | null
           company_id: string
+          correlation_id: string | null
           created_at: string
           destination_id: string
           destination_type: string
@@ -19661,7 +19717,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          causation_id?: string | null
           company_id: string
+          correlation_id?: string | null
           created_at?: string
           destination_id: string
           destination_type: string
@@ -19676,7 +19734,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          causation_id?: string | null
           company_id?: string
+          correlation_id?: string | null
           created_at?: string
           destination_id?: string
           destination_type?: string

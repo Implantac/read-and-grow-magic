@@ -9,11 +9,17 @@ type EventType =
   | 'WORKFLOW_STARTED'
   | 'WORKFLOW_COMPLETED';
 
-type SubscriptionCallback = (payload: any) => void;
+interface EventPayload {
+  correlationId?: string;
+  causationId?: string;
+  [key: string]: any;
+}
+
+type SubscriptionCallback = (payload: EventPayload) => void;
 
 interface EventBusState {
   subscribers: Record<string, Set<SubscriptionCallback>>;
-  publish: (event: EventType, payload: any) => void;
+  publish: (event: EventType, payload: EventPayload) => void;
   subscribe: (event: EventType, callback: SubscriptionCallback) => () => void;
 }
 

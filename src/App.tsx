@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/ui/base/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
 import { EnterpriseProvider, useEnterprise } from "@/core/auth/EnterpriseContext";
+import { PolicyProvider } from "@/core/orchestration/policyEngine";
 import { Loader2 } from 'lucide-react';
 import { ConfirmDialogProvider } from '@/shared/components/ConfirmDialog';
 import { useLowMarginAlertsRealtime } from '@/hooks/commercial/useLowMarginAlertsRealtime';
@@ -106,17 +107,19 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <EnterpriseProvider>
-        <ConfirmDialogProvider>
-          <RealtimeAlertsBridge />
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <WorkflowSwitcher />
-            <Suspense fallback={<GlobalLoader />}>
-              <AppRoutes />
-            </Suspense>
-          </BrowserRouter>
-        </ConfirmDialogProvider>
+        <PolicyProvider>
+          <ConfirmDialogProvider>
+            <RealtimeAlertsBridge />
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <WorkflowSwitcher />
+              <Suspense fallback={<GlobalLoader />}>
+                <AppRoutes />
+              </Suspense>
+            </BrowserRouter>
+          </ConfirmDialogProvider>
+        </PolicyProvider>
       </EnterpriseProvider>
     </TooltipProvider>
   </QueryClientProvider>
