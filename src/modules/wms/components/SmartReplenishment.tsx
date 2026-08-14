@@ -920,7 +920,7 @@ export function SmartReplenishment() {
                     size="icon"
                     onClick={() => setShowClearConfirm(true)}
                     className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                    title="Limpar Histórico e Cache"
+                    title="Limpar Histórico e Cache (Ctrl+Del / Ctrl+Backspace)"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
