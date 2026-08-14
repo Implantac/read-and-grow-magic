@@ -164,7 +164,10 @@ export function SmartReplenishment() {
     return Object.values(groups);
   }, [suggestions, selectedIds, editedQuantities]);
 
-  const handleUpdateQuantity = (id: string, value: number) => {
+  const handleUpdateQuantity = (id: string, value: number, max: number) => {
+    if (value > max) {
+      toast.error(`Quantidade excede o surplus disponível na origem (${max} un).`);
+    }
     setEditedQuantities(prev => ({ ...prev, [id]: value }));
   };
 
@@ -173,6 +176,11 @@ export function SmartReplenishment() {
     newSet.delete(id);
     setSelectedIds(newSet);
   };
+
+  const hasInvalidItems = useMemo(() => {
+    if (!bulkPreviewData) return false;
+    return bulkPreviewData.some((g: any) => g.itens.some((i: any) => i.isInvalid));
+  }, [bulkPreviewData]);
 
   const handleBulkApprove = async () => {
     if (!bulkPreviewData || bulkPreviewData.length === 0) return;
