@@ -21,14 +21,58 @@ const RealtimeAlertsBridge = React.memo(() => {
   const enterprise = useEnterprise();
   const companyId = enterprise.currentCompany?.id;
   
-  if (enterprise.isLoading || !companyId) return null;
+  // Decouple orchestrator mounting from immediate render to prevent synchronous state cycles
+  const [shouldMount, setShouldMount] = React.useState(false);
+
+  React.useEffect(() => {
+    // Only mount if enterprise is fully loaded and we have a company ID
+    if (!enterprise.isLoading && companyId) {
+      // Use a slightly longer delay for initial mounting to ensure context stability
+      const timer = setTimeout(() => {
+        setShouldMount(true);
+      }, 800);
+      return () => clearTimeout(timer);
+    } else if (!enterprise.isLoading && !companyId) {
+      // If finished loading but no company, don't mount
+      setShouldMount(false);
+    }
+    // We don't unmount immediately on isLoading=true to prevent flickering/resubscription loops
+    // unless the company ID actually changes
+  }, [enterprise.isLoading, companyId]);
+
+  if (!shouldMount || !companyId) return null;
 
   return <OrchestratorInternal companyId={companyId} />;
 });
 
 const OrchestratorInternal = React.memo(({ companyId }: { companyId: string }) => {
+  const lastCompanyId = React.useRef<string | null>(null);
+
+  // Prevent internal re-renders of orchestrators if companyId hasn't actually changed
+  if (lastCompanyId.current !== companyId) {
+    lastCompanyId.current = companyId;
+  }
+
+  return (
+    <React.Fragment>
+      <LowMarginAlertsWrapper companyId={companyId} />
+      <InventoryOrchestratorWrapper companyId={companyId} />
+      <FinancialOrchestratorWrapper companyId={companyId} />
+    </React.Fragment>
+  );
+});
+
+const LowMarginAlertsWrapper = React.memo(({ companyId }: { companyId: string }) => {
   useLowMarginAlertsRealtime(companyId);
+  return null;
+});
+
+const InventoryOrchestratorWrapper = React.memo(({ companyId }: { companyId: string }) => {
   useInventoryOrchestrator(companyId);
+  return null;
+});
+
+const FinancialOrchestratorWrapper = React.memo(({ companyId }: { companyId: string }) => {
   useFinancialOrchestrator(companyId);
   return null;
 });

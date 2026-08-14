@@ -8,13 +8,11 @@ export const useInventoryOrchestrator = (providedCompanyId?: string) => {
   const companyId = providedCompanyId || currentCompany?.id;
   const eventBus = useEventBus();
   
-  // Use a ref to track the last companyId we subscribed for to prevent duplicates
   const lastSubscribedCompanyId = useRef<string | null>(null);
+  const isHandlingCleanup = useRef(false);
 
   const handleSaleCompleted = useCallback((payload: any) => {
-    // Strict company check
     if (payload.companyId !== companyId) return;
-
     console.log('[InventoryOrchestrator] Sale completed, processing stock update', payload);
     toastSuccess(`Pedido ${payload.orderId.split('-')[0]} confirmado. Movimentação de estoque iniciada.`);
     
@@ -28,17 +26,35 @@ export const useInventoryOrchestrator = (providedCompanyId?: string) => {
   }, [companyId, eventBus]);
 
   useEffect(() => {
-    if (!companyId || isContextLoading) return;
+    // Break cycle if context is resetting or loading
+    if (!companyId || isContextLoading) {
+      lastSubscribedCompanyId.current = null;
+      return;
+    }
+
+    // Idempotency check
     if (lastSubscribedCompanyId.current === companyId) return;
 
-    lastSubscribedCompanyId.current = companyId;
-    console.log(`[InventoryOrchestrator] Subscribing to SALE_COMPLETED for company: ${companyId}`);
+    const currentId = companyId;
+    lastSubscribedCompanyId.current = currentId;
+
+    console.log(`[InventoryOrchestrator] Subscribing for company: ${currentId}`);
     const unsubscribe = eventBus.subscribe('SALE_COMPLETED', handleSaleCompleted);
 
     return () => {
-      console.log(`[InventoryOrchestrator] Unsubscribing from SALE_COMPLETED for company: ${companyId}`);
+      if (isHandlingCleanup.current) return;
+      isHandlingCleanup.current = true;
+      
+      console.log(`[InventoryOrchestrator] Unsubscribing for company: ${currentId}`);
       unsubscribe();
-      lastSubscribedCompanyId.current = null;
+      
+      // Reset after a small delay to allow React state to settle
+      setTimeout(() => {
+        if (lastSubscribedCompanyId.current === currentId) {
+          lastSubscribedCompanyId.current = null;
+        }
+        isHandlingCleanup.current = false;
+      }, 100);
     };
   }, [companyId, eventBus, isContextLoading, handleSaleCompleted]);
 };
