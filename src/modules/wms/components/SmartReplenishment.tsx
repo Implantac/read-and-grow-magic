@@ -567,7 +567,7 @@ export function SmartReplenishment() {
                       <ArrowRight className="h-4 w-4 text-muted-foreground mt-2" />
                       <div className="flex flex-col">
                         <span className="text-[10px] text-muted-foreground uppercase font-bold">Destino</span>
-                        <span className="text-sm font-semibold">{group.targetName}</span>
+                        <span className="text-sm font-semibold">{group.targetName as string}</span>
                       </div>
                     </div>
                     <Badge variant="secondary">{group.itens.length} {group.itens.length === 1 ? 'item' : 'itens'}</Badge>
