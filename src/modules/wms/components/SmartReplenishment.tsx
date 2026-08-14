@@ -37,18 +37,30 @@ export function SmartReplenishment() {
     }, {});
 
     Object.values(byProduct).forEach((p: any) => {
+      // Motor de Necessidade: Considera Estoque Projetado (Saldo + Em Trânsito)
+      // Nota: Implementação simplificada para o motor atual, buscando consolidar as regras
       const lowStockBranches = p.balances.filter((b: any) => b.quantity < p.min_stock);
-      const surplusBranches = p.balances.filter((b: any) => b.quantity > p.min_stock * 2); // Threshold set to 2x for safety
+      const surplusBranches = p.balances.filter((b: any) => b.quantity > p.min_stock * 2); 
 
       lowStockBranches.forEach((target: any) => {
         const needed = p.min_stock - target.quantity;
         
-        // Encontra a melhor fonte baseada no saldo disponível acima do mínimo
-        const source = surplusBranches
-          .map((s: any) => ({ ...s, availableSurplus: s.quantity - p.min_stock }))
-          .sort((a: any, b: any) => b.availableSurplus - a.availableSurplus)[0];
-        
-        if (source && source.availableSurplus > 0) {
+        // Fluxo de Prioridade: 1. Outras Lojas (Balanceamento) -> 2. CD -> 3. Indústria
+        const sortedSources = surplusBranches
+          .map((s: any) => {
+            let priority = 3; // Outros
+            if (s.branch_tipo === 'STORE') priority = 1; // Balanceamento entre lojas
+            if (s.branch_tipo === 'DISTRIBUTION_CENTER') priority = 2; // Reabastecimento CD
+            if (s.branch_tipo === 'FACTORY') priority = 3; // Produção
+
+            return { ...s, availableSurplus: s.quantity - p.min_stock, sourcePriority: priority };
+          })
+          .sort((a: any, b: any) => {
+            if (a.sourcePriority !== b.sourcePriority) return a.sourcePriority - b.sourcePriority;
+            return b.availableSurplus - a.availableSurplus;
+          });
+
+        const source = sortedSources[0];
           const transferable = Math.min(needed, source.availableSurplus);
           
           if (transferable > 0) {
@@ -59,6 +71,7 @@ export function SmartReplenishment() {
               productName: p.name,
               sourceBranchId: source.branch_id,
               sourceBranchName: source.branch_name,
+              sourceBranchTipo: source.branch_tipo,
               targetBranchId: target.branch_id,
               targetBranchName: target.branch_name,
               currentSourceQty: source.quantity,
@@ -78,7 +91,7 @@ export function SmartReplenishment() {
     createTransfer.mutate({
       origem_branch_id: sug.sourceBranchId,
       destino_branch_id: sug.targetBranchId,
-      canal_origem: sug.sourceBranchId === 'industria-main' ? 'ATACADO_INDUSTRIA' : 'VAREJO_PDV', // Ajuste dinâmico
+      canal_origem: sug.sourceBranchTipo === 'FACTORY' || sug.sourceBranchTipo === 'DISTRIBUTION_CENTER' ? 'ATACADO_INDUSTRIA' : 'VAREJO_PDV',
       canal_destino: 'VAREJO_PDV',
       observacoes: `Reposição via IA: ${sug.sourceBranchName} -> ${sug.targetBranchName}`,
       itens: [{ product_id: sug.productId, quantidade: sug.suggestedQty }],
