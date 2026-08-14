@@ -28,17 +28,28 @@ export const useInventoryOrchestrator = (providedCompanyId?: string) => {
   }, [companyId, eventBus]);
 
   useEffect(() => {
-    if (!companyId || isContextLoading) return;
+    if (!companyId || isContextLoading) {
+      lastSubscribedCompanyId.current = null;
+      return;
+    }
+
     if (lastSubscribedCompanyId.current === companyId) return;
 
-    lastSubscribedCompanyId.current = companyId;
-    console.log(`[InventoryOrchestrator] Subscribing to SALE_COMPLETED for company: ${companyId}`);
-    const unsubscribe = eventBus.subscribe('SALE_COMPLETED', handleSaleCompleted);
+    let unsubscribe: (() => void) | null = null;
+    const currentId = companyId;
+    lastSubscribedCompanyId.current = currentId;
+
+    console.log(`[InventoryOrchestrator] Subscribing to SALE_COMPLETED for company: ${currentId}`);
+    unsubscribe = eventBus.subscribe('SALE_COMPLETED', handleSaleCompleted);
 
     return () => {
-      console.log(`[InventoryOrchestrator] Unsubscribing from SALE_COMPLETED for company: ${companyId}`);
-      unsubscribe();
-      lastSubscribedCompanyId.current = null;
+      if (unsubscribe) {
+        console.log(`[InventoryOrchestrator] Unsubscribing from SALE_COMPLETED for company: ${currentId}`);
+        unsubscribe();
+      }
+      if (lastSubscribedCompanyId.current === currentId) {
+        lastSubscribedCompanyId.current = null;
+      }
     };
   }, [companyId, eventBus, isContextLoading, handleSaleCompleted]);
 };

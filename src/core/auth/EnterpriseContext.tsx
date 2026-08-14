@@ -114,15 +114,18 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
     setSubSegment(prev => prev === (company.sub_segment ?? '') ? prev : (company.sub_segment ?? ''));
     setCompanySize(prev => prev === (company.company_size ?? 'Pequeno') ? prev : (company.company_size ?? 'Pequeno'));
     setTaxRegime(prev => prev === ((company.tax_regime as string | null) ?? 'Simples Nacional') ? prev : ((company.tax_regime as string | null) ?? 'Simples Nacional'));
+    
     setOperationTypes(prev => {
       const next = (company.operation_types as OperationType[] | null) ?? [];
-      if (JSON.stringify(prev) === JSON.stringify(next)) return prev;
+      if (prev.length === next.length && JSON.stringify(prev) === JSON.stringify(next)) return prev;
       return next;
     });
+
     setPolicies(prev => {
       if (prev.replenishmentMethod === nextPolicies.replenishmentMethod && 
           prev.workflowEnabled === nextPolicies.workflowEnabled &&
-          prev.eventOrchestrationEnabled === nextPolicies.eventOrchestrationEnabled) {
+          prev.eventOrchestrationEnabled === nextPolicies.eventOrchestrationEnabled &&
+          prev.inventoryAdjustmentPolicy === nextPolicies.inventoryAdjustmentPolicy) {
         return prev;
       }
       return nextPolicies;
@@ -161,12 +164,10 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
         return;
       }
       
-      // Update the current user ref BEFORE triggering any state changes
       lastSyncUser.current = user.id;
-      
       setIsLoading(true);
 
-      const [companies, profile, userRole] = await Promise.all([
+      const [companies, profile, userRoleData] = await Promise.all([
         TenantService.getCompanies(),
         TenantService.getUserProfile(user.id),
         TenantService.getUserRole(user.id)
@@ -177,10 +178,9 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
       // Update global app store with profile/role info once
       const { useAppStore: useStore } = await import('@/stores/useAppStore');
       const storeState = useStore.getState();
-      const finalRole = (userRole as any) || 'viewer';
+      const finalRole = (userRoleData as any) || 'viewer';
       const userName = profile?.name || user.user_metadata?.name || user.email?.split('@')[0] || 'Usuário';
       
-      // Strict atomic update check for store to break any recursion
       const needsUpdate = 
         storeState.user?.id !== user.id || 
         storeState.user?.name !== userName ||
@@ -189,7 +189,6 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
 
       if (needsUpdate) {
         useStore.setState((state) => {
-          // Double check inside to be absolutely sure
           if (state.user?.id === user.id && state.userRole === finalRole && state.isAuthenticated) return state;
           
           return {
@@ -204,7 +203,7 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
             userRole: finalRole,
             isAuthenticated: true
           };
-        });
+        }, true); // Use true for 'replace' to ensure atomicity in some zustand versions or just be extra safe
       }
 
       if (companies && companies.length > 0) {
@@ -240,8 +239,7 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
             const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
             const enterpriseStore = useEnterpriseStore.getState();
             if (enterpriseStore.activeBranchId !== defaultBranch.id) {
-              // Update non-reactively to break chain
-              useEnterpriseStore.setState({ activeBranchId: defaultBranch.id });
+              useEnterpriseStore.setState({ activeBranchId: defaultBranch.id }, true);
             }
           }
         }
@@ -321,7 +319,7 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
     if (data) {
       applyCompany(data as CompanyRow);
       const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
-      useEnterpriseStore.getState().setActiveCompanyId(id);
+      useEnterpriseStore.setState({ activeCompanyId: id }, true);
     }
   }, [applyCompany]);
 
@@ -329,7 +327,7 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
     if (!id) {
       setCurrentBranch(null);
       const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
-      useEnterpriseStore.getState().setActiveBranchId(null);
+      useEnterpriseStore.setState({ activeBranchId: null }, true);
       return;
     }
     const branch = allBranches.find(b => b.id === id);
@@ -339,7 +337,7 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
         return { ...branch };
       });
       const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
-      useEnterpriseStore.getState().setActiveBranchId(id);
+      useEnterpriseStore.setState({ activeBranchId: id }, true);
     }
   }, [allBranches]);
 

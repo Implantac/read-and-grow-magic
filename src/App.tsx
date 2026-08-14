@@ -21,7 +21,19 @@ const RealtimeAlertsBridge = React.memo(() => {
   const enterprise = useEnterprise();
   const companyId = enterprise.currentCompany?.id;
   
-  if (enterprise.isLoading || !companyId) return null;
+  // Decouple orchestrator mounting from immediate render to prevent synchronous state cycles
+  const [shouldMount, setShouldMount] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!enterprise.isLoading && companyId) {
+      const timer = setTimeout(() => setShouldMount(true), 500);
+      return () => clearTimeout(timer);
+    } else {
+      setShouldMount(false);
+    }
+  }, [enterprise.isLoading, companyId]);
+
+  if (!shouldMount || !companyId) return null;
 
   return <OrchestratorInternal companyId={companyId} />;
 });
