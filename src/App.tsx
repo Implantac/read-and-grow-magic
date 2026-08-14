@@ -22,14 +22,17 @@ const RealtimeAlertsBridge = React.memo(() => {
   const companyId = enterprise.currentCompany?.id;
   
   // Bridge monitors companyId changes without re-triggering hooks unnecessarily
-  const lastId = React.useRef<string | null>(null);
-  
-  // We use the raw ID from the enterprise context, ensuring the hooks only 
-  // initialize when the company is actually loaded and changes.
-  useLowMarginAlertsRealtime(companyId || undefined);
-  useInventoryOrchestrator(companyId || undefined);
-  useFinancialOrchestrator(companyId || undefined);
-  
+  // We memoize the initialization to ensure it only happens when companyId truly changes
+  return React.useMemo(() => {
+    if (!companyId) return null;
+    return <AlertsOrchestratorContainer companyId={companyId} />;
+  }, [companyId]);
+});
+
+const AlertsOrchestratorContainer = React.memo(({ companyId }: { companyId: string }) => {
+  useLowMarginAlertsRealtime(companyId);
+  useInventoryOrchestrator(companyId);
+  useFinancialOrchestrator(companyId);
   return null;
 });
 

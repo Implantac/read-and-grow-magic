@@ -26,7 +26,7 @@ export function useAuth(options: UseAuthOptions = {}) {
         if (!session && mounted) {
           const state = useAppStore.getState();
           if (state.isAuthenticated) {
-            useAppStore.setState({ isAuthenticated: false, user: null, userRole: null });
+            useAppStore.setState((s) => ({ ...s, isAuthenticated: false, user: null, userRole: null }));
           }
         }
       } finally {

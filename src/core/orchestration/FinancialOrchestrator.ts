@@ -28,9 +28,11 @@ export const useFinancialOrchestrator = (providedCompanyId?: string) => {
   useEffect(() => {
     if (!companyId || isContextLoading) return;
     
+    console.log(`[FinancialOrchestrator] Subscribing to SALE_COMPLETED for company: ${companyId}`);
     const unsubscribe = eventBus.subscribe('SALE_COMPLETED', handleSaleCompleted);
 
     return () => {
+      console.log(`[FinancialOrchestrator] Unsubscribing from SALE_COMPLETED for company: ${companyId}`);
       unsubscribe();
     };
   }, [companyId, eventBus, isContextLoading, handleSaleCompleted]);

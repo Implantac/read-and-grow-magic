@@ -29,9 +29,11 @@ export const useInventoryOrchestrator = (providedCompanyId?: string) => {
   useEffect(() => {
     if (!companyId || isContextLoading) return;
     
+    console.log(`[InventoryOrchestrator] Subscribing to SALE_COMPLETED for company: ${companyId}`);
     const unsubscribe = eventBus.subscribe('SALE_COMPLETED', handleSaleCompleted);
 
     return () => {
+      console.log(`[InventoryOrchestrator] Unsubscribing from SALE_COMPLETED for company: ${companyId}`);
       unsubscribe();
     };
   }, [companyId, eventBus, isContextLoading, handleSaleCompleted]);
