@@ -148,12 +148,15 @@ export function SmartReplenishment() {
           itens: []
         };
       }
+      const qty = editedQuantities[sug.id] ?? sug.suggestedQty;
       acc[key].itens.push({ 
         id: sug.id,
         product_id: sug.productId, 
         productName: sug.productName,
         productCode: sug.productCode,
-        quantidade: editedQuantities[sug.id] ?? sug.suggestedQty 
+        quantidade: qty,
+        maxAvailable: sug.currentSourceQty - sug.minStock, // Surplus real disponível
+        isInvalid: qty > (sug.currentSourceQty - sug.minStock) || qty <= 0
       });
       return acc;
     }, {});
@@ -161,7 +164,10 @@ export function SmartReplenishment() {
     return Object.values(groups);
   }, [suggestions, selectedIds, editedQuantities]);
 
-  const handleUpdateQuantity = (id: string, value: number) => {
+  const handleUpdateQuantity = (id: string, value: number, max: number) => {
+    if (value > max) {
+      toast.error(`Quantidade excede o surplus disponível na origem (${max} un).`);
+    }
     setEditedQuantities(prev => ({ ...prev, [id]: value }));
   };
 
@@ -170,6 +176,11 @@ export function SmartReplenishment() {
     newSet.delete(id);
     setSelectedIds(newSet);
   };
+
+  const hasInvalidItems = useMemo(() => {
+    if (!bulkPreviewData) return false;
+    return bulkPreviewData.some((g: any) => g.itens.some((i: any) => i.isInvalid));
+  }, [bulkPreviewData]);
 
   const handleBulkApprove = async () => {
     if (!bulkPreviewData || bulkPreviewData.length === 0) return;
@@ -604,12 +615,17 @@ export function SmartReplenishment() {
                           <div className="text-[10px] text-muted-foreground font-mono">{String(item.productCode)}</div>
                         </TableCell>
                         <TableCell className="py-2 text-right">
-                          <Input
-                            type="number"
-                            value={item.quantidade}
-                            onChange={(e) => handleUpdateQuantity(item.id, Number(e.target.value))}
-                            className="h-7 w-20 ml-auto text-right text-xs font-bold text-primary"
-                          />
+                          <div className="flex flex-col items-end gap-1">
+                            <Input
+                              type="number"
+                              value={item.quantidade}
+                              onChange={(e) => handleUpdateQuantity(item.id, Number(e.target.value), item.maxAvailable)}
+                              className={`h-7 w-20 ml-auto text-right text-xs font-bold ${item.isInvalid ? 'border-destructive text-destructive' : 'text-primary'}`}
+                            />
+                            {item.isInvalid && (
+                              <span className="text-[8px] text-destructive font-semibold">Max: {item.maxAvailable}</span>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell className="py-2 text-right">
                           <Button
@@ -642,7 +658,7 @@ export function SmartReplenishment() {
               <Button 
                 className="bg-primary hover:bg-primary/90"
                 onClick={handleBulkApprove}
-                disabled={isBulkApproving}
+                disabled={isBulkApproving || hasInvalidItems}
               >
                 {isBulkApproving ? (
                   <>
@@ -660,6 +676,7 @@ export function SmartReplenishment() {
               <Button 
                 className="bg-primary hover:bg-primary/90"
                 onClick={() => setBulkConfirmStep(true)}
+                disabled={hasInvalidItems}
               >
                 Próximo: Confirmar
                 <ArrowRight className="h-4 w-4 ml-2" />
