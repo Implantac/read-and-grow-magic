@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { RefreshCw, ArrowRight, AlertTriangle, CheckCircle, Search, Filter, Brain, CheckSquare, Square, Rocket } from 'lucide-react';
+import { RefreshCw, ArrowRight, AlertTriangle, CheckCircle, Search, Filter, Brain, CheckSquare, Square, Rocket, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
@@ -20,6 +20,7 @@ export function SmartReplenishment() {
   const [showBulkPreview, setShowBulkPreview] = useState(false);
   const [bulkConfirmStep, setBulkConfirmStep] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [editedQuantities, setEditedQuantities] = useState<Record<string, number>>({});
   const { data: matrix = [], isLoading, error, refetch } = useEstoqueMatrix(search, true);
   const { data: branches = [] } = useBranches();
   const createTransfer = useCreateTransferenciaCanal();
@@ -148,16 +149,27 @@ export function SmartReplenishment() {
         };
       }
       acc[key].itens.push({ 
+        id: sug.id,
         product_id: sug.productId, 
         productName: sug.productName,
         productCode: sug.productCode,
-        quantidade: sug.suggestedQty 
+        quantidade: editedQuantities[sug.id] ?? sug.suggestedQty 
       });
       return acc;
     }, {});
 
     return Object.values(groups);
-  }, [suggestions, selectedIds]);
+  }, [suggestions, selectedIds, editedQuantities]);
+
+  const handleUpdateQuantity = (id: string, value: number) => {
+    setEditedQuantities(prev => ({ ...prev, [id]: value }));
+  };
+
+  const handleRemoveItem = (id: string) => {
+    const newSet = new Set(selectedIds);
+    newSet.delete(id);
+    setSelectedIds(newSet);
+  };
 
   const handleBulkApprove = async () => {
     if (!bulkPreviewData || bulkPreviewData.length === 0) return;
@@ -581,6 +593,7 @@ export function SmartReplenishment() {
                       <TableRow className="bg-transparent hover:bg-transparent">
                         <TableHead className="h-8 py-0">Produto</TableHead>
                         <TableHead className="h-8 py-0 text-right">Quantidade</TableHead>
+                        <TableHead className="h-8 py-0 w-10"></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -590,9 +603,23 @@ export function SmartReplenishment() {
                           <div className="text-xs font-medium">{String(item.productName)}</div>
                           <div className="text-[10px] text-muted-foreground font-mono">{String(item.productCode)}</div>
                         </TableCell>
-                        <TableCell className="py-2 text-right font-bold text-primary">
-                          {Number(item.quantidade)}
-
+                        <TableCell className="py-2 text-right">
+                          <Input
+                            type="number"
+                            value={item.quantidade}
+                            onChange={(e) => handleUpdateQuantity(item.id, Number(e.target.value))}
+                            className="h-7 w-20 ml-auto text-right text-xs font-bold text-primary"
+                          />
+                        </TableCell>
+                        <TableCell className="py-2 text-right">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                            onClick={() => handleRemoveItem(item.id)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
                           </TableCell>
                         </TableRow>
                       ))}
