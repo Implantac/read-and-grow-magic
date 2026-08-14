@@ -361,15 +361,23 @@ export function SmartReplenishment() {
   // Atalhos de teclado
   useMemo(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!showBulkPreview || bulkConfirmStep) return;
+      if (!showBulkPreview) return;
       
       if (e.ctrlKey || e.metaKey) {
         if (e.key === 'z') {
+          if (bulkConfirmStep) return;
           e.preventDefault();
           handleUndo();
         } else if (e.key === 'y' || (e.key === 'Z' && e.shiftKey)) {
+          if (bulkConfirmStep) return;
           e.preventDefault();
           handleRedo();
+        } else if (e.key === 'Delete' || e.key === 'Backspace') {
+          // Apenas se o histórico não estiver vazio
+          if (Object.keys(editedQuantities).length > 0 || historyStack.length > 0 || redoStack.length > 0) {
+            e.preventDefault();
+            setShowClearConfirm(true);
+          }
         }
       }
     };
