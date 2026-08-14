@@ -156,7 +156,7 @@ export function SmartReplenishment() {
         productCode: sug.productCode,
         quantidade: qty,
         maxAvailable: sug.currentSourceQty - sug.minStock, // Surplus real disponível
-        isInvalid: qty > (sug.currentSourceQty - sug.minStock) || qty <= 0
+        isInvalid: qty <= 0 // Agora o ajuste automático cuida do máximo, então invalidamos apenas se for <= 0
       });
       return acc;
     }, {});
