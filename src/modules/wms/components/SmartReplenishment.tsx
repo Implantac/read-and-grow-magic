@@ -228,6 +228,11 @@ export function SmartReplenishment() {
     }
   };
 
+  const handleResetAllQuantities = () => {
+    setEditedQuantities({});
+    toast.info("Todas as quantidades foram restauradas para os valores sugeridos.");
+  };
+
   const handleResetQuantity = (id: string) => {
     setEditedQuantities(prev => {
       const next = { ...prev };
