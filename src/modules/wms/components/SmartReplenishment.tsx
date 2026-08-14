@@ -198,7 +198,6 @@ export function SmartReplenishment() {
     if (value > max) {
       toast.error(`Quantidade acima do limite máximo (${max} un).`);
       
-      // Registrar no histórico se for um ajuste automático por exceder o máximo
       if (suggestion) {
         setChangeHistory(prev => [
           {
@@ -209,13 +208,14 @@ export function SmartReplenishment() {
             adjustedValue: max,
             reason: 'Excedeu surplus disponível'
           },
-          ...prev.slice(0, 9) // Manter apenas os últimos 10
+          ...prev.slice(0, 9)
         ]);
       }
     } else if (value < 1 && value !== 0) {
       finalValue = 1;
     }
-    setEditedQuantities(prev => ({ ...prev, [id]: finalValue }));
+    
+    pushToHistory({ ...editedQuantities, [id]: finalValue });
   };
 
   const handleAutoCorrectInvalid = () => {
