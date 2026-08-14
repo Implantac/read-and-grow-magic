@@ -593,6 +593,7 @@ export function SmartReplenishment() {
                       <TableRow className="bg-transparent hover:bg-transparent">
                         <TableHead className="h-8 py-0">Produto</TableHead>
                         <TableHead className="h-8 py-0 text-right">Quantidade</TableHead>
+                        <TableHead className="h-8 py-0 w-10"></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -602,9 +603,23 @@ export function SmartReplenishment() {
                           <div className="text-xs font-medium">{String(item.productName)}</div>
                           <div className="text-[10px] text-muted-foreground font-mono">{String(item.productCode)}</div>
                         </TableCell>
-                        <TableCell className="py-2 text-right font-bold text-primary">
-                          {Number(item.quantidade)}
-
+                        <TableCell className="py-2 text-right">
+                          <Input
+                            type="number"
+                            value={item.quantidade}
+                            onChange={(e) => handleUpdateQuantity(item.id, Number(e.target.value))}
+                            className="h-7 w-20 ml-auto text-right text-xs font-bold text-primary"
+                          />
+                        </TableCell>
+                        <TableCell className="py-2 text-right">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                            onClick={() => handleRemoveItem(item.id)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
                           </TableCell>
                         </TableRow>
                       ))}
