@@ -10,7 +10,9 @@ export type TransferStatus =
   | 'EM TRÂNSITO' 
   | 'RECEBIDA' 
   | 'CONFERIDA' 
-  | 'ENCERRADA';
+  | 'ENCERRADA'
+  | 'CANCELADA';
+
 
 export interface WorkflowTransition {
   transferId: string;
