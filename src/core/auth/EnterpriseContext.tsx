@@ -174,21 +174,35 @@ export const EnterpriseProvider = withRenderMonitor(React.memo(React.forwardRef<
       const { useAppStore: useStore } = await import('@/stores/useAppStore');
       const storeState = useStore.getState();
       const finalRole = (userRole as any) || 'viewer';
+      const userName = profile?.name || user.user_metadata?.name || user.email?.split('@')[0] || 'Usuário';
       
-      // Atomic update check for store
-      if (storeState.user?.id !== user.id || storeState.userRole !== finalRole) {
-        // Use a non-reactive way to update the store to avoid recursion
-        useStore.persist.clearStorage(); // Optional: clear if needed, but setState is usually enough
-        useStore.setState({
-          user: {
-            id: user.id,
-            name: profile?.name || user.user_metadata?.name || user.email?.split('@')[0] || 'Usuário',
-            email: user.email || '',
-            role: finalRole,
-            permissions: ['all'],
-          },
-          userRole: finalRole,
-          isAuthenticated: true
+      // Strict atomic update check for store to break any recursion
+      const needsUpdate = 
+        storeState.user?.id !== user.id || 
+        storeState.user?.name !== userName ||
+        storeState.userRole !== finalRole ||
+        !storeState.isAuthenticated;
+
+      if (needsUpdate) {
+        // Use setState with a function to ensure we have the latest state and avoid closure issues
+        useStore.setState((state) => {
+          // Re-verify inside the setter to be absolutely sure
+          if (state.user?.id === user.id && state.userRole === finalRole && state.isAuthenticated) {
+            return state;
+          }
+          
+          return {
+            ...state,
+            user: {
+              id: user.id,
+              name: userName,
+              email: user.email || '',
+              role: finalRole,
+              permissions: ['all'],
+            },
+            userRole: finalRole,
+            isAuthenticated: true
+          };
         });
       }
 
