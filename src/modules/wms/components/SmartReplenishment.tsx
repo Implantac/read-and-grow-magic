@@ -21,6 +21,7 @@ export function SmartReplenishment() {
   const [showBulkPreview, setShowBulkPreview] = useState(false);
   const [bulkConfirmStep, setBulkConfirmStep] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   
   // Persistência no LocalStorage
   const [editedQuantities, setEditedQuantities] = useLocalStorage<Record<string, number>>('smart-replenishment-edited-quantities', {});
