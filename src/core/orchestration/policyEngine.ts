@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
 
 /**
@@ -59,7 +59,6 @@ export function PolicyProvider({ children }: { children: React.ReactNode }) {
 
   const policy = useMemo(() => {
     // Aqui no futuro carregaremos as políticas do banco de dados (public.enterprise_policies)
-    // Por enquanto, aplicamos defaults baseados no segmento ou configurações da empresa
     const base = { ...DEFAULT_POLICY };
 
     if (segment === 'retail') {
@@ -76,11 +75,7 @@ export function PolicyProvider({ children }: { children: React.ReactNode }) {
     return base;
   }, [currentCompany, segment]);
 
-  return (
-    <PolicyContext.Provider value={policy}>
-      {children}
-    </PolicyContext.Provider>
-  );
+  return React.createElement(PolicyContext.Provider, { value: policy }, children);
 }
 
 export const usePolicy = () => useContext(PolicyContext);

@@ -107,17 +107,19 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <EnterpriseProvider>
-        <ConfirmDialogProvider>
-          <RealtimeAlertsBridge />
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <WorkflowSwitcher />
-            <Suspense fallback={<GlobalLoader />}>
-              <AppRoutes />
-            </Suspense>
-          </BrowserRouter>
-        </ConfirmDialogProvider>
+        <PolicyProvider>
+          <ConfirmDialogProvider>
+            <RealtimeAlertsBridge />
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <WorkflowSwitcher />
+              <Suspense fallback={<GlobalLoader />}>
+                <AppRoutes />
+              </Suspense>
+            </BrowserRouter>
+          </ConfirmDialogProvider>
+        </PolicyProvider>
       </EnterpriseProvider>
     </TooltipProvider>
   </QueryClientProvider>
