@@ -26,7 +26,11 @@ export function useAuth(options: UseAuthOptions = {}) {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session && mounted) {
-          storeLogout();
+          // Check if we are actually authenticated in the store before logging out to avoid loops
+          const currentState = useAppStore.getState();
+          if (currentState.isAuthenticated) {
+            storeLogout();
+          }
         }
       } finally {
         if (mounted) setLoading(false);
@@ -37,7 +41,10 @@ export function useAuth(options: UseAuthOptions = {}) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_OUT' && mounted) {
-        storeLogout();
+        const currentState = useAppStore.getState();
+        if (currentState.isAuthenticated) {
+          storeLogout();
+        }
       }
     });
 
