@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { RefreshCw, ArrowRight, AlertTriangle, CheckCircle, Search, Filter, Brain, CheckSquare, Square, Rocket, Trash2, History, RotateCcw, Undo2, Redo2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { stockEngine } from '@/services/operational/inventory/stockEngine';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/ui/base/dialog';
 import { Checkbox } from '@/ui/base/checkbox';
+import { useLocalStorage } from '@uidotdev/usehooks';
 
 export function SmartReplenishment() {
   const [search, setSearch] = useState('');
@@ -20,14 +21,17 @@ export function SmartReplenishment() {
   const [showBulkPreview, setShowBulkPreview] = useState(false);
   const [bulkConfirmStep, setBulkConfirmStep] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [editedQuantities, setEditedQuantities] = useState<Record<string, number>>({});
+  
+  // Persistência no LocalStorage
+  const [editedQuantities, setEditedQuantities] = useLocalStorage<Record<string, number>>('smart-replenishment-edited-quantities', {});
+  const [historyStack, setHistoryStack] = useLocalStorage<Record<string, number>[]>('smart-replenishment-history-stack', []);
+  const [redoStack, setRedoStack] = useLocalStorage<Record<string, number>[]>('smart-replenishment-redo-stack', []);
+  
   const { data: matrix = [], isLoading, error, refetch } = useEstoqueMatrix(search, true);
   const { data: branches = [] } = useBranches();
   const createTransfer = useCreateTransferenciaCanal();
   const [isBulkApproving, setIsBulkApproving] = useState(false);
   const [changeHistory, setChangeHistory] = useState<any[]>([]);
-  const [historyStack, setHistoryStack] = useState<Record<string, number>[]>([]);
-  const [redoStack, setRedoStack] = useState<Record<string, number>[]>([]);
 
   const pushToHistory = (newQuantities: Record<string, number>) => {
     setHistoryStack(prev => [...prev, editedQuantities]);
