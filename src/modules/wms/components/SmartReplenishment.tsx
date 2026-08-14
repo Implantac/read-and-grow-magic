@@ -10,9 +10,12 @@ import { useBranches } from '@/hooks/useBranches';
 import { useCreateTransferenciaCanal } from '@/hooks/wms/useTransferenciasCanal';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { toast } from 'sonner';
+import { stockEngine } from '@/services/operational/inventory/stockEngine';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/ui/base/dialog';
 
 export function SmartReplenishment() {
   const [search, setSearch] = useState('');
+  const [simulatedSug, setSimulatedSug] = useState<any>(null);
   const { data: matrix = [], isLoading, error, refetch } = useEstoqueMatrix(search, true);
   const { data: branches = [] } = useBranches();
   const createTransfer = useCreateTransferenciaCanal();
@@ -50,10 +53,8 @@ export function SmartReplenishment() {
       const surplusBranches = p.balances.filter((b: any) => b.quantity > p.min_stock * 1.5); 
 
       lowStockBranches.forEach((target: any) => {
-        // Posição Projetada = Saldo + (Em Trânsito - Reservado) 
-        // Implementação futura: buscar saldos reais do Ledger
-        const projectedStock = target.quantity; 
-        const needed = p.min_stock - projectedStock;
+        const projected = stockEngine.calculateProjected(target);
+        const needed = p.min_stock - projected.projected;
         
         if (needed <= 0) return;
 
@@ -230,6 +231,71 @@ export function SmartReplenishment() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={!!simulatedSug} onOpenChange={(open) => !open && setSimulatedSug(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Brain className="h-5 w-5 text-primary" /> Simulador de Impacto (IA Explicável)
+            </DialogTitle>
+            <DialogDescription>
+              Análise preditiva do efeito da transferência na malha logística.
+            </DialogDescription>
+          </DialogHeader>
+
+          {simulatedSug && (
+            <div className="space-y-6 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 rounded-lg bg-muted/50 border">
+                  <p className="text-xs font-bold uppercase text-muted-foreground mb-2">Destino: {simulatedSug.targetBranchName}</p>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Cobertura Atual:</span>
+                      <span className="font-bold text-destructive">{(simulatedSug.currentTargetQty / 10).toFixed(1)} dias</span>
+                    </div>
+                    <div className="flex justify-between text-sm text-success">
+                      <span>Após +{simulatedSug.suggestedQty}:</span>
+                      <span className="font-bold">{((simulatedSug.currentTargetQty + simulatedSug.suggestedQty) / 10).toFixed(1)} dias</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-lg bg-muted/50 border">
+                  <p className="text-xs font-bold uppercase text-muted-foreground mb-2">Origem: {simulatedSug.sourceBranchName}</p>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Cobertura Atual:</span>
+                      <span className="font-bold">{(simulatedSug.currentSourceQty / 10).toFixed(1)} dias</span>
+                    </div>
+                    <div className="flex justify-between text-sm text-amber-500">
+                      <span>Após -{simulatedSug.suggestedQty}:</span>
+                      <span className="font-bold">{((simulatedSug.currentSourceQty - simulatedSug.suggestedQty) / 10).toFixed(1)} dias</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
+                <p className="text-xs font-bold text-primary uppercase mb-2">Por que o sistema sugeriu isso?</p>
+                <div className="text-xs space-y-2 text-muted-foreground leading-relaxed">
+                  <p>• A unidade <strong>{simulatedSug.targetBranchName}</strong> apresenta risco de ruptura iminente.</p>
+                  <p>• A unidade <strong>{simulatedSug.sourceBranchName}</strong> possui excedente operacional (Surplus) de {simulatedSug.currentSourceQty - simulatedSug.currentTargetQty} unidades.</p>
+                  <p>• Lead time estimado de <strong>1 dia</strong> garante a reposição antes do esgotamento total.</p>
+                  <p>• Prioridade: <strong>{simulatedSug.priority.toUpperCase()}</strong>.</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSimulatedSug(null)}>Cancelar</Button>
+            <Button onClick={() => {
+              handleExecute(simulatedSug);
+              setSimulatedSug(null);
+            }}>Confirmar e Transferir</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
