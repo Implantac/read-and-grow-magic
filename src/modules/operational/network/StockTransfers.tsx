@@ -10,7 +10,7 @@ import { EmptyState } from '@/shared/components/EmptyState';
 import { ScrollArea } from '@/ui/base/scroll-area';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/ui/base/dialog';
 import { transferWorkflow, TransferStatus } from '@/services/operational/inventory/transferWorkflow';
-import { useAuth } from '@/hooks/system/useAuth';
+import { useAppStore } from '@/stores/useAppStore';
 import { toast } from 'sonner';
 import { Separator } from '@/ui/base/separator';
 import { Textarea } from '@/ui/base/textarea';
@@ -32,7 +32,7 @@ const workflowSteps: { status: TransferStatus, label: string, icon: any, color: 
 
 export default function StockTransfersPage() {
   const { data: transfers, isLoading, refetch } = useTransferOrders();
-  const { user } = useAuth();
+  const user = useAppStore(state => state.user);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [history, setHistory] = useState<any[]>([]);
   const [isLogDialogOpen, setIsLogDialogOpen] = useState(false);
