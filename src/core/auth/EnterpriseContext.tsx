@@ -184,8 +184,7 @@ export const EnterpriseProvider = withRenderMonitor(React.memo(React.forwardRef<
         !storeState.isAuthenticated;
 
       if (needsUpdate) {
-        // Use a direct state assignment via setState with a simple object first
-        // to minimize internal Zustand overhead during the sync
+        // Use a direct state assignment via setState
         useStore.setState({
           user: {
             id: user.id,
