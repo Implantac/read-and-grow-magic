@@ -109,7 +109,7 @@ export default function StoreHealthMap() {
                         </div>
                       </td>
                       <td className="p-4 text-center">
-                        <Badge variant={store.status === 'excellent' ? 'success' : store.status === 'attention' ? 'warning' : 'destructive'}>
+                        <Badge variant={store.status === 'excellent' ? 'default' : store.status === 'attention' ? 'warning' : 'destructive'}>
                           {store.status === 'excellent' ? 'Ideal' : store.status === 'attention' ? 'Atenção' : 'Crítico'}
                         </Badge>
                       </td>
