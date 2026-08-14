@@ -14,11 +14,15 @@ export interface ERPPolicy {
     autoAdjustmentThreshold: number;
     requiresTransferApproval: boolean;
     minCoverageDays: number;
+    replenishmentMethod: 'MIN_MAX' | 'FORECAST' | 'MRP' | 'MANUAL' | 'AI_ASSISTED';
+    inventoryAdjustmentPolicy: 'AUTO' | 'MANAGER_APPROVAL' | 'AUDIT_REQUIRED';
+    transferApprovalLimit: number;
   };
   commercial: {
     maxDiscountPercentage: number;
     strictCreditCheck: boolean;
     autoOrderApproval: boolean;
+    salesCreditCheck: 'NONE' | 'BASIC' | 'STRICT';
   };
   financial: {
     autoReconcile: boolean;
@@ -28,6 +32,12 @@ export interface ERPPolicy {
     autoInvoiceEmission: boolean;
     homologationMode: boolean;
   };
+  core: {
+    workflowEnabled: boolean;
+    eventOrchestrationEnabled: boolean;
+    auditLevel: 'NONE' | 'BASIC' | 'FULL';
+    taskBoardEnabled: boolean;
+  };
 }
 
 const DEFAULT_POLICY: ERPPolicy = {
@@ -36,11 +46,15 @@ const DEFAULT_POLICY: ERPPolicy = {
     autoAdjustmentThreshold: 10,
     requiresTransferApproval: true,
     minCoverageDays: 7,
+    replenishmentMethod: 'MIN_MAX',
+    inventoryAdjustmentPolicy: 'MANAGER_APPROVAL',
+    transferApprovalLimit: 5000,
   },
   commercial: {
     maxDiscountPercentage: 15,
     strictCreditCheck: true,
     autoOrderApproval: false,
+    salesCreditCheck: 'BASIC',
   },
   financial: {
     autoReconcile: false,
@@ -50,6 +64,12 @@ const DEFAULT_POLICY: ERPPolicy = {
     autoInvoiceEmission: false,
     homologationMode: true,
   },
+  core: {
+    workflowEnabled: true,
+    eventOrchestrationEnabled: true,
+    auditLevel: 'FULL',
+    taskBoardEnabled: true,
+  }
 };
 
 const PolicyContext = createContext<ERPPolicy>(DEFAULT_POLICY);
@@ -58,7 +78,6 @@ export function PolicyProvider({ children }: { children: React.ReactNode }) {
   const { currentCompany, segment } = useEnterprise();
 
   const policy = useMemo(() => {
-    // Aqui no futuro carregaremos as políticas do banco de dados (public.enterprise_policies)
     const base = { ...DEFAULT_POLICY };
 
     if (segment === 'retail') {
@@ -66,7 +85,7 @@ export function PolicyProvider({ children }: { children: React.ReactNode }) {
       base.commercial.autoOrderApproval = true;
     }
 
-    // @ts-ignore - Metadata may contain policies
+    // @ts-ignore
     if (currentCompany?.metadata?.policies) {
       // @ts-ignore
       return { ...base, ...currentCompany.metadata.policies };
@@ -82,20 +101,17 @@ export const usePolicy = () => useContext(PolicyContext);
 
 /**
  * Legacy support for EnterpriseContext.tsx
- * P1 - Contratos: Facilitar migração para PolicyProvider
  */
-export function getEnterprisePolicies(segment: string): ERPPolicy['inventory'] & Pick<ERPPolicy['inventory'], 'requiresTransferApproval'> & { eventOrchestrationEnabled: boolean; workflowEnabled: boolean; auditLevel: 'NONE' | 'BASIC' | 'FULL'; taskBoardEnabled: boolean; replenishmentMethod: any; inventoryAdjustmentPolicy: any; salesCreditCheck: any } {
+export function getEnterprisePolicies(segment: string) {
   const base = DEFAULT_POLICY;
   return {
-    replenishmentMethod: base.inventory.replenishmentMethod || 'MIN_MAX',
-    transferApprovalLimit: 5000,
-    inventoryAdjustmentPolicy: base.inventory.inventoryAdjustmentPolicy || 'MANAGER_APPROVAL',
-    salesCreditCheck: base.commercial.strictCreditCheck ? 'STRICT' : 'BASIC',
-    workflowEnabled: true,
-    eventOrchestrationEnabled: true,
-    auditLevel: 'FULL',
-    taskBoardEnabled: true,
-    requiresTransferApproval: base.inventory.requiresTransferApproval
-  } as any;
+    replenishmentMethod: base.inventory.replenishmentMethod,
+    transferApprovalLimit: base.inventory.transferApprovalLimit,
+    inventoryAdjustmentPolicy: base.inventory.inventoryAdjustmentPolicy,
+    salesCreditCheck: base.commercial.salesCreditCheck,
+    workflowEnabled: base.core.workflowEnabled,
+    eventOrchestrationEnabled: base.core.eventOrchestrationEnabled,
+    auditLevel: base.core.auditLevel,
+    taskBoardEnabled: base.core.taskBoardEnabled
+  };
 }
-
