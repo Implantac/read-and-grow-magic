@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { RefreshCw, ArrowRight, AlertTriangle, CheckCircle, Search, Filter, Brain, CheckSquare, Square, Rocket, Trash2, History } from 'lucide-react';
+import { RefreshCw, ArrowRight, AlertTriangle, CheckCircle, Search, Filter, Brain, CheckSquare, Square, Rocket, Trash2, History, RotateCcw } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
@@ -191,6 +191,15 @@ export function SmartReplenishment() {
       finalValue = 1;
     }
     setEditedQuantities(prev => ({ ...prev, [id]: finalValue }));
+  };
+
+  const handleResetQuantity = (id: string) => {
+    setEditedQuantities(prev => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+    toast.info("Quantidade restaurada para o valor sugerido.");
   };
 
   const handleRemoveItem = (id: string) => {
@@ -709,15 +718,29 @@ export function SmartReplenishment() {
                           </div>
                         </TableCell>
                         <TableCell className="py-2 text-right">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                            onClick={() => handleRemoveItem(item.id)}
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                          </TableCell>
+                          <div className="flex justify-end gap-1">
+                            {editedQuantities[item.id] !== undefined && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-muted-foreground hover:text-primary"
+                                onClick={() => handleResetQuantity(item.id)}
+                                title="Restaurar valor original"
+                              >
+                                <RotateCcw className="h-3.5 w-3.5" />
+                              </Button>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                              onClick={() => handleRemoveItem(item.id)}
+                              title="Remover item"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
