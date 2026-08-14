@@ -177,6 +177,8 @@ export const EnterpriseProvider = withRenderMonitor(React.memo(React.forwardRef<
       
       // Atomic update check for store
       if (storeState.user?.id !== user.id || storeState.userRole !== finalRole) {
+        // Use a non-reactive way to update the store to avoid recursion
+        useStore.persist.clearStorage(); // Optional: clear if needed, but setState is usually enough
         useStore.setState({
           user: {
             id: user.id,

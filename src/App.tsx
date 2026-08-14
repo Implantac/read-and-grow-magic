@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useEffect } from 'react';
 import { Toaster } from "@/ui/base/toaster";
 import { Toaster as Sonner } from "@/ui/base/sonner";
 import { TooltipProvider } from "@/ui/base/tooltip";
@@ -21,11 +21,14 @@ const RealtimeAlertsBridge = React.memo(() => {
   const { currentCompany, isLoading } = useEnterprise();
   const companyId = currentCompany?.id;
   
-  // Use a ref to ensure orchestrators are only initialized once per stableId
   const lastInitializedId = React.useRef<string | null>(null);
 
-  // Orchestrators and Realtime hooks inside a dedicated component to scope their lifecycle
-  // We use stable IDs and internal guards in the hooks themselves
+  useEffect(() => {
+    if (companyId && companyId !== lastInitializedId.current) {
+      lastInitializedId.current = companyId;
+    }
+  }, [companyId]);
+
   useLowMarginAlertsRealtime(companyId || undefined);
   useInventoryOrchestrator(companyId || undefined);
   useFinancialOrchestrator(companyId || undefined);
