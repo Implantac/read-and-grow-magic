@@ -1,49 +1,84 @@
-import { Segment } from '@/core/auth/EnterpriseContext';
+import { createContext, useContext, useMemo } from 'react';
+import { useEnterprise } from '@/core/auth/EnterpriseContext';
 
-export interface Policy {
-  replenishmentMethod: 'MIN_MAX' | 'FORECAST' | 'MRP' | 'MANUAL' | 'AI_ASSISTED';
-  transferApprovalLimit: number;
-  inventoryAdjustmentPolicy: 'AUTO' | 'MANAGER_APPROVAL' | 'AUDIT_REQUIRED';
-  salesCreditCheck: 'NONE' | 'BASIC' | 'STRICT';
-  workflowEnabled: boolean;
-  eventOrchestrationEnabled: boolean;
-  auditLevel: 'NONE' | 'BASIC' | 'FULL';
-  taskBoardEnabled: boolean;
+/**
+ * Enterprise Policy Engine
+ * 
+ * Centraliza as regras de negócio por Tenant/Empresa.
+ * P1 - Contratos: Define quem manda em quê e quais os limites operacionais.
+ */
+
+export interface ERPPolicy {
+  inventory: {
+    allowNegativeStock: boolean;
+    autoAdjustmentThreshold: number;
+    requiresTransferApproval: boolean;
+    minCoverageDays: number;
+  };
+  commercial: {
+    maxDiscountPercentage: number;
+    strictCreditCheck: boolean;
+    autoOrderApproval: boolean;
+  };
+  financial: {
+    autoReconcile: boolean;
+    maxPaymentAdvance: number;
+  };
+  fiscal: {
+    autoInvoiceEmission: boolean;
+    homologationMode: boolean;
+  };
 }
 
-const DEFAULT_POLICIES: Record<string, Policy> = {
-  retail_chain: {
-    replenishmentMethod: 'AI_ASSISTED',
-    transferApprovalLimit: 5000,
-    inventoryAdjustmentPolicy: 'MANAGER_APPROVAL',
-    salesCreditCheck: 'STRICT',
-    workflowEnabled: true,
-    eventOrchestrationEnabled: true,
-    auditLevel: 'FULL',
-    taskBoardEnabled: true
+const DEFAULT_POLICY: ERPPolicy = {
+  inventory: {
+    allowNegativeStock: false,
+    autoAdjustmentThreshold: 10,
+    requiresTransferApproval: true,
+    minCoverageDays: 7,
   },
-  industry: {
-    replenishmentMethod: 'MRP',
-    transferApprovalLimit: 10000,
-    inventoryAdjustmentPolicy: 'AUDIT_REQUIRED',
-    salesCreditCheck: 'BASIC',
-    workflowEnabled: true,
-    eventOrchestrationEnabled: true,
-    auditLevel: 'FULL',
-    taskBoardEnabled: true
+  commercial: {
+    maxDiscountPercentage: 15,
+    strictCreditCheck: true,
+    autoOrderApproval: false,
   },
-  general: {
-    replenishmentMethod: 'MIN_MAX',
-    transferApprovalLimit: 2000,
-    inventoryAdjustmentPolicy: 'AUTO',
-    salesCreditCheck: 'NONE',
-    workflowEnabled: false,
-    eventOrchestrationEnabled: false,
-    auditLevel: 'BASIC',
-    taskBoardEnabled: true
-  }
+  financial: {
+    autoReconcile: false,
+    maxPaymentAdvance: 0,
+  },
+  fiscal: {
+    autoInvoiceEmission: false,
+    homologationMode: true,
+  },
 };
 
-export const getEnterprisePolicies = (segment: string): Policy => {
-  return DEFAULT_POLICIES[segment] || DEFAULT_POLICIES.general;
-};
+const PolicyContext = createContext<ERPPolicy>(DEFAULT_POLICY);
+
+export function PolicyProvider({ children }: { children: React.ReactNode }) {
+  const { currentCompany, segment } = useEnterprise();
+
+  const policy = useMemo(() => {
+    // Aqui no futuro carregaremos as políticas do banco de dados (public.enterprise_policies)
+    // Por enquanto, aplicamos defaults baseados no segmento ou configurações da empresa
+    const base = { ...DEFAULT_POLICY };
+
+    if (segment === 'retail') {
+      base.inventory.allowNegativeStock = false;
+      base.commercial.autoOrderApproval = true;
+    }
+
+    if (currentCompany?.metadata?.policies) {
+      return { ...base, ...currentCompany.metadata.policies };
+    }
+
+    return base;
+  }, [currentCompany, segment]);
+
+  return (
+    <PolicyContext.Provider value={policy}>
+      {children}
+    </PolicyContext.Provider>
+  );
+}
+
+export const usePolicy = () => useContext(PolicyContext);
