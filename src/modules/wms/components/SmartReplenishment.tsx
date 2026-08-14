@@ -20,6 +20,7 @@ export function SmartReplenishment() {
   const [showBulkPreview, setShowBulkPreview] = useState(false);
   const [bulkConfirmStep, setBulkConfirmStep] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [editedQuantities, setEditedQuantities] = useState<Record<string, number>>({});
   const { data: matrix = [], isLoading, error, refetch } = useEstoqueMatrix(search, true);
   const { data: branches = [] } = useBranches();
   const createTransfer = useCreateTransferenciaCanal();
