@@ -25,10 +25,12 @@ export const supplyChainService = {
       const balance = balances?.find(b => b.product_id === policy.product_id);
       const physical = Number(balance?.quantity || 0);
       const reserved = Number(balance?.reserved_qty || 0);
-      const inTransit = Number(balance?.in_transit_in_quantity || 0);
+      // in_transit_in_quantity não existe no banco, usando 0 ou buscando de transferências se necessário
+      const inTransit = 0; 
       
       const projected = physical - reserved + inTransit;
-      const target = policy.target_stock || policy.product?.min_stock || 0;
+      const target = policy.product?.min_stock || 0;
+
       
       return {
         product_id: policy.product_id,
