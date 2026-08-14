@@ -261,91 +261,104 @@ export function SmartReplenishment() {
 
           {simulatedSug && (
             <div className="space-y-6 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 rounded-lg bg-muted/50 border">
-                  <p className="text-xs font-bold uppercase text-muted-foreground mb-3">Métricas de Destino: {simulatedSug.targetBranchName}</p>
-                  <div className="grid grid-cols-2 gap-y-3 gap-x-4">
-                    <div>
-                      <p className="text-[10px] text-muted-foreground uppercase">Estoque Disponível</p>
-                      <p className="text-sm font-bold">{simulatedSug.targetMetrics.available} un</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-muted-foreground uppercase">Projetado (+Trânsito)</p>
-                      <p className="text-sm font-bold">{simulatedSug.targetMetrics.projected} un</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-muted-foreground uppercase">Demanda Média</p>
-                      <p className="text-sm font-bold">{simulatedSug.targetMetrics.dailyDemand.toFixed(2)} /dia</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-muted-foreground uppercase">Cobertura Atual</p>
-                      <p className={`text-sm font-bold ${simulatedSug.targetMetrics.coverageDays < 3 ? 'text-destructive' : ''}`}>
-                        {simulatedSug.targetMetrics.coverageDays.toFixed(1)} dias
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-muted-foreground uppercase">Estoque Mín/Máx</p>
-                      <p className="text-sm font-bold">{simulatedSug.minStock} / {simulatedSug.maxStock || '—'}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-muted-foreground uppercase">Lead Time</p>
-                      <p className="text-sm font-bold">{simulatedSug.leadTime || 0} dias</p>
-                    </div>
-                  </div>
+              <div className="p-4 rounded-lg bg-muted/50 border">
+                  <p className="text-xs font-bold uppercase text-muted-foreground mb-4 flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-primary" />
+                    Memória de Cálculo: {simulatedSug.targetBranchName}
+                  </p>
                   
-                  <div className="mt-4 pt-4 border-t border-dashed">
-                    <p className="text-[10px] text-success uppercase font-bold mb-1">Impacto da Sugestão (+{simulatedSug.suggestedQty})</p>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Nova Cobertura:</span>
-                      <span className="font-bold text-success">
-                        {((simulatedSug.targetMetrics.projected + simulatedSug.suggestedQty) / (simulatedSug.targetMetrics.dailyDemand || 1)).toFixed(1)} dias
-                      </span>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <p className="text-[10px] text-muted-foreground uppercase">1. Demanda Média Diária</p>
+                        <p className="text-sm font-bold">{simulatedSug.targetMetrics.dailyDemand.toFixed(2)} un/dia</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-[10px] text-muted-foreground uppercase">2. Lead Time (D+N)</p>
+                        <p className="text-sm font-bold">{simulatedSug.leadTime || 0} dias</p>
+                      </div>
+                    </div>
+
+                    <div className="p-3 rounded bg-background/50 border border-dashed space-y-2">
+                      <p className="text-[10px] text-muted-foreground uppercase font-semibold">Equação de Ressuprimento</p>
+                      <div className="space-y-1 font-mono text-xs">
+                        <div className="flex justify-between">
+                          <span>Estoque Físico:</span>
+                          <span>{simulatedSug.targetMetrics.physical}</span>
+                        </div>
+                        <div className="flex justify-between text-red-500">
+                          <span>(-) Reservas:</span>
+                          <span>{simulatedSug.targetMetrics.reserved}</span>
+                        </div>
+                        <div className="flex justify-between text-blue-500">
+                          <span>(+) Em Trânsito:</span>
+                          <span>{simulatedSug.targetMetrics.inTransitIn}</span>
+                        </div>
+                        <div className="border-t pt-1 flex justify-between font-bold">
+                          <span>(=) Projetado:</span>
+                          <span>{simulatedSug.targetMetrics.projected}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <p className="text-[10px] text-muted-foreground uppercase">3. Cobertura Crítica</p>
+                        <p className={`text-sm font-bold ${simulatedSug.targetMetrics.coverageDays < 3 ? 'text-destructive' : ''}`}>
+                          {simulatedSug.targetMetrics.coverageDays.toFixed(1)} dias
+                        </p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-[10px] text-muted-foreground uppercase">4. Gatilho (Mín/Máx)</p>
+                        <p className="text-sm font-bold">{simulatedSug.minStock} / {simulatedSug.maxStock || '—'}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 <div className="p-4 rounded-lg bg-muted/50 border">
-                  <p className="text-xs font-bold uppercase text-muted-foreground mb-3">Métricas de Origem: {simulatedSug.sourceBranchName}</p>
-                  <div className="grid grid-cols-2 gap-y-3 gap-x-4">
-                    <div>
-                      <p className="text-[10px] text-muted-foreground uppercase">Estoque Físico</p>
-                      <p className="text-sm font-bold">{simulatedSug.sourceMetrics.physical} un</p>
+                  <p className="text-xs font-bold uppercase text-muted-foreground mb-4 flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-amber-500" />
+                    Viabilidade de Origem: {simulatedSug.sourceBranchName}
+                  </p>
+                  
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-muted-foreground italic text-xs">Saldo Disponível:</span>
+                      <span className="font-bold text-success">{simulatedSug.sourceMetrics.available} un</span>
                     </div>
-                    <div>
-                      <p className="text-[10px] text-muted-foreground uppercase">Disponível</p>
-                      <p className="text-sm font-bold text-success">{simulatedSug.sourceMetrics.available} un</p>
+                    
+                    <div className="p-3 rounded bg-background/50 border border-dashed space-y-2">
+                      <p className="text-[10px] text-muted-foreground uppercase font-semibold">Análise de Impacto</p>
+                      <div className="space-y-1 text-xs">
+                        <div className="flex justify-between">
+                          <span>Cobertura Atual:</span>
+                          <span>{simulatedSug.sourceMetrics.coverageDays.toFixed(1)} dias</span>
+                        </div>
+                        <div className="flex justify-between text-amber-500">
+                          <span>Pós-Transferência:</span>
+                          <span className="font-bold">
+                            {((simulatedSug.sourceMetrics.projected - simulatedSug.suggestedQty) / (simulatedSug.sourceMetrics.dailyDemand || 1)).toFixed(1)} dias
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-[10px] text-muted-foreground uppercase">Cobertura Atual</p>
-                      <p className="text-sm font-bold">{simulatedSug.sourceMetrics.coverageDays.toFixed(1)} dias</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-muted-foreground uppercase">Classe ABC</p>
-                      <Badge variant="outline" className={`text-[9px] ${stockEngine.getABCColor(simulatedSug.sourceMetrics.abcClass)}`}>
-                        {simulatedSug.sourceMetrics.abcClass || 'N/A'}
-                      </Badge>
-                    </div>
-                  </div>
 
-                  <div className="mt-4 pt-4 border-t border-dashed">
-                    <p className="text-[10px] text-amber-500 uppercase font-bold mb-1">Impacto da Sugestão (-{simulatedSug.suggestedQty})</p>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Nova Cobertura:</span>
-                      <span className="font-bold text-amber-500">
-                        {((simulatedSug.sourceMetrics.projected - simulatedSug.suggestedQty) / (simulatedSug.sourceMetrics.dailyDemand || 1)).toFixed(1)} dias
-                      </span>
+                    <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                      <Badge variant="outline" className={`text-[9px] ${stockEngine.getABCColor(simulatedSug.sourceMetrics.abcClass)}`}>
+                        Curva {simulatedSug.sourceMetrics.abcClass || 'N/A'}
+                      </Badge>
+                      <span>Item de {simulatedSug.sourceMetrics.abcClass === 'A' ? 'Alto' : simulatedSug.sourceMetrics.abcClass === 'B' ? 'Médio' : 'Baixo'} giro.</span>
                     </div>
                   </div>
                 </div>
               </div>
 
               <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
-                <p className="text-xs font-bold text-primary uppercase mb-2">Lógica de Recomendação</p>
+                <p className="text-xs font-bold text-primary uppercase mb-2">Conclusão da IA</p>
                 <div className="text-xs space-y-2 text-muted-foreground leading-relaxed">
-                  <p>• <strong>Necessidade Identificada:</strong> A unidade de destino atingiu o ponto de ressuprimento (Estoque Projetado {simulatedSug.targetMetrics.projected} &lt; Mínimo {simulatedSug.minStock}).</p>
-                  <p>• <strong>Viabilidade de Origem:</strong> A origem possui excedente operacional seguro, mantendo cobertura pós-transferência acima do nível crítico.</p>
-                  <p>• <strong>Tempo de Reação:</strong> O Lead Time de {simulatedSug.leadTime} dias foi considerado para garantir que o trânsito chegue antes da ruptura total.</p>
-                  <p>• <strong>Prioridade {simulatedSug.priority.toUpperCase()}:</strong> Calculada com base na gravidade da ruptura (cobertura atual de {simulatedSug.targetMetrics.coverageDays.toFixed(1)} dias).</p>
+                  <p>• <strong>Gatilho:</strong> O estoque projetado ({simulatedSug.targetMetrics.projected}) está abaixo do mínimo ({simulatedSug.minStock}).</p>
+                  <p>• <strong>Recomendação:</strong> Transferir <strong>{simulatedSug.suggestedQty} unidades</strong> para restaurar a cobertura de segurança.</p>
                 </div>
               </div>
             </div>
