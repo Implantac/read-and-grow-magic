@@ -148,12 +148,15 @@ export function SmartReplenishment() {
           itens: []
         };
       }
+      const qty = editedQuantities[sug.id] ?? sug.suggestedQty;
       acc[key].itens.push({ 
         id: sug.id,
         product_id: sug.productId, 
         productName: sug.productName,
         productCode: sug.productCode,
-        quantidade: editedQuantities[sug.id] ?? sug.suggestedQty 
+        quantidade: qty,
+        maxAvailable: sug.currentSourceQty - sug.minStock, // Surplus real disponível
+        isInvalid: qty > (sug.currentSourceQty - sug.minStock) || qty <= 0
       });
       return acc;
     }, {});
