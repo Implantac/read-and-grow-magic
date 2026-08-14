@@ -61,6 +61,8 @@ export function SmartReplenishment() {
           });
 
         const source = sortedSources[0];
+        
+        if (source && source.availableSurplus > 0) {
           const transferable = Math.min(needed, source.availableSurplus);
           
           if (transferable > 0) {
