@@ -42,7 +42,8 @@ class RenderDepthMonitor {
       
       // In production, we don't throw to avoid hiding the original React #185 error
       // which is more useful for debugging the root cause.
-      if (process.env.NODE_ENV === 'development') {
+      // We use window.location as a proxy for environment check to avoid TS node types dependency
+      if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
         const error = new Error(`Infinite render in ${componentName}`);
         (error as any).isRenderLoop = true;
         throw error;

@@ -269,11 +269,12 @@ export const EnterpriseProvider = withRenderMonitor(React.memo(React.forwardRef<
     const isMounted = mounted;
     
     // Initial load - use a small delay to let auth stabilize
+    // We check if we are already syncing or loading to avoid double trigger
     const timeout = setTimeout(() => {
-      if (mounted.current) {
+      if (mounted.current && !isSyncing.current) {
         loadActiveTenant(isMounted);
       }
-    }, 100);
+    }, 150);
 
     // Sync with auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
