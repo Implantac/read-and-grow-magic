@@ -63,7 +63,8 @@ export function withRenderMonitor<P extends object>(
 ) {
   const name = componentName || Component.displayName || Component.name || 'UnknownComponent';
   
-  // Create a functional component that doesn't accept a ref by default
+  // We use a regular functional component to avoid "cannot be given refs" warnings
+  // for components that don't explicitly support them.
   const MonitorWrapper = (props: P) => {
     const isInitialRender = React.useRef(true);
     
@@ -78,7 +79,8 @@ export function withRenderMonitor<P extends object>(
     return React.createElement(Component as any, props);
   };
 
-  // Only use forwardRef if the underlying component explicitly supports it
+  // Only use forwardRef if the underlying component is already a forwardRef component
+  // or a class component, to preserve existing ref behavior without forcing it on others.
   const isForwardRef = (Component as any)?.$$typeof === Symbol.for('react.forward_ref');
   const isClassComponent = Component.prototype?.isReactComponent;
 
