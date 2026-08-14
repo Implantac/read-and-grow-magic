@@ -1,22 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnterprise } from "@/core/auth/EnterpriseContext";
+import { transferWorkflow, TransferStatus } from "@/services/operational/inventory/transferWorkflow";
 import { toast } from "sonner";
 
-export type TransferStatus = 
-  | 'SUGERIDA' 
-  | 'APROVADA' 
-  | 'RESERVADA' 
-  | 'SEPARAÇÃO' 
-  | 'CONFERÊNCIA' 
-  | 'EXPEDIDA' 
-  | 'EM TRÂNSITO' 
-  | 'RECEBIDA' 
-  | 'CONFERIDA' 
-  | 'ENCERRADA';
-
 export function useSupplyChainExecution() {
-  const { currentBranch } = useEnterprise();
+  const { currentBranch, user } = useEnterprise();
   const queryClient = useQueryClient();
   const branchId = currentBranch?.id;
 
@@ -25,7 +14,6 @@ export function useSupplyChainExecution() {
     queryFn: async () => {
       if (!branchId) return [];
       
-      // Busca transferências onde a unidade atual é origem ou destino e precisa de ação
       const { data, error } = await supabase
         .from('stock_transfer_orders')
         .select(`
@@ -70,13 +58,44 @@ export function useSupplyChainExecution() {
     enabled: !!branchId,
   });
 
+  const transitionMutation = useMutation({
+    mutationFn: async ({ transferId, toStatus, quantity, notes }: { 
+      transferId: string, 
+      toStatus: TransferStatus,
+      quantity?: number,
+      notes?: string
+    }) => {
+      if (!user?.id) throw new Error("Usuário não autenticado");
+      
+      return await transferWorkflow.transition({
+        transferId,
+        toStatus,
+        userId: user.id,
+        quantity,
+        notes
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['supply-chain-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['stock-in-transit'] });
+      toast.success("Status atualizado com sucesso");
+    },
+    onError: (error) => {
+      console.error("Erro na transição:", error);
+      toast.error("Falha ao atualizar status");
+    }
+  });
+
   return {
     tasks: tasksQuery.data || [],
     inTransit: inTransitQuery.data || [],
     isLoading: tasksQuery.isLoading || inTransitQuery.isLoading,
+    isProcessing: transitionMutation.isPending,
+    transition: transitionMutation.mutateAsync,
     refetch: () => {
       tasksQuery.refetch();
       inTransitQuery.refetch();
     }
   };
 }
+
