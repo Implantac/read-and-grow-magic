@@ -52,7 +52,7 @@ export const transferWorkflow = {
     if (logError) throw logError;
 
     // 2. Atualizar o status atual na ordem de transferência e propagar correlação
-    const { error: updateError } = await supabase
+    const { error: updateError } = await (supabase as any)
       .from('stock_transfer_orders')
       .update({ 
         current_status: toStatus as any,
