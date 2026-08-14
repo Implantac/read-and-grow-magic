@@ -63,12 +63,14 @@ export function withRenderMonitor<P extends object>(
 ) {
   const name = componentName || Component.displayName || Component.name || 'UnknownComponent';
   
-  // We use a regular functional component to avoid "cannot be given refs" warnings
-  // for components that don't explicitly support them.
+  // Return the component directly if we're not in a situation where we can safely wrap it
+  // and keep the same behavior (like forwardRef)
+  if (!Component) return Component;
+
   const MonitorWrapper = (props: P) => {
     const isInitialRender = React.useRef(true);
     
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
       if (isInitialRender.current) {
         isInitialRender.current = false;
         return;
@@ -79,32 +81,23 @@ export function withRenderMonitor<P extends object>(
     return React.createElement(Component as any, props);
   };
 
-  // Only use forwardRef if the underlying component is already a forwardRef component
-  // or a class component, or if it explicitly supports refs.
-  const isForwardRef = (Component as any)?.$$typeof === Symbol.for('react.forward_ref');
-  const isClassComponent = Component.prototype?.isReactComponent;
-  const isMemo = (Component as any)?.$$typeof === Symbol.for('react.memo');
-
-  if (isForwardRef || isClassComponent || isMemo) {
-    const ForwardedMonitor = React.forwardRef<any, P>((props, ref) => {
-      const isInitialRender = React.useRef(true);
-      
-      React.useEffect(() => {
-        if (isInitialRender.current) {
-          isInitialRender.current = false;
-          return;
-        }
-        monitor.trackUpdate(name);
-      });
-
-      // Unwrap memo if needed for createElement
-      const componentToRender = isMemo ? (Component as any).type : Component;
-      return React.createElement(componentToRender, { ...props, ref });
+  const ForwardedMonitor = React.forwardRef<any, P>((props, ref) => {
+    const isInitialRender = React.useRef(true);
+    
+    React.useLayoutEffect(() => {
+      if (isInitialRender.current) {
+        isInitialRender.current = false;
+        return;
+      }
+      monitor.trackUpdate(name);
     });
-    ForwardedMonitor.displayName = `withRenderMonitor(${name})`;
-    return isMemo ? React.memo(ForwardedMonitor) : ForwardedMonitor;
-  }
 
+    return React.createElement(Component as any, { ...props, ref });
+  });
+
+  ForwardedMonitor.displayName = `withRenderMonitor(${name})`;
   MonitorWrapper.displayName = `withRenderMonitor(${name})`;
-  return MonitorWrapper;
+
+  // We always use forwardRef by default to be safe, as it handles most cases
+  return ForwardedMonitor;
 }
