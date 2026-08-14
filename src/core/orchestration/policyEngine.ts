@@ -67,7 +67,9 @@ export function PolicyProvider({ children }: { children: React.ReactNode }) {
       base.commercial.autoOrderApproval = true;
     }
 
+    // @ts-ignore - Metadata may contain policies
     if (currentCompany?.metadata?.policies) {
+      // @ts-ignore
       return { ...base, ...currentCompany.metadata.policies };
     }
 
