@@ -555,6 +555,28 @@ export function SmartReplenishment() {
           <div className="flex-1 overflow-y-auto py-4 space-y-4">
             {bulkConfirmStep ? (
               <div className="space-y-6">
+                {changeHistory.length > 0 && (
+                  <div className="p-4 rounded-lg border bg-amber-50/50 border-amber-200">
+                    <div className="flex items-center gap-2 mb-3 text-amber-800">
+                      <History className="h-4 w-4" />
+                      <h4 className="text-sm font-bold uppercase tracking-wider">Ajustes Automáticos da IA</h4>
+                    </div>
+                    <div className="space-y-2">
+                      {changeHistory.map(log => (
+                        <div key={log.id} className="text-[11px] flex items-center justify-between border-b border-amber-100 pb-1 last:border-0">
+                          <span className="font-medium text-amber-900">{log.productName}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="line-through text-amber-500">{log.originalValue}</span>
+                            <ArrowRight className="h-3 w-3 text-amber-600" />
+                            <span className="font-bold text-amber-700">{log.adjustedValue}</span>
+                            <span className="text-[9px] bg-amber-200 text-amber-800 px-1 rounded ml-1">{log.timestamp}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 text-center">
                     <p className="text-2xl font-bold text-primary">{bulkPreviewData?.length}</p>
