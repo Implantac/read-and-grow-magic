@@ -156,8 +156,8 @@ export function SmartReplenishment() {
         productName: sug.productName,
         productCode: sug.productCode,
         quantidade: qty,
-        maxAvailable: sug.currentSourceQty - sug.minStock, // Surplus real disponível
-        isInvalid: qty <= 0 // Agora o ajuste automático cuida do máximo, então invalidamos apenas se for <= 0
+        maxAvailable: sug.currentSourceQty - sug.minStock,
+        isInvalid: qty <= 0 || qty > (sug.currentSourceQty - sug.minStock)
       });
       return acc;
     }, {});
@@ -170,8 +170,7 @@ export function SmartReplenishment() {
     const suggestion = suggestions.find(s => s.id === id);
     
     if (value > max) {
-      finalValue = max;
-      toast.warning(`Quantidade ajustada para o máximo executável (${max} un).`);
+      toast.error(`Quantidade acima do limite máximo (${max} un).`);
       
       // Registrar no histórico se for um ajuste automático por exceder o máximo
       if (suggestion) {
