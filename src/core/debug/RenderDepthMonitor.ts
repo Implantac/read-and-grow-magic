@@ -63,7 +63,7 @@ export function withRenderMonitor<P extends object>(
 ) {
   const name = componentName || Component.displayName || Component.name || 'UnknownComponent';
   
-  return (props: P) => {
+  const WrappedComponent = React.forwardRef<any, P>((props, ref) => {
     const isInitialRender = React.useRef(true);
     React.useEffect(() => {
       if (isInitialRender.current) {
@@ -73,6 +73,9 @@ export function withRenderMonitor<P extends object>(
       monitor.trackUpdate(name);
     });
 
-    return React.createElement(Component, props);
-  };
+    return React.createElement(Component, { ...props, ref });
+  });
+
+  WrappedComponent.displayName = `withRenderMonitor(${name})`;
+  return WrappedComponent;
 }

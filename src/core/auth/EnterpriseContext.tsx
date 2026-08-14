@@ -155,7 +155,7 @@ export const EnterpriseProvider = withRenderMonitor(({ children }: { children: R
       }
 
       // Check if we already synced this user to avoid loop
-      if (user.id === lastSyncUser.current && currentCompany) {
+      if (user.id === lastSyncUser.current && currentCompany && !isLoading) {
         return;
       }
       lastSyncUser.current = user.id;
