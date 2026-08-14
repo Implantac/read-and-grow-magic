@@ -13,14 +13,22 @@ export const useFinancialOrchestrator = (providedCompanyId?: string) => {
 
   const handleSaleCompleted = useCallback((payload: any) => {
     if (payload.companyId !== companyId) return;
-    console.log('[FinancialOrchestrator] Sale completed, generating ledger entry', payload);
+    
+    const correlationId = payload.correlationId;
+    console.log('[FinancialOrchestrator] Sale completed, generating ledger entry', {
+      orderId: payload.orderId,
+      correlationId
+    });
+    
     toastSuccess(`Título financeiro gerado para o pedido ${payload.orderId.split('-')[0]}.`);
     
     setTimeout(() => {
       eventBus.publish('PAYMENT_SETTLED', { 
         orderId: payload.orderId,
         status: 'PENDING',
-        companyId: payload.companyId 
+        companyId: payload.companyId,
+        correlationId,
+        causationId: payload.orderId
       });
     }, 0);
   }, [companyId, eventBus]);

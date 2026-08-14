@@ -11957,6 +11957,7 @@ export type Database = {
           commission_value: number | null
           company_id: string
           conference_status: string | null
+          correlation_id: string | null
           created_at: string
           date: string
           delivery_date: string | null
@@ -12001,6 +12002,7 @@ export type Database = {
           commission_value?: number | null
           company_id: string
           conference_status?: string | null
+          correlation_id?: string | null
           created_at?: string
           date?: string
           delivery_date?: string | null
@@ -12045,6 +12047,7 @@ export type Database = {
           commission_value?: number | null
           company_id?: string
           conference_status?: string | null
+          correlation_id?: string | null
           created_at?: string
           date?: string
           delivery_date?: string | null

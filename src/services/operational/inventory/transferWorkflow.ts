@@ -22,6 +22,7 @@ export interface WorkflowTransition {
   quantity?: number;
   divergence?: number;
   notes?: string;
+  correlationId?: string;
 }
 
 export const transferWorkflow = {
@@ -31,7 +32,8 @@ export const transferWorkflow = {
     userId,
     quantity = 0,
     divergence = 0,
-    notes = ''
+    notes = '',
+    correlationId
   }: Omit<WorkflowTransition, 'fromStatus'>) {
     
     // 1. Registrar o log do workflow
@@ -49,10 +51,13 @@ export const transferWorkflow = {
 
     if (logError) throw logError;
 
-    // 2. Atualizar o status atual na ordem de transferência
-    const { error: updateError } = await supabase
+    // 2. Atualizar o status atual na ordem de transferência e propagar correlação
+    const { error: updateError } = await (supabase as any)
       .from('stock_transfer_orders')
-      .update({ current_status: toStatus as any })
+      .update({ 
+        current_status: toStatus as any,
+        correlation_id: correlationId || null
+      })
       .eq('id', transferId);
 
     if (updateError) throw updateError;

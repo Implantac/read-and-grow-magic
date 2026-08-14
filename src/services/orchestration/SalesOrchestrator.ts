@@ -4,22 +4,30 @@ import { toastSuccess } from '@/lib/toastHelpers';
 
 export class SalesOrchestrator {
   static async completeSale(orderId: string, companyId: string) {
-    console.log(`[SalesOrchestrator] Completing sale: ${orderId}`);
+    const correlationId = crypto.randomUUID();
+    console.log(`[SalesOrchestrator] Completing sale: ${orderId} (Correlation: ${correlationId})`);
     
-    // 1. Update order status
-    const { error: updateError } = await supabase
+    // 1. Update order status and propagate correlation
+    const { error: updateError } = await (supabase as any)
       .from('orders')
-      .update({ status: 'completed' })
+      .update({ 
+        status: 'completed',
+        correlation_id: correlationId
+      })
       .eq('id', orderId);
       
     if (updateError) throw updateError;
     
     toastSuccess('Venda Concluída', `O pedido ${orderId.split('-')[0]} foi processado pelo orquestrador.`);
 
-    // 2. Publish Event
-    // Note: useEventBus.getState() is correct for zustand to get current state without hook
+    // 2. Publish Event with Correlation
     const eventBus = useEventBus.getState();
-    await eventBus.publish('SALE_COMPLETED', { orderId, companyId });
+    await eventBus.publish('SALE_COMPLETED', { 
+      orderId, 
+      companyId,
+      correlationId,
+      causationId: orderId
+    });
     
     return { success: true };
   }

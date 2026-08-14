@@ -3,12 +3,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEnterprise } from "@/core/auth/EnterpriseContext";
 import { useAppStore } from "@/stores/useAppStore";
 import { transferWorkflow, TransferStatus } from "@/services/operational/inventory/transferWorkflow";
+import { useInventoryOrchestrator } from "@/core/orchestration/InventoryOrchestrator";
 import { toast } from "sonner";
 
 export function useSupplyChainExecution() {
   const { currentBranch } = useEnterprise();
   const { user } = useAppStore();
   const queryClient = useQueryClient();
+  const { logToLedger } = useInventoryOrchestrator();
   const branchId = currentBranch?.id;
 
   const tasksQuery = useQuery({
@@ -69,13 +71,26 @@ export function useSupplyChainExecution() {
     }) => {
       if (!user?.id) throw new Error("Usuário não autenticado");
       
-      return await transferWorkflow.transition({
+      const correlationId = crypto.randomUUID();
+      
+      const result = await transferWorkflow.transition({
         transferId,
         toStatus,
         userId: user.id,
         quantity,
-        notes
+        notes,
+        correlationId
       });
+
+      // Audit Log via Orchestrator (SSOT)
+      await logToLedger({
+        movementId: transferId,
+        newStatus: toStatus,
+        correlationId,
+        metadata: { quantity, notes, source: 'useSupplyChainExecution' }
+      });
+
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['supply-chain-tasks'] });
