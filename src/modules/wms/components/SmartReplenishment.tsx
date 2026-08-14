@@ -329,6 +329,23 @@ export function SmartReplenishment() {
     setSelectedIds(newSet);
   };
 
+  // Efeito para sincronizar selectedIds com editedQuantities ao carregar
+  useEffect(() => {
+    const editedIds = Object.keys(editedQuantities);
+    if (editedIds.length > 0 && selectedIds.size === 0) {
+      const newSelected = new Set(selectedIds);
+      editedIds.forEach(id => {
+        // Apenas adiciona se existir na sugestão atual para evitar lixo
+        if (suggestions.find(s => s.id === id)) {
+          newSelected.add(id);
+        }
+      });
+      if (newSelected.size > 0) {
+        setSelectedIds(newSelected);
+      }
+    }
+  }, [suggestions.length]); // Executa quando as sugestões carregam
+
   // Atalhos de teclado
   useMemo(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
