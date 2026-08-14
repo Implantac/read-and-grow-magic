@@ -17,11 +17,13 @@ import { Checkbox } from '@/ui/base/checkbox';
 export function SmartReplenishment() {
   const [search, setSearch] = useState('');
   const [simulatedSug, setSimulatedSug] = useState<any>(null);
+  const [showBulkPreview, setShowBulkPreview] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const { data: matrix = [], isLoading, error, refetch } = useEstoqueMatrix(search, true);
   const { data: branches = [] } = useBranches();
   const createTransfer = useCreateTransferenciaCanal();
   const [isBulkApproving, setIsBulkApproving] = useState(false);
+
 
   const suggestions = useMemo(() => {
     const list: any[] = [];
