@@ -18,6 +18,10 @@ import { useEstoqueMatrix } from "@/hooks/inventory/useEstoqueMatrix";
 import { stockEngine } from "@/services/operational/inventory/stockEngine";
 import { Link } from "react-router-dom";
 
+import { stockEngine } from "@/services/operational/inventory/stockEngine";
+import { useEstoqueMatrix } from "@/hooks/inventory/useEstoqueMatrix";
+import { useTransferOrders } from "@/hooks/operational/network/useNetworkArchitecture";
+
 export default function SupplyChainTower() {
   const { data: matrix = [], isLoading } = useEstoqueMatrix('', true);
 

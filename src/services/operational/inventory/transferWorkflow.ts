@@ -58,59 +58,61 @@ export const transferWorkflow = {
     // 3. Efeitos colaterais no estoque (Lógica Centralizada)
     const { data: order } = await supabase
       .from('stock_transfer_orders')
-      .select('*')
+      .select('*, items:stock_transfer_items(*)')
       .eq('id', transferId)
       .single();
 
-    if (order) {
-      if (toStatus === 'RESERVADA') {
-        // Reservar estoque na origem
-        await supabase.rpc('adjust_stock', {
-          p_branch_id: order.origin_unit_id,
-          p_product_id: order.product_id,
-          p_quantity: 0,
-          p_reserved: quantity || order.requested_quantity
-        });
-      } else if (toStatus === 'EXPEDIDA') {
-        // Baixa físico e reserva na origem, aumenta trânsito
-        await supabase.rpc('adjust_stock', {
-          p_branch_id: order.origin_unit_id,
-          p_product_id: order.product_id,
-          p_quantity: -(quantity || order.requested_quantity),
-          p_reserved: -(quantity || order.requested_quantity),
-          p_transit_in: 0
-        });
-        // Aumenta trânsito no destino
-        await supabase.rpc('adjust_stock', {
-          p_branch_id: order.destination_unit_id,
-          p_product_id: order.product_id,
-          p_quantity: 0,
-          p_reserved: 0,
-          p_transit_in: quantity || order.requested_quantity
-        });
-      } else if (toStatus === 'RECEBIDA') {
-        // Baixa trânsito e aumenta físico no destino
-        await supabase.rpc('adjust_stock', {
-          p_branch_id: order.destination_unit_id,
-          p_product_id: order.product_id,
-          p_quantity: quantity || order.requested_quantity,
-          p_reserved: 0,
-          p_transit_in: -(quantity || order.requested_quantity)
-        });
+    if (order && order.items && order.items.length > 0) {
+      for (const item of order.items) {
+        if (toStatus === 'RESERVADA') {
+          // Reservar estoque na origem
+          await supabase.rpc('adjust_stock', {
+            p_branch_id: order.origin_unit_id,
+            p_product_id: item.product_id,
+            p_quantity: 0,
+            p_reserved: quantity || item.requested_qty
+          } as any);
+        } else if (toStatus === 'EXPEDIDA') {
+          // Baixa físico e reserva na origem
+          await supabase.rpc('adjust_stock', {
+            p_branch_id: order.origin_unit_id,
+            p_product_id: item.product_id,
+            p_quantity: -(quantity || item.requested_qty),
+            p_reserved: -(quantity || item.requested_qty),
+            p_transit_in: 0
+          } as any);
+          // Aumenta trânsito no destino
+          await supabase.rpc('adjust_stock', {
+            p_branch_id: order.destination_unit_id,
+            p_product_id: item.product_id,
+            p_quantity: 0,
+            p_reserved: 0,
+            p_transit_in: quantity || item.requested_qty
+          } as any);
+        } else if (toStatus === 'RECEBIDA') {
+          // Baixa trânsito e aumenta físico no destino
+          await supabase.rpc('adjust_stock', {
+            p_branch_id: order.destination_unit_id,
+            p_product_id: item.product_id,
+            p_quantity: quantity || item.requested_qty,
+            p_reserved: 0,
+            p_transit_in: -(quantity || item.requested_qty)
+          } as any);
 
-        // Registrar divergência se houver
-        if (divergence > 0) {
-          await supabase
-            .from('stock_transfer_divergences')
-            .insert({
-              transfer_id: transferId,
-              product_id: order.product_id,
-              expected_qty: order.requested_quantity,
-              actual_qty: quantity,
-              divergence_qty: divergence,
-              reason: 'CONFERENCIA',
-              notes
-            });
+          // Registrar divergência se houver
+          if (divergence > 0) {
+            await supabase
+              .from('stock_transfer_divergences')
+              .insert({
+                transfer_id: transferId,
+                product_id: item.product_id,
+                expected_qty: item.requested_qty,
+                actual_qty: quantity,
+                divergence_qty: divergence,
+                reason: 'CONFERENCIA',
+                notes
+              });
+          }
         }
       }
     }
