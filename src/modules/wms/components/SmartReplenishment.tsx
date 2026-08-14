@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { RefreshCw, ArrowRight, AlertTriangle, CheckCircle, Search, Filter } from 'lucide-react';
+import { RefreshCw, ArrowRight, AlertTriangle, CheckCircle, Search, Filter, Brain } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
@@ -215,13 +215,22 @@ export function SmartReplenishment() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button 
-                          size="sm" 
-                          onClick={() => handleExecute(sug)}
-                          disabled={createTransfer.isPending}
-                        >
-                          Transferir
-                        </Button>
+                        <div className="flex justify-end gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => setSimulatedSug(sug)}
+                          >
+                            Simular
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            onClick={() => handleExecute(sug)}
+                            disabled={createTransfer.isPending}
+                          >
+                            Transferir
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
