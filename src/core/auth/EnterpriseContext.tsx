@@ -155,7 +155,9 @@ export const EnterpriseProvider = withRenderMonitor(React.memo(React.forwardRef<
       }
 
       // Check if we already synced this user to avoid loop
+      // We compare ID and active state to ensure we don't reload during a render cycle
       if (user.id === lastSyncUser.current && currentCompany && !isLoading) {
+        isSyncing.current = false;
         return;
       }
       lastSyncUser.current = user.id;
@@ -184,17 +186,20 @@ export const EnterpriseProvider = withRenderMonitor(React.memo(React.forwardRef<
         !storeState.isAuthenticated;
 
       if (needsUpdate) {
-        // Use a direct state assignment via setState
-        useStore.setState({
-          user: {
-            id: user.id,
-            name: userName,
-            email: user.email || '',
-            role: finalRole,
-            permissions: ['all'],
-          },
-          userRole: finalRole,
-          isAuthenticated: true
+        // Use a functional update to ensure we have the absolute latest state from Zustand
+        useStore.setState((state) => {
+          if (state.user?.id === user.id && state.userRole === finalRole) return state;
+          return {
+            user: {
+              id: user.id,
+              name: userName,
+              email: user.email || '',
+              role: finalRole,
+              permissions: ['all'],
+            },
+            userRole: finalRole,
+            isAuthenticated: true
+          };
         });
       }
 
@@ -231,7 +236,8 @@ export const EnterpriseProvider = withRenderMonitor(React.memo(React.forwardRef<
             const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
             const enterpriseStore = useEnterpriseStore.getState();
             if (enterpriseStore.activeBranchId !== defaultBranch.id) {
-              enterpriseStore.setActiveBranchId(defaultBranch.id);
+              // Update non-reactively to break chain
+              useEnterpriseStore.setState({ activeBranchId: defaultBranch.id });
             }
           }
         }

@@ -1,9 +1,10 @@
 import { useEnterpriseStore } from '../stores/useEnterpriseStore';
+import { useMemo } from 'react';
 
 export const useAdaptiveInterface = () => {
-  const { config } = useEnterpriseStore();
+  const config = useEnterpriseStore(state => state.config);
 
-  const getVisibleModules = () => {
+  const visibleModules = useMemo(() => {
     if (!config) return ['dashboard', 'admin'];
 
     const baseModules = ['dashboard', 'finance', 'commercial', 'admin'];
@@ -18,10 +19,10 @@ export const useAdaptiveInterface = () => {
       default:
         return baseModules;
     }
-  };
+  }, [config?.segment]); // Stable dependency
 
   return {
-    visibleModules: getVisibleModules(),
+    visibleModules,
     isSegment: (segment: string) => config?.segment === segment,
   };
 };
