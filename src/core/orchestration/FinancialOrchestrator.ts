@@ -1,6 +1,6 @@
 import { useEventBus } from '@/core/events/useEventBus';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { toastSuccess } from '@/lib/toastHelpers';
 
 export const useFinancialOrchestrator = (providedCompanyId?: string) => {

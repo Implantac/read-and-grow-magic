@@ -21,15 +21,21 @@ const RealtimeAlertsBridge = React.memo(() => {
   const { currentCompany, isLoading } = useEnterprise();
   const companyId = currentCompany?.id;
   
-  // Guard against re-initialization during context loading or if companyId hasn't changed
-  if (isLoading || !companyId) return null;
+  // We use a ref to track the "active" company we've initialized for.
+  // This prevents the bridge from flipping null/component during context jitter.
+  const activeCompanyId = React.useRef<string | null>(null);
 
-  return <AlertsOrchestratorContainer companyId={companyId} />;
+  if (!isLoading && companyId && activeCompanyId.current !== companyId) {
+    activeCompanyId.current = companyId;
+  }
+
+  if (!activeCompanyId.current) return null;
+
+  return <AlertsOrchestratorContainer companyId={activeCompanyId.current} />;
 });
 
 const AlertsOrchestratorContainer = React.memo(({ companyId }: { companyId: string }) => {
-  // We use keying by companyId to force a clean unmount/remount ONLY when companyId changes
-  return <OrchestratorInternal key={companyId} companyId={companyId} />;
+  return <OrchestratorInternal companyId={companyId} />;
 });
 
 const OrchestratorInternal = React.memo(({ companyId }: { companyId: string }) => {
