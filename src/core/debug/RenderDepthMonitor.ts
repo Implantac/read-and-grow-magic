@@ -31,23 +31,21 @@ class RenderDepthMonitor {
     this.updateCounts.set(componentName, currentCount);
 
     if (currentCount > MAX_UPDATES_PER_SECOND) {
+      // Interrompe o loop forçadamente mudando o estado do componente se possível
+      // Mas aqui apenas logamos e suspendemos o monitoramento para evitar crash de stack
       console.error(
-        `[CRITICAL] Loop de Renderização Detectado em: "${componentName}".`,
-        `Frequência: ${currentCount} updates/segundo. Interrompendo para proteção do navegador.`
+        `[CRITICAL] Loop de Renderização em: "${componentName}".`,
+        `Frequência: ${currentCount} updates/seg. Pausando monitoramento.`
       );
       
-      // Throttle alerts to avoid console flooding
       this.isEnabled = false;
       setTimeout(() => { this.isEnabled = true; }, 10000);
       
-      // Attempt to capture a stack trace for the update
-      try {
-        throw new Error(`Infinite render detection in ${componentName}`);
-      } catch (e) {
-        console.groupCollapsed(`Trace: ${componentName} Loop`);
-        console.error(e);
-        console.groupEnd();
-      }
+      // Lança um erro controlado que pode ser pego por um ErrorBoundary
+      // Isso é melhor do que deixar o React travar o navegador
+      const error = new Error(`Infinite render in ${componentName}`);
+      (error as any).isRenderLoop = true;
+      throw error;
     }
   }
 }
