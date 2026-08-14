@@ -156,7 +156,7 @@ export function SmartReplenishment() {
         productCode: sug.productCode,
         quantidade: qty,
         maxAvailable: sug.currentSourceQty - sug.minStock, // Surplus real disponível
-        isInvalid: qty > (sug.currentSourceQty - sug.minStock) || qty <= 0
+        isInvalid: qty <= 0 // Agora o ajuste automático cuida do máximo, então invalidamos apenas se for <= 0
       });
       return acc;
     }, {});
@@ -165,10 +165,15 @@ export function SmartReplenishment() {
   }, [suggestions, selectedIds, editedQuantities]);
 
   const handleUpdateQuantity = (id: string, value: number, max: number) => {
+    let finalValue = value;
     if (value > max) {
-      toast.error(`Quantidade excede o surplus disponível na origem (${max} un).`);
+      finalValue = max;
+      toast.warning(`Quantidade ajustada para o máximo executável (${max} un).`);
+    } else if (value < 1 && value !== 0) {
+      // Se o usuário tentar apagar ou colocar negativo, mas não for zero explicitamente
+      finalValue = 1;
     }
-    setEditedQuantities(prev => ({ ...prev, [id]: value }));
+    setEditedQuantities(prev => ({ ...prev, [id]: finalValue }));
   };
 
   const handleRemoveItem = (id: string) => {
@@ -621,6 +626,12 @@ export function SmartReplenishment() {
                               value={item.quantidade}
                               onChange={(e) => handleUpdateQuantity(item.id, Number(e.target.value), item.maxAvailable)}
                               className={`h-7 w-20 ml-auto text-right text-xs font-bold ${item.isInvalid ? 'border-destructive text-destructive' : 'text-primary'}`}
+                              onBlur={(e) => {
+                                if (Number(e.target.value) <= 0) {
+                                  handleUpdateQuantity(item.id, 1, item.maxAvailable);
+                                  toast.info("Quantidade mínima é 1 unidade.");
+                                }
+                              }}
                             />
                             {item.isInvalid && (
                               <span className="text-[8px] text-destructive font-semibold">Max: {item.maxAvailable}</span>
