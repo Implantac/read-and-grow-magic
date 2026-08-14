@@ -261,9 +261,10 @@ export function SmartReplenishment() {
 
           {simulatedSug && (
             <div className="space-y-6 py-4">
-              <div className="p-4 rounded-lg bg-muted/50 border">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 rounded-lg bg-muted/50 border">
                   <p className="text-xs font-bold uppercase text-muted-foreground mb-4 flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-primary" />
+                    <span className="h-2 w-2 rounded-full bg-primary" />
                     Memória de Cálculo: {simulatedSug.targetBranchName}
                   </p>
                   
@@ -318,7 +319,7 @@ export function SmartReplenishment() {
 
                 <div className="p-4 rounded-lg bg-muted/50 border">
                   <p className="text-xs font-bold uppercase text-muted-foreground mb-4 flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-amber-500" />
+                    <span className="h-2 w-2 rounded-full bg-amber-500" />
                     Viabilidade de Origem: {simulatedSug.sourceBranchName}
                   </p>
                   
