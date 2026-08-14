@@ -25,6 +25,7 @@ export function SmartReplenishment() {
   const { data: branches = [] } = useBranches();
   const createTransfer = useCreateTransferenciaCanal();
   const [isBulkApproving, setIsBulkApproving] = useState(false);
+  const [changeHistory, setChangeHistory] = useState<any[]>([]);
 
 
 
