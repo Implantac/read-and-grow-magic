@@ -263,6 +263,16 @@ export function SmartReplenishment() {
     toast.info("Todas as quantidades foram restauradas para os valores sugeridos.");
   };
 
+  const handleClearPersistence = () => {
+    setEditedQuantities({});
+    setHistoryStack([]);
+    setRedoStack([]);
+    localStorage.removeItem('smart-replenishment-edited-quantities');
+    localStorage.removeItem('smart-replenishment-history-stack');
+    localStorage.removeItem('smart-replenishment-redo-stack');
+    toast.success("Histórico e cache limpos com sucesso.");
+  };
+
   const handleResetQuantity = (id: string) => {
     const next = { ...editedQuantities };
     delete next[id];
