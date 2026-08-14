@@ -317,7 +317,9 @@ export default function StoreCentral() {
                   </div>
                 </CardContent>
               </Card>
+            </TabsContent>
             <TabsContent value="novo">
+
               <Card className="border-primary/40 bg-primary/5">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
