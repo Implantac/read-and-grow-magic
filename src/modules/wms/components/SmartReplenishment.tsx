@@ -21,6 +21,7 @@ export function SmartReplenishment() {
   const [showBulkPreview, setShowBulkPreview] = useState(false);
   const [bulkConfirmStep, setBulkConfirmStep] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   
   // Persistência no LocalStorage
   const [editedQuantities, setEditedQuantities] = useLocalStorage<Record<string, number>>('smart-replenishment-edited-quantities', {});
@@ -270,6 +271,7 @@ export function SmartReplenishment() {
     localStorage.removeItem('smart-replenishment-edited-quantities');
     localStorage.removeItem('smart-replenishment-history-stack');
     localStorage.removeItem('smart-replenishment-redo-stack');
+    setShowClearConfirm(false);
     toast.success("Histórico e cache limpos com sucesso.");
   };
 
@@ -908,7 +910,7 @@ export function SmartReplenishment() {
                   <Button 
                     variant="ghost"
                     size="icon"
-                    onClick={handleClearPersistence}
+                    onClick={() => setShowClearConfirm(true)}
                     className="h-8 w-8 text-destructive hover:bg-destructive/10"
                     title="Limpar Histórico e Cache"
                   >
@@ -970,6 +972,28 @@ export function SmartReplenishment() {
             )}
           </DialogFooter>
 
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" />
+              Limpar Tudo?
+            </DialogTitle>
+            <DialogDescription className="pt-2">
+              Esta ação irá apagar permanentemente todo o histórico de alterações (Undo/Redo) e as quantidades editadas nesta sessão.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setShowClearConfirm(false)}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={handleClearPersistence}>
+              Sim, Limpar Histórico
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
