@@ -54,35 +54,33 @@ export const ConfirmDialogProvider = React.memo(({ children }: { children: React
 
   return (
     <ConfirmCtx.Provider value={value}>
-      <>
-        {children}
-        <AlertDialog open={open} onOpenChange={(v) => { if (!v) handleClose(false); }}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{opts?.title ?? 'Confirmar'}</AlertDialogTitle>
-              {opts?.description && (
-                <AlertDialogDescription asChild>
-                  <div className="text-sm text-muted-foreground">{opts.description}</div>
-                </AlertDialogDescription>
+      {children}
+      <AlertDialog open={open} onOpenChange={(v) => { if (!v) handleClose(false); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{opts?.title ?? 'Confirmar'}</AlertDialogTitle>
+            {opts?.description && (
+              <AlertDialogDescription asChild>
+                <div className="text-sm text-muted-foreground">{opts.description}</div>
+              </AlertDialogDescription>
+            )}
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => handleClose(false)}>
+              {opts?.cancelLabel ?? 'Cancelar'}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => handleClose(true)}
+              className={cn(
+                variant === 'destructive' && 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+                variant === 'warning' && 'bg-yellow-600 text-white hover:bg-yellow-600/90',
               )}
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => handleClose(false)}>
-                {opts?.cancelLabel ?? 'Cancelar'}
-              </AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => handleClose(true)}
-                className={cn(
-                  variant === 'destructive' && 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-                  variant === 'warning' && 'bg-yellow-600 text-white hover:bg-yellow-600/90',
-                )}
-              >
-                {opts?.confirmLabel ?? 'Confirmar'}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </>
+            >
+              {opts?.confirmLabel ?? 'Confirmar'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </ConfirmCtx.Provider>
   );
 });
