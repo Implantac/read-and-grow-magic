@@ -38,7 +38,7 @@ export function SmartReplenishment() {
 
     Object.values(byProduct).forEach((p: any) => {
       const lowStockBranches = p.balances.filter((b: any) => b.quantity < p.min_stock);
-      const surplusBranches = p.balances.filter((b: any) => b.quantity > p.min_stock * 1.5); // Threshold reduzido para 1.5x
+      const surplusBranches = p.balances.filter((b: any) => b.quantity > p.min_stock * 2); // Threshold set to 2x for safety
 
       lowStockBranches.forEach((target: any) => {
         const needed = p.min_stock - target.quantity;

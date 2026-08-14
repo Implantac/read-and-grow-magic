@@ -194,12 +194,9 @@ export default function EstoqueMatrix() {
                         const v = p.cells[`${b.id}::VAREJO_PDV`] ?? 0;
                         const a = p.cells[`${b.id}::ATACADO_INDUSTRIA`] ?? 0;
                         const cellTotal = v + a;
-                        // Split min proportionally across branches for a soft signal
-                        const perBranchMin =
-                          p.min_stock > 0 && branches.length > 0
-                            ? p.min_stock / branches.length
-                            : 0;
-                        const sev = cellSeverity(cellTotal, perBranchMin);
+                        // Use exact min_stock if defined, otherwise 0
+                        // The user requested removing the equal division by branches
+                        const sev = cellSeverity(cellTotal, p.min_stock);
                         const canal: 'VAREJO_PDV' | 'ATACADO_INDUSTRIA' =
                           b.canal_padrao === 'ATACADO_INDUSTRIA'
                             ? 'ATACADO_INDUSTRIA'
