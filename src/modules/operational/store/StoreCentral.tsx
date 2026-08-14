@@ -240,7 +240,15 @@ export default function StoreCentral() {
               <div className="flex flex-col items-center justify-center py-4">
                 <div className="text-4xl font-black text-primary">{health?.score}</div>
                 <div className="text-[10px] font-bold uppercase tracking-widest text-primary/70">Score Total</div>
-                <Badge className="mt-2 bg-success text-success-foreground hover:bg-success">Excelente</Badge>
+                <Badge className={cn(
+                  "mt-2 text-white",
+                  health?.status === 'excellent' ? "bg-success hover:bg-success/90" : 
+                  health?.status === 'attention' ? "bg-amber-500 hover:bg-amber-600" : 
+                  "bg-destructive hover:bg-destructive/90"
+                )}>
+                  {health?.status === 'excellent' ? 'Excelente' : 
+                   health?.status === 'attention' ? 'Atenção' : 'Crítico'}
+                </Badge>
               </div>
               <div className="space-y-3">
                 {health?.factors.map((factor) => (
