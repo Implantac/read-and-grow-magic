@@ -97,6 +97,11 @@ export function SmartReplenishment() {
               suggestedQty: transferable,
               priority: (target.quantity <= 0) ? 'critical' : (needed > p.min_stock * 0.5 ? 'high' : 'medium'),
               flowType: source.branch_tipo === 'STORE' ? 'BALANCEAMENTO' : 'REABASTECIMENTO',
+              targetMetrics: stockEngine.calculateProjected(target),
+              sourceMetrics: stockEngine.calculateProjected(source),
+              minStock: p.min_stock,
+              maxStock: target.max_stock,
+              leadTime: target.lead_time_days,
             });
           }
         }
@@ -220,8 +225,10 @@ export function SmartReplenishment() {
                             variant="outline" 
                             size="sm" 
                             onClick={() => setSimulatedSug(sug)}
+                            className="gap-2"
                           >
-                            Simular
+                            <Brain className="h-3.5 w-3.5" />
+                            Explicar
                           </Button>
                           <Button 
                             size="sm" 
@@ -245,7 +252,7 @@ export function SmartReplenishment() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Brain className="h-5 w-5 text-primary" /> Simulador de Impacto (IA Explicável)
+              <Brain className="h-5 w-5 text-primary" /> Inteligência de Abastecimento (Explicar)
             </DialogTitle>
             <DialogDescription>
               Análise preditiva do efeito da transferência na malha logística.
@@ -256,41 +263,89 @@ export function SmartReplenishment() {
             <div className="space-y-6 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 rounded-lg bg-muted/50 border">
-                  <p className="text-xs font-bold uppercase text-muted-foreground mb-2">Destino: {simulatedSug.targetBranchName}</p>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Cobertura Atual:</span>
-                      <span className="font-bold text-destructive">{(simulatedSug.currentTargetQty / 10).toFixed(1)} dias</span>
+                  <p className="text-xs font-bold uppercase text-muted-foreground mb-3">Métricas de Destino: {simulatedSug.targetBranchName}</p>
+                  <div className="grid grid-cols-2 gap-y-3 gap-x-4">
+                    <div>
+                      <p className="text-[10px] text-muted-foreground uppercase">Estoque Disponível</p>
+                      <p className="text-sm font-bold">{simulatedSug.targetMetrics.available} un</p>
                     </div>
-                    <div className="flex justify-between text-sm text-success">
-                      <span>Após +{simulatedSug.suggestedQty}:</span>
-                      <span className="font-bold">{((simulatedSug.currentTargetQty + simulatedSug.suggestedQty) / 10).toFixed(1)} dias</span>
+                    <div>
+                      <p className="text-[10px] text-muted-foreground uppercase">Projetado (+Trânsito)</p>
+                      <p className="text-sm font-bold">{simulatedSug.targetMetrics.projected} un</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-muted-foreground uppercase">Demanda Média</p>
+                      <p className="text-sm font-bold">{simulatedSug.targetMetrics.dailyDemand.toFixed(2)} /dia</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-muted-foreground uppercase">Cobertura Atual</p>
+                      <p className={`text-sm font-bold ${simulatedSug.targetMetrics.coverageDays < 3 ? 'text-destructive' : ''}`}>
+                        {simulatedSug.targetMetrics.coverageDays.toFixed(1)} dias
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-muted-foreground uppercase">Estoque Mín/Máx</p>
+                      <p className="text-sm font-bold">{simulatedSug.minStock} / {simulatedSug.maxStock || '—'}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-muted-foreground uppercase">Lead Time</p>
+                      <p className="text-sm font-bold">{simulatedSug.leadTime || 0} dias</p>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 pt-4 border-t border-dashed">
+                    <p className="text-[10px] text-success uppercase font-bold mb-1">Impacto da Sugestão (+{simulatedSug.suggestedQty})</p>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Nova Cobertura:</span>
+                      <span className="font-bold text-success">
+                        {((simulatedSug.targetMetrics.projected + simulatedSug.suggestedQty) / (simulatedSug.targetMetrics.dailyDemand || 1)).toFixed(1)} dias
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 <div className="p-4 rounded-lg bg-muted/50 border">
-                  <p className="text-xs font-bold uppercase text-muted-foreground mb-2">Origem: {simulatedSug.sourceBranchName}</p>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Cobertura Atual:</span>
-                      <span className="font-bold">{(simulatedSug.currentSourceQty / 10).toFixed(1)} dias</span>
+                  <p className="text-xs font-bold uppercase text-muted-foreground mb-3">Métricas de Origem: {simulatedSug.sourceBranchName}</p>
+                  <div className="grid grid-cols-2 gap-y-3 gap-x-4">
+                    <div>
+                      <p className="text-[10px] text-muted-foreground uppercase">Estoque Físico</p>
+                      <p className="text-sm font-bold">{simulatedSug.sourceMetrics.physical} un</p>
                     </div>
-                    <div className="flex justify-between text-sm text-amber-500">
-                      <span>Após -{simulatedSug.suggestedQty}:</span>
-                      <span className="font-bold">{((simulatedSug.currentSourceQty - simulatedSug.suggestedQty) / 10).toFixed(1)} dias</span>
+                    <div>
+                      <p className="text-[10px] text-muted-foreground uppercase">Disponível</p>
+                      <p className="text-sm font-bold text-success">{simulatedSug.sourceMetrics.available} un</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-muted-foreground uppercase">Cobertura Atual</p>
+                      <p className="text-sm font-bold">{simulatedSug.sourceMetrics.coverageDays.toFixed(1)} dias</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-muted-foreground uppercase">Classe ABC</p>
+                      <Badge variant="outline" className={`text-[9px] ${stockEngine.getABCColor(simulatedSug.sourceMetrics.abcClass)}`}>
+                        {simulatedSug.sourceMetrics.abcClass || 'N/A'}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pt-4 border-t border-dashed">
+                    <p className="text-[10px] text-amber-500 uppercase font-bold mb-1">Impacto da Sugestão (-{simulatedSug.suggestedQty})</p>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Nova Cobertura:</span>
+                      <span className="font-bold text-amber-500">
+                        {((simulatedSug.sourceMetrics.projected - simulatedSug.suggestedQty) / (simulatedSug.sourceMetrics.dailyDemand || 1)).toFixed(1)} dias
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
 
               <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
-                <p className="text-xs font-bold text-primary uppercase mb-2">Por que o sistema sugeriu isso?</p>
+                <p className="text-xs font-bold text-primary uppercase mb-2">Lógica de Recomendação</p>
                 <div className="text-xs space-y-2 text-muted-foreground leading-relaxed">
-                  <p>• A unidade <strong>{simulatedSug.targetBranchName}</strong> apresenta risco de ruptura iminente.</p>
-                  <p>• A unidade <strong>{simulatedSug.sourceBranchName}</strong> possui excedente operacional (Surplus) de {simulatedSug.currentSourceQty - simulatedSug.currentTargetQty} unidades.</p>
-                  <p>• Lead time estimado de <strong>1 dia</strong> garante a reposição antes do esgotamento total.</p>
-                  <p>• Prioridade: <strong>{simulatedSug.priority.toUpperCase()}</strong>.</p>
+                  <p>• <strong>Necessidade Identificada:</strong> A unidade de destino atingiu o ponto de ressuprimento (Estoque Projetado {simulatedSug.targetMetrics.projected} &lt; Mínimo {simulatedSug.minStock}).</p>
+                  <p>• <strong>Viabilidade de Origem:</strong> A origem possui excedente operacional seguro, mantendo cobertura pós-transferência acima do nível crítico.</p>
+                  <p>• <strong>Tempo de Reação:</strong> O Lead Time de {simulatedSug.leadTime} dias foi considerado para garantir que o trânsito chegue antes da ruptura total.</p>
+                  <p>• <strong>Prioridade {simulatedSug.priority.toUpperCase()}:</strong> Calculada com base na gravidade da ruptura (cobertura atual de {simulatedSug.targetMetrics.coverageDays.toFixed(1)} dias).</p>
                 </div>
               </div>
             </div>

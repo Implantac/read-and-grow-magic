@@ -12,7 +12,13 @@ export interface EstoqueMatrixRow {
   branch_tipo: string | null;
   canal_operacional: 'VAREJO_PDV' | 'ATACADO_INDUSTRIA';
   quantity: number;
+  reserved_quantity?: number;
+  in_transit_in_quantity?: number;
+  average_daily_sales?: number;
+  abc_class?: string;
   min_stock: number;
+  max_stock?: number;
+  lead_time_days?: number;
 }
 
 /**
@@ -31,7 +37,7 @@ export function useEstoqueMatrix(search = '', forceConsolidated = false) {
       let query = supabase
         .from('stock_balances')
         .select(
-          'product_id, product_code, product_name, branch_id, canal_operacional, quantity, branches(name, tipo), products(min_stock)'
+          'product_id, product_code, product_name, branch_id, canal_operacional, quantity, reserved_quantity, in_transit_in_quantity, average_daily_sales, abc_class, branches(name, tipo), products(min_stock, max_stock, lead_time_days)'
         )
         .eq('company_id', companyId!)
         .limit(2000);
@@ -54,7 +60,13 @@ export function useEstoqueMatrix(search = '', forceConsolidated = false) {
         branch_tipo: r.branches?.tipo ?? null,
         canal_operacional: r.canal_operacional,
         quantity: Number(r.quantity ?? 0),
+        reserved_quantity: Number(r.reserved_quantity ?? 0),
+        in_transit_in_quantity: Number(r.in_transit_in_quantity ?? 0),
+        average_daily_sales: Number(r.average_daily_sales ?? 0),
+        abc_class: r.abc_class,
         min_stock: Number(r.products?.min_stock ?? 0),
+        max_stock: Number(r.products?.max_stock ?? 0),
+        lead_time_days: Number(r.products?.lead_time_days ?? 0),
       })) as EstoqueMatrixRow[];
     },
   });
