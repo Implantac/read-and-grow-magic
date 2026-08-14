@@ -155,11 +155,13 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
       }
 
       // Check if we already synced this user to avoid loop
-      // We compare ID and active state to ensure we don't reload during a render cycle
+      // We compare ID and state to ensure we don't reload during a render cycle
       if (user.id === lastSyncUser.current && currentCompany && !isLoading) {
         isSyncing.current = false;
         return;
       }
+      
+      // Update the current user ref BEFORE triggering any state changes
       lastSyncUser.current = user.id;
       
       setIsLoading(true);

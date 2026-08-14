@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect } from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Toaster } from "@/ui/base/toaster";
 import { Toaster as Sonner } from "@/ui/base/sonner";
 import { TooltipProvider } from "@/ui/base/tooltip";
@@ -21,16 +21,12 @@ const RealtimeAlertsBridge = React.memo(() => {
   const enterprise = useEnterprise();
   const companyId = enterprise.currentCompany?.id;
   
-  // Bridge monitors companyId changes without re-triggering hooks unnecessarily
-  // We memoize the initialization to ensure it only happens when companyId truly changes
-  return React.useMemo(() => {
-    if (!companyId) return null;
-    console.log('[RealtimeAlertsBridge] Re-initializing orchestrators for company:', companyId);
-    return <AlertsOrchestratorContainer companyId={companyId} />;
-  }, [companyId]);
+  if (enterprise.isLoading || !companyId) return null;
+
+  return <OrchestratorInternal companyId={companyId} />;
 });
 
-const AlertsOrchestratorContainer = React.memo(({ companyId }: { companyId: string }) => {
+const OrchestratorInternal = React.memo(({ companyId }: { companyId: string }) => {
   useLowMarginAlertsRealtime(companyId);
   useInventoryOrchestrator(companyId);
   useFinancialOrchestrator(companyId);
@@ -67,9 +63,9 @@ const App = () => (
     <TooltipProvider>
       <EnterpriseProvider>
         <ConfirmDialogProvider>
+          <RealtimeAlertsBridge />
           <Toaster />
           <Sonner />
-          <RealtimeAlertsBridge />
           <BrowserRouter>
             <WorkflowSwitcher />
             <Suspense fallback={<GlobalLoader />}>
