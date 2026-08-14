@@ -184,25 +184,18 @@ export const EnterpriseProvider = withRenderMonitor(React.memo(React.forwardRef<
         !storeState.isAuthenticated;
 
       if (needsUpdate) {
-        // Use setState with a function to ensure we have the latest state and avoid closure issues
-        useStore.setState((state) => {
-          // Re-verify inside the setter to be absolutely sure
-          if (state.user?.id === user.id && state.userRole === finalRole && state.isAuthenticated) {
-            return state;
-          }
-          
-          return {
-            ...state,
-            user: {
-              id: user.id,
-              name: userName,
-              email: user.email || '',
-              role: finalRole,
-              permissions: ['all'],
-            },
-            userRole: finalRole,
-            isAuthenticated: true
-          };
+        // Use a direct state assignment via setState with a simple object first
+        // to minimize internal Zustand overhead during the sync
+        useStore.setState({
+          user: {
+            id: user.id,
+            name: userName,
+            email: user.email || '',
+            role: finalRole,
+            permissions: ['all'],
+          },
+          userRole: finalRole,
+          isAuthenticated: true
         });
       }
 

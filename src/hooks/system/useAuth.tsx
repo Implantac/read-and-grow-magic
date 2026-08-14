@@ -19,16 +19,14 @@ export function useAuth(options: UseAuthOptions = {}) {
 
     let mounted = true;
 
-    // We only need to check the session here to manage the "loading" state of the app entry.
-    // The actual profile/store synchronization is handled by EnterpriseProvider
-    // to avoid multiple listeners causing Maximum update depth exceeded (Error #185).
+    // Reduced complexity here to favor EnterpriseProvider's sync logic
     const checkSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session && mounted) {
-          // Atomic store access to avoid reactive loop
-          if (useAppStore.getState().isAuthenticated) {
-            storeLogout();
+          const state = useAppStore.getState();
+          if (state.isAuthenticated) {
+            useAppStore.setState({ isAuthenticated: false, user: null, userRole: null });
           }
         }
       } finally {

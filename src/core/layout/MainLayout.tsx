@@ -24,16 +24,16 @@ export const MainLayout = withRenderMonitor(() => {
   const lastNavPath = useRef<string | null>(null);
   useEffect(() => {
     if (!loading && !isAuthenticated && !isBypassPage) {
-      if (lastNavPath.current !== '/login') {
-        lastNavPath.current = '/login';
-        // Use a microtask delay to ensure state has settled
-        const timer = setTimeout(() => {
-          navigate('/login', { replace: true });
-        }, 0);
-        return () => clearTimeout(timer);
+      const currentPath = pathname;
+      if (currentPath !== '/login') {
+        // Use requestAnimationFrame to defer navigation to the next paint
+        // This is safer than setTimeout(0) for breaking render cycles
+        requestAnimationFrame(() => {
+          if (!useAppStore.getState().isAuthenticated) {
+            navigate('/login', { replace: true });
+          }
+        });
       }
-    } else if (isAuthenticated) {
-      lastNavPath.current = pathname;
     }
   }, [isAuthenticated, loading, navigate, isBypassPage, pathname]);
 
