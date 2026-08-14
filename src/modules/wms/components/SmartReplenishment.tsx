@@ -263,6 +263,16 @@ export function SmartReplenishment() {
     toast.info("Todas as quantidades foram restauradas para os valores sugeridos.");
   };
 
+  const handleClearPersistence = () => {
+    setEditedQuantities({});
+    setHistoryStack([]);
+    setRedoStack([]);
+    localStorage.removeItem('smart-replenishment-edited-quantities');
+    localStorage.removeItem('smart-replenishment-history-stack');
+    localStorage.removeItem('smart-replenishment-redo-stack');
+    toast.success("Histórico e cache limpos com sucesso.");
+  };
+
   const handleResetQuantity = (id: string) => {
     const next = { ...editedQuantities };
     delete next[id];
@@ -893,6 +903,18 @@ export function SmartReplenishment() {
                     <Redo2 className="h-4 w-4" />
                   </Button>
                 </div>
+
+                {(Object.keys(editedQuantities).length > 0 || historyStack.length > 0 || redoStack.length > 0) && (
+                  <Button 
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleClearPersistence}
+                    className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                    title="Limpar Histórico e Cache"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
 
                 {Object.keys(editedQuantities).length > 0 && (
                   <Button 
