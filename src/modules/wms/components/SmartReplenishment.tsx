@@ -181,6 +181,8 @@ export function SmartReplenishment() {
       toast.success(`${successCount} sugestões aprovadas e transferências geradas!`);
       setSelectedIds(new Set());
       setShowBulkPreview(false);
+      setBulkConfirmStep(false);
+
     } catch (err) {
       console.error("Bulk approval error:", err);
       toast.error("Erro ao processar aprovação em lote.");
