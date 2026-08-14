@@ -12,32 +12,40 @@ import {
   Clock,
   ArrowRight,
   ChevronRight,
-  Filter
+  Filter,
+  CheckCircle2
 } from "lucide-react";
 import { useEstoqueMatrix } from "@/hooks/inventory/useEstoqueMatrix";
 import { stockEngine } from "@/services/operational/inventory/stockEngine";
-import { Link } from "react-router-dom";
-
-import { stockEngine } from "@/services/operational/inventory/stockEngine";
-import { useEstoqueMatrix } from "@/hooks/inventory/useEstoqueMatrix";
+import { Link, useNavigate } from "react-router-dom";
 import { useTransferOrders } from "@/hooks/operational/network/useNetworkArchitecture";
 
 export default function SupplyChainTower() {
-  const { data: matrix = [], isLoading } = useEstoqueMatrix('', true);
+  const navigate = useNavigate();
+  const { data: matrix = [], isLoading: isMatrixLoading } = useEstoqueMatrix('', true);
+  const { data: transfers = [] } = useTransferOrders();
 
-  const stats = {
-    ruptures: matrix.filter(m => m.quantity <= 0).length,
-    critical: matrix.filter(m => {
-        const p = stockEngine.calculateProjected(m);
-        return p.status === 'critical';
-    }).length,
-    inTransit: 43, // Placeholder para integração real com transfers
-    delayed: 12,
-    suggestions: 87
-  };
+  const ruptures = matrix.filter(item => item.quantity <= 0).length;
+  const criticalCoverage = matrix.filter(item => {
+    const p = stockEngine.calculateProjected(item);
+    return p.coverageDays < 3;
+  }).length;
+
+  const inTransitCount = transfers.filter((t: any) => 
+    ['EXPEDIDA', 'EM TRÂNSITO'].includes(t.current_status)
+  ).length;
+
+  const pendingApprovals = transfers.filter((t: any) => 
+    t.current_status === 'SUGERIDA'
+  ).length;
+
+  const suggestionsCount = matrix.filter(item => {
+    const p = stockEngine.calculateProjected(item);
+    return p.status === 'critical' || p.status === 'attention';
+  }).length;
 
   return (
-    <PageContainer loading={isLoading}>
+    <PageContainer loading={isMatrixLoading}>
       <PageHeader 
         title="Torre de Controle de Abastecimento" 
         description="Gestão preditiva e orquestração de malha logística Read & Grow"
@@ -54,11 +62,11 @@ export default function SupplyChainTower() {
       </PageHeader>
 
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-        <StatCard title="Rupturas" value={stats.ruptures} icon={AlertTriangle} variant="destructive" />
-        <StatCard title="Críticos" value={stats.critical} icon={TrendingUp} variant="warning" />
-        <StatCard title="Em Trânsito" value={stats.inTransit} icon={Truck} variant="info" />
-        <StatCard title="Atrasados" value={stats.delayed} icon={Clock} variant="destructive" />
-        <StatCard title="Sugestões" value={stats.suggestions} icon={Brain} variant="success" />
+        <StatCard title="Rupturas" value={ruptures} icon={AlertTriangle} variant="destructive" />
+        <StatCard title="Críticos" value={criticalCoverage} icon={TrendingUp} variant="warning" />
+        <StatCard title="Em Trânsito" value={inTransitCount} icon={Truck} variant="info" />
+        <StatCard title="Aprovação" value={pendingApprovals} icon={CheckCircle2} variant="success" />
+        <StatCard title="Sugestões" value={suggestionsCount} icon={Brain} variant="default" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -114,7 +122,7 @@ export default function SupplyChainTower() {
                 <CardContent className="space-y-4">
                     <div className="flex justify-between items-center text-sm">
                         <span className="text-muted-foreground">Lojas com Risco</span>
-                        <Badge variant="outline" className="text-destructive border-destructive/20">{stats.critical} Unidades</Badge>
+                        <Badge variant="outline" className="text-destructive border-destructive/20">{criticalCoverage} Unidades</Badge>
                     </div>
                     <div className="flex justify-between items-center text-sm">
                         <span className="text-muted-foreground">Eficiência de Giro</span>
@@ -138,7 +146,7 @@ export default function SupplyChainTower() {
                     <div className="space-y-4">
                         <div className="p-3 rounded-lg border bg-accent/30 text-xs">
                             <p className="font-bold">Otimização de Surplus</p>
-                            <p className="text-muted-foreground mt-1">Identificamos excesso de estoque em 4 lojas que podem suprir as rupturas do Shopping Norte.</p>
+                            <p className="text-muted-foreground mt-1">Identificamos excesso de estoque em lojas que podem suprir as rupturas críticas identificadas.</p>
                             <Button variant="link" className="p-0 h-auto text-[10px] mt-2 text-primary" asChild>
                                 <Link to="/logistica/reposicao-inteligente">Analisar agora</Link>
                             </Button>

@@ -1,5 +1,4 @@
 import { supabase } from "@/integrations/supabase/client";
-import { stockEngine } from "./stockEngine";
 
 export type TransferStatus = 
   | 'SUGERIDA' 
@@ -50,13 +49,13 @@ export const transferWorkflow = {
     // 2. Atualizar o status atual na ordem de transferência
     const { error: updateError } = await supabase
       .from('stock_transfer_orders')
-      .update({ current_status: toStatus })
+      .update({ current_status: toStatus as any })
       .eq('id', transferId);
 
     if (updateError) throw updateError;
 
     // 3. Efeitos colaterais no estoque (Lógica Centralizada)
-    const { data: order } = await supabase
+    const { data: order } = await (supabase as any)
       .from('stock_transfer_orders')
       .select('*, items:stock_transfer_items(*)')
       .eq('id', transferId)
@@ -66,38 +65,38 @@ export const transferWorkflow = {
       for (const item of order.items) {
         if (toStatus === 'RESERVADA') {
           // Reservar estoque na origem
-          await supabase.rpc('adjust_stock', {
+          await (supabase as any).rpc('adjust_stock', {
             p_branch_id: order.origin_unit_id,
             p_product_id: item.product_id,
             p_quantity: 0,
             p_reserved: quantity || item.requested_qty
-          } as any);
+          });
         } else if (toStatus === 'EXPEDIDA') {
           // Baixa físico e reserva na origem
-          await supabase.rpc('adjust_stock', {
+          await (supabase as any).rpc('adjust_stock', {
             p_branch_id: order.origin_unit_id,
             p_product_id: item.product_id,
             p_quantity: -(quantity || item.requested_qty),
             p_reserved: -(quantity || item.requested_qty),
             p_transit_in: 0
-          } as any);
+          });
           // Aumenta trânsito no destino
-          await supabase.rpc('adjust_stock', {
+          await (supabase as any).rpc('adjust_stock', {
             p_branch_id: order.destination_unit_id,
             p_product_id: item.product_id,
             p_quantity: 0,
             p_reserved: 0,
             p_transit_in: quantity || item.requested_qty
-          } as any);
+          });
         } else if (toStatus === 'RECEBIDA') {
           // Baixa trânsito e aumenta físico no destino
-          await supabase.rpc('adjust_stock', {
+          await (supabase as any).rpc('adjust_stock', {
             p_branch_id: order.destination_unit_id,
             p_product_id: item.product_id,
             p_quantity: quantity || item.requested_qty,
             p_reserved: 0,
             p_transit_in: -(quantity || item.requested_qty)
-          } as any);
+          });
 
           // Registrar divergência se houver
           if (divergence > 0) {
@@ -121,7 +120,7 @@ export const transferWorkflow = {
   },
 
   async getHistory(transferId: string) {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('stock_transfer_workflow_logs')
       .select(`
         *,
