@@ -480,6 +480,83 @@ export function SmartReplenishment() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={showBulkPreview} onOpenChange={setShowBulkPreview}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <CheckSquare className="h-6 w-6 text-primary" /> Revisar Transferências Consolidadas
+            </DialogTitle>
+            <DialogDescription>
+              A IA consolidou {selectedIds.size} itens em {bulkPreviewData?.length || 0} transferências otimizadas para reduzir custos logísticos.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-y-auto py-4 space-y-4">
+            {bulkPreviewData?.map((group: any, idx: number) => (
+              <div key={idx} className="border rounded-lg overflow-hidden bg-muted/30">
+                <div className="bg-muted p-3 flex items-center justify-between border-b">
+                  <div className="flex items-center gap-4">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] text-muted-foreground uppercase font-bold">Origem</span>
+                      <span className="text-sm font-semibold">{group.sourceName}</span>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground mt-2" />
+                    <div className="flex flex-col">
+                      <span className="text-[10px] text-muted-foreground uppercase font-bold">Destino</span>
+                      <span className="text-sm font-semibold">{group.targetName}</span>
+                    </div>
+                  </div>
+                  <Badge variant="secondary">{group.itens.length} {group.itens.length === 1 ? 'item' : 'itens'}</Badge>
+                </div>
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-transparent hover:bg-transparent">
+                      <TableHead className="h-8 py-0">Produto</TableHead>
+                      <TableHead className="h-8 py-0 text-right">Quantidade</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {group.itens.map((item: any, itemIdx: number) => (
+                      <TableRow key={itemIdx} className="hover:bg-transparent">
+                        <TableCell className="py-2">
+                          <div className="text-xs font-medium">{item.productName}</div>
+                          <div className="text-[10px] text-muted-foreground font-mono">{item.productCode}</div>
+                        </TableCell>
+                        <TableCell className="py-2 text-right font-bold text-primary">
+                          {item.quantidade}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ))}
+          </div>
+
+          <DialogFooter className="border-t pt-4">
+            <Button variant="outline" onClick={() => setShowBulkPreview(false)}>Cancelar</Button>
+            <Button 
+              className="bg-primary hover:bg-primary/90"
+              onClick={handleBulkApprove}
+              disabled={isBulkApproving}
+            >
+              {isBulkApproving ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  Gerando Transferências...
+                </>
+              ) : (
+                <>
+                  <Rocket className="h-4 w-4 mr-2" />
+                  Confirmar e Gerar {bulkPreviewData?.length} Transferências
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
