@@ -830,6 +830,29 @@ export function SmartReplenishment() {
             
             {!bulkConfirmStep && (
               <>
+                <div className="flex items-center gap-1 mr-auto">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground"
+                    onClick={handleUndo}
+                    disabled={historyStack.length === 0}
+                    title="Desfazer (Ctrl+Z)"
+                  >
+                    <Undo2 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground"
+                    onClick={handleRedo}
+                    disabled={redoStack.length === 0}
+                    title="Refazer (Ctrl+Y)"
+                  >
+                    <Redo2 className="h-4 w-4" />
+                  </Button>
+                </div>
+
                 {Object.keys(editedQuantities).length > 0 && (
                   <Button 
                     variant="ghost"
