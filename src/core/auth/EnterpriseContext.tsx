@@ -341,33 +341,41 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
     }
   }, [allBranches]);
 
-  const value = useMemo(() => ({
-    currentTenant,
-    currentGroup,
-    currentCompany,
-    currentBranch,
-    allBranches,
-    segment,
-    subSegment,
-    companySize,
-    taxRegime,
-    operationTypes,
-    policies,
-    isLoading,
-    setCompany,
-    setBranch,
-    executiveCouncil
-  }), [
-    currentTenant, currentGroup, 
+  const value = useMemo(() => {
+    return {
+      currentTenant,
+      currentGroup,
+      currentCompany,
+      currentBranch,
+      allBranches,
+      segment,
+      subSegment,
+      companySize,
+      taxRegime,
+      operationTypes,
+      policies,
+      isLoading,
+      setCompany,
+      setBranch,
+      executiveCouncil
+    };
+  }, [
+    currentTenant, 
+    currentGroup, 
     currentCompany?.id, 
     currentBranch?.id, 
     allBranches.length,
-    segment, subSegment, companySize, taxRegime, 
+    segment, 
+    subSegment, 
+    companySize, 
+    taxRegime, 
     operationTypes.length,
     policies.replenishmentMethod,
     policies.workflowEnabled,
     policies.eventOrchestrationEnabled,
-    isLoading, setCompany, setBranch
+    isLoading,
+    setCompany,
+    setBranch
   ]);
 
   return (
