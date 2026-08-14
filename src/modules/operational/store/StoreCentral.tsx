@@ -129,6 +129,10 @@ export default function StoreCentral() {
               <TabsTrigger value="solicitacoes" className="gap-2">
                 <Package className="h-4 w-4" /> Solicitações
               </TabsTrigger>
+              <TabsTrigger value="novo" className="gap-2 text-primary font-bold">
+                <ArrowUpCircle className="h-4 w-4" /> Solicitar
+              </TabsTrigger>
+
             </TabsList>
 
             <TabsContent value="alertas">
