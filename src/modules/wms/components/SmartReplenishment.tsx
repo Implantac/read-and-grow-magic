@@ -379,6 +379,8 @@ export function SmartReplenishment() {
             setShowClearConfirm(true);
           }
         }
+      } else if (e.key === 'Escape' && showClearConfirm) {
+        setShowClearConfirm(false);
       }
     };
 
