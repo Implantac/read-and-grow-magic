@@ -974,6 +974,28 @@ export function SmartReplenishment() {
 
         </DialogContent>
       </Dialog>
+
+      <Dialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" />
+              Limpar Tudo?
+            </DialogTitle>
+            <DialogDescription className="pt-2">
+              Esta ação irá apagar permanentemente todo o histórico de alterações (Undo/Redo) e as quantidades editadas nesta sessão.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setShowClearConfirm(false)}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={handleClearPersistence}>
+              Sim, Limpar Histórico
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
