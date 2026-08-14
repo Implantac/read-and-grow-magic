@@ -625,7 +625,38 @@ export function SmartReplenishment() {
                 </div>
               </div>
             ) : (
-              bulkPreviewData?.map((group: any, idx: number) => (
+              <div className="space-y-4">
+                {changeHistory.length > 0 && (
+                  <div className="p-3 rounded-lg border bg-amber-50/50 border-amber-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2 text-amber-800">
+                        <History className="h-3.5 w-3.5" />
+                        <h4 className="text-[10px] font-bold uppercase tracking-wider">Ajustes da IA nesta sessão</h4>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-5 text-[9px] text-amber-700 hover:bg-amber-100"
+                        onClick={() => setChangeHistory([])}
+                      >
+                        Limpar Histórico
+                      </Button>
+                    </div>
+                    <div className="space-y-1.5 max-h-32 overflow-y-auto pr-1">
+                      {changeHistory.map(log => (
+                        <div key={log.id} className="text-[10px] flex items-center justify-between border-b border-amber-100/50 pb-1 last:border-0">
+                          <span className="font-medium text-amber-900 truncate max-w-[150px]">{log.productName}</span>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="line-through text-amber-400">{log.originalValue}</span>
+                            <ArrowRight className="h-2.5 w-2.5 text-amber-600" />
+                            <span className="font-bold text-amber-700">{log.adjustedValue}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {bulkPreviewData?.map((group: any, idx: number) => (
                 <div key={idx} className="border rounded-lg overflow-hidden bg-muted/30">
                   <div className="bg-muted p-3 flex items-center justify-between border-b">
                     <div className="flex items-center gap-4">
