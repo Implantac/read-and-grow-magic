@@ -149,16 +149,27 @@ export function SmartReplenishment() {
         };
       }
       acc[key].itens.push({ 
+        id: sug.id,
         product_id: sug.productId, 
         productName: sug.productName,
         productCode: sug.productCode,
-        quantidade: sug.suggestedQty 
+        quantidade: editedQuantities[sug.id] ?? sug.suggestedQty 
       });
       return acc;
     }, {});
 
     return Object.values(groups);
-  }, [suggestions, selectedIds]);
+  }, [suggestions, selectedIds, editedQuantities]);
+
+  const handleUpdateQuantity = (id: string, value: number) => {
+    setEditedQuantities(prev => ({ ...prev, [id]: value }));
+  };
+
+  const handleRemoveItem = (id: string) => {
+    const newSet = new Set(selectedIds);
+    newSet.delete(id);
+    setSelectedIds(newSet);
+  };
 
   const handleBulkApprove = async () => {
     if (!bulkPreviewData || bulkPreviewData.length === 0) return;
