@@ -723,9 +723,10 @@ export function SmartReplenishment() {
                     </TableBody>
                   </Table>
                 </div>
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
+        </div>
 
           <DialogFooter className="border-t pt-4">
             <Button 
