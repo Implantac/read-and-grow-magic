@@ -26,6 +26,32 @@ export function SmartReplenishment() {
   const createTransfer = useCreateTransferenciaCanal();
   const [isBulkApproving, setIsBulkApproving] = useState(false);
   const [changeHistory, setChangeHistory] = useState<any[]>([]);
+  const [historyStack, setHistoryStack] = useState<Record<string, number>[]>([]);
+  const [redoStack, setRedoStack] = useState<Record<string, number>[]>([]);
+
+  const pushToHistory = (newQuantities: Record<string, number>) => {
+    setHistoryStack(prev => [...prev, editedQuantities]);
+    setRedoStack([]); // Limpar redo ao fazer nova alteração
+    setEditedQuantities(newQuantities);
+  };
+
+  const handleUndo = () => {
+    if (historyStack.length === 0) return;
+    const prev = historyStack[historyStack.length - 1];
+    setRedoStack(current => [...current, editedQuantities]);
+    setHistoryStack(current => current.slice(0, -1));
+    setEditedQuantities(prev);
+    toast.info("Desfeito com sucesso");
+  };
+
+  const handleRedo = () => {
+    if (redoStack.length === 0) return;
+    const next = redoStack[redoStack.length - 1];
+    setHistoryStack(current => [...current, editedQuantities]);
+    setRedoStack(current => current.slice(0, -1));
+    setEditedQuantities(next);
+    toast.info("Refeito com sucesso");
+  };
 
 
 
