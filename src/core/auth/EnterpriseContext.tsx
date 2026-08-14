@@ -63,7 +63,7 @@ interface EnterpriseContextType {
 
 const EnterpriseContext = createContext<EnterpriseContextType | undefined>(undefined);
 
-export const EnterpriseProvider = React.memo(React.forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ children }, ref) => {
+export const EnterpriseProvider = React.memo(({ children }: { children: React.ReactNode }) => {
   const [currentTenant, setCurrentTenant] = useState<TenantRef | null>(null);
   const [currentGroup, setCurrentGroup] = useState<GroupRef | null>(null);
   const [currentCompany, setCurrentCompany] = useState<CompanyRow | null>(null);
@@ -361,13 +361,13 @@ export const EnterpriseProvider = React.memo(React.forwardRef<HTMLDivElement, { 
   ]);
 
   return (
-    <div ref={ref}>
-      <EnterpriseContext.Provider value={value}>
-        {children}
-      </EnterpriseContext.Provider>
-    </div>
+    <EnterpriseContext.Provider value={value}>
+      {children}
+    </EnterpriseContext.Provider>
   );
-})), 'EnterpriseProvider');
+});
+
+EnterpriseProvider.displayName = 'EnterpriseProvider';
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useEnterprise = () => {

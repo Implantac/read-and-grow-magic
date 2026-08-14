@@ -88,6 +88,8 @@ export const ConfirmDialogProvider = React.memo(({ children }: { children: React
   );
 });
 
+ConfirmDialogProvider.displayName = 'ConfirmDialogProvider';
+
 export function useConfirm(): ConfirmFn {
   const ctx = useContext(ConfirmCtx);
   if (!ctx) {
