@@ -30,7 +30,7 @@ const ConfirmCtx = createContext<ConfirmFn | null>(null);
  * Provider global de confirmação destrutiva unificada.
  * Uso: `const confirm = useConfirm(); if (await confirm({ title: 'Excluir?' })) { ... }`.
  */
-export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => {
+export const ConfirmDialogProvider = React.forwardRef<HTMLDivElement, { children: ReactNode }>(({ children }, ref) => {
   const [open, setOpen] = useState(false);
   const [opts, setOpts] = useState<ConfirmOptions | null>(null);
   const resolverRef = useRef<((v: boolean) => void) | null>(null);
@@ -54,36 +54,38 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
 
   return (
     <ConfirmCtx.Provider value={value}>
-      {children}
-      <AlertDialog open={open} onOpenChange={(v) => { if (!v) handleClose(false); }}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{opts?.title ?? 'Confirmar'}</AlertDialogTitle>
-            {opts?.description && (
-              <AlertDialogDescription asChild>
-                <div className="text-sm text-muted-foreground">{opts.description}</div>
-              </AlertDialogDescription>
-            )}
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => handleClose(false)}>
-              {opts?.cancelLabel ?? 'Cancelar'}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => handleClose(true)}
-              className={cn(
-                variant === 'destructive' && 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-                variant === 'warning' && 'bg-yellow-600 text-white hover:bg-yellow-600/90',
+      <div ref={ref}>
+        {children}
+        <AlertDialog open={open} onOpenChange={(v) => { if (!v) handleClose(false); }}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{opts?.title ?? 'Confirmar'}</AlertDialogTitle>
+              {opts?.description && (
+                <AlertDialogDescription asChild>
+                  <div className="text-sm text-muted-foreground">{opts.description}</div>
+                </AlertDialogDescription>
               )}
-            >
-              {opts?.confirmLabel ?? 'Confirmar'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => handleClose(false)}>
+                {opts?.cancelLabel ?? 'Cancelar'}
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => handleClose(true)}
+                className={cn(
+                  variant === 'destructive' && 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+                  variant === 'warning' && 'bg-yellow-600 text-white hover:bg-yellow-600/90',
+                )}
+              >
+                {opts?.confirmLabel ?? 'Confirmar'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
     </ConfirmCtx.Provider>
   );
-};
+});
 
 export function useConfirm(): ConfirmFn {
   const ctx = useContext(ConfirmCtx);
