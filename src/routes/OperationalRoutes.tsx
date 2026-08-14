@@ -8,6 +8,7 @@ const ConferenceQueuePage = lazy(() => import("../modules/operational/Conference
 const BillingQueuePage = lazy(() => import("../modules/operational/BillingQueue"));
 const ShipmentPage = lazy(() => import("../modules/operational/ShipmentPage"));
 const UnifiedSupplyChain = lazy(() => import("../modules/operational/supply-chain/UnifiedSupplyChain"));
+const SupplyChainTower = lazy(() => import("../modules/operational/network/SupplyChainTower"));
 const NetworkControlTower = lazy(() => import("../modules/operational/network/components/NetworkControlTower"));
 const StockTransfers = lazy(() => import("../modules/operational/network/StockTransfers"));
 const ReplenishmentIntelligence = lazy(() => import("../modules/operational/network/ReplenishmentIntelligence"));
@@ -24,6 +25,7 @@ export const OperationalRoutes = [
   <Route key="op-abastecimento" path="abastecimento" element={<UnifiedSupplyChain />} />,
 
   <Route key="op-rede-tower" path="rede/painel" element={<NetworkControlTower />} />,
+  <Route key="op-tower" path="torre-abastecimento" element={<SupplyChainTower />} />,
   <Route key="op-abastecimento-central" path="abastecimento/central" element={<UnifiedSupplyChain />} />,
 
   <Route key="op-rede-transfers" path="rede/transferencias" element={<StockTransfers />} />,
