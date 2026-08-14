@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { RefreshCw, ArrowRight, AlertTriangle, CheckCircle, Search, Filter, Brain } from 'lucide-react';
+import { RefreshCw, ArrowRight, AlertTriangle, CheckCircle, Search, Filter, Brain, CheckSquare, Square, Rocket } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
@@ -12,13 +12,16 @@ import { EmptyState } from '@/shared/components/EmptyState';
 import { toast } from 'sonner';
 import { stockEngine } from '@/services/operational/inventory/stockEngine';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/ui/base/dialog';
+import { Checkbox } from '@/ui/base/checkbox';
 
 export function SmartReplenishment() {
   const [search, setSearch] = useState('');
   const [simulatedSug, setSimulatedSug] = useState<any>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const { data: matrix = [], isLoading, error, refetch } = useEstoqueMatrix(search, true);
   const { data: branches = [] } = useBranches();
   const createTransfer = useCreateTransferenciaCanal();
+  const [isBulkApproving, setIsBulkApproving] = useState(false);
 
   const suggestions = useMemo(() => {
     const list: any[] = [];
@@ -124,6 +127,69 @@ export function SmartReplenishment() {
     });
   };
 
+  const handleBulkApprove = async () => {
+    const toApprove = suggestions.filter(s => selectedIds.has(s.id));
+    if (toApprove.length === 0) return;
+
+    setIsBulkApproving(true);
+    let successCount = 0;
+
+    try {
+      // Group by Source/Target to create optimized transfers (headers)
+      const groups = toApprove.reduce((acc: any, sug) => {
+        const key = `${sug.sourceBranchId}-${sug.targetBranchId}`;
+        if (!acc[key]) {
+          acc[key] = {
+            sourceId: sug.sourceBranchId,
+            targetId: sug.targetBranchId,
+            sourceName: sug.sourceBranchName,
+            targetName: sug.targetBranchName,
+            sourceTipo: sug.sourceBranchTipo,
+            itens: []
+          };
+        }
+        acc[key].itens.push({ product_id: sug.productId, quantidade: sug.suggestedQty });
+        return acc;
+      }, {});
+
+      for (const key in groups) {
+        const group = groups[key];
+        await createTransfer.mutateAsync({
+          origem_branch_id: group.sourceId,
+          destino_branch_id: group.targetId,
+          canal_origem: group.sourceTipo === 'FACTORY' || group.sourceTipo === 'DISTRIBUTION_CENTER' ? 'ATACADO_INDUSTRIA' : 'VAREJO_PDV',
+          canal_destino: 'VAREJO_PDV',
+          observacoes: `Aprovação em lote IA: ${group.sourceName} -> ${group.targetName}`,
+          itens: group.itens,
+        });
+        successCount += group.itens.length;
+      }
+      
+      toast.success(`${successCount} sugestões aprovadas e transferências geradas!`);
+      setSelectedIds(new Set());
+    } catch (err) {
+      console.error("Bulk approval error:", err);
+      toast.error("Erro ao processar aprovação em lote.");
+    } finally {
+      setIsBulkApproving(false);
+    }
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === suggestions.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(suggestions.map(s => s.id)));
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    const newSet = new Set(selectedIds);
+    if (newSet.has(id)) newSet.delete(id);
+    else newSet.add(id);
+    setSelectedIds(newSet);
+  };
+
   return (
     <div className="space-y-4">
       <Card className="border-primary/20 bg-primary/5">
@@ -136,7 +202,21 @@ export function SmartReplenishment() {
                 <CardDescription>Análise preditiva de ruptura e surplus para balanceamento de malha</CardDescription>
               </div>
             </div>
-            <Badge variant="outline" className="bg-background">IA Analítica Ativa</Badge>
+            <div className="flex items-center gap-3">
+              {selectedIds.size > 0 && (
+                <Button 
+                  variant="default" 
+                  size="sm" 
+                  className="bg-primary hover:bg-primary/90 shadow-lg animate-in fade-in zoom-in duration-300"
+                  onClick={handleBulkApprove}
+                  disabled={isBulkApproving}
+                >
+                  <Rocket className={`h-4 w-4 mr-2 ${isBulkApproving ? 'animate-bounce' : ''}`} />
+                  Aprovar {selectedIds.size} {selectedIds.size === 1 ? 'Sugestão' : 'Sugestões'}
+                </Button>
+              )}
+              <Badge variant="outline" className="bg-background">IA Analítica Ativa</Badge>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -182,6 +262,12 @@ export function SmartReplenishment() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-12">
+                      <Checkbox 
+                        checked={suggestions.length > 0 && selectedIds.size === suggestions.length}
+                        onCheckedChange={toggleSelectAll}
+                      />
+                    </TableHead>
                     <TableHead>Produto</TableHead>
                     <TableHead>Origem (Surplus)</TableHead>
                     <TableHead>Fluxo</TableHead>
@@ -192,8 +278,14 @@ export function SmartReplenishment() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {suggestions.map(sug => (
-                    <TableRow key={sug.id}>
+                    {suggestions.map(sug => (
+                    <TableRow key={sug.id} className={selectedIds.has(sug.id) ? 'bg-primary/5' : ''}>
+                      <TableCell>
+                        <Checkbox 
+                          checked={selectedIds.has(sug.id)}
+                          onCheckedChange={() => toggleSelect(sug.id)}
+                        />
+                      </TableCell>
                       <TableCell>
                         <div className="font-medium text-sm">{sug.productName}</div>
                         <div className="text-[10px] text-muted-foreground font-mono">{sug.productCode}</div>
