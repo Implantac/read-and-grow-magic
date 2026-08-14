@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 
 export function SmartReplenishment() {
   const [search, setSearch] = useState('');
-  const { data: matrix = [], isLoading, error, refetch } = useEstoqueMatrix(search);
+  const { data: matrix = [], isLoading, error, refetch } = useEstoqueMatrix(search, true);
   const { data: branches = [] } = useBranches();
   const createTransfer = useCreateTransferenciaCanal();
 

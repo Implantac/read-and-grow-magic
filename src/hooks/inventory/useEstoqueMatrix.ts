@@ -19,12 +19,12 @@ export interface EstoqueMatrixRow {
  * Global stock matrix (product × branch × canal).
  * The manager consumes this to compare Industry stock vs each retail store.
  */
-export function useEstoqueMatrix(search = '') {
+export function useEstoqueMatrix(search = '', forceConsolidated = false) {
   const companyId = useEnterpriseStore((s) => s.activeCompanyId);
   const { canal, branchId } = useCanalStore();
 
   return useQuery({
-    queryKey: ['estoque-matrix', companyId, canal, branchId, search],
+    queryKey: ['estoque-matrix', companyId, canal, branchId, search, forceConsolidated],
     enabled: !!companyId,
     staleTime: 30 * 1000,
     queryFn: async () => {
@@ -36,8 +36,10 @@ export function useEstoqueMatrix(search = '') {
         .eq('company_id', companyId!)
         .limit(2000);
 
-      if (canal !== 'CONSOLIDADO') query = query.eq('canal_operacional', canal);
-      if (branchId) query = query.eq('branch_id', branchId);
+      if (!forceConsolidated) {
+        if (canal !== 'CONSOLIDADO') query = query.eq('canal_operacional', canal);
+        if (branchId) query = query.eq('branch_id', branchId);
+      }
       if (search) query = query.ilike('product_name', `%${search}%`);
 
       const { data, error } = await query;
