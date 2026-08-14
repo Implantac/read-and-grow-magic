@@ -23,16 +23,26 @@ import {
   Clock,
   ArrowRight,
   ClipboardList,
-  ListTodo
+  ListTodo,
+  ArrowUpCircle,
+  PlayCircle,
+  TruckIcon,
+  CheckCircle,
+  XCircle,
+  LayoutGrid,
+  FileText
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/ui/base/skeleton";
+import { useEnterprise } from "@/core/auth/EnterpriseContext";
 
 export default function StoreCentral() {
   const { kpis, alerts, health, reliability, isLoading, refetch } = useStoreCentral();
-  const { tasks, inTransit, isLoading: isLoadingExecution } = useSupplyChainExecution();
+  const { tasks, inTransit, isLoading: isLoadingExecution, isProcessing, transition } = useSupplyChainExecution();
+  const { currentBranch } = useEnterprise();
+
 
 
   if (isLoading) {
@@ -200,29 +210,60 @@ export default function StoreCentral() {
                 <CardContent className="p-0">
                   <div className="divide-y">
                     {tasks.length > 0 ? (
-                      tasks.map((task: any) => (
-                        <div key={task.id} className="p-4 flex items-center justify-between hover:bg-muted/30 transition-colors">
-                          <div className="flex items-center gap-4">
-                            <div className="p-2 rounded bg-primary/10 text-primary">
-                              {task.current_status === 'SEPARAÇÃO' ? <Package className="h-5 w-5" /> : <Truck className="h-5 w-5" />}
-                            </div>
-                            <div>
-                              <p className="text-sm font-bold">TRF-{task.id.split('-')[0].toUpperCase()}</p>
-                              <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-                                <span>{task.origin?.name}</span>
-                                <ArrowRight className="h-2 w-2" />
-                                <span>{task.destination?.name}</span>
+                      tasks.map((task: any) => {
+                        const isOrigin = task.origin_unit_id === currentBranch?.id;
+                        const status = task.current_status;
+                        
+                        // Determinar ações possíveis com base no status e se é origem ou destino
+                        let nextAction = null;
+                        if (isOrigin) {
+                          if (status === 'SUGERIDA') nextAction = { label: 'Aprovar', status: 'APROVADA', icon: CheckCircle };
+                          else if (status === 'APROVADA') nextAction = { label: 'Alocar', status: 'RESERVADA', icon: LayoutGrid };
+                          else if (status === 'RESERVADA') nextAction = { label: 'Separar', status: 'SEPARAÇÃO', icon: Package };
+                          else if (status === 'SEPARAÇÃO') nextAction = { label: 'Expedir', status: 'EM TRÂNSITO', icon: TruckIcon };
+                        } else {
+                          if (status === 'EM TRÂNSITO') nextAction = { label: 'Receber', status: 'RECEBIDA', icon: ArrowUpCircle };
+                          else if (status === 'RECEBIDA') nextAction = { label: 'Concluir', status: 'ENCERRADA', icon: CheckCircle };
+                        }
+
+                        return (
+                          <div key={task.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between hover:bg-muted/30 transition-colors gap-4">
+                            <div className="flex items-center gap-4">
+                              <div className="p-2 rounded bg-primary/10 text-primary">
+                                {status === 'SEPARAÇÃO' ? <Package className="h-5 w-5" /> : <Truck className="h-5 w-5" />}
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm font-bold">TRF-{task.id.split('-')[0].toUpperCase()}</p>
+                                  <Badge variant="outline" className="text-[9px] h-4 py-0">{status}</Badge>
+                                </div>
+                                <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-0.5">
+                                  <span className={cn(isOrigin && "font-bold text-primary")}>{task.origin?.name}</span>
+                                  <ArrowRight className="h-2 w-2" />
+                                  <span className={cn(!isOrigin && "font-bold text-primary")}>{task.destination?.name}</span>
+                                </div>
                               </div>
                             </div>
+                            
+                            <div className="flex items-center gap-2">
+                              {nextAction && (
+                                <Button 
+                                  size="sm" 
+                                  className="h-8 text-xs gap-1.5"
+                                  disabled={isProcessing}
+                                  onClick={() => transition({ transferId: task.id, toStatus: nextAction.status })}
+                                >
+                                  {<nextAction.icon className="h-3.5 w-3.5" />}
+                                  {nextAction.label}
+                                </Button>
+                              )}
+                              <Button variant="outline" size="sm" className="h-8 text-xs" asChild>
+                                <Link to={`/logistica/transferencias?id=${task.id}`}>Detalhes</Link>
+                              </Button>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-4">
-                            <Badge variant="outline" className="text-[10px]">{task.current_status}</Badge>
-                            <Button size="sm" className="h-8 text-xs" asChild>
-                              <Link to="/logistica/transferencias">Gerenciar</Link>
-                            </Button>
-                          </div>
-                        </div>
-                      ))
+                        );
+                      })
                     ) : (
                       <div className="p-12 text-center text-muted-foreground">
                         <ShieldCheck className="h-10 w-10 mx-auto mb-3 opacity-20" />
@@ -233,6 +274,7 @@ export default function StoreCentral() {
                 </CardContent>
               </Card>
             </TabsContent>
+
 
             <TabsContent value="transito">
               <Card>

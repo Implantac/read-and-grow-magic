@@ -1,11 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnterprise } from "@/core/auth/EnterpriseContext";
+import { useAppStore } from "@/stores/useAppStore";
 import { transferWorkflow, TransferStatus } from "@/services/operational/inventory/transferWorkflow";
 import { toast } from "sonner";
 
 export function useSupplyChainExecution() {
-  const { currentBranch, user } = useEnterprise();
+  const { currentBranch } = useEnterprise();
+  const { user } = useAppStore();
   const queryClient = useQueryClient();
   const branchId = currentBranch?.id;
 
@@ -98,4 +100,5 @@ export function useSupplyChainExecution() {
     }
   };
 }
+
 
