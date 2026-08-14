@@ -271,6 +271,7 @@ export function SmartReplenishment() {
     localStorage.removeItem('smart-replenishment-edited-quantities');
     localStorage.removeItem('smart-replenishment-history-stack');
     localStorage.removeItem('smart-replenishment-redo-stack');
+    setShowClearConfirm(false);
     toast.success("Histórico e cache limpos com sucesso.");
   };
 
