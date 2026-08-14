@@ -23,7 +23,7 @@ Command.displayName = CommandPrimitive.displayName;
 
 type CommandDialogProps = DialogProps;
 
-const CommandDialog = React.forwardRef<
+const CommandDialog = React.memo(React.forwardRef<
   React.ElementRef<typeof DialogContent>,
   CommandDialogProps
 >(({ children, ...props }, ref) => {
@@ -36,7 +36,7 @@ const CommandDialog = React.forwardRef<
       </DialogContent>
     </Dialog>
   );
-});
+}));
 CommandDialog.displayName = "CommandDialog";
 
 const CommandInput = React.forwardRef<
