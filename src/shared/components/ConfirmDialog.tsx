@@ -54,7 +54,6 @@ export const ConfirmDialogProvider = React.memo(({ children }: { children: React
 
   return (
     <ConfirmCtx.Provider value={value}>
-    <ConfirmCtx.Provider value={value}>
       <>
         {children}
         <AlertDialog open={open} onOpenChange={(v) => { if (!v) handleClose(false); }}>
