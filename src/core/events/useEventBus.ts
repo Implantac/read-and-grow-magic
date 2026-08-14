@@ -31,7 +31,7 @@ export const useEventBus = create<EventBusState>((set, get) => ({
   publish: (event, payload) => {
     // Decouple event emission from the current execution context entirely
     // This is the CRITICAL fix for React Error #185 loops
-    queueMicrotask(() => {
+    setTimeout(() => {
       const state = get();
       const eventSubscribers = state.subscribers[event];
       
@@ -49,7 +49,7 @@ export const useEventBus = create<EventBusState>((set, get) => ({
           console.error(`[EventBus] Error in subscriber for ${event}:`, err);
         }
       }
-    });
+    }, 0);
   },
 
   subscribe: (event, callback) => {

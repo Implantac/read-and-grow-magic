@@ -25,6 +25,7 @@ const RealtimeAlertsBridge = React.memo(() => {
   // We memoize the initialization to ensure it only happens when companyId truly changes
   return React.useMemo(() => {
     if (!companyId) return null;
+    console.log('[RealtimeAlertsBridge] Re-initializing orchestrators for company:', companyId);
     return <AlertsOrchestratorContainer companyId={companyId} />;
   }, [companyId]);
 });
