@@ -18,19 +18,21 @@ import { withRenderMonitor } from '@/core/debug/RenderDepthMonitor';
 const AppRoutes = React.memo(lazy(() => import('./routes/index')));
 
 const RealtimeAlertsBridge = React.memo(() => {
-  const enterprise = useEnterprise();
-  const companyId = enterprise.currentCompany?.id;
+  const { currentCompany, isLoading } = useEnterprise();
+  const companyId = currentCompany?.id;
   
-  // Bridge monitors companyId changes without re-triggering hooks unnecessarily
-  // We memoize the initialization to ensure it only happens when companyId truly changes
-  return React.useMemo(() => {
-    if (!companyId) return null;
-    console.log('[RealtimeAlertsBridge] Re-initializing orchestrators for company:', companyId);
-    return <AlertsOrchestratorContainer companyId={companyId} />;
-  }, [companyId]);
+  // Guard against re-initialization during context loading or if companyId hasn't changed
+  if (isLoading || !companyId) return null;
+
+  return <AlertsOrchestratorContainer companyId={companyId} />;
 });
 
 const AlertsOrchestratorContainer = React.memo(({ companyId }: { companyId: string }) => {
+  // We use keying by companyId to force a clean unmount/remount ONLY when companyId changes
+  return <OrchestratorInternal key={companyId} companyId={companyId} />;
+});
+
+const OrchestratorInternal = React.memo(({ companyId }: { companyId: string }) => {
   useLowMarginAlertsRealtime(companyId);
   useInventoryOrchestrator(companyId);
   useFinancialOrchestrator(companyId);
