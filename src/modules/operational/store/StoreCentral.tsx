@@ -5,6 +5,8 @@ import { Badge } from "@/ui/base/badge";
 import { Button } from "@/ui/base/button";
 import { Progress } from "@/ui/base/progress";
 import { useStoreCentral } from "@/hooks/operational/store/useStoreCentral";
+import { useSupplyChainExecution } from "@/hooks/operational/network/useSupplyChainExecution";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/base/tabs";
 import { 
   Store, 
   TrendingUp, 
@@ -20,8 +22,10 @@ import {
   Ticket,
   Clock,
   ArrowRight,
-  ClipboardList
+  ClipboardList,
+  ListTodo
 } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/ui/base/skeleton";
