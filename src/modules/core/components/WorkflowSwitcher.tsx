@@ -39,7 +39,7 @@ const Brain = ({ className }: { className?: string }) => (
   </svg>
 );
 
-export const WorkflowSwitcher = () => {
+export const WorkflowSwitcher = React.forwardRef<HTMLDivElement, any>((_, ref) => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
