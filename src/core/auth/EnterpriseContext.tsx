@@ -175,14 +175,16 @@ export const EnterpriseProvider = withRenderMonitor(({ children }: { children: R
       const store = useAppStore.getState();
       const finalRole = (userRole as any) || 'viewer';
       
-      store.setUser({
-        id: user.id,
-        name: profile?.name || user.user_metadata?.name || user.email?.split('@')[0] || 'Usuário',
-        email: user.email || '',
-        role: finalRole,
-        permissions: ['all'],
-      });
-      store.setUserRole(finalRole);
+      if (store.user?.id !== user.id || store.userRole !== finalRole) {
+        store.setUser({
+          id: user.id,
+          name: profile?.name || user.user_metadata?.name || user.email?.split('@')[0] || 'Usuário',
+          email: user.email || '',
+          role: finalRole,
+          permissions: ['all'],
+        });
+        store.setUserRole(finalRole);
+      }
 
       if (companies && companies.length > 0) {
         const company = companies.find(c => c.id === profile?.company_id) || companies[0];
@@ -260,13 +262,25 @@ export const EnterpriseProvider = withRenderMonitor(({ children }: { children: R
       if (!isMounted.current) return;
       
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        loadActiveTenant(isMounted);
+        // Only reload if the user ID has actually changed
+        if (session?.user?.id !== lastSyncUser.current) {
+          loadActiveTenant(isMounted);
+        }
       } else if (event === 'SIGNED_OUT') {
-        lastSyncUser.current = null;
-        setCurrentCompany(null);
-        setCurrentBranch(null);
-        setAllBranches([]);
-        setIsLoading(false);
+        if (lastSyncUser.current !== null) {
+          lastSyncUser.current = null;
+          setCurrentCompany(null);
+          setCurrentBranch(null);
+          setAllBranches([]);
+          setIsLoading(false);
+          
+          // Clear global stores on sign out
+          import('@/stores/useAppStore').then(({ useAppStore }) => useAppStore.getState().logout());
+          import('@/core/stores/useEnterpriseStore').then(({ useEnterpriseStore }) => {
+            useEnterpriseStore.getState().setActiveCompanyId(null);
+            useEnterpriseStore.getState().setActiveBranchId(null);
+          });
+        }
       }
     });
 

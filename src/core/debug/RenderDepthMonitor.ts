@@ -5,7 +5,7 @@
  */
 import React from 'react';
 
-const MAX_UPDATES_PER_SECOND = 50;
+const MAX_UPDATES_PER_SECOND = 30;
 const CHECK_INTERVAL = 1000;
 
 class RenderDepthMonitor {
