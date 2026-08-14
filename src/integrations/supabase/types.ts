@@ -1854,6 +1854,47 @@ export type Database = {
         }
         Relationships: []
       }
+      auto_approval_policies: {
+        Row: {
+          allowed_origin_types: string[] | null
+          company_id: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          max_quantity: number | null
+          max_value: number | null
+          required_abc_class: string[] | null
+        }
+        Insert: {
+          allowed_origin_types?: string[] | null
+          company_id: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_quantity?: number | null
+          max_value?: number | null
+          required_abc_class?: string[] | null
+        }
+        Update: {
+          allowed_origin_types?: string[] | null
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_quantity?: number | null
+          max_value?: number | null
+          required_abc_class?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auto_approval_policies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       automation_rules: {
         Row: {
           actions: Json
@@ -15752,9 +15793,11 @@ export type Database = {
       }
       replenishment_policies: {
         Row: {
+          abc_class: string | null
           branch_id: string
           company_id: string
           created_at: string
+          demand_curve: Database["public"]["Enums"]["demand_curve"] | null
           id: string
           is_active: boolean
           lead_time_days: number
@@ -15763,12 +15806,16 @@ export type Database = {
           product_id: string
           replenishment_source_id: string | null
           safety_stock: number
+          safety_stock_days: number | null
+          target_coverage_days: number | null
           updated_at: string
         }
         Insert: {
+          abc_class?: string | null
           branch_id: string
           company_id: string
           created_at?: string
+          demand_curve?: Database["public"]["Enums"]["demand_curve"] | null
           id?: string
           is_active?: boolean
           lead_time_days?: number
@@ -15777,12 +15824,16 @@ export type Database = {
           product_id: string
           replenishment_source_id?: string | null
           safety_stock?: number
+          safety_stock_days?: number | null
+          target_coverage_days?: number | null
           updated_at?: string
         }
         Update: {
+          abc_class?: string | null
           branch_id?: string
           company_id?: string
           created_at?: string
+          demand_curve?: Database["public"]["Enums"]["demand_curve"] | null
           id?: string
           is_active?: boolean
           lead_time_days?: number
@@ -15791,6 +15842,8 @@ export type Database = {
           product_id?: string
           replenishment_source_id?: string | null
           safety_stock?: number
+          safety_stock_days?: number | null
+          target_coverage_days?: number | null
           updated_at?: string
         }
         Relationships: [
@@ -18505,6 +18558,60 @@ export type Database = {
           },
         ]
       }
+      stock_transfer_divergences: {
+        Row: {
+          actual_qty: number
+          created_at: string | null
+          created_by: string | null
+          divergence_qty: number
+          expected_qty: number
+          id: string
+          notes: string | null
+          product_id: string
+          reason: string | null
+          transfer_id: string
+        }
+        Insert: {
+          actual_qty: number
+          created_at?: string | null
+          created_by?: string | null
+          divergence_qty: number
+          expected_qty: number
+          id?: string
+          notes?: string | null
+          product_id: string
+          reason?: string | null
+          transfer_id: string
+        }
+        Update: {
+          actual_qty?: number
+          created_at?: string | null
+          created_by?: string | null
+          divergence_qty?: number
+          expected_qty?: number
+          id?: string
+          notes?: string | null
+          product_id?: string
+          reason?: string | null
+          transfer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_transfer_divergences_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_transfer_divergences_transfer_id_fkey"
+            columns: ["transfer_id"]
+            isOneToOne: false
+            referencedRelation: "stock_transfer_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stock_transfer_items: {
         Row: {
           created_at: string
@@ -18679,6 +18786,63 @@ export type Database = {
             columns: ["transfer_id"]
             isOneToOne: false
             referencedRelation: "stock_transfer_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      store_health_metrics: {
+        Row: {
+          accuracy_rate: number | null
+          branch_id: string
+          calculated_at: string | null
+          company_id: string
+          coverage_days: number | null
+          efficiency_rank: number | null
+          excess_value: number | null
+          id: string
+          metadata: Json | null
+          rupture_count: number | null
+          score: number | null
+        }
+        Insert: {
+          accuracy_rate?: number | null
+          branch_id: string
+          calculated_at?: string | null
+          company_id: string
+          coverage_days?: number | null
+          efficiency_rank?: number | null
+          excess_value?: number | null
+          id?: string
+          metadata?: Json | null
+          rupture_count?: number | null
+          score?: number | null
+        }
+        Update: {
+          accuracy_rate?: number | null
+          branch_id?: string
+          calculated_at?: string | null
+          company_id?: string
+          coverage_days?: number | null
+          efficiency_rank?: number | null
+          excess_value?: number | null
+          id?: string
+          metadata?: Json | null
+          rupture_count?: number | null
+          score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_health_metrics_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_health_metrics_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -24504,6 +24668,7 @@ export type Database = {
         | "DISTRIBUTION_CENTER"
         | "STORE"
       canal_operacional: "VAREJO_PDV" | "ATACADO_INDUSTRIA"
+      demand_curve: "HIGH" | "MEDIUM" | "LOW" | "NEW" | "SEASONAL"
       enterprise_tier: "small" | "medium" | "enterprise"
       org_type: "holding" | "company" | "branch" | "unit"
       stock_transfer_status:
@@ -24683,6 +24848,7 @@ export const Constants = {
         "STORE",
       ],
       canal_operacional: ["VAREJO_PDV", "ATACADO_INDUSTRIA"],
+      demand_curve: ["HIGH", "MEDIUM", "LOW", "NEW", "SEASONAL"],
       enterprise_tier: ["small", "medium", "enterprise"],
       org_type: ["holding", "company", "branch", "unit"],
       stock_transfer_status: [

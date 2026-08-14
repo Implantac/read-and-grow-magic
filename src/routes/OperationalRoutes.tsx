@@ -14,6 +14,8 @@ const StockTransfers = lazy(() => import("../modules/operational/network/StockTr
 const ReplenishmentIntelligence = lazy(() => import("../modules/operational/network/ReplenishmentIntelligence"));
 const PosTerminals = lazy(() => import("../modules/operational/network/PosTerminals"));
 
+const StoreHealthMap = lazy(() => import("../modules/operational/network/StoreHealthMap"));
+
 export const OperationalRoutes = [
   <Route key="op-index" index element={<Navigate to="dashboard" replace />} />,
   <Route key="op-dash" path="dashboard" element={<OperationalDashboardPage />} />,
@@ -26,6 +28,7 @@ export const OperationalRoutes = [
 
   <Route key="op-rede-tower" path="rede/painel" element={<NetworkControlTower />} />,
   <Route key="op-tower" path="torre-abastecimento" element={<SupplyChainTower />} />,
+  <Route key="op-health" path="saude-lojas" element={<StoreHealthMap />} />,
   <Route key="op-abastecimento-central" path="abastecimento/central" element={<UnifiedSupplyChain />} />,
 
   <Route key="op-rede-transfers" path="rede/transferencias" element={<StockTransfers />} />,
