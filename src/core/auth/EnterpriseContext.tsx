@@ -122,13 +122,14 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
     });
 
     setPolicies(prev => {
-      if (prev.replenishmentMethod === nextPolicies.replenishmentMethod && 
-          prev.workflowEnabled === nextPolicies.workflowEnabled &&
-          prev.eventOrchestrationEnabled === nextPolicies.eventOrchestrationEnabled &&
-          prev.inventoryAdjustmentPolicy === nextPolicies.inventoryAdjustmentPolicy) {
+      const next = nextPolicies as any;
+      if (prev.replenishmentMethod === next.replenishmentMethod && 
+          prev.workflowEnabled === next.workflowEnabled &&
+          prev.eventOrchestrationEnabled === next.eventOrchestrationEnabled &&
+          prev.inventoryAdjustmentPolicy === next.inventoryAdjustmentPolicy) {
         return prev;
       }
-      return nextPolicies;
+      return next;
     });
   }, []);
 
