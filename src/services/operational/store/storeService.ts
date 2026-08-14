@@ -166,8 +166,8 @@ export const storeService = {
       factors: [
         { label: 'Confiabilidade de Estoque', score: Math.round(reliability) },
         { label: 'Gestão de Exceções', score: Math.round(100 - (pendingCritical || 0) * 2) },
-        { label: 'Rede Operacional', score: Math.round(( (totalBranches - branchIndex) / totalBranches) * 100) },
-        { label: 'Ranking Eficiência', score: Math.round(85 + Math.random() * 10) }
+        { label: 'Rede Operacional', score: Math.round(((totalBranches - branchIndex) / totalBranches) * 100) },
+        { label: 'Ranking Eficiência', score: Math.round(reliability * 0.9) }
       ],
       networkPosition: `${branchIndex + 1} / ${totalBranches}`
     };

@@ -67,13 +67,17 @@ export default function ReplenishmentIntelligencePage() {
             <Card className="bg-primary/5 border-primary/20">
               <CardHeader className="pb-2">
                 <CardDescription>Cobertura Média</CardDescription>
-                <CardTitle className="text-2xl text-blue-500">14 dias</CardTitle>
+                <CardTitle className="text-2xl text-blue-500">
+                  {policies?.length ? Math.round(policies.reduce((acc: number, p: any) => acc + (p.lead_time_days || 0), 0) / policies.length) : 0} dias
+                </CardTitle>
               </CardHeader>
             </Card>
             <Card className="bg-primary/5 border-primary/20">
               <CardHeader className="pb-2">
-                <CardDescription>Acuracidade Sugestão</CardDescription>
-                <CardTitle className="text-2xl text-green-500">92%</CardTitle>
+                <CardDescription>Eficiência da Malha</CardDescription>
+                <CardTitle className="text-2xl text-green-500">
+                  {policies?.length ? Math.round((policies.filter((p: any) => (p.current_stock || 0) >= p.min_stock).length / policies.length) * 100) : 0}%
+                </CardTitle>
               </CardHeader>
             </Card>
           </div>
