@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { RefreshCw, ArrowRight, AlertTriangle, CheckCircle, Search, Filter, Brain, CheckSquare, Square, Rocket, Trash2, History, RotateCcw } from 'lucide-react';
+import { RefreshCw, ArrowRight, AlertTriangle, CheckCircle, Search, Filter, Brain, CheckSquare, Square, Rocket, Trash2, History, RotateCcw, Undo2, Redo2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
@@ -26,6 +26,32 @@ export function SmartReplenishment() {
   const createTransfer = useCreateTransferenciaCanal();
   const [isBulkApproving, setIsBulkApproving] = useState(false);
   const [changeHistory, setChangeHistory] = useState<any[]>([]);
+  const [historyStack, setHistoryStack] = useState<Record<string, number>[]>([]);
+  const [redoStack, setRedoStack] = useState<Record<string, number>[]>([]);
+
+  const pushToHistory = (newQuantities: Record<string, number>) => {
+    setHistoryStack(prev => [...prev, editedQuantities]);
+    setRedoStack([]); // Limpar redo ao fazer nova alteração
+    setEditedQuantities(newQuantities);
+  };
+
+  const handleUndo = () => {
+    if (historyStack.length === 0) return;
+    const prev = historyStack[historyStack.length - 1];
+    setRedoStack(current => [...current, editedQuantities]);
+    setHistoryStack(current => current.slice(0, -1));
+    setEditedQuantities(prev);
+    toast.info("Desfeito com sucesso");
+  };
+
+  const handleRedo = () => {
+    if (redoStack.length === 0) return;
+    const next = redoStack[redoStack.length - 1];
+    setHistoryStack(current => [...current, editedQuantities]);
+    setRedoStack(current => current.slice(0, -1));
+    setEditedQuantities(next);
+    toast.info("Refeito com sucesso");
+  };
 
 
 
@@ -172,7 +198,6 @@ export function SmartReplenishment() {
     if (value > max) {
       toast.error(`Quantidade acima do limite máximo (${max} un).`);
       
-      // Registrar no histórico se for um ajuste automático por exceder o máximo
       if (suggestion) {
         setChangeHistory(prev => [
           {
@@ -183,13 +208,14 @@ export function SmartReplenishment() {
             adjustedValue: max,
             reason: 'Excedeu surplus disponível'
           },
-          ...prev.slice(0, 9) // Manter apenas os últimos 10
+          ...prev.slice(0, 9)
         ]);
       }
     } else if (value < 1 && value !== 0) {
       finalValue = 1;
     }
-    setEditedQuantities(prev => ({ ...prev, [id]: finalValue }));
+    
+    pushToHistory({ ...editedQuantities, [id]: finalValue });
   };
 
   const handleAutoCorrectInvalid = () => {
@@ -223,22 +249,20 @@ export function SmartReplenishment() {
     });
 
     if (corrections > 0) {
-      setEditedQuantities(newEdited);
+      pushToHistory(newEdited);
       toast.success(`${corrections} quantidades corrigidas para o limite máximo.`);
     }
   };
 
   const handleResetAllQuantities = () => {
-    setEditedQuantities({});
+    pushToHistory({});
     toast.info("Todas as quantidades foram restauradas para os valores sugeridos.");
   };
 
   const handleResetQuantity = (id: string) => {
-    setEditedQuantities(prev => {
-      const next = { ...prev };
-      delete next[id];
-      return next;
-    });
+    const next = { ...editedQuantities };
+    delete next[id];
+    pushToHistory(next);
     toast.info("Quantidade restaurada para o valor sugerido.");
   };
 
@@ -300,6 +324,26 @@ export function SmartReplenishment() {
     else newSet.add(id);
     setSelectedIds(newSet);
   };
+
+  // Atalhos de teclado
+  useMemo(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!showBulkPreview || bulkConfirmStep) return;
+      
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'z') {
+          e.preventDefault();
+          handleUndo();
+        } else if (e.key === 'y' || (e.key === 'Z' && e.shiftKey)) {
+          e.preventDefault();
+          handleRedo();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showBulkPreview, bulkConfirmStep, historyStack, redoStack, editedQuantities]);
 
   return (
     <div className="space-y-4">
@@ -806,6 +850,29 @@ export function SmartReplenishment() {
             
             {!bulkConfirmStep && (
               <>
+                <div className="flex items-center gap-1 mr-auto">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground"
+                    onClick={handleUndo}
+                    disabled={historyStack.length === 0}
+                    title="Desfazer (Ctrl+Z)"
+                  >
+                    <Undo2 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground"
+                    onClick={handleRedo}
+                    disabled={redoStack.length === 0}
+                    title="Refazer (Ctrl+Y)"
+                  >
+                    <Redo2 className="h-4 w-4" />
+                  </Button>
+                </div>
+
                 {Object.keys(editedQuantities).length > 0 && (
                   <Button 
                     variant="ghost"
