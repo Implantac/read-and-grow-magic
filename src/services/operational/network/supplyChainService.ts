@@ -29,7 +29,8 @@ export const supplyChainService = {
       const inTransit = 0; 
       
       const projected = physical - reserved + inTransit;
-      const target = policy.product?.min_stock || 0;
+      const target = policy.min_stock || policy.product?.min_stock || 0;
+
 
       
       return {
