@@ -203,7 +203,7 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
             userRole: finalRole,
             isAuthenticated: true
           };
-        }, true); // Use true for 'replace' to ensure atomicity in some zustand versions or just be extra safe
+        });
       }
 
       if (companies && companies.length > 0) {
@@ -239,7 +239,7 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
             const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
             const enterpriseStore = useEnterpriseStore.getState();
             if (enterpriseStore.activeBranchId !== defaultBranch.id) {
-              useEnterpriseStore.setState({ activeBranchId: defaultBranch.id }, true);
+              useEnterpriseStore.setState({ activeBranchId: defaultBranch.id });
             }
           }
         }
@@ -319,7 +319,7 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
     if (data) {
       applyCompany(data as CompanyRow);
       const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
-      useEnterpriseStore.setState({ activeCompanyId: id }, true);
+      useEnterpriseStore.setState({ activeCompanyId: id });
     }
   }, [applyCompany]);
 
@@ -327,7 +327,7 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
     if (!id) {
       setCurrentBranch(null);
       const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
-      useEnterpriseStore.setState({ activeBranchId: null }, true);
+      useEnterpriseStore.setState({ activeBranchId: null });
       return;
     }
     const branch = allBranches.find(b => b.id === id);
@@ -337,7 +337,7 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
         return { ...branch };
       });
       const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
-      useEnterpriseStore.setState({ activeBranchId: id }, true);
+      useEnterpriseStore.setState({ activeBranchId: id });
     }
   }, [allBranches]);
 
