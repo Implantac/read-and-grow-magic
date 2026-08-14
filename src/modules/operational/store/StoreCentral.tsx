@@ -179,7 +179,7 @@ export default function StoreCentral() {
                       <Clock className="h-4 w-4" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold">2 Em Trânsito</p>
+                      <p className="text-sm font-bold">{kpis?.inTransit || 0} Em Trânsito</p>
                       <p className="text-[10px] text-muted-foreground">Previsão: Hoje</p>
                     </div>
                   </div>
@@ -191,7 +191,7 @@ export default function StoreCentral() {
                       <CheckCircle2 className="h-4 w-4" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold">1 Recebido</p>
+                      <p className="text-sm font-bold">{kpis?.receiving || 0} Recebido</p>
                       <p className="text-[10px] text-muted-foreground">Aguardando conferência</p>
                     </div>
                   </div>
@@ -210,14 +210,14 @@ export default function StoreCentral() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Sugestões Pendentes</span>
-                    <span className="font-bold">4 itens</span>
+                    <span className="font-bold">{kpis?.itemsPending || 0} itens</span>
                   </div>
                   <div className="flex items-center justify-between text-sm text-destructive font-medium bg-destructive/5 p-2 rounded">
                     <div className="flex items-center gap-2">
                       <AlertTriangle className="h-4 w-4" />
                       Risco de Ruptura Alto
                     </div>
-                    <span>38 un</span>
+                    <span>{kpis?.unitsPending || 0} un</span>
                   </div>
                   <Button className="w-full gap-2 mt-2">
                     Analisar Sugestão <ArrowRight className="h-4 w-4" />
@@ -240,7 +240,15 @@ export default function StoreCentral() {
               <div className="flex flex-col items-center justify-center py-4">
                 <div className="text-4xl font-black text-primary">{health?.score}</div>
                 <div className="text-[10px] font-bold uppercase tracking-widest text-primary/70">Score Total</div>
-                <Badge className="mt-2 bg-success text-success-foreground hover:bg-success">Excelente</Badge>
+                <Badge className={cn(
+                  "mt-2 text-white",
+                  health?.status === 'excellent' ? "bg-success hover:bg-success/90" : 
+                  health?.status === 'attention' ? "bg-amber-500 hover:bg-amber-600" : 
+                  "bg-destructive hover:bg-destructive/90"
+                )}>
+                  {health?.status === 'excellent' ? 'Excelente' : 
+                   health?.status === 'attention' ? 'Atenção' : 'Crítico'}
+                </Badge>
               </div>
               <div className="space-y-3">
                 {health?.factors.map((factor) => (
@@ -269,7 +277,7 @@ export default function StoreCentral() {
                 <p className="text-[10px] font-bold uppercase text-muted-foreground">Ranking Eficiência</p>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Posição na Rede</span>
-                  <span className="font-bold text-primary">02 / 14</span>
+                  <span className="font-bold text-primary">{health?.networkPosition || '—'}</span>
                 </div>
               </div>
             </CardContent>

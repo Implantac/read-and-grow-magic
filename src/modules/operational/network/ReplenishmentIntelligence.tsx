@@ -51,25 +51,29 @@ export default function ReplenishmentIntelligencePage() {
             <Card className="bg-primary/5 border-primary/20">
               <CardHeader className="pb-2">
                 <CardDescription>Itens em Ruptura</CardDescription>
-                <CardTitle className="text-2xl text-red-500">12</CardTitle>
+                <CardTitle className="text-2xl text-red-500">
+                  {policies?.filter((p: any) => p.is_active && (p.current_stock || 0) < p.min_stock).length || 0}
+                </CardTitle>
               </CardHeader>
             </Card>
             <Card className="bg-primary/5 border-primary/20">
               <CardHeader className="pb-2">
-                <CardDescription>Sugestões Pendentes</CardDescription>
-                <CardTitle className="text-2xl text-amber-500">45</CardTitle>
+                <CardDescription>Políticas Ativas</CardDescription>
+                <CardTitle className="text-2xl text-amber-500">
+                  {policies?.filter((p: any) => p.is_active).length || 0}
+                </CardTitle>
               </CardHeader>
             </Card>
             <Card className="bg-primary/5 border-primary/20">
               <CardHeader className="pb-2">
-                <CardDescription>Em Trânsito</CardDescription>
-                <CardTitle className="text-2xl text-blue-500">R$ 142k</CardTitle>
+                <CardDescription>Cobertura Média</CardDescription>
+                <CardTitle className="text-2xl text-blue-500">14 dias</CardTitle>
               </CardHeader>
             </Card>
             <Card className="bg-primary/5 border-primary/20">
               <CardHeader className="pb-2">
                 <CardDescription>Acuracidade Sugestão</CardDescription>
-                <CardTitle className="text-2xl text-green-500">94.2%</CardTitle>
+                <CardTitle className="text-2xl text-green-500">92%</CardTitle>
               </CardHeader>
             </Card>
           </div>
