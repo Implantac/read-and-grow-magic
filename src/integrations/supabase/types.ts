@@ -18559,6 +18559,9 @@ export type Database = {
           carrier_id: string | null
           company_id: string
           created_at: string
+          current_status:
+            | Database["public"]["Enums"]["transfer_workflow_status"]
+            | null
           destination_unit_id: string
           id: string
           notes: string | null
@@ -18575,6 +18578,9 @@ export type Database = {
           carrier_id?: string | null
           company_id: string
           created_at?: string
+          current_status?:
+            | Database["public"]["Enums"]["transfer_workflow_status"]
+            | null
           destination_unit_id: string
           id?: string
           notes?: string | null
@@ -18591,6 +18597,9 @@ export type Database = {
           carrier_id?: string | null
           company_id?: string
           created_at?: string
+          current_status?:
+            | Database["public"]["Enums"]["transfer_workflow_status"]
+            | null
           destination_unit_id?: string
           id?: string
           notes?: string | null
@@ -18629,6 +18638,47 @@ export type Database = {
             columns: ["origin_unit_id"]
             isOneToOne: false
             referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_transfer_workflow_logs: {
+        Row: {
+          created_at: string | null
+          divergence: number | null
+          id: string
+          notes: string | null
+          quantity: number | null
+          status: Database["public"]["Enums"]["transfer_workflow_status"]
+          transfer_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          divergence?: number | null
+          id?: string
+          notes?: string | null
+          quantity?: number | null
+          status: Database["public"]["Enums"]["transfer_workflow_status"]
+          transfer_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          divergence?: number | null
+          id?: string
+          notes?: string | null
+          quantity?: number | null
+          status?: Database["public"]["Enums"]["transfer_workflow_status"]
+          transfer_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_transfer_workflow_logs_transfer_id_fkey"
+            columns: ["transfer_id"]
+            isOneToOne: false
+            referencedRelation: "stock_transfer_orders"
             referencedColumns: ["id"]
           },
         ]
@@ -24467,6 +24517,17 @@ export type Database = {
         | "COMPLETED"
         | "CANCELLED"
       tax_regime: "simples" | "presumed" | "real"
+      transfer_workflow_status:
+        | "SUGERIDA"
+        | "APROVADA"
+        | "RESERVADA"
+        | "SEPARAÇÃO"
+        | "CONFERÊNCIA"
+        | "EXPEDIDA"
+        | "EM TRÂNSITO"
+        | "RECEBIDA"
+        | "CONFERIDA"
+        | "ENCERRADA"
       unit_type: "factory" | "distribution_center" | "store" | "office"
     }
     CompositeTypes: {
@@ -24636,6 +24697,18 @@ export const Constants = {
         "CANCELLED",
       ],
       tax_regime: ["simples", "presumed", "real"],
+      transfer_workflow_status: [
+        "SUGERIDA",
+        "APROVADA",
+        "RESERVADA",
+        "SEPARAÇÃO",
+        "CONFERÊNCIA",
+        "EXPEDIDA",
+        "EM TRÂNSITO",
+        "RECEBIDA",
+        "CONFERIDA",
+        "ENCERRADA",
+      ],
       unit_type: ["factory", "distribution_center", "store", "office"],
     },
   },
