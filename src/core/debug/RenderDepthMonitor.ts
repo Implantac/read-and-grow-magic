@@ -63,8 +63,8 @@ export function withRenderMonitor<P extends object>(
 ) {
   const name = componentName || Component.displayName || Component.name || 'UnknownComponent';
   
-  // Wrap in forwardRef but only pass ref to components that can handle it
-  const WrappedComponent = React.forwardRef<any, P>((props, ref) => {
+  // Create a functional component that doesn't accept a ref by default
+  const MonitorWrapper = (props: P) => {
     const isInitialRender = React.useRef(true);
     
     React.useEffect(() => {
@@ -75,20 +75,31 @@ export function withRenderMonitor<P extends object>(
       monitor.trackUpdate(name);
     });
 
-    // Check if the component is likely a class component or a forwardRef component
-    // or if it's one of our own functional components we know supports refs.
-    const canReceiveRef = 
-      typeof Component !== 'function' || 
-      (Component as any).$$typeof === Symbol.for('react.forward_ref') ||
-      Component.prototype?.isReactComponent;
-
-    if (canReceiveRef) {
-      return React.createElement(Component as any, { ...props, ref });
-    }
-    
     return React.createElement(Component as any, props);
-  });
+  };
 
-  WrappedComponent.displayName = `withRenderMonitor(${name})`;
-  return WrappedComponent;
+  // Only use forwardRef if the underlying component explicitly supports it
+  const isForwardRef = (Component as any)?.$$typeof === Symbol.for('react.forward_ref');
+  const isClassComponent = Component.prototype?.isReactComponent;
+
+  if (isForwardRef || isClassComponent) {
+    const ForwardedMonitor = React.forwardRef<any, P>((props, ref) => {
+      const isInitialRender = React.useRef(true);
+      
+      React.useEffect(() => {
+        if (isInitialRender.current) {
+          isInitialRender.current = false;
+          return;
+        }
+        monitor.trackUpdate(name);
+      });
+
+      return React.createElement(Component as any, { ...props, ref });
+    });
+    ForwardedMonitor.displayName = `withRenderMonitor(${name})`;
+    return ForwardedMonitor;
+  }
+
+  MonitorWrapper.displayName = `withRenderMonitor(${name})`;
+  return MonitorWrapper;
 }
