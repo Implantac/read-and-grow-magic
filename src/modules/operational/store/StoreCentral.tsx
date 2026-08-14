@@ -317,8 +317,39 @@ export default function StoreCentral() {
                   </div>
                 </CardContent>
               </Card>
+            <TabsContent value="novo">
+              <Card className="border-primary/40 bg-primary/5">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <ArrowUpCircle className="h-5 w-5 text-primary" /> Nova Solicitação de Abastecimento
+                  </CardTitle>
+                  <CardDescription>Inicie uma transferência de reposição para esta unidade</CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-col items-center justify-center p-12 text-center">
+                  <div className="p-4 rounded-full bg-primary/10 text-primary mb-4">
+                    <RefreshCw className="h-10 w-10" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">Reposição Inteligente</h3>
+                  <p className="text-muted-foreground max-w-md mb-8">
+                    Utilize o motor de inteligência para identificar rupturas e sugerir as quantidades ideais baseadas no seu estoque atual e demanda.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4 w-full max-w-sm">
+                    <Button className="flex-1 gap-2" asChild>
+                      <Link to="/wms/reposicao">
+                        <TrendingUp className="h-4 w-4" /> Sugestão de IA
+                      </Link>
+                    </Button>
+                    <Button variant="outline" className="flex-1 gap-2" asChild>
+                      <Link to="/logistica/transferencias">
+                        <FileText className="h-4 w-4" /> Manual
+                      </Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
+
 
 
           {/* Seção Operacional Secundária - Ações Rápidas */}
