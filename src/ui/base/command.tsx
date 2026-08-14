@@ -23,10 +23,9 @@ Command.displayName = CommandPrimitive.displayName;
 
 type CommandDialogProps = DialogProps;
 
-const CommandDialog = React.memo(React.forwardRef<
-  React.ElementRef<typeof DialogContent>,
-  CommandDialogProps
->(({ children, ...props }, ref) => {
+const CommandDialog = React.memo(
+  React.forwardRef<React.ElementRef<typeof DialogContent>, CommandDialogProps>(
+    ({ children, ...props }, ref) => {
   return (
     <Dialog {...props}>
       <DialogContent ref={ref} className="overflow-hidden p-0 shadow-lg">

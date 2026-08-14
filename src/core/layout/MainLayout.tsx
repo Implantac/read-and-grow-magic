@@ -12,7 +12,7 @@ import { DrillDownDrawer } from '@/shared/components/DrillDownDrawer';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 
-export const MainLayout = withRenderMonitor(() => {
+export const MainLayout = () => {
   const { isAuthenticated, sidebarCollapsed, theme, user } = useAppStore();
   const { loading } = useAuth();
   const navigate = useNavigate();
@@ -113,4 +113,4 @@ export const MainLayout = withRenderMonitor(() => {
       </main>
     </div>
   );
-}, 'MainLayout');
+};
