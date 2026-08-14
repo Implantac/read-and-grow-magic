@@ -626,6 +626,12 @@ export function SmartReplenishment() {
                               value={item.quantidade}
                               onChange={(e) => handleUpdateQuantity(item.id, Number(e.target.value), item.maxAvailable)}
                               className={`h-7 w-20 ml-auto text-right text-xs font-bold ${item.isInvalid ? 'border-destructive text-destructive' : 'text-primary'}`}
+                              onBlur={(e) => {
+                                if (Number(e.target.value) <= 0) {
+                                  handleUpdateQuantity(item.id, 1, item.maxAvailable);
+                                  toast.info("Quantidade mínima é 1 unidade.");
+                                }
+                              }}
                             />
                             {item.isInvalid && (
                               <span className="text-[8px] text-destructive font-semibold">Max: {item.maxAvailable}</span>
