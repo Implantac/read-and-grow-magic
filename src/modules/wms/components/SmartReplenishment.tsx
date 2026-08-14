@@ -521,8 +521,9 @@ export function SmartReplenishment() {
                   </div>
                   <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 text-center">
                     <p className="text-2xl font-bold text-primary">
-                      {bulkPreviewData?.reduce((acc: number, group: any) => acc + group.itens.reduce((iAcc: number, i: any) => iAcc + i.quantidade, 0), 0)}
+                      {bulkPreviewData?.reduce((acc: number, group: any) => acc + (group.itens as any[]).reduce((iAcc: number, i: any) => iAcc + Number(i.quantidade), 0), 0)}
                     </p>
+
                     <p className="text-[10px] text-muted-foreground uppercase font-bold">Volume Total</p>
                   </div>
                 </div>
