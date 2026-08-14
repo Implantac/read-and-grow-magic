@@ -23,4 +23,4 @@ export const Toaster = React.memo(React.forwardRef<HTMLDivElement>((_, ref) => {
       <ToastViewport />
     </ToastProvider>
   );
-});
+}));

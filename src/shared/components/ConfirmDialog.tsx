@@ -85,7 +85,7 @@ export const ConfirmDialogProvider = React.memo(React.forwardRef<HTMLDivElement,
       </div>
     </ConfirmCtx.Provider>
   );
-});
+}));
 
 export function useConfirm(): ConfirmFn {
   const ctx = useContext(ConfirmCtx);

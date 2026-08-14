@@ -25,6 +25,6 @@ const Toaster = React.memo(React.forwardRef<HTMLDivElement, ToasterProps>(({ ...
       {...props}
     />
   );
-});
+}));
 
 export { Toaster, toast };
