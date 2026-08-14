@@ -167,11 +167,27 @@ export function SmartReplenishment() {
 
   const handleUpdateQuantity = (id: string, value: number, max: number) => {
     let finalValue = value;
+    const suggestion = suggestions.find(s => s.id === id);
+    
     if (value > max) {
       finalValue = max;
       toast.warning(`Quantidade ajustada para o máximo executável (${max} un).`);
+      
+      // Registrar no histórico se for um ajuste automático por exceder o máximo
+      if (suggestion) {
+        setChangeHistory(prev => [
+          {
+            id: crypto.randomUUID(),
+            timestamp: new Date().toLocaleTimeString('pt-BR'),
+            productName: suggestion.productName,
+            originalValue: value,
+            adjustedValue: max,
+            reason: 'Excedeu surplus disponível'
+          },
+          ...prev.slice(0, 9) // Manter apenas os últimos 10
+        ]);
+      }
     } else if (value < 1 && value !== 0) {
-      // Se o usuário tentar apagar ou colocar negativo, mas não for zero explicitamente
       finalValue = 1;
     }
     setEditedQuantities(prev => ({ ...prev, [id]: finalValue }));
