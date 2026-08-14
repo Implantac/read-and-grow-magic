@@ -40,7 +40,7 @@ export function SmartReplenishment() {
       // Motor de Necessidade: Considera Estoque Projetado (Saldo + Em Trânsito)
       // Nota: Implementação simplificada para o motor atual, buscando consolidar as regras
       const lowStockBranches = p.balances.filter((b: any) => b.quantity < p.min_stock);
-      const surplusBranches = p.balances.filter((b: any) => b.quantity > p.min_stock * 2); 
+      const surplusBranches = p.balances.filter((b: any) => b.quantity > (p.max_stock || p.min_stock * 2)); 
 
       lowStockBranches.forEach((target: any) => {
         const needed = p.min_stock - target.quantity;

@@ -180,7 +180,7 @@ export default function StoreCentral() {
                     </div>
                     <div>
                       <p className="text-sm font-bold">{kpis?.inTransit || 0} Em Trânsito</p>
-                      <p className="text-[10px] text-muted-foreground">Previsão: Hoje</p>
+                      <p className="text-[10px] text-muted-foreground">Previsão: Pendente</p>
                     </div>
                   </div>
                   <Button variant="outline" size="sm" className="text-[10px] h-7">Rastrear</Button>
