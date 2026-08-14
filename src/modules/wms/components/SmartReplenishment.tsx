@@ -129,46 +129,56 @@ export function SmartReplenishment() {
     });
   };
 
-  const handleBulkApprove = async () => {
+  const bulkPreviewData = useMemo(() => {
     const toApprove = suggestions.filter(s => selectedIds.has(s.id));
-    if (toApprove.length === 0) return;
+    if (toApprove.length === 0) return null;
+
+    const groups = toApprove.reduce((acc: any, sug) => {
+      const key = `${sug.sourceBranchId}-${sug.targetBranchId}`;
+      if (!acc[key]) {
+        acc[key] = {
+          sourceId: sug.sourceBranchId,
+          targetId: sug.targetBranchId,
+          sourceName: sug.sourceBranchName,
+          targetName: sug.targetBranchName,
+          sourceTipo: sug.sourceBranchTipo,
+          itens: []
+        };
+      }
+      acc[key].itens.push({ 
+        product_id: sug.productId, 
+        productName: sug.productName,
+        productCode: sug.productCode,
+        quantidade: sug.suggestedQty 
+      });
+      return acc;
+    }, {});
+
+    return Object.values(groups);
+  }, [suggestions, selectedIds]);
+
+  const handleBulkApprove = async () => {
+    if (!bulkPreviewData || bulkPreviewData.length === 0) return;
 
     setIsBulkApproving(true);
     let successCount = 0;
 
     try {
-      // Group by Source/Target to create optimized transfers (headers)
-      const groups = toApprove.reduce((acc: any, sug) => {
-        const key = `${sug.sourceBranchId}-${sug.targetBranchId}`;
-        if (!acc[key]) {
-          acc[key] = {
-            sourceId: sug.sourceBranchId,
-            targetId: sug.targetBranchId,
-            sourceName: sug.sourceBranchName,
-            targetName: sug.targetBranchName,
-            sourceTipo: sug.sourceBranchTipo,
-            itens: []
-          };
-        }
-        acc[key].itens.push({ product_id: sug.productId, quantidade: sug.suggestedQty });
-        return acc;
-      }, {});
-
-      for (const key in groups) {
-        const group = groups[key];
+      for (const group of bulkPreviewData as any[]) {
         await createTransfer.mutateAsync({
           origem_branch_id: group.sourceId,
           destino_branch_id: group.targetId,
           canal_origem: group.sourceTipo === 'FACTORY' || group.sourceTipo === 'DISTRIBUTION_CENTER' ? 'ATACADO_INDUSTRIA' : 'VAREJO_PDV',
           canal_destino: 'VAREJO_PDV',
           observacoes: `Aprovação em lote IA: ${group.sourceName} -> ${group.targetName}`,
-          itens: group.itens,
+          itens: group.itens.map((i: any) => ({ product_id: i.product_id, quantidade: i.quantidade })),
         });
         successCount += group.itens.length;
       }
       
       toast.success(`${successCount} sugestões aprovadas e transferências geradas!`);
       setSelectedIds(new Set());
+      setShowBulkPreview(false);
     } catch (err) {
       console.error("Bulk approval error:", err);
       toast.error("Erro ao processar aprovação em lote.");
@@ -176,6 +186,7 @@ export function SmartReplenishment() {
       setIsBulkApproving(false);
     }
   };
+
 
   const toggleSelectAll = () => {
     if (selectedIds.size === suggestions.length) {
