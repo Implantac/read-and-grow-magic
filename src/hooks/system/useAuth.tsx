@@ -26,9 +26,8 @@ export function useAuth(options: UseAuthOptions = {}) {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session && mounted) {
-          // Check if we are actually authenticated in the store before logging out to avoid loops
-          const currentState = useAppStore.getState();
-          if (currentState.isAuthenticated) {
+          // Atomic store access to avoid reactive loop
+          if (useAppStore.getState().isAuthenticated) {
             storeLogout();
           }
         }

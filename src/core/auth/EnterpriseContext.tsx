@@ -171,19 +171,23 @@ export const EnterpriseProvider = withRenderMonitor(({ children }: { children: R
       if (!isMounted.current) return;
 
       // Update global app store with profile/role info once
-      const { useAppStore } = await import('@/stores/useAppStore');
-      const store = useAppStore.getState();
+      const { useAppStore: useStore } = await import('@/stores/useAppStore');
+      const storeState = useStore.getState();
       const finalRole = (userRole as any) || 'viewer';
       
-      if (store.user?.id !== user.id || store.userRole !== finalRole) {
-        store.setUser({
-          id: user.id,
-          name: profile?.name || user.user_metadata?.name || user.email?.split('@')[0] || 'Usuário',
-          email: user.email || '',
-          role: finalRole,
-          permissions: ['all'],
+      // Atomic update check for store
+      if (storeState.user?.id !== user.id || storeState.userRole !== finalRole) {
+        useStore.setState({
+          user: {
+            id: user.id,
+            name: profile?.name || user.user_metadata?.name || user.email?.split('@')[0] || 'Usuário',
+            email: user.email || '',
+            role: finalRole,
+            permissions: ['all'],
+          },
+          userRole: finalRole,
+          isAuthenticated: true
         });
-        store.setUserRole(finalRole);
       }
 
       if (companies && companies.length > 0) {
