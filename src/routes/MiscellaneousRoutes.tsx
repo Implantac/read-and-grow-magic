@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 const ProfilePage = lazy(() => import("../pages/Profile"));
-// const HardeningMasterPlan = lazy(() => import("./index"));
+// Removed circular dependency: const HardeningMasterPlan = lazy(() => import("./index"));
 const NotificationsPage = lazy(() => import("../pages/Notifications"));
 const LandingPage = lazy(() => import("../pages/LandingPage"));
 const RFIDDashboardPage = lazy(() => import("../pages/rfid/Dashboard"));
