@@ -5,7 +5,7 @@
  */
 import React from 'react';
 
-const MAX_UPDATES_PER_SECOND = 30;
+const MAX_UPDATES_PER_SECOND = 15;
 const CHECK_INTERVAL = 1000;
 
 class RenderDepthMonitor {
@@ -31,14 +31,14 @@ class RenderDepthMonitor {
     this.updateCounts.set(componentName, currentCount);
 
     if (currentCount > MAX_UPDATES_PER_SECOND) {
-      console.warn(
-        `[RenderDepthMonitor] Potential Render Loop Detected: "${componentName}" updated ${currentCount} times in <1s.`,
-        '\nComponent stack analysis initiated...'
+      console.error(
+        `[CRITICAL] Loop de Renderização Detectado em: "${componentName}".`,
+        `Frequência: ${currentCount} updates/segundo. Interrompendo para proteção do navegador.`
       );
       
       // Throttle alerts to avoid console flooding
       this.isEnabled = false;
-      setTimeout(() => { this.isEnabled = true; }, 5000);
+      setTimeout(() => { this.isEnabled = true; }, 10000);
       
       // Attempt to capture a stack trace for the update
       try {
