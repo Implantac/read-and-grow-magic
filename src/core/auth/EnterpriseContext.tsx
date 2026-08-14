@@ -63,7 +63,7 @@ interface EnterpriseContextType {
 
 const EnterpriseContext = createContext<EnterpriseContextType | undefined>(undefined);
 
-export const EnterpriseProvider = withRenderMonitor(({ children }: { children: React.ReactNode }) => {
+export const EnterpriseProvider = withRenderMonitor(React.forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ children }, ref) => {
   const [currentTenant, setCurrentTenant] = useState<TenantRef | null>(null);
   const [currentGroup, setCurrentGroup] = useState<GroupRef | null>(null);
   const [currentCompany, setCurrentCompany] = useState<CompanyRow | null>(null);
@@ -346,11 +346,13 @@ export const EnterpriseProvider = withRenderMonitor(({ children }: { children: R
   ]);
 
   return (
-    <EnterpriseContext.Provider value={value}>
-      {children}
-    </EnterpriseContext.Provider>
+    <div ref={ref}>
+      <EnterpriseContext.Provider value={value}>
+        {children}
+      </EnterpriseContext.Provider>
+    </div>
   );
-}, 'EnterpriseProvider');
+}), 'EnterpriseProvider');
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useEnterprise = () => {
