@@ -192,6 +192,42 @@ export function SmartReplenishment() {
     setEditedQuantities(prev => ({ ...prev, [id]: finalValue }));
   };
 
+  const handleAutoCorrectInvalid = () => {
+    if (!bulkPreviewData) return;
+    
+    const newEdited = { ...editedQuantities };
+    let corrections = 0;
+
+    bulkPreviewData.forEach((group: any) => {
+      group.itens.forEach((item: any) => {
+        if (item.quantidade > item.maxAvailable) {
+          newEdited[item.id] = item.maxAvailable;
+          corrections++;
+          
+          const suggestion = suggestions.find(s => s.id === item.id);
+          if (suggestion) {
+            setChangeHistory(prev => [
+              {
+                id: crypto.randomUUID(),
+                timestamp: new Date().toLocaleTimeString('pt-BR'),
+                productName: suggestion.productName,
+                originalValue: item.quantidade,
+                adjustedValue: item.maxAvailable,
+                reason: 'Correção automática'
+              },
+              ...prev.slice(0, 9)
+            ]);
+          }
+        }
+      });
+    });
+
+    if (corrections > 0) {
+      setEditedQuantities(newEdited);
+      toast.success(`${corrections} quantidades corrigidas para o limite máximo.`);
+    }
+  };
+
   const handleResetQuantity = (id: string) => {
     setEditedQuantities(prev => {
       const next = { ...prev };
