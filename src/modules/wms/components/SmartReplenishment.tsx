@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { RefreshCw, ArrowRight, AlertTriangle, CheckCircle, Search, Filter, Brain, CheckSquare, Square, Rocket, Trash2 } from 'lucide-react';
+import { RefreshCw, ArrowRight, AlertTriangle, CheckCircle, Search, Filter, Brain, CheckSquare, Square, Rocket, Trash2, History } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
@@ -25,6 +25,7 @@ export function SmartReplenishment() {
   const { data: branches = [] } = useBranches();
   const createTransfer = useCreateTransferenciaCanal();
   const [isBulkApproving, setIsBulkApproving] = useState(false);
+  const [changeHistory, setChangeHistory] = useState<any[]>([]);
 
 
 
@@ -166,11 +167,27 @@ export function SmartReplenishment() {
 
   const handleUpdateQuantity = (id: string, value: number, max: number) => {
     let finalValue = value;
+    const suggestion = suggestions.find(s => s.id === id);
+    
     if (value > max) {
       finalValue = max;
       toast.warning(`Quantidade ajustada para o máximo executável (${max} un).`);
+      
+      // Registrar no histórico se for um ajuste automático por exceder o máximo
+      if (suggestion) {
+        setChangeHistory(prev => [
+          {
+            id: crypto.randomUUID(),
+            timestamp: new Date().toLocaleTimeString('pt-BR'),
+            productName: suggestion.productName,
+            originalValue: value,
+            adjustedValue: max,
+            reason: 'Excedeu surplus disponível'
+          },
+          ...prev.slice(0, 9) // Manter apenas os últimos 10
+        ]);
+      }
     } else if (value < 1 && value !== 0) {
-      // Se o usuário tentar apagar ou colocar negativo, mas não for zero explicitamente
       finalValue = 1;
     }
     setEditedQuantities(prev => ({ ...prev, [id]: finalValue }));
@@ -538,6 +555,28 @@ export function SmartReplenishment() {
           <div className="flex-1 overflow-y-auto py-4 space-y-4">
             {bulkConfirmStep ? (
               <div className="space-y-6">
+                {changeHistory.length > 0 && (
+                  <div className="p-4 rounded-lg border bg-amber-50/50 border-amber-200">
+                    <div className="flex items-center gap-2 mb-3 text-amber-800">
+                      <History className="h-4 w-4" />
+                      <h4 className="text-sm font-bold uppercase tracking-wider">Ajustes Automáticos da IA</h4>
+                    </div>
+                    <div className="space-y-2">
+                      {changeHistory.map(log => (
+                        <div key={log.id} className="text-[11px] flex items-center justify-between border-b border-amber-100 pb-1 last:border-0">
+                          <span className="font-medium text-amber-900">{log.productName}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="line-through text-amber-500">{log.originalValue}</span>
+                            <ArrowRight className="h-3 w-3 text-amber-600" />
+                            <span className="font-bold text-amber-700">{log.adjustedValue}</span>
+                            <span className="text-[9px] bg-amber-200 text-amber-800 px-1 rounded ml-1">{log.timestamp}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 text-center">
                     <p className="text-2xl font-bold text-primary">{bulkPreviewData?.length}</p>
@@ -586,7 +625,38 @@ export function SmartReplenishment() {
                 </div>
               </div>
             ) : (
-              bulkPreviewData?.map((group: any, idx: number) => (
+              <div className="space-y-4">
+                {changeHistory.length > 0 && (
+                  <div className="p-3 rounded-lg border bg-amber-50/50 border-amber-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2 text-amber-800">
+                        <History className="h-3.5 w-3.5" />
+                        <h4 className="text-[10px] font-bold uppercase tracking-wider">Ajustes da IA nesta sessão</h4>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-5 text-[9px] text-amber-700 hover:bg-amber-100"
+                        onClick={() => setChangeHistory([])}
+                      >
+                        Limpar Histórico
+                      </Button>
+                    </div>
+                    <div className="space-y-1.5 max-h-32 overflow-y-auto pr-1">
+                      {changeHistory.map(log => (
+                        <div key={log.id} className="text-[10px] flex items-center justify-between border-b border-amber-100/50 pb-1 last:border-0">
+                          <span className="font-medium text-amber-900 truncate max-w-[150px]">{log.productName}</span>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="line-through text-amber-400">{log.originalValue}</span>
+                            <ArrowRight className="h-2.5 w-2.5 text-amber-600" />
+                            <span className="font-bold text-amber-700">{log.adjustedValue}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {bulkPreviewData?.map((group: any, idx: number) => (
                 <div key={idx} className="border rounded-lg overflow-hidden bg-muted/30">
                   <div className="bg-muted p-3 flex items-center justify-between border-b">
                     <div className="flex items-center gap-4">
@@ -653,9 +723,10 @@ export function SmartReplenishment() {
                     </TableBody>
                   </Table>
                 </div>
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
+        </div>
 
           <DialogFooter className="border-t pt-4">
             <Button 
