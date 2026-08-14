@@ -583,12 +583,13 @@ export function SmartReplenishment() {
                     <TableBody>
                       {group.itens.map((item: any, itemIdx: number) => (
                         <TableRow key={itemIdx} className="hover:bg-transparent">
-                          <TableCell className="py-2">
-                            <div className="text-xs font-medium">{item.productName}</div>
-                            <div className="text-[10px] text-muted-foreground font-mono">{item.productCode}</div>
-                          </TableCell>
-                          <TableCell className="py-2 text-right font-bold text-primary">
-                            {item.quantidade}
+                        <TableCell className="py-2">
+                          <div className="text-xs font-medium">{String(item.productName)}</div>
+                          <div className="text-[10px] text-muted-foreground font-mono">{String(item.productCode)}</div>
+                        </TableCell>
+                        <TableCell className="py-2 text-right font-bold text-primary">
+                          {Number(item.quantidade)}
+
                           </TableCell>
                         </TableRow>
                       ))}
