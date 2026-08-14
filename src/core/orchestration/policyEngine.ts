@@ -79,3 +79,23 @@ export function PolicyProvider({ children }: { children: React.ReactNode }) {
 }
 
 export const usePolicy = () => useContext(PolicyContext);
+
+/**
+ * Legacy support for EnterpriseContext.tsx
+ * P1 - Contratos: Facilitar migração para PolicyProvider
+ */
+export function getEnterprisePolicies(segment: string): ERPPolicy['inventory'] & Pick<ERPPolicy['inventory'], 'requiresTransferApproval'> & { eventOrchestrationEnabled: boolean; workflowEnabled: boolean; auditLevel: 'NONE' | 'BASIC' | 'FULL'; taskBoardEnabled: boolean; replenishmentMethod: any; inventoryAdjustmentPolicy: any; salesCreditCheck: any } {
+  const base = DEFAULT_POLICY;
+  return {
+    replenishmentMethod: base.inventory.replenishmentMethod || 'MIN_MAX',
+    transferApprovalLimit: 5000,
+    inventoryAdjustmentPolicy: base.inventory.inventoryAdjustmentPolicy || 'MANAGER_APPROVAL',
+    salesCreditCheck: base.commercial.strictCreditCheck ? 'STRICT' : 'BASIC',
+    workflowEnabled: true,
+    eventOrchestrationEnabled: true,
+    auditLevel: 'FULL',
+    taskBoardEnabled: true,
+    requiresTransferApproval: base.inventory.requiresTransferApproval
+  } as any;
+}
+
