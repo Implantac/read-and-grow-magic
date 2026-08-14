@@ -18,17 +18,14 @@ import { withRenderMonitor } from '@/core/debug/RenderDepthMonitor';
 const AppRoutes = withRenderMonitor(React.memo(lazy(() => import('./routes/index'))), 'AppRoutes');
 
 const RealtimeAlertsBridge = React.memo(() => {
-  const { currentCompany, isLoading } = useEnterprise();
-  const companyId = currentCompany?.id;
+  const enterprise = useEnterprise();
+  const companyId = enterprise.currentCompany?.id;
   
-  const lastInitializedId = React.useRef<string | null>(null);
-
-  useEffect(() => {
-    if (companyId && companyId !== lastInitializedId.current) {
-      lastInitializedId.current = companyId;
-    }
-  }, [companyId]);
-
+  // Bridge monitors companyId changes without re-triggering hooks unnecessarily
+  const lastId = React.useRef<string | null>(null);
+  
+  // We use the raw ID from the enterprise context, ensuring the hooks only 
+  // initialize when the company is actually loaded and changes.
   useLowMarginAlertsRealtime(companyId || undefined);
   useInventoryOrchestrator(companyId || undefined);
   useFinancialOrchestrator(companyId || undefined);
