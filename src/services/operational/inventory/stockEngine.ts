@@ -9,6 +9,8 @@ export interface ProjectedStockResult {
   dailyDemand: number;
   coverageDays: number;
   status: 'critical' | 'attention' | 'normal' | 'excess';
+  excessQty: number;
+  abcClass?: 'A' | 'B' | 'C';
 }
 
 export const stockEngine = {
@@ -21,11 +23,17 @@ export const stockEngine = {
     const available = physical - reserved;
     const projected = available + inTransitIn;
     const coverageDays = dailyDemand > 0 ? projected / dailyDemand : 999;
+    const maxStock = Number(row.max_stock || 99999);
 
     let status: ProjectedStockResult['status'] = 'normal';
+    let excessQty = 0;
+
     if (coverageDays < 1) status = 'critical';
     else if (coverageDays < 3) status = 'attention';
-    else if (coverageDays > 15) status = 'excess';
+    else if (projected > maxStock || coverageDays > 15) {
+      status = 'excess';
+      excessQty = projected - maxStock;
+    }
 
     return {
       physical,
@@ -35,7 +43,9 @@ export const stockEngine = {
       projected,
       dailyDemand,
       coverageDays,
-      status
+      status,
+      excessQty,
+      abcClass: row.abc_class
     };
   },
 

@@ -116,8 +116,10 @@ export default function SupplyChainTower() {
                         <span className="text-muted-foreground">Eficiência de Giro</span>
                         <span className="font-bold text-success">92.4%</span>
                     </div>
-                    <Button className="w-full gap-2 mt-4">
-                        Ver Mapa de Ruptura <ArrowRight className="h-4 w-4" />
+                    <Button className="w-full gap-2 mt-4" asChild>
+                        <Link to="/operacional/saude-lojas">
+                            Ver Mapa de Saúde <ArrowRight className="h-4 w-4" />
+                        </Link>
                     </Button>
                 </CardContent>
             </Card>
