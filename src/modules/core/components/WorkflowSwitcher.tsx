@@ -39,7 +39,7 @@ const Brain = ({ className }: { className?: string }) => (
   </svg>
 );
 
-export const WorkflowSwitcher = () => {
+export const WorkflowSwitcher = React.forwardRef<HTMLDivElement, any>((_, ref) => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -82,7 +82,7 @@ export const WorkflowSwitcher = () => {
   ];
 
   return (
-    <>
+    <div ref={ref}>
       <Button 
         variant="outline" 
         className="fixed bottom-6 right-6 shadow-2xl border-primary/20 bg-background/80 backdrop-blur-sm z-50 h-12 px-6 rounded-full gap-2 group transition-all hover:scale-105 active:scale-95"
@@ -118,6 +118,6 @@ export const WorkflowSwitcher = () => {
           ))}
         </CommandList>
       </CommandDialog>
-    </>
+    </div>
   );
-};
+});

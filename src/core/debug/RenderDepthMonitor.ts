@@ -63,8 +63,9 @@ export function withRenderMonitor<P extends object>(
 ) {
   const name = componentName || Component.displayName || Component.name || 'UnknownComponent';
   
-  return (props: P) => {
+  const WrappedComponent = React.forwardRef<any, P>((props, ref) => {
     const isInitialRender = React.useRef(true);
+    
     React.useEffect(() => {
       if (isInitialRender.current) {
         isInitialRender.current = false;
@@ -73,6 +74,11 @@ export function withRenderMonitor<P extends object>(
       monitor.trackUpdate(name);
     });
 
-    return React.createElement(Component, props);
-  };
+    // We only pass ref if it's a component that can receive it
+    // Using cast to any to satisfy TS for this monitoring HOC
+    return React.createElement(Component as any, { ...props, ref });
+  });
+
+  WrappedComponent.displayName = `withRenderMonitor(${name})`;
+  return WrappedComponent;
 }
