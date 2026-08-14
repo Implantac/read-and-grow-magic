@@ -358,9 +358,16 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
     setBranch,
     executiveCouncil
   }), [
-    currentTenant, currentGroup, currentCompany, currentBranch, allBranches,
-    segment, subSegment, companySize, taxRegime, operationTypes,
-    policies, isLoading, setCompany, setBranch
+    currentTenant, currentGroup, 
+    currentCompany?.id, 
+    currentBranch?.id, 
+    allBranches.length,
+    segment, subSegment, companySize, taxRegime, 
+    operationTypes.length,
+    policies.replenishmentMethod,
+    policies.workflowEnabled,
+    policies.eventOrchestrationEnabled,
+    isLoading, setCompany, setBranch
   ]);
 
   return (
