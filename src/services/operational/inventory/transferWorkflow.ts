@@ -10,7 +10,9 @@ export type TransferStatus =
   | 'EM TRÂNSITO' 
   | 'RECEBIDA' 
   | 'CONFERIDA' 
-  | 'ENCERRADA';
+  | 'ENCERRADA'
+  | 'CANCELADA';
+
 
 export interface WorkflowTransition {
   transferId: string;
@@ -38,11 +40,12 @@ export const transferWorkflow = {
       .insert({
         transfer_id: transferId,
         user_id: userId,
-        status: toStatus,
+        status: toStatus as any,
         quantity,
         divergence,
         notes
       });
+
 
     if (logError) throw logError;
 

@@ -5,6 +5,8 @@ import { Badge } from "@/ui/base/badge";
 import { Button } from "@/ui/base/button";
 import { Progress } from "@/ui/base/progress";
 import { useStoreCentral } from "@/hooks/operational/store/useStoreCentral";
+import { useSupplyChainExecution } from "@/hooks/operational/network/useSupplyChainExecution";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/base/tabs";
 import { 
   Store, 
   TrendingUp, 
@@ -20,14 +22,18 @@ import {
   Ticket,
   Clock,
   ArrowRight,
-  ClipboardList
+  ClipboardList,
+  ListTodo
 } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/ui/base/skeleton";
 
 export default function StoreCentral() {
   const { kpis, alerts, health, reliability, isLoading, refetch } = useStoreCentral();
+  const { tasks, inTransit, isLoading: isLoadingExecution } = useSupplyChainExecution();
+
 
   if (isLoading) {
     return (
@@ -96,81 +102,187 @@ export default function StoreCentral() {
             />
           </div>
 
-          {/* O que precisa da sua atenção? */}
-          <Card className="border-primary/20 shadow-elevation-2">
-            <CardHeader className="pb-3 border-b border-border/40">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-lg">Prioridades Operacionais (Orquestradas)</CardTitle>
+          {/* Central de Operação Unificada */}
+          <Tabs defaultValue="alertas" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 mb-4">
+              <TabsTrigger value="alertas" className="gap-2">
+                <AlertTriangle className="h-4 w-4" /> Alertas
+              </TabsTrigger>
+              <TabsTrigger value="tarefas" className="gap-2">
+                <ListTodo className="h-4 w-4" /> Minhas Tarefas
+                {tasks.length > 0 && <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 flex items-center justify-center rounded-full text-[10px]">{tasks.length}</Badge>}
+              </TabsTrigger>
+              <TabsTrigger value="transito" className="gap-2">
+                <Truck className="h-4 w-4" /> Em Trânsito
+                {inTransit.length > 0 && <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center rounded-full text-[10px]">{inTransit.length}</Badge>}
+              </TabsTrigger>
+              <TabsTrigger value="solicitacoes" className="gap-2">
+                <Package className="h-4 w-4" /> Solicitações
+              </TabsTrigger>
+            </TabsList>
 
-                  <CardDescription>Pendências críticas detectadas pelo Ecossistema Global (EOE)</CardDescription>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-destructive border-destructive/20 bg-destructive/5 animate-pulse">
-                    {alerts?.filter(a => a.type === 'critical').length} Críticos
-                  </Badge>
-                  <Badge variant="outline" className="text-primary border-primary/20 bg-primary/5">
-                    UEEF Nível 4
-                  </Badge>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="divide-y">
-                {isLoading ? (
-                  <div className="p-8 text-center">
-                    <RefreshCw className="h-8 w-8 animate-spin mx-auto text-primary opacity-20" />
-                    <p className="text-xs text-muted-foreground mt-2">Carregando tarefas críticas...</p>
-                  </div>
-                ) : alerts?.length > 0 ? (
-                  alerts.map((alert) => (
-                    <div key={alert.id} className="p-4 flex items-start gap-4 hover:bg-muted/50 transition-colors group relative overflow-hidden">
-                      {alert.type === 'critical' && (
-                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-destructive animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
-                      )}
-                      <div className={cn(
-                        "p-2 rounded-full ring-1 ring-inset relative z-10",
-                        alert.type === 'critical' ? "bg-destructive/10 text-destructive ring-destructive/20 shadow-[0_0_10px_rgba(239,68,68,0.2)]" : 
-                        alert.type === 'warning' ? "bg-warning/10 text-warning ring-warning/20" : "bg-primary/10 text-primary ring-primary/20"
-                      )}>
-                        {alert.category === 'rupture' && <AlertTriangle className="h-5 w-5" />}
-                        {alert.category === 'receiving' && <Package className="h-5 w-5" />}
-                        {alert.category === 'transfer' && <Truck className="h-5 w-5" />}
-                        {alert.category === 'cashier' && <DollarSign className="h-5 w-5" />}
-                        {alert.category === 'replenishment' && <RefreshCw className="h-5 w-5" />}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <p className="font-bold text-sm">{alert.title}</p>
-                          {alert.actionPath && (
-                            <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 opacity-0 group-hover:opacity-100 transition-opacity" asChild>
-                              <Link to={alert.actionPath}>
-                                {alert.actionLabel || 'Tratar'} <ChevronRight className="h-3 w-3" />
-                              </Link>
-                            </Button>
-                          )}
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-0.5">{alert.description}</p>
-                      </div>
+            <TabsContent value="alertas">
+              <Card className="border-primary/20 shadow-elevation-2">
+                <CardHeader className="pb-3 border-b border-border/40">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-lg">Prioridades Operacionais (Orquestradas)</CardTitle>
+                      <CardDescription>Pendências críticas detectadas pelo Ecossistema Global (EOE)</CardDescription>
                     </div>
-                  ))
-                ) : (
-                  <div className="p-8 text-center text-muted-foreground">
-                    <CheckCircle2 className="h-8 w-8 mx-auto mb-2 opacity-20" />
-                    <p className="text-sm">Nenhuma pendência crítica encontrada.</p>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-destructive border-destructive/20 bg-destructive/5 animate-pulse">
+                        {alerts?.filter(a => a.type === 'critical').length} Críticos
+                      </Badge>
+                      <Badge variant="outline" className="text-primary border-primary/20 bg-primary/5">
+                        UEEF Nível 4
+                      </Badge>
+                    </div>
                   </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="divide-y">
+                    {isLoading ? (
+                      <div className="p-8 text-center">
+                        <RefreshCw className="h-8 w-8 animate-spin mx-auto text-primary opacity-20" />
+                        <p className="text-xs text-muted-foreground mt-2">Carregando tarefas críticas...</p>
+                      </div>
+                    ) : alerts?.length > 0 ? (
+                      alerts.map((alert) => (
+                        <div key={alert.id} className="p-4 flex items-start gap-4 hover:bg-muted/50 transition-colors group relative overflow-hidden">
+                          {alert.type === 'critical' && (
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-destructive animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
+                          )}
+                          <div className={cn(
+                            "p-2 rounded-full ring-1 ring-inset relative z-10",
+                            alert.type === 'critical' ? "bg-destructive/10 text-destructive ring-destructive/20 shadow-[0_0_10px_rgba(239,68,68,0.2)]" : 
+                            alert.type === 'warning' ? "bg-warning/10 text-warning ring-warning/20" : "bg-primary/10 text-primary ring-primary/20"
+                          )}>
+                            {alert.category === 'rupture' && <AlertTriangle className="h-5 w-5" />}
+                            {alert.category === 'receiving' && <Package className="h-5 w-5" />}
+                            {alert.category === 'transfer' && <Truck className="h-5 w-5" />}
+                            {alert.category === 'cashier' && <DollarSign className="h-5 w-5" />}
+                            {alert.category === 'replenishment' && <RefreshCw className="h-5 w-5" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <p className="font-bold text-sm">{alert.title}</p>
+                              {alert.actionPath && (
+                                <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 opacity-0 group-hover:opacity-100 transition-opacity" asChild>
+                                  <Link to={alert.actionPath}>
+                                    {alert.actionLabel || 'Tratar'} <ChevronRight className="h-3 w-3" />
+                                  </Link>
+                                </Button>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-0.5">{alert.description}</p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-8 text-center text-muted-foreground">
+                        <CheckCircle2 className="h-8 w-8 mx-auto mb-2 opacity-20" />
+                        <p className="sm:text-sm text-xs">Nenhuma pendência crítica encontrada.</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-          {/* Seção Operacional Secundária */}
+            <TabsContent value="tarefas">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <ListTodo className="h-5 w-5 text-primary" /> Fila de Execução Operacional
+                  </CardTitle>
+                  <CardDescription>Ações logísticas aguardando processamento nesta unidade</CardDescription>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="divide-y">
+                    {tasks.length > 0 ? (
+                      tasks.map((task: any) => (
+                        <div key={task.id} className="p-4 flex items-center justify-between hover:bg-muted/30 transition-colors">
+                          <div className="flex items-center gap-4">
+                            <div className="p-2 rounded bg-primary/10 text-primary">
+                              {task.current_status === 'SEPARAÇÃO' ? <Package className="h-5 w-5" /> : <Truck className="h-5 w-5" />}
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold">TRF-{task.id.split('-')[0].toUpperCase()}</p>
+                              <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                                <span>{task.origin?.name}</span>
+                                <ArrowRight className="h-2 w-2" />
+                                <span>{task.destination?.name}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <Badge variant="outline" className="text-[10px]">{task.current_status}</Badge>
+                            <Button size="sm" className="h-8 text-xs" asChild>
+                              <Link to="/logistica/transferencias">Gerenciar</Link>
+                            </Button>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-12 text-center text-muted-foreground">
+                        <ShieldCheck className="h-10 w-10 mx-auto mb-3 opacity-20" />
+                        <p className="text-sm">Sem tarefas pendentes para hoje.</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="transito">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Truck className="h-5 w-5 text-violet-500" /> Carga em Trânsito para esta Loja
+                  </CardTitle>
+                  <CardDescription>Acompanhe o que está a caminho e planeje o recebimento</CardDescription>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="divide-y">
+                    {inTransit.length > 0 ? (
+                      inTransit.map((order: any) => (
+                        <div key={order.id} className="p-4 flex items-center justify-between hover:bg-muted/30 transition-colors">
+                          <div className="flex items-center gap-4">
+                            <div className="p-2 rounded bg-violet-500/10 text-violet-500">
+                              <Package className="h-5 w-5" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold">TRF-{order.id.split('-')[0].toUpperCase()}</p>
+                              <p className="text-[10px] text-muted-foreground">Origem: {order.origin?.name}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <Badge className="bg-violet-500 text-[10px] mb-1">EM TRÂNSITO</Badge>
+                            <p className="text-[10px] text-muted-foreground">Previsão: Hoje</p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-12 text-center text-muted-foreground">
+                        <Clock className="h-10 w-10 mx-auto mb-3 opacity-20" />
+                        <p className="text-sm">Nenhuma carga em trânsito no momento.</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+
+
+          {/* Seção Operacional Secundária - Ações Rápidas */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
+            <Card className="hover:border-primary/40 transition-colors">
               <CardHeader>
                 <CardTitle className="text-md flex items-center gap-2">
-                  <Truck className="h-4 w-4" /> Transferências & Recebimento
+                  <Truck className="h-4 w-4" /> Centro de Recebimento
                 </CardTitle>
+                <CardDescription>Conferência de mercadorias e ajuste de divergências</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between p-3 rounded-lg border bg-accent/30">
@@ -179,11 +291,13 @@ export default function StoreCentral() {
                       <Clock className="h-4 w-4" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold">{kpis?.inTransit || 0} Em Trânsito</p>
-                      <p className="text-[10px] text-muted-foreground">Previsão: Pendente</p>
+                      <p className="text-sm font-bold">{inTransit.length} Cargas Pendentes</p>
+                      <p className="text-[10px] text-muted-foreground">Acompanhamento em tempo real</p>
                     </div>
                   </div>
-                  <Button variant="outline" size="sm" className="text-[10px] h-7">Rastrear</Button>
+                  <Button variant="outline" size="sm" className="text-[10px] h-7" asChild>
+                    <Link to="/logistica/transferencias">Rastrear</Link>
+                  </Button>
                 </div>
                 <div className="flex items-center justify-between p-3 rounded-lg border bg-accent/30">
                   <div className="flex items-center gap-3">
@@ -191,41 +305,50 @@ export default function StoreCentral() {
                       <CheckCircle2 className="h-4 w-4" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold">{kpis?.receiving || 0} Recebido</p>
-                      <p className="text-[10px] text-muted-foreground">Aguardando conferência</p>
+                      <p className="text-sm font-bold">Conferência Cega</p>
+                      <p className="text-[10px] text-muted-foreground">Validar itens recebidos</p>
                     </div>
                   </div>
-                  <Button variant="default" size="sm" className="text-[10px] h-7">Conferir</Button>
+                  <Button variant="default" size="sm" className="text-[10px] h-7" asChild>
+                    <Link to="/logistica/transferencias">Iniciar</Link>
+                  </Button>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="hover:border-primary/40 transition-colors">
               <CardHeader>
                 <CardTitle className="text-md flex items-center gap-2">
-                  <RefreshCw className="h-4 w-4" /> Reabastecimento Sugerido
+                  <RefreshCw className="h-4 w-4" /> Sugestão de Abastecimento
                 </CardTitle>
+                <CardDescription>Reposição baseada em demanda e cobertura</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Sugestões Pendentes</span>
-                    <span className="font-bold">{kpis?.itemsPending || 0} itens</span>
+                    <span className="text-muted-foreground">Solicitações Ativas</span>
+                    <span className="font-bold">{kpis?.itemsPending || 0} SKUs</span>
                   </div>
-                  <div className="flex items-center justify-between text-sm text-destructive font-medium bg-destructive/5 p-2 rounded">
+                  <div className={cn(
+                    "flex items-center justify-between text-sm font-medium p-2 rounded",
+                    (kpis?.unitsPending || 0) > 0 ? "text-destructive bg-destructive/5" : "text-success bg-success/5"
+                  )}>
                     <div className="flex items-center gap-2">
                       <AlertTriangle className="h-4 w-4" />
-                      Risco de Ruptura Alto
+                      { (kpis?.unitsPending || 0) > 0 ? "Risco de Ruptura Detectado" : "Nível de Estoque Seguro" }
                     </div>
                     <span>{kpis?.unitsPending || 0} un</span>
                   </div>
-                  <Button className="w-full gap-2 mt-2">
-                    Analisar Sugestão <ArrowRight className="h-4 w-4" />
+                  <Button className="w-full gap-2 mt-2" asChild>
+                    <Link to="/wms/reposicao">
+                      Analisar Sugestão <ArrowRight className="h-4 w-4" />
+                    </Link>
                   </Button>
                 </div>
               </CardContent>
             </Card>
           </div>
+
         </div>
 
         {/* Lado Direito: Saúde e Índices */}
