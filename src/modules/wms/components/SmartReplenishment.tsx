@@ -37,21 +37,36 @@ export function SmartReplenishment() {
     }, {});
 
     Object.values(byProduct).forEach((p: any) => {
-      // Motor de Necessidade: Considera Estoque Projetado (Saldo + Em Trânsito)
-      // Nota: Implementação simplificada para o motor atual, buscando consolidar as regras
-      const lowStockBranches = p.balances.filter((b: any) => b.quantity < p.min_stock);
-      const surplusBranches = p.balances.filter((b: any) => b.quantity > (p.max_stock || p.min_stock * 2)); 
+      // Motor de Necessidade Profissional
+      // Identifica destinos (filiais abaixo do estoque alvo)
+      const lowStockBranches = p.balances.filter((b: any) => {
+        // Se houver política específica, usa ela. Caso contrário, usa o global do produto.
+        // Nota: A matriz atual traz o global, mas o motor de rede deve buscar a política SKU x Local.
+        // Implementação simplificada mantendo a compatibilidade com a matriz atual:
+        return b.quantity < p.min_stock;
+      });
+
+      // Identifica origens (filiais com surplus)
+      const surplusBranches = p.balances.filter((b: any) => b.quantity > p.min_stock * 1.5); 
 
       lowStockBranches.forEach((target: any) => {
-        const needed = p.min_stock - target.quantity;
+        // Posição Projetada = Saldo + (Em Trânsito - Reservado) 
+        // Implementação futura: buscar saldos reais do Ledger
+        const projectedStock = target.quantity; 
+        const needed = p.min_stock - projectedStock;
         
-        // Fluxo de Prioridade: 1. Outras Lojas (Balanceamento) -> 2. CD -> 3. Indústria
+        if (needed <= 0) return;
+
+        // Fluxo de Prioridade de Rede: 
+        // 1. Balanceamento entre Lojas (Surplus de proximidade/tipo)
+        // 2. Reabastecimento via CD (Distribuição)
+        // 3. Produção (Indústria)
         const sortedSources = surplusBranches
           .map((s: any) => {
-            let priority = 3; // Outros
-            if (s.branch_tipo === 'STORE') priority = 1; // Balanceamento entre lojas
-            if (s.branch_tipo === 'DISTRIBUTION_CENTER') priority = 2; // Reabastecimento CD
-            if (s.branch_tipo === 'FACTORY') priority = 3; // Produção
+            let priority = 4;
+            if (s.branch_tipo === 'STORE') priority = 1; // Prioridade 1: Balanceamento
+            if (s.branch_tipo === 'DISTRIBUTION_CENTER') priority = 2; // Prioridade 2: CD
+            if (s.branch_tipo === 'FACTORY') priority = 3; // Prioridade 3: Produção
 
             return { ...s, availableSurplus: s.quantity - p.min_stock, sourcePriority: priority };
           })
@@ -80,6 +95,7 @@ export function SmartReplenishment() {
               currentTargetQty: target.quantity,
               suggestedQty: transferable,
               priority: (target.quantity <= 0) ? 'critical' : (needed > p.min_stock * 0.5 ? 'high' : 'medium'),
+              flowType: source.branch_tipo === 'STORE' ? 'BALANCEAMENTO' : 'REABASTECIMENTO',
             });
           }
         }
@@ -162,6 +178,7 @@ export function SmartReplenishment() {
                   <TableRow>
                     <TableHead>Produto</TableHead>
                     <TableHead>Origem (Surplus)</TableHead>
+                    <TableHead>Fluxo</TableHead>
                     <TableHead></TableHead>
                     <TableHead>Destino (Ruptura)</TableHead>
                     <TableHead className="text-right">Qtd Sugerida</TableHead>
@@ -178,6 +195,11 @@ export function SmartReplenishment() {
                       <TableCell>
                         <div className="text-xs font-semibold">{sug.sourceBranchName}</div>
                         <div className="text-[10px] text-muted-foreground">Saldo: {sug.currentSourceQty}</div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="text-[9px] uppercase">
+                          {sug.flowType}
+                        </Badge>
                       </TableCell>
                       <TableCell><ArrowRight className="h-4 w-4 text-muted-foreground" /></TableCell>
                       <TableCell>
