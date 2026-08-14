@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect } from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Toaster } from "@/ui/base/toaster";
 import { Toaster as Sonner } from "@/ui/base/sonner";
 import { TooltipProvider } from "@/ui/base/tooltip";
@@ -21,11 +21,9 @@ const RealtimeAlertsBridge = React.memo(() => {
   const { currentCompany, isLoading } = useEnterprise();
   const companyId = currentCompany?.id;
   
-  // We use keying to force a clean unmount/remount ONLY when companyId changes.
-  // The null check prevents rendering until we have a real ID.
   if (isLoading || !companyId) return null;
 
-  return <OrchestratorInternal key={companyId} companyId={companyId} />;
+  return <OrchestratorInternal companyId={companyId} />;
 });
 
 const OrchestratorInternal = React.memo(({ companyId }: { companyId: string }) => {
