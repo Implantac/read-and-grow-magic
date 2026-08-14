@@ -325,6 +325,26 @@ export function SmartReplenishment() {
     setSelectedIds(newSet);
   };
 
+  // Atalhos de teclado
+  useMemo(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!showBulkPreview || bulkConfirmStep) return;
+      
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'z') {
+          e.preventDefault();
+          handleUndo();
+        } else if (e.key === 'y' || (e.key === 'Z' && e.shiftKey)) {
+          e.preventDefault();
+          handleRedo();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showBulkPreview, bulkConfirmStep, historyStack, redoStack, editedQuantities]);
+
   return (
     <div className="space-y-4">
       <Card className="border-primary/20 bg-primary/5">
