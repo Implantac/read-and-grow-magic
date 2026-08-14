@@ -21,17 +21,17 @@ const RealtimeAlertsBridge = React.memo(() => {
   const { currentCompany, isLoading } = useEnterprise();
   const companyId = currentCompany?.id;
   
-  // We use a ref to track the "active" company we've initialized for.
-  // This prevents the bridge from flipping null/component during context jitter.
-  const activeCompanyId = React.useRef<string | null>(null);
+  const [activeId, setActiveId] = React.useState<string | null>(null);
 
-  if (!isLoading && companyId && activeCompanyId.current !== companyId) {
-    activeCompanyId.current = companyId;
-  }
+  React.useEffect(() => {
+    if (!isLoading && companyId && activeId !== companyId) {
+      setActiveId(companyId);
+    }
+  }, [companyId, isLoading, activeId]);
 
-  if (!activeCompanyId.current) return null;
+  if (!activeId) return null;
 
-  return <AlertsOrchestratorContainer companyId={activeCompanyId.current} />;
+  return <AlertsOrchestratorContainer companyId={activeId} />;
 });
 
 const AlertsOrchestratorContainer = React.memo(({ companyId }: { companyId: string }) => {
