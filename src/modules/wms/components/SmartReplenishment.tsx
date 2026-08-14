@@ -165,10 +165,15 @@ export function SmartReplenishment() {
   }, [suggestions, selectedIds, editedQuantities]);
 
   const handleUpdateQuantity = (id: string, value: number, max: number) => {
+    let finalValue = value;
     if (value > max) {
-      toast.error(`Quantidade excede o surplus disponível na origem (${max} un).`);
+      finalValue = max;
+      toast.warning(`Quantidade ajustada para o máximo executável (${max} un).`);
+    } else if (value < 1 && value !== 0) {
+      // Se o usuário tentar apagar ou colocar negativo, mas não for zero explicitamente
+      finalValue = 1;
     }
-    setEditedQuantities(prev => ({ ...prev, [id]: value }));
+    setEditedQuantities(prev => ({ ...prev, [id]: finalValue }));
   };
 
   const handleRemoveItem = (id: string) => {
