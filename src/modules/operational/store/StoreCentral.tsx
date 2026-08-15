@@ -350,6 +350,45 @@ export default function StoreCentral() {
                 </CardContent>
               </Card>
             </TabsContent>
+
+            <TabsContent value="fiscal">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-orange-500" /> Documentos Fiscais Pendentes
+                  </CardTitle>
+                  <CardDescription>NF-es de transferências em trânsito aguardando conferência</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {inTransit.length > 0 ? (
+                      inTransit.map((order: any) => (
+                        <div key={order.id} className="flex items-center justify-between p-3 border rounded-lg bg-muted/20">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded bg-orange-500/10 text-orange-500">
+                              <FileText className="h-4 w-4" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium">NF-e vinculada à TRF-{order.id.split('-')[0].toUpperCase()}</p>
+                              <p className="text-xs text-muted-foreground">Correlation ID: {order.correlation_id?.split('-')[0]}...</p>
+                            </div>
+                          </div>
+                          <Button variant="ghost" size="sm" asChild>
+                            <Link to="/fiscal/nfe">Ver Documento</Link>
+                          </Button>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground italic text-sm">
+                        Nenhum documento fiscal pendente para as cargas atuais.
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+              </Card>
+            </TabsContent>
           </Tabs>
 
 
