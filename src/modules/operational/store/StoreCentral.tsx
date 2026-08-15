@@ -121,6 +121,11 @@ export default function StoreCentral() {
             />
           </div>
 
+          {/* Camada Prescritiva (Minha Loja 2.0) */}
+          <div className="space-y-4">
+             <PrescriptiveAlert />
+          </div>
+
           {/* Central de Operação Unificada */}
           <Tabs defaultValue="alertas" className="w-full">
             <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 mb-4">
