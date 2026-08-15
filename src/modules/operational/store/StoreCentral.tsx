@@ -160,7 +160,6 @@ export default function StoreCentral() {
                         <ClipboardList className="h-3 w-3" /> Iniciar Inventário
                       </Link>
                     </Button>
-                    </Button>
                   </div>
                </CardContent>
              </Card>
