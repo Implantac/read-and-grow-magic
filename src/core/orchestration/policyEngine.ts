@@ -108,14 +108,5 @@ export const usePolicy = () => useContext(PolicyContext);
  */
 export function getEnterprisePolicies(segment: string) {
   const base = DEFAULT_POLICY;
-  return {
-    replenishmentMethod: base.inventory.replenishmentMethod,
-    transferApprovalLimit: base.inventory.transferApprovalLimit,
-    inventoryAdjustmentPolicy: base.inventory.inventoryAdjustmentPolicy,
-    salesCreditCheck: base.commercial.salesCreditCheck,
-    workflowEnabled: base.core.workflowEnabled,
-    eventOrchestrationEnabled: base.core.eventOrchestrationEnabled,
-    auditLevel: base.core.auditLevel,
-    taskBoardEnabled: base.core.taskBoardEnabled
-  };
+  return DEFAULT_POLICY;
 }

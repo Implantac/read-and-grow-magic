@@ -12,6 +12,7 @@ import { useLowMarginAlertsRealtime } from '@/hooks/commercial/useLowMarginAlert
 import { WorkflowSwitcher } from '@/modules/core/components/WorkflowSwitcher';
 import { useInventoryOrchestrator } from '@/core/orchestration/InventoryOrchestrator';
 import { useFinancialOrchestrator } from '@/core/orchestration/FinancialOrchestrator';
+import { useFiscalOrchestrator } from '@/core/orchestration/FiscalOrchestrator';
 
 import { withRenderMonitor } from '@/core/debug/RenderDepthMonitor';
 
@@ -59,6 +60,7 @@ const OrchestratorInternal = React.memo(({ companyId }: { companyId: string }) =
       <LowMarginAlertsWrapper companyId={companyId} />
       <InventoryOrchestratorWrapper companyId={companyId} />
       <FinancialOrchestratorWrapper companyId={companyId} />
+      <FiscalOrchestratorWrapper companyId={companyId} />
     </React.Fragment>
   );
 });
@@ -75,6 +77,11 @@ const InventoryOrchestratorWrapper = React.memo(({ companyId }: { companyId: str
 
 const FinancialOrchestratorWrapper = React.memo(({ companyId }: { companyId: string }) => {
   useFinancialOrchestrator(companyId);
+  return null;
+});
+
+const FiscalOrchestratorWrapper = React.memo(({ companyId }: { companyId: string }) => {
+  useFiscalOrchestrator();
   return null;
 });
 

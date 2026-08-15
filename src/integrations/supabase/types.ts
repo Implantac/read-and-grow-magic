@@ -9867,6 +9867,7 @@ export type Database = {
           company_id: string
           consumer_final: boolean
           contingency: boolean | null
+          correlation_id: string | null
           created_at: string
           danfe_url: string | null
           difal_total: number
@@ -9917,6 +9918,7 @@ export type Database = {
           company_id?: string
           consumer_final?: boolean
           contingency?: boolean | null
+          correlation_id?: string | null
           created_at?: string
           danfe_url?: string | null
           difal_total?: number
@@ -9967,6 +9969,7 @@ export type Database = {
           company_id?: string
           consumer_final?: boolean
           contingency?: boolean | null
+          correlation_id?: string | null
           created_at?: string
           danfe_url?: string | null
           difal_total?: number
@@ -18668,6 +18671,7 @@ export type Database = {
           approved_by: string | null
           carrier_id: string | null
           company_id: string
+          correlation_id: string | null
           created_at: string
           current_status:
             | Database["public"]["Enums"]["transfer_workflow_status"]
@@ -18687,6 +18691,7 @@ export type Database = {
           approved_by?: string | null
           carrier_id?: string | null
           company_id: string
+          correlation_id?: string | null
           created_at?: string
           current_status?:
             | Database["public"]["Enums"]["transfer_workflow_status"]
@@ -18706,6 +18711,7 @@ export type Database = {
           approved_by?: string | null
           carrier_id?: string | null
           company_id?: string
+          correlation_id?: string | null
           created_at?: string
           current_status?:
             | Database["public"]["Enums"]["transfer_workflow_status"]

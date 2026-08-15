@@ -114,25 +114,24 @@ export default function StoreCentral() {
 
           {/* Central de Operação Unificada */}
           <Tabs defaultValue="alertas" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 mb-4">
+            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 mb-4">
               <TabsTrigger value="alertas" className="gap-2">
                 <AlertTriangle className="h-4 w-4" /> Alertas
               </TabsTrigger>
               <TabsTrigger value="tarefas" className="gap-2">
-                <ListTodo className="h-4 w-4" /> Minhas Tarefas
+                <ListTodo className="h-4 w-4" /> Tarefas
                 {tasks.length > 0 && <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 flex items-center justify-center rounded-full text-[10px]">{tasks.length}</Badge>}
               </TabsTrigger>
               <TabsTrigger value="transito" className="gap-2">
-                <Truck className="h-4 w-4" /> Em Trânsito
+                <Truck className="h-4 w-4" /> Trânsito
                 {inTransit.length > 0 && <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center rounded-full text-[10px]">{inTransit.length}</Badge>}
               </TabsTrigger>
-              <TabsTrigger value="solicitacoes" className="gap-2">
-                <Package className="h-4 w-4" /> Solicitações
+              <TabsTrigger value="fiscal" className="gap-2">
+                <FileText className="h-4 w-4" /> Fiscal
               </TabsTrigger>
               <TabsTrigger value="novo" className="gap-2 text-primary font-bold">
                 <ArrowUpCircle className="h-4 w-4" /> Solicitar
               </TabsTrigger>
-
             </TabsList>
 
             <TabsContent value="alertas">
@@ -350,7 +349,45 @@ export default function StoreCentral() {
                 </CardContent>
               </Card>
             </TabsContent>
+
+            <TabsContent value="fiscal">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-orange-500" /> Documentos Fiscais Pendentes
+                  </CardTitle>
+                  <CardDescription>NF-es de transferências em trânsito aguardando conferência</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {inTransit.length > 0 ? (
+                      inTransit.map((order: any) => (
+                        <div key={order.id} className="flex items-center justify-between p-3 border rounded-lg bg-muted/20">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded bg-orange-500/10 text-orange-500">
+                              <FileText className="h-4 w-4" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium">NF-e vinculada à TRF-{order.id.split('-')[0].toUpperCase()}</p>
+                              <p className="text-xs text-muted-foreground">Correlation ID: {order.correlation_id?.split('-')[0]}...</p>
+                            </div>
+                          </div>
+                          <Button variant="ghost" size="sm" asChild>
+                            <Link to="/fiscal/nfe">Ver Documento</Link>
+                          </Button>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground italic text-sm">
+                        Nenhum documento fiscal pendente para as cargas atuais.
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
           </Tabs>
+
 
 
 
