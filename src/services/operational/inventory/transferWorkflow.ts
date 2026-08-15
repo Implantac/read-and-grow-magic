@@ -64,7 +64,14 @@ export const transferWorkflow = {
 
     if (updateError) throw updateError;
 
-    // 2.1 Publish event for orchestration
+    // 3. Efeitos colaterais no estoque (Lógica Centralizada)
+    const { data: order } = await (supabase as any)
+      .from('stock_transfer_orders')
+      .select('*, items:stock_transfer_items(*)')
+      .eq('id', transferId)
+      .single();
+
+    // 2.1 Publish event for orchestration (Now we have the company_id from order)
     const eventBus = useEventBus.getState();
     await eventBus.publish('WORKFLOW_COMPLETED', {
       transferId,
@@ -74,13 +81,6 @@ export const transferWorkflow = {
       correlationId,
       companyId: order?.company_id
     });
-
-    // 3. Efeitos colaterais no estoque (Lógica Centralizada)
-    const { data: order } = await (supabase as any)
-      .from('stock_transfer_orders')
-      .select('*, items:stock_transfer_items(*)')
-      .eq('id', transferId)
-      .single();
 
     if (order && order.items && order.items.length > 0) {
       for (const item of order.items) {
