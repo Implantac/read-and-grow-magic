@@ -39,23 +39,20 @@ describe('Logistic-Fiscal Traceability Integration (Direct Event Test)', () => {
     const transferId = 'test-transfer-id';
     const companyId = 'test-company-id';
     
-    // Use the event bus directly from the store to avoid hook-related timing issues in dispatch
+    // Initialize the event bus before actions
     const eventBus = useEventBus.getState();
     const mockFiscalHandler = vi.fn();
     eventBus.subscribe('FISCAL_OPERATION_REQUESTED', mockFiscalHandler);
 
-    // 1. Initialize Hook and wait for registration
-    // The hook uses useEffect to subscribe to the event bus.
+    // Initialize Hook
     renderHook(() => useInventoryOrchestrator(companyId));
     
-    // Wait for the useEffect in useInventoryOrchestrator to run
-    // Since useEventBus is a Zustand store, the subscription is immediate but inside useEffect
+    // Give enough time to establish the subscription within useEffect
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 150));
+      await new Promise(resolve => setTimeout(resolve, 300));
     });
 
-    // 2. Publish event
-    // The Orchestrator should now be subscribed and handle this
+    // Publish event - This triggers handleTransferShipped in Orchestrator
     await act(async () => {
       eventBus.publish('WORKFLOW_COMPLETED', {
         transferId,
@@ -66,18 +63,12 @@ describe('Logistic-Fiscal Traceability Integration (Direct Event Test)', () => {
       });
     });
 
-    // 3. Poll for the resulting FISCAL_OPERATION_REQUESTED event
-    // The EventBus uses setTimeout(..., 0) for publish, and the Orchestrator also uses one.
-    // We need at least 2 ticks + any React re-renders.
-    let found = false;
-    for (let i = 0; i < 20; i++) {
+    // Poll for the resulting FISCAL_OPERATION_REQUESTED event
+    for (let i = 0; i < 30; i++) {
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 50));
       });
-      if (mockFiscalHandler.mock.calls.length > 0) {
-        found = true;
-        break;
-      }
+      if (mockFiscalHandler.mock.calls.length > 0) break;
     }
 
     expect(mockFiscalHandler).toHaveBeenCalledWith(expect.objectContaining({
