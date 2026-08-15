@@ -30,13 +30,17 @@ import {
   CheckCircle,
   XCircle,
   LayoutGrid,
-  FileText
+  FileText,
+  Lightbulb,
+  Map as MapIcon
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/ui/base/skeleton";
 import { useEnterprise } from "@/core/auth/EnterpriseContext";
+import { NetworkMap } from "./components/NetworkMap";
+import { PrescriptiveAlert } from "./components/PrescriptiveAlert";
 
 export default function StoreCentral() {
   const { kpis, alerts, health, reliability, isLoading, refetch } = useStoreCentral();
@@ -63,14 +67,27 @@ export default function StoreCentral() {
 
   return (
     <PageContainer>
+      <div className="mb-6 space-y-1">
+        <h1 className="text-3xl font-black tracking-tighter">MINHA LOJA</h1>
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Store className="h-4 w-4" />
+          <span className="text-sm font-bold uppercase tracking-wider">{currentBranch?.name || "CARREGANDO UNIDADE..."}</span>
+        </div>
+      </div>
+
       <PageHeader 
-        title="Central da Loja" 
-        description="Painel operacional integrado para gestão de unidade"
-        icon={Store}
+        title={`Bom dia, ${currentBranch?.name?.split(' ')[0] || 'Gestor'}.`}
+        description="Aqui está o que precisa da sua atenção hoje."
+        icon={Heart}
       >
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="bg-success/10 text-success border-success/20">
-            Loja Operacional
+          <Badge variant="outline" className={cn(
+            "border-success/20 font-bold",
+            health?.status === 'excellent' ? "bg-success/10 text-success" : 
+            health?.status === 'attention' ? "bg-amber-500/10 text-amber-500" : 
+            "bg-destructive/10 text-destructive"
+          )}>
+            Estado: {health?.status === 'excellent' ? '🟢 Normal' : health?.status === 'attention' ? '🟡 Atenção' : '🔴 Crítica'}
           </Badge>
           <Button variant="outline" size="sm" className="gap-2" onClick={() => refetch()}>
             <RefreshCw className={cn("h-3 w-3", isLoading && "animate-spin")} /> Atualizar
@@ -110,6 +127,31 @@ export default function StoreCentral() {
               icon={AlertTriangle}
               variant={ (kpis?.ruptures || 0) > 0 ? "warning" : "success" }
             />
+          </div>
+
+          {/* Camada Prescritiva (Minha Loja 2.0) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             <PrescriptiveAlert />
+             <Card className="bg-primary/5 border-primary/20">
+               <CardHeader className="pb-2">
+                 <CardTitle className="text-sm font-bold flex items-center gap-2">
+                   <Lightbulb className="h-4 w-4 text-primary" /> Ações Sugeridas
+                 </CardTitle>
+               </CardHeader>
+               <CardContent className="p-0">
+                  <div className="divide-y divide-primary/10">
+                    <Button variant="ghost" className="w-full justify-start text-xs h-10 gap-2 rounded-none px-4">
+                      <Package className="h-3 w-3" /> Receber Mercadoria (2)
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start text-xs h-10 gap-2 rounded-none px-4">
+                      <RefreshCw className="h-3 w-3" /> Solicitar Abastecimento
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start text-xs h-10 gap-2 rounded-none px-4">
+                      <Truck className="h-3 w-3" /> Transferir Excesso
+                    </Button>
+                  </div>
+               </CardContent>
+             </Card>
           </div>
 
           {/* Central de Operação Unificada */}
@@ -521,6 +563,8 @@ export default function StoreCentral() {
               </div>
             </CardContent>
           </Card>
+
+          <NetworkMap />
 
           <Card className="border-dashed border-primary/40 bg-primary/5">
             <CardHeader className="pb-2">

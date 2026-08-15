@@ -13,6 +13,7 @@ import { WorkflowSwitcher } from '@/modules/core/components/WorkflowSwitcher';
 import { useInventoryOrchestrator } from '@/core/orchestration/InventoryOrchestrator';
 import { useFinancialOrchestrator } from '@/core/orchestration/FinancialOrchestrator';
 import { useFiscalOrchestrator } from '@/core/orchestration/FiscalOrchestrator';
+import { useStoreOrchestrator } from '@/core/orchestration/StoreOrchestrator';
 
 import { withRenderMonitor } from '@/core/debug/RenderDepthMonitor';
 
@@ -61,6 +62,7 @@ const OrchestratorInternal = React.memo(({ companyId }: { companyId: string }) =
       <InventoryOrchestratorWrapper companyId={companyId} />
       <FinancialOrchestratorWrapper companyId={companyId} />
       <FiscalOrchestratorWrapper companyId={companyId} />
+      <StoreOrchestratorWrapper companyId={companyId} />
     </React.Fragment>
   );
 });
@@ -82,6 +84,11 @@ const FinancialOrchestratorWrapper = React.memo(({ companyId }: { companyId: str
 
 const FiscalOrchestratorWrapper = React.memo(({ companyId }: { companyId: string }) => {
   useFiscalOrchestrator();
+  return null;
+});
+
+const StoreOrchestratorWrapper = React.memo(({ companyId }: { companyId: string }) => {
+  useStoreOrchestrator(companyId);
   return null;
 });
 
