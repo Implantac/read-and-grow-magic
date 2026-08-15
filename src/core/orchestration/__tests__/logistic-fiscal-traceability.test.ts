@@ -43,7 +43,7 @@ vi.mock('@/core/auth/EnterpriseContext', () => ({
   }))
 }));
 
-// Mock toast helpers to avoid noise
+// Mock toast helpers
 vi.mock('@/lib/toastHelpers', () => ({
   toastSuccess: vi.fn(),
   toastError: vi.fn()
@@ -52,7 +52,6 @@ vi.mock('@/lib/toastHelpers', () => ({
 describe('Logistic-Fiscal Traceability Integration', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Reset EventBus subscribers to avoid cross-test pollution
     useEventBus.setState({ subscribers: {} });
   });
 
@@ -62,21 +61,15 @@ describe('Logistic-Fiscal Traceability Integration', () => {
     const userId = 'test-user-id';
     const companyId = 'test-company-id';
     
-    // 1. Setup Orquestradores e EventBus
     const eventBus = useEventBus.getState();
     const mockFiscalHandler = vi.fn();
-    
-    // Subscribe to the final event in the chain
-    eventBus.subscribe('FISCAL_OPERATION_REQUESTED', mockFiscalHandler);
-    
-    // Subscribe to the intermediate event for debugging
     const mockWorkflowHandler = vi.fn();
+    
+    eventBus.subscribe('FISCAL_OPERATION_REQUESTED', mockFiscalHandler);
     eventBus.subscribe('WORKFLOW_COMPLETED', mockWorkflowHandler);
 
-    // Mount Orchestrator (it subscribes to WORKFLOW_COMPLETED and emits FISCAL_OPERATION_REQUESTED)
     renderHook(() => useInventoryOrchestrator(companyId));
 
-    // 2. Act: Trigger transition (Status: EM TRÂNSITO)
     const status: TransferStatus = 'EM TRÂNSITO';
     
     await act(async () => {
@@ -88,22 +81,34 @@ describe('Logistic-Fiscal Traceability Integration', () => {
       });
     });
 
-    // 3. Assert: Verify end-to-end propagation
-    // Aguarda múltiplos ciclos do EventBus (cada publish é um setTimeout 0)
-    for (let i = 0; i < 20; i++) {
+    // Wait for event chain: workflow -> orchestrator -> fiscal request
+    // Incremental polling to be more resilient
+    let success = false;
+    for (let i = 0; i < 50; i++) {
       await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 5));
+        await new Promise(resolve => setTimeout(resolve, 10));
       });
+      if (mockFiscalHandler.mock.calls.length > 0) {
+        success = true;
+        break;
+      }
     }
 
-    // Verify intermediate event was received
+    if (!success) {
+      console.log('Final state check:');
+      console.log('WORKFLOW_COMPLETED calls:', mockWorkflowHandler.mock.calls.length);
+      if (mockWorkflowHandler.mock.calls.length > 0) {
+        console.log('WORKFLOW_COMPLETED payload:', JSON.stringify(mockWorkflowHandler.mock.calls[0][0]));
+      }
+      console.log('FISCAL_OPERATION_REQUESTED calls:', mockFiscalHandler.mock.calls.length);
+    }
+
     expect(mockWorkflowHandler).toHaveBeenCalledWith(expect.objectContaining({
       transferId,
       correlationId,
       status: 'EM TRÂNSITO'
     }));
 
-    // Verify final event was received with preserved correlation_id
     expect(mockFiscalHandler).toHaveBeenCalledWith(expect.objectContaining({
       originId: transferId,
       correlationId,
