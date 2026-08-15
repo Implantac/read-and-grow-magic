@@ -16,6 +16,7 @@ vi.mock('@/integrations/supabase/client', () => ({
   }
 }));
 
+// We force isLoading to false and a stable companyId
 vi.mock('@/core/auth/EnterpriseContext', () => ({
   useEnterprise: vi.fn(() => ({
     currentCompany: { id: 'test-company-id' },
@@ -39,36 +40,37 @@ describe('Logistic-Fiscal Traceability Integration (Direct Event Test)', () => {
     const transferId = 'test-transfer-id';
     const companyId = 'test-company-id';
     
-    // Manual subscription setup to test the logic directly if Hook fails to subscribe in time
+    // 1. Initialize Hook 
+    // We pass the companyId explicitly to bypass context logic if needed
+    renderHook(() => useInventoryOrchestrator(companyId));
+    
+    // Crucial: Wait long enough for the useEffect to fire. 
+    // In React 18, useEffect runs after the browser paint (simulated in JSDOM).
+    // act() will flush them.
+    await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 100));
+    });
+
     const eventBus = useEventBus.getState();
     const mockFiscalHandler = vi.fn();
     eventBus.subscribe('FISCAL_OPERATION_REQUESTED', mockFiscalHandler);
 
-    // Mount the hook to trigger the Effect
-    const { rerender } = renderHook(({ cid }) => useInventoryOrchestrator(cid), {
-      initialProps: { cid: companyId }
-    });
-    
-    // Wait for the useEffect in useInventoryOrchestrator to fire and register subscribers
-    // React 18 act() handles the effects, but we need to wait for microtasks
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 500));
-    });
-
-    // Verify subscription status
+    // Verify subscription actually occurred
     let subscribers = useEventBus.getState().subscribers['WORKFLOW_COMPLETED'];
     
-    // If it hasn't subscribed yet, we might need a rerender or more time
     if (!subscribers || subscribers.size === 0) {
-      console.log('Rerendering hook...');
+      // One last attempt to flush
       await act(async () => {
-        rerender({ cid: companyId });
-        await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise(resolve => setTimeout(resolve, 500));
       });
       subscribers = useEventBus.getState().subscribers['WORKFLOW_COMPLETED'];
     }
 
-    expect(subscribers?.size).toBeGreaterThan(0);
+    // Fail early with clear message if orchestrator is not listening
+    if (!subscribers || subscribers.size === 0) {
+      console.error('Available event types in bus:', Object.keys(useEventBus.getState().subscribers));
+      throw new Error('FAILED: Orchestrator did not subscribe to WORKFLOW_COMPLETED. Check useEffect conditions in InventoryOrchestrator.ts');
+    }
 
     // 2. Publish event directly via store
     await act(async () => {
@@ -82,9 +84,9 @@ describe('Logistic-Fiscal Traceability Integration (Direct Event Test)', () => {
     });
 
     // 3. Robust Polling
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 20; i++) {
       await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 50));
       });
       if (mockFiscalHandler.mock.calls.length > 0) break;
     }
@@ -95,5 +97,5 @@ describe('Logistic-Fiscal Traceability Integration (Direct Event Test)', () => {
       companyId: companyId,
       type: 'TRANSFER_OUT'
     }));
-  }, 15000);
+  }, 10000);
 });
