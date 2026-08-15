@@ -74,6 +74,13 @@ describe('Logistic-Fiscal Traceability Integration', () => {
     renderHook(() => useInventoryOrchestrator(companyId));
 
     // 2. Act: Trigger transition
+    const publishPromise = new Promise<void>((resolve) => {
+      eventBus.subscribe('WORKFLOW_COMPLETED', (payload) => {
+        console.log('EventBus received WORKFLOW_COMPLETED:', payload.status);
+        resolve();
+      });
+    });
+
     await transferWorkflow.transition({
       transferId,
       toStatus: 'EM TRÂNSITO' as any,
@@ -82,13 +89,9 @@ describe('Logistic-Fiscal Traceability Integration', () => {
     });
 
     // 3. Assert: Verify end-to-end propagation
-    // We need to wait for all microtasks and event bus timeouts
-    // eventBus uses setTimeout(..., 0) for each publish
-    // InventoryOrchestrator uses setTimeout(..., 0) for its follow-up publish
-    
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await publishPromise;
+    await new Promise(resolve => setTimeout(resolve, 50));
 
-    // Debugging: check if WORKFLOW_COMPLETED was received
     console.log('Workflow Mock calls:', mockWorkflowHandler.mock.calls.length);
     if (mockWorkflowHandler.mock.calls.length > 0) {
       console.log('Workflow Mock payload:', JSON.stringify(mockWorkflowHandler.mock.calls[0][0]));
