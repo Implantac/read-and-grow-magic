@@ -58,7 +58,6 @@ describe('Logistic-Fiscal Traceability Integration', () => {
     const userId = 'test-user-id';
     const companyId = 'test-company-id';
     
-    // Subscribe to EventBus before actions
     const eventBus = useEventBus.getState();
     const mockFiscalHandler = vi.fn();
     const mockWorkflowHandler = vi.fn();
@@ -66,13 +65,18 @@ describe('Logistic-Fiscal Traceability Integration', () => {
     eventBus.subscribe('FISCAL_OPERATION_REQUESTED', mockFiscalHandler);
     eventBus.subscribe('WORKFLOW_COMPLETED', mockWorkflowHandler);
 
-    // Mount Orchestrator (subscribes to WORKFLOW_COMPLETED)
+    // Mount Orchestrator (it subscribes to WORKFLOW_COMPLETED)
     renderHook(() => useInventoryOrchestrator(companyId));
 
     const status: TransferStatus = 'EXPEDIDA';
     
+    // We must ensure the subscription logic in Orchestrator's useEffect runs
+    // In Vitest/React-Testing-Library, useEffect might need a tick
+    await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 50));
+    });
+
     // 1. Publish event directly to test Orchestrator subscription
-    // This bypasses the first level of event bus async delay
     await act(async () => {
         eventBus.publish('WORKFLOW_COMPLETED', {
             transferId,
@@ -87,9 +91,17 @@ describe('Logistic-Fiscal Traceability Integration', () => {
     // Wait for event chain: publish -> setTimeout 0 -> Orchestrator handle -> setTimeout 0 -> publish -> setTimeout 0 -> mock handle
     for (let i = 0; i < 50; i++) {
       await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 5));
+        await new Promise(resolve => setTimeout(resolve, 10));
       });
       if (mockFiscalHandler.mock.calls.length > 0) break;
+    }
+
+    if (mockFiscalHandler.mock.calls.length === 0) {
+        console.log('Orchestration did not complete in time.');
+        console.log('WORKFLOW_COMPLETED calls:', mockWorkflowHandler.mock.calls.length);
+        if (mockWorkflowHandler.mock.calls.length > 0) {
+            console.log('Payload:', JSON.stringify(mockWorkflowHandler.mock.calls[0][0]));
+        }
     }
 
     expect(mockFiscalHandler).toHaveBeenCalledWith(expect.objectContaining({
