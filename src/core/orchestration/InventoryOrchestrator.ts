@@ -122,12 +122,25 @@ export const useInventoryOrchestrator = (providedCompanyId?: string) => {
     
     const unsubscribeTransfer = eventBus.subscribe('WORKFLOW_COMPLETED', (payload) => {
       console.log('[InventoryOrchestrator] WORKFLOW_COMPLETED event received:', payload.type, payload.status);
-      if (payload.type === 'TRANSFER' && (payload.status === 'EM TRÂNSITO' || payload.status === 'EXPEDIDA' || payload.status === 'ENVIADO')) {
-        handleTransferShipped({
-          transferId: payload.transferId,
-          companyId: payload.companyId,
-          correlationId: payload.correlationId
+      
+      if (payload.type === 'TRANSFER') {
+        // Log to ledger for ALL transitions to ensure auditability (P2)
+        logToLedger({
+          movementId: payload.transferId,
+          newStatus: payload.status,
+          correlationId: payload.correlationId,
+          causationId: payload.causationId || payload.transferId,
+          metadata: { userId: payload.userId }
         });
+
+        // P4 - Logistics Integration: Auto NF-e on SHIPPED
+        if (payload.status === 'EM TRÂNSITO' || payload.status === 'EXPEDIDA' || payload.status === 'ENVIADO') {
+          handleTransferShipped({
+            transferId: payload.transferId,
+            companyId: payload.companyId,
+            correlationId: payload.correlationId
+          });
+        }
       }
     });
 

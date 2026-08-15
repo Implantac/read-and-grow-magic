@@ -140,22 +140,30 @@ export default function StoreCentral() {
                </CardHeader>
                <CardContent className="p-0">
                   <div className="divide-y divide-primary/10">
-                    <Button variant="ghost" className="w-full justify-start text-xs h-10 gap-2 rounded-none px-4">
-                      <Package className="h-3 w-3" /> Receber Mercadoria (2)
+                    <Button variant="ghost" className="w-full justify-start text-xs h-10 gap-2 rounded-none px-4" asChild>
+                      <Link to="/logistica/recebimento">
+                        <Package className="h-3 w-3" /> Receber Mercadoria ({kpis?.receiving || 0})
+                      </Link>
                     </Button>
-                    <Button variant="ghost" className="w-full justify-start text-xs h-10 gap-2 rounded-none px-4">
-                      <RefreshCw className="h-3 w-3" /> Solicitar Abastecimento
+                    <Button variant="ghost" className="w-full justify-start text-xs h-10 gap-2 rounded-none px-4" asChild>
+                      <Link to="/wms/reposicao">
+                        <RefreshCw className="h-3 w-3" /> Solicitar Abastecimento
+                      </Link>
                     </Button>
-                    <Button variant="ghost" className="w-full justify-start text-xs h-10 gap-2 rounded-none px-4">
-                      <Truck className="h-3 w-3" /> Transferir Excesso
+                    <Button variant="ghost" className="w-full justify-start text-xs h-10 gap-2 rounded-none px-4" asChild>
+                      <Link to="/logistica/transferencias">
+                        <Truck className="h-3 w-3" /> Transferir Produto
+                      </Link>
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start text-xs h-10 gap-2 rounded-none px-4" asChild>
+                      <Link to="/estoque/inventario">
+                        <ClipboardList className="h-3 w-3" /> Iniciar Inventário
+                      </Link>
                     </Button>
                   </div>
                </CardContent>
              </Card>
           </div>
-
-          {/* Mapa de Estoque da Rede */}
-          <NetworkMap />
 
           {/* Central de Operação Unificada */}
           <Tabs defaultValue="alertas" className="w-full">

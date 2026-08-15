@@ -19,15 +19,21 @@ export function PrescriptiveAlert() {
       const recommendation = metadata?.recommendation;
       if (!recommendation) throw new Error("Dados da recomendação não encontrados.");
 
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) throw new Error("Usuário não autenticado");
+
+      const correlationId = crypto.randomUUID();
+      const companyId = recommendation.companyId || (await getCompanyId(recommendation.branchId));
+
       // Criar a transferência sugerida
       const { data: transfer, error: transferError } = await (supabase as any)
         .from('stock_transfer_orders')
         .insert({
-          company_id: recommendation.companyId || (await getCompanyId(recommendation.branchId)),
+          company_id: companyId,
           origin_unit_id: recommendation.sourceBranchId,
           destination_unit_id: recommendation.branchId,
           current_status: 'SUGERIDA',
-          correlation_id: crypto.randomUUID(),
+          correlation_id: correlationId,
           type: 'AUTOMATIC'
         })
         .select()
@@ -50,7 +56,17 @@ export function PrescriptiveAlert() {
         .update({ status: 'completed' })
         .eq('id', alertId);
 
-      toastSuccess("Ação aprovada", "Transferência de reabastecimento criada com sucesso.");
+      // Integrar com o workflow formal para disparar orquestração
+      // A transição para APROVADA ativa a reserva no InventoryOrchestrator via evento
+      const { transferWorkflow } = await import("@/services/operational/inventory/transferWorkflow");
+      await transferWorkflow.transition({
+        transferId: transfer.id,
+        toStatus: 'APROVADA',
+        userId: userData.user.id,
+        correlationId
+      });
+
+      toastSuccess("Ação aprovada", "Transferência criada e aprovada automaticamente.");
       refetch();
     } catch (error) {
       console.error(error);
