@@ -39,20 +39,23 @@ describe('Logistic-Fiscal Traceability Integration (Direct Event Test)', () => {
     const transferId = 'test-transfer-id';
     const companyId = 'test-company-id';
     
-    // 1. Initialize Hook
-    renderHook(() => useInventoryOrchestrator(companyId));
-    
-    // Wait for useEffect to register subscribers
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 150));
-    });
-
+    // Use the event bus directly from the store to avoid hook-related timing issues in dispatch
     const eventBus = useEventBus.getState();
     const mockFiscalHandler = vi.fn();
     eventBus.subscribe('FISCAL_OPERATION_REQUESTED', mockFiscalHandler);
 
-    // 2. Publish event directly
-    console.log('--- TEST: Publishing WORKFLOW_COMPLETED ---');
+    // 1. Initialize Hook and wait for registration
+    // The hook uses useEffect to subscribe to the event bus.
+    renderHook(() => useInventoryOrchestrator(companyId));
+    
+    // Wait for the useEffect in useInventoryOrchestrator to run
+    // Since useEventBus is a Zustand store, the subscription is immediate but inside useEffect
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 150));
+    });
+
+    // 2. Publish event
+    // The Orchestrator should now be subscribed and handle this
     await act(async () => {
       eventBus.publish('WORKFLOW_COMPLETED', {
         transferId,
@@ -63,12 +66,18 @@ describe('Logistic-Fiscal Traceability Integration (Direct Event Test)', () => {
       });
     });
 
-    // 3. Poll for result (multiple async ticks)
-    for (let i = 0; i < 50; i++) {
+    // 3. Poll for the resulting FISCAL_OPERATION_REQUESTED event
+    // The EventBus uses setTimeout(..., 0) for publish, and the Orchestrator also uses one.
+    // We need at least 2 ticks + any React re-renders.
+    let found = false;
+    for (let i = 0; i < 20; i++) {
       await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 20));
+        await new Promise(resolve => setTimeout(resolve, 50));
       });
-      if (mockFiscalHandler.mock.calls.length > 0) break;
+      if (mockFiscalHandler.mock.calls.length > 0) {
+        found = true;
+        break;
+      }
     }
 
     expect(mockFiscalHandler).toHaveBeenCalledWith(expect.objectContaining({
