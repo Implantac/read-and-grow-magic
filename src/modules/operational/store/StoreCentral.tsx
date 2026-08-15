@@ -536,6 +536,8 @@ export default function StoreCentral() {
             </CardContent>
           </Card>
 
+          <NetworkMap />
+
           <Card className="border-dashed border-primary/40 bg-primary/5">
             <CardHeader className="pb-2">
               <CardTitle className="text-xs font-black uppercase text-primary/70">Auditoria Cíclica (Smart)</CardTitle>
