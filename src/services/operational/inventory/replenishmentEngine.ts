@@ -14,6 +14,7 @@ export interface ReplenishmentRecommendation {
   sourceBranchName?: string;
   reason: string;
   urgency: 'critical' | 'attention' | 'normal';
+  companyId?: string;
 }
 
 export const replenishmentEngine = {
