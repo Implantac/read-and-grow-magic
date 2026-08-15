@@ -30,7 +30,7 @@ export const stockEngine = {
 
     if (coverageDays < 1) status = 'critical';
     else if (coverageDays < 3) status = 'attention';
-    else if (projected > maxStock || coverageDays > 15) {
+    else if (projected > maxStock || coverageDays > 30) {
       status = 'excess';
       excessQty = projected - maxStock;
     }
