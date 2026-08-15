@@ -125,7 +125,8 @@ export const storeService = {
       title: task.title,
       description: task.description || '',
       actionLabel: 'Tratar',
-      actionPath: this.getActionPath(task.category)
+      actionPath: this.getActionPath(task.category),
+      metadata: task.metadata
     }));
   },
 
