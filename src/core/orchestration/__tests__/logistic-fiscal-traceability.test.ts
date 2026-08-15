@@ -16,7 +16,7 @@ vi.mock('@/integrations/supabase/client', () => ({
   }
 }));
 
-// Stable companyId
+// Mock EnterpriseContext to return false for isLoading
 vi.mock('@/core/auth/EnterpriseContext', () => ({
   useEnterprise: vi.fn(() => ({
     currentCompany: { id: 'test-company-id' },
@@ -40,34 +40,33 @@ describe('Logistic-Fiscal Traceability Integration (Direct Event Test)', () => {
     const transferId = 'test-transfer-id';
     const companyId = 'test-company-id';
     
-    // 1. Initialize Hook 
+    // We render the hook multiple times if needed to force the effect
     const { rerender } = renderHook(() => useInventoryOrchestrator(companyId));
     
-    // Crucial: React 18 effects are asynchronous. 
-    // Multiple act() calls with small timeouts to flush the microtask queue.
-    for (let i = 0; i < 10; i++) {
-        await act(async () => {
-            await new Promise(resolve => setTimeout(resolve, 10));
-        });
-    }
+    // Flush effects
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 200));
+    });
 
     const eventBus = useEventBus.getState();
     const mockFiscalHandler = vi.fn();
     eventBus.subscribe('FISCAL_OPERATION_REQUESTED', mockFiscalHandler);
 
-    // Verify subscription actually occurred
+    // If subscription is missing, try one more time
     let subscribers = useEventBus.getState().subscribers['WORKFLOW_COMPLETED'];
-    
     if (!subscribers || subscribers.size === 0) {
-      console.log('Rerendering hook...');
       await act(async () => {
         rerender();
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 200));
       });
       subscribers = useEventBus.getState().subscribers['WORKFLOW_COMPLETED'];
     }
 
-    expect(subscribers?.size).toBeGreaterThan(0);
+    // Final check for registration
+    if (!subscribers || subscribers.size === 0) {
+      console.error('Bus subscribers after rerender:', Object.keys(useEventBus.getState().subscribers));
+      throw new Error('FAILED: Orchestrator did not subscribe to WORKFLOW_COMPLETED');
+    }
 
     // 2. Publish event directly via store
     await act(async () => {
@@ -83,7 +82,7 @@ describe('Logistic-Fiscal Traceability Integration (Direct Event Test)', () => {
     // 3. Robust Polling
     for (let i = 0; i < 20; i++) {
       await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 50));
       });
       if (mockFiscalHandler.mock.calls.length > 0) break;
     }
