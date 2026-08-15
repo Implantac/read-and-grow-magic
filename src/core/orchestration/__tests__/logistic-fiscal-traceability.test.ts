@@ -89,6 +89,10 @@ describe('Logistic-Fiscal Traceability Integration', () => {
     await new Promise(resolve => setTimeout(resolve, 100));
 
     // Debugging: check if WORKFLOW_COMPLETED was received
+    console.log('Workflow Mock calls:', mockWorkflowHandler.mock.calls.length);
+    if (mockWorkflowHandler.mock.calls.length > 0) {
+      console.log('Workflow Mock payload:', JSON.stringify(mockWorkflowHandler.mock.calls[0][0]));
+    }
     expect(mockWorkflowHandler).toHaveBeenCalled();
 
     expect(mockFiscalHandler).toHaveBeenCalledWith(expect.objectContaining({
