@@ -67,19 +67,27 @@ export default function StoreCentral() {
 
   return (
     <PageContainer>
+      <div className="mb-6 space-y-1">
+        <h1 className="text-3xl font-black tracking-tighter">MINHA LOJA</h1>
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Store className="h-4 w-4" />
+          <span className="text-sm font-bold uppercase tracking-wider">{currentBranch?.name || "CARREGANDO UNIDADE..."}</span>
+        </div>
+      </div>
+
       <PageHeader 
-        title="Minha Loja" 
-        description={currentBranch?.name || "Painel operacional integrado para gestão de unidade"}
-        icon={Store}
+        title={`Bom dia, ${currentBranch?.name?.split(' ')[0] || 'Gestor'}.`}
+        description="Aqui está o que precisa da sua atenção hoje."
+        icon={Heart}
       >
         <div className="flex items-center gap-2">
           <Badge variant="outline" className={cn(
-            "border-success/20",
+            "border-success/20 font-bold",
             health?.status === 'excellent' ? "bg-success/10 text-success" : 
             health?.status === 'attention' ? "bg-amber-500/10 text-amber-500" : 
             "bg-destructive/10 text-destructive"
           )}>
-            Operação: {health?.status === 'excellent' ? '🟢 Normal' : health?.status === 'attention' ? '🟡 Atenção' : '🔴 Crítica'}
+            Estado: {health?.status === 'excellent' ? '🟢 Normal' : health?.status === 'attention' ? '🟡 Atenção' : '🔴 Crítica'}
           </Badge>
           <Button variant="outline" size="sm" className="gap-2" onClick={() => refetch()}>
             <RefreshCw className={cn("h-3 w-3", isLoading && "animate-spin")} /> Atualizar
