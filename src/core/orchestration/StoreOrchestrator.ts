@@ -66,7 +66,7 @@ export const useStoreOrchestrator = (providedCompanyId?: string) => {
               metadata: { recommendation }
             });
             
-          toastInfo(`Nova tarefa crítica gerada para ${recommendation.productName}`);
+          toastSuccess(`Nova tarefa crítica gerada para ${recommendation.productName}`);
         }
       }
     }
