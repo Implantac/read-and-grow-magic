@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useEventBus } from '@/core/events/useEventBus';
 
-// We test the LOGIC directly since Hook lifecycles are unstable in the test environment
 describe('Logistic-Fiscal Traceability Logic', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -17,11 +16,10 @@ describe('Logistic-Fiscal Traceability Logic', () => {
     const mockFiscalHandler = vi.fn();
     eventBus.subscribe('FISCAL_OPERATION_REQUESTED', mockFiscalHandler);
 
-    // Manual simulation of the Orchestrator logic
-    // This confirms that IF the event is received, the correlationId is preserved
+    // Lógica espelhada do InventoryOrchestrator.ts:handleTransferShipped
+    // Confirma que o correlationId recebido é repassado para o próximo evento.
     eventBus.subscribe('WORKFLOW_COMPLETED', (payload: any) => {
       if (payload.type === 'TRANSFER' && payload.status === 'EXPEDIDA') {
-        // This simulates handleTransferShipped logic
         eventBus.publish('FISCAL_OPERATION_REQUESTED', {
           originId: payload.transferId,
           type: 'TRANSFER_OUT',
@@ -32,7 +30,7 @@ describe('Logistic-Fiscal Traceability Logic', () => {
       }
     });
 
-    // 1. Emit the initial logistic event
+    // 1. Emite o evento logístico inicial
     eventBus.publish('WORKFLOW_COMPLETED', {
       transferId,
       status: 'EXPEDIDA',
@@ -41,16 +39,16 @@ describe('Logistic-Fiscal Traceability Logic', () => {
       correlationId
     });
 
-    // 2. Poll for the resulting fiscal event
-    // The event bus uses setTimeout(..., 0) for each hop
+    // 2. Aguarda propagação assíncrona (2 hops de setTimeout 0)
     for (let i = 0; i < 20; i++) {
       await new Promise(resolve => setTimeout(resolve, 50));
       if (mockFiscalHandler.mock.calls.length > 0) break;
     }
 
+    // Validação Final: correlation_id deve ser idêntico ao original
     expect(mockFiscalHandler).toHaveBeenCalledWith(expect.objectContaining({
       originId: transferId,
-      correlationId,
+      correlationId: correlationId,
       companyId: companyId,
       type: 'TRANSFER_OUT'
     }));
