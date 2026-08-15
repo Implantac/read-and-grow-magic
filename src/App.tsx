@@ -13,6 +13,7 @@ import { WorkflowSwitcher } from '@/modules/core/components/WorkflowSwitcher';
 import { useInventoryOrchestrator } from '@/core/orchestration/InventoryOrchestrator';
 import { useFinancialOrchestrator } from '@/core/orchestration/FinancialOrchestrator';
 import { useFiscalOrchestrator } from '@/core/orchestration/FiscalOrchestrator';
+import { useStoreOrchestrator } from '@/core/orchestration/StoreOrchestrator';
 
 import { withRenderMonitor } from '@/core/debug/RenderDepthMonitor';
 
