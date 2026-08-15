@@ -40,9 +40,17 @@ vi.mock('@/core/auth/EnterpriseContext', () => ({
   }))
 }));
 
+// Mock toast helpers to avoid noise
+vi.mock('@/lib/toastHelpers', () => ({
+  toastSuccess: vi.fn(),
+  toastError: vi.fn()
+}));
+
 describe('Logistic-Fiscal Traceability Integration', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Reset EventBus subscribers
+    useEventBus.setState({ subscribers: {} });
   });
 
   it('should propagate correlation_id from transferWorkflow through InventoryOrchestrator to FISCAL_OPERATION_REQUESTED', async () => {
@@ -54,13 +62,18 @@ describe('Logistic-Fiscal Traceability Integration', () => {
     // 1. Setup Orquestradores e EventBus
     const eventBus = useEventBus.getState();
     const mockFiscalHandler = vi.fn();
+    
+    // Subscribe first
     eventBus.subscribe('FISCAL_OPERATION_REQUESTED', mockFiscalHandler);
+    
+    // Mock WORKFLOW_COMPLETED handler to debug
+    const mockWorkflowHandler = vi.fn();
+    eventBus.subscribe('WORKFLOW_COMPLETED', mockWorkflowHandler);
 
     // Mount Orchestrator (it subscribes to WORKFLOW_COMPLETED)
     renderHook(() => useInventoryOrchestrator(companyId));
 
-    // 2. Act: Trigger transition (Status: EM TRÂNSITO)
-    // InventoryOrchestrator listens for (status === 'EM TRÂNSITO' && type === 'TRANSFER')
+    // 2. Act: Trigger transition
     await transferWorkflow.transition({
       transferId,
       toStatus: 'EM TRÂNSITO' as any,
@@ -69,14 +82,14 @@ describe('Logistic-Fiscal Traceability Integration', () => {
     });
 
     // 3. Assert: Verify end-to-end propagation
-    // We need to wait for two setTimeout(0) cycles in sequence:
-    // 1. EventBus.publish (WORKFLOW_COMPLETED)
-    // 2. InventoryOrchestrator.handleTransferShipped -> EventBus.publish (FISCAL_OPERATION_REQUESTED)
+    // We need to wait for all microtasks and event bus timeouts
+    // eventBus uses setTimeout(..., 0) for each publish
+    // InventoryOrchestrator uses setTimeout(..., 0) for its follow-up publish
     
-    // Wait for all microtasks and event bus timeouts
-    for (let i = 0; i < 5; i++) {
-      await new Promise(resolve => setTimeout(resolve, 10));
-    }
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // Debugging: check if WORKFLOW_COMPLETED was received
+    expect(mockWorkflowHandler).toHaveBeenCalled();
 
     expect(mockFiscalHandler).toHaveBeenCalledWith(expect.objectContaining({
       originId: transferId,
