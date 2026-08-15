@@ -1,46 +1,22 @@
-# Plano de Evolução ERP Enterprise — READ & GROW
+# Plano de Implementação - Hardening Enterprise & Automação Fiscal
 
-Este plano detalha a transição do sistema para uma arquitetura de ecossistema integrado, orquestrado e rastreável, conforme a diretriz da Software House Enterprise.
+Este plano detalha a consolidação da Fase 1 (Core) e o início da Fase 4 (Orquestração Cross-Module) com foco em automação fiscal e cockpit operacional.
 
-## 1. Auditoria e Diagnóstico (FASE 0)
+## 1. Hardening do Motor de Políticas (Core)
+- [x] Expansão do `ERPPolicy` para incluir `taxRegime` e `autoTransferInvoice`.
+- [x] Sincronização de flags no `PolicyEngine`.
 
-### Arquitetura Atual (Diagnóstico)
-*   **Fundação**: Baseada em domínios isolados com comunicação via `EventBus`. RLS ativado via Supabase.
-*   **Core**: `EnterpriseContext` estabilizado para evitar loops (React Error #185).
-*   **Inventory**: Implementado como SSOT funcional, mas com brechas para ajustes sem correlação completa.
-*   **Workflow**: Transferências operam via estados, mas a integração com Fiscal/Financeiro é reativa, não orquestrada.
+## 2. Orquestração Logística-Fiscal (P4)
+- [x] Atualização do `useEventBus` com evento `FISCAL_OPERATION_REQUESTED`.
+- [x] Implementação de gatilho em `InventoryOrchestrator` para disparar evento fiscal no status "EM TRÂNSITO".
+- [x] Propagação de `correlationId` no `transferWorkflow`.
+- [ ] Implementação do `FiscalOrchestrator` para assinar `FISCAL_OPERATION_REQUESTED` e gerar NF-e automática via `FiscalService`.
 
-### Arquitetura Alvo
-*   **Orquestração Central**: Passar de "Módulos que reagem" para "Processos que orquestram".
-*   **Rastreabilidade Total**: Implantação obrigatória de `correlation_id` em toda a cadeia O2C e P2P.
-*   **UX Task-Oriented**: Consolidação do cockpit "Minha Loja" e "Central de Gestão".
-
-## 2. P1 — Core & Contratos (Blindagem e Políticas)
-
-### 2.1 Policy Engine Centralizado
-*   Mover configurações como `allowNegativeStock`, `autoAdjustmentThreshold` e `replenishmentMethod` para um `PolicyEngine` no Core.
-*   Garantir que os domínios consultem o Core antes de executar ações críticas.
-
-### 2.2 Padronização de Auditoria
-*   Expandir `correlation_id` para todos os logs de auditoria e movimentos de ledger.
-*   Implementar `causation_id` para rastrear eventos filhos (ex: NF-e gerada por uma Transferência).
-
-## 3. P2 — Inventory SSOT (Imutabilidade)
-
-*   **Ledger Logístico**: Blindar a tabela `supply_chain_ledger` contra inserções manuais; apenas via RPCs ou Triggers autorizados.
-*   **Kardex Unificado**: Criar uma view consolidada que mostre o histórico físico, fiscal e financeiro de um SKU.
-
-## 4. P3 — Store Operations (Minha Loja)
-
-*   **Cockpit Operacional**: Transformar `StoreCentral` na tela principal do operador de loja.
-*   **Central de Exceções**: Implementar o motor que identifica rupturas, atrasos e divergências, apresentando "Ações" em vez de "Dados".
-
-## 5. P4 — Logistics & WMS (Workflow Total)
-
-*   **Picking Waves**: Integrar o WMS diretamente no workflow de transferências e vendas.
-*   **Divergência Automática**: Gerar workflows de inspeção quando o recebimento físico ≠ esperado.
+## 3. Consolidação do Cockpit "Minha Loja" (UX)
+- [x] Refatoração visual do `StoreCentral.tsx` para foco em exceções.
+- [ ] Integração de KPIs de "Ruptura Iminente" baseados no motor de sugestão.
+- [ ] Adição de widget de "Documentos Fiscais Pendentes" para transferências em trânsito.
 
 ## Detalhes Técnicos
-*   **Segurança**: RLS em nível de Tenant e Filial.
-*   **Performance**: Uso de `requestAnimationFrame` para navegações pós-evento para evitar bloqueio de UI.
-*   **Qualidade**: Cobertura de testes em orquestradores críticos.
+- **Correlation Chain**: `Transfer Action` -> `EventBus: WORKFLOW_COMPLETED` -> `InventoryOrchestrator` -> `EventBus: FISCAL_OPERATION_REQUESTED` -> `FiscalOrchestrator` -> `Supabase: nfe`.
+- **Traceability**: Garantir que a NF-e gerada herde o `correlation_id` do movimento original.

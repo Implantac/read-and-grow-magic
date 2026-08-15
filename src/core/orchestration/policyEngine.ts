@@ -31,6 +31,8 @@ export interface ERPPolicy {
   fiscal: {
     autoInvoiceEmission: boolean;
     homologationMode: boolean;
+    taxRegime: string;
+    autoTransferInvoice: boolean;
   };
   core: {
     workflowEnabled: boolean;
@@ -63,6 +65,8 @@ const DEFAULT_POLICY: ERPPolicy = {
   fiscal: {
     autoInvoiceEmission: false,
     homologationMode: true,
+    taxRegime: 'Simples Nacional',
+    autoTransferInvoice: true,
   },
   core: {
     workflowEnabled: true,

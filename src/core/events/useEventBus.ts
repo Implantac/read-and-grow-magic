@@ -7,7 +7,8 @@ type EventType =
   | 'INVENTORY_ALERT' 
   | 'POLICY_VIOLATION'
   | 'WORKFLOW_STARTED'
-  | 'WORKFLOW_COMPLETED';
+  | 'WORKFLOW_COMPLETED'
+  | 'FISCAL_OPERATION_REQUESTED';
 
 interface EventPayload {
   correlationId?: string;

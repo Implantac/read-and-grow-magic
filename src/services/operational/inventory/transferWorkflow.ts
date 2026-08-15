@@ -1,4 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
+import { useEventBus } from "@/core/events/useEventBus";
+
 
 export type TransferStatus = 
   | 'SUGERIDA' 
@@ -61,6 +63,16 @@ export const transferWorkflow = {
       .eq('id', transferId);
 
     if (updateError) throw updateError;
+
+    // 2.1 Publish event for orchestration
+    const eventBus = useEventBus.getState();
+    await eventBus.publish('WORKFLOW_COMPLETED', {
+      transferId,
+      status: toStatus,
+      type: 'TRANSFER',
+      userId,
+      correlationId
+    });
 
     // 3. Efeitos colaterais no estoque (Lógica Centralizada)
     const { data: order } = await (supabase as any)
