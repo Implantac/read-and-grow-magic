@@ -31,9 +31,6 @@ vi.mock('@/lib/toastHelpers', () => ({
 describe('Logistic-Fiscal Traceability Integration (Direct Event Test)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // We do NOT reset subscribers here because the renderHook might have subscribed already
-    // Instead, we ensure a fresh start by using a unique event name if needed, 
-    // but resetting the store state is standard.
     useEventBus.setState({ subscribers: {} });
   });
 
@@ -42,26 +39,31 @@ describe('Logistic-Fiscal Traceability Integration (Direct Event Test)', () => {
     const transferId = 'test-transfer-id';
     const companyId = 'test-company-id';
     
-    // 1. Initialize Hook FIRST
-    const { rerender } = renderHook(({ cid }) => useInventoryOrchestrator(cid), {
-      initialProps: { cid: companyId }
-    });
+    // 1. Initialize Hook FIRST and ensure it renders completely
+    const { result } = renderHook(() => useInventoryOrchestrator(companyId));
     
-    // Wait for the useEffect to fire and subscribe
-    // React 18 act() handles the effects
+    // IMPORTANT: Wait for multiple React cycles to ensure useEffect has run and 
+    // subscribers are registered in the event bus store.
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise(resolve => setTimeout(resolve, 500));
     });
 
     const eventBus = useEventBus.getState();
     const mockFiscalHandler = vi.fn();
+    
+    // Subscribe our test listener
     eventBus.subscribe('FISCAL_OPERATION_REQUESTED', mockFiscalHandler);
 
-    // Verify subscription count via debug (optional)
+    // Verify subscription
     const subs = useEventBus.getState().subscribers['WORKFLOW_COMPLETED'];
-    console.log('WORKFLOW_COMPLETED subscribers count:', subs ? subs.size : 0);
+    if (!subs || subs.size === 0) {
+      console.warn('CRITICAL: Orchestrator failed to subscribe to WORKFLOW_COMPLETED');
+    } else {
+      console.log(`WORKFLOW_COMPLETED subscribers: ${subs.size}`);
+    }
 
-    // 2. Publish event
+    // 2. Publish event directly via store
+    // This MUST trigger handleTransferShipped in the Orchestrator
     console.log('--- TEST: Publishing WORKFLOW_COMPLETED ---');
     await act(async () => {
       eventBus.publish('WORKFLOW_COMPLETED', {
@@ -73,15 +75,19 @@ describe('Logistic-Fiscal Traceability Integration (Direct Event Test)', () => {
       });
     });
 
-    // 3. Poll for the resulting FISCAL_OPERATION_REQUESTED event
-    // The EventBus uses setTimeout(..., 0) for publish.
-    // Jump 1: WORKFLOW_COMPLETED publish -> setTimeout 0 -> Orchestrator handle
-    // Jump 2: Orchestrator handle -> FISCAL_OPERATION_REQUESTED publish -> setTimeout 0 -> mock handle
-    for (let i = 0; i < 20; i++) {
+    // 3. Robust Polling
+    // Jump 1: Publish -> setTimeout 0 -> callbacks
+    // Jump 2: Orchestrator -> publish -> setTimeout 0 -> callbacks
+    for (let i = 0; i < 50; i++) {
       await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await new Promise(resolve => setTimeout(resolve, 100));
       });
       if (mockFiscalHandler.mock.calls.length > 0) break;
+    }
+
+    if (mockFiscalHandler.mock.calls.length === 0) {
+      console.error('FAILED: FISCAL_OPERATION_REQUESTED was not published.');
+      console.log('Final EventBus state:', JSON.stringify(Object.keys(useEventBus.getState().subscribers)));
     }
 
     expect(mockFiscalHandler).toHaveBeenCalledWith(expect.objectContaining({
