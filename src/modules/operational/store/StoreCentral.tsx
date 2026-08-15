@@ -387,9 +387,8 @@ export default function StoreCentral() {
                 </CardContent>
               </Card>
             </TabsContent>
-              </Card>
-            </TabsContent>
           </Tabs>
+
 
 
 
