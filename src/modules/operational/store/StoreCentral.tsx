@@ -140,15 +140,15 @@ export default function StoreCentral() {
                 <CardHeader className="pb-3 border-b border-border/40">
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle className="text-lg">Prioridades Operacionais (Orquestradas)</CardTitle>
-                      <CardDescription>Pendências críticas detectadas pelo Ecossistema Global (EOE)</CardDescription>
+                      <CardTitle className="text-lg">Exceções & Prioridades (Orquestradas)</CardTitle>
+                      <CardDescription>Pendências críticas que exigem ação imediata (P3 - Minha Loja)</CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant="outline" className="text-destructive border-destructive/20 bg-destructive/5 animate-pulse">
                         {alerts?.filter(a => a.type === 'critical').length} Críticos
                       </Badge>
                       <Badge variant="outline" className="text-primary border-primary/20 bg-primary/5">
-                        UEEF Nível 4
+                        EOE Intelligence
                       </Badge>
                     </div>
                   </div>

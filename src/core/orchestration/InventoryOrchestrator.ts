@@ -74,6 +74,28 @@ export const useInventoryOrchestrator = (providedCompanyId?: string) => {
     }, 0);
   }, [companyId, eventBus]);
 
+  const handleTransferShipped = useCallback((payload: any) => {
+    if (payload.companyId !== companyId) return;
+    
+    const correlationId = payload.correlationId;
+    
+    console.log('[InventoryOrchestrator] Transfer shipped, orchestrating fiscal emission', {
+      transferId: payload.transferId,
+      correlationId
+    });
+
+    // P4 - Logistics Integration: Auto NF-e on SHIPPED
+    setTimeout(() => {
+      eventBus.publish('FISCAL_OPERATION_REQUESTED', { 
+        originId: payload.transferId,
+        type: 'TRANSFER_OUT',
+        companyId: payload.companyId,
+        correlationId,
+        causationId: payload.transferId
+      });
+    }, 0);
+  }, [companyId, eventBus]);
+
   useEffect(() => {
     if (!companyId || isContextLoading) {
       lastSubscribedCompanyId.current = null;
@@ -87,12 +109,22 @@ export const useInventoryOrchestrator = (providedCompanyId?: string) => {
 
     console.log(`[InventoryOrchestrator] SSOT Subscribing for company: ${currentId}`);
     const unsubscribeSale = eventBus.subscribe('SALE_COMPLETED', handleSaleCompleted);
+    const unsubscribeTransfer = eventBus.subscribe('WORKFLOW_COMPLETED', (payload) => {
+      if (payload.type === 'TRANSFER' && payload.status === 'EM TRÂNSITO') {
+        handleTransferShipped({
+          transferId: payload.transferId,
+          companyId: payload.companyId,
+          correlationId: payload.correlationId
+        });
+      }
+    });
 
     return () => {
       if (isHandlingCleanup.current) return;
       isHandlingCleanup.current = true;
       
       unsubscribeSale();
+      unsubscribeTransfer();
       
       setTimeout(() => {
         if (lastSubscribedCompanyId.current === currentId) {
@@ -101,10 +133,9 @@ export const useInventoryOrchestrator = (providedCompanyId?: string) => {
         isHandlingCleanup.current = false;
       }, 100);
     };
-  }, [companyId, eventBus, isContextLoading, handleSaleCompleted]);
+  }, [companyId, eventBus, isContextLoading, handleSaleCompleted, handleTransferShipped]);
 
   return {
     logToLedger
   };
 };
-
