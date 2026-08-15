@@ -64,13 +64,18 @@ export default function StoreCentral() {
   return (
     <PageContainer>
       <PageHeader 
-        title="Central da Loja" 
-        description="Painel operacional integrado para gestão de unidade"
+        title="Minha Loja" 
+        description={currentBranch?.name || "Painel operacional integrado para gestão de unidade"}
         icon={Store}
       >
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="bg-success/10 text-success border-success/20">
-            Loja Operacional
+          <Badge variant="outline" className={cn(
+            "border-success/20",
+            health?.status === 'excellent' ? "bg-success/10 text-success" : 
+            health?.status === 'attention' ? "bg-amber-500/10 text-amber-500" : 
+            "bg-destructive/10 text-destructive"
+          )}>
+            Operação: {health?.status === 'excellent' ? '🟢 Normal' : health?.status === 'attention' ? '🟡 Atenção' : '🔴 Crítica'}
           </Badge>
           <Button variant="outline" size="sm" className="gap-2" onClick={() => refetch()}>
             <RefreshCw className={cn("h-3 w-3", isLoading && "animate-spin")} /> Atualizar
