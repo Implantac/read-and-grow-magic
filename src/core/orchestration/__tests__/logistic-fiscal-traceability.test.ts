@@ -58,6 +58,9 @@ describe('Logistic-Fiscal Traceability Integration', () => {
     const userId = 'test-user-id';
     const companyId = 'test-company-id';
     
+    // Mount Orchestrator FIRST to ensure it's subscribed before the event is published
+    renderHook(() => useInventoryOrchestrator(companyId));
+
     const eventBus = useEventBus.getState();
     const mockFiscalHandler = vi.fn();
     const mockWorkflowHandler = vi.fn();
@@ -65,10 +68,9 @@ describe('Logistic-Fiscal Traceability Integration', () => {
     eventBus.subscribe('FISCAL_OPERATION_REQUESTED', mockFiscalHandler);
     eventBus.subscribe('WORKFLOW_COMPLETED', mockWorkflowHandler);
 
-    renderHook(() => useInventoryOrchestrator(companyId));
-
     const status: TransferStatus = 'EXPEDIDA';
     
+    // Trigger transition which publishes WORKFLOW_COMPLETED
     await act(async () => {
       await transferWorkflow.transition({
         transferId,
@@ -78,11 +80,24 @@ describe('Logistic-Fiscal Traceability Integration', () => {
       });
     });
 
-    for (let i = 0; i < 50; i++) {
+    // Increased polling time and iteration count to handle multiple async ticks (event bus use setTimeout 0)
+    let found = false;
+    for (let i = 0; i < 100; i++) {
       await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise(resolve => setTimeout(resolve, 5));
       });
-      if (mockFiscalHandler.mock.calls.length > 0) break;
+      if (mockFiscalHandler.mock.calls.length > 0) {
+        found = true;
+        break;
+      }
+    }
+
+    if (!found) {
+        console.log('Orchestration did not complete in time.');
+        console.log('WORKFLOW_COMPLETED calls:', mockWorkflowHandler.mock.calls.length);
+        if (mockWorkflowHandler.mock.calls.length > 0) {
+            console.log('Payload:', JSON.stringify(mockWorkflowHandler.mock.calls[0][0]));
+        }
     }
 
     expect(mockWorkflowHandler).toHaveBeenCalledWith(expect.objectContaining({
