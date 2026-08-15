@@ -97,13 +97,11 @@ describe('Logistic-Fiscal Traceability Integration', () => {
     }
 
     // Verify intermediate event was received
-    expect(mockWorkflowHandler).toHaveBeenCalled();
-    const workflowPayload = mockWorkflowHandler.mock.calls[0][0];
-    expect(workflowPayload).objectContaining({
+    expect(mockWorkflowHandler).toHaveBeenCalledWith(expect.objectContaining({
       transferId,
       correlationId,
       status: 'EM TRÂNSITO'
-    });
+    }));
 
     // Verify final event was received with preserved correlation_id
     expect(mockFiscalHandler).toHaveBeenCalledWith(expect.objectContaining({
