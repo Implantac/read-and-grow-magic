@@ -25,7 +25,7 @@ export const replenishmentEngine = {
     // 1. Obter dados de estoque e política da filial destino
     const { data: stockData } = await (supabase as any)
       .from('stock_balances')
-      .select('*, products(name, cost_price), branches(name)')
+      .select('*, products(name, cost_price), branches(name, company_id)')
       .eq('branch_id', branchId)
       .eq('product_id', productId)
       .single();
@@ -37,19 +37,24 @@ export const replenishmentEngine = {
       .select('*')
       .eq('branch_id', branchId)
       .eq('product_id', productId)
-      .single();
+      .maybeSingle();
 
     const minStock = policy?.min_stock || 10;
     const targetStock = policy?.target_stock || 30;
 
     const analysis = stockEngine.calculateProjected(stockData);
     
-    if (analysis.status !== 'critical' && analysis.status !== 'attention') {
+    // Análise de Ruptura Antecipada (Item 14)
+    const isCritical = analysis.status === 'critical' || analysis.coverageDays < 2;
+    
+    if (!isCritical && analysis.status !== 'attention') {
       return null;
     }
 
     const requiredQty = Math.max(0, targetStock - analysis.projected);
     if (requiredQty <= 0) return null;
+
+    const companyId = stockData.branches?.company_id;
 
     // 2. Localizar Melhor Origem (Motor de Origem - Item 9)
     // Prioridade: CD Central -> Lojas com Excesso -> Pedido Compra
@@ -73,8 +78,9 @@ export const replenishmentEngine = {
         sourceType: 'CD',
         sourceBranchId: cdSource.branch_id,
         sourceBranchName: cdSource.branches?.name,
-        reason: 'CD possui estoque disponível com menor lead time.',
-        urgency: analysis.status === 'critical' ? 'critical' : 'attention'
+        reason: analysis.coverageDays < 2 ? `Ruptura iminente em ${analysis.coverageDays.toFixed(1)} dias. CD possui disponibilidade imediata.` : 'Reposição recomendada via CD central.',
+        urgency: isCritical ? 'critical' : 'attention',
+        companyId
       };
     }
 
@@ -95,8 +101,9 @@ export const replenishmentEngine = {
         sourceType: 'STORE',
         sourceBranchId: excessSource.branch_id,
         sourceBranchName: excessSource.branches?.name,
-        reason: 'Remanejamento de excesso identificado na rede.',
-        urgency: analysis.status === 'critical' ? 'critical' : 'attention'
+        reason: `Excesso de estoque identificado na ${excessSource.branches?.name} (${analysis.excessQty} un). Remanejamento ideal para cobertura.`,
+        urgency: isCritical ? 'critical' : 'attention',
+        companyId
       };
     }
 
@@ -109,8 +116,9 @@ export const replenishmentEngine = {
       suggestedQty: requiredQty,
       coverageResult: analysis,
       sourceType: 'PURCHASE',
-      reason: 'Sem estoque disponível na rede. Necessário pedido de compra.',
-      urgency: 'critical'
+      reason: 'Estoque zerado em toda a rede. Recomendação de urgência para Pedido de Compra.',
+      urgency: 'critical',
+      companyId
     };
   }
 };
