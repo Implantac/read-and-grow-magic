@@ -3,7 +3,7 @@ import { transferWorkflow } from '@/services/operational/inventory/transferWorkf
 import { useEventBus } from '@/core/events/useEventBus';
 import { supabase } from '@/integrations/supabase/client';
 import { useInventoryOrchestrator } from '@/core/orchestration/InventoryOrchestrator';
-import { renderHook } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 
 // Mock Supabase
 vi.mock('@/integrations/supabase/client', () => ({
