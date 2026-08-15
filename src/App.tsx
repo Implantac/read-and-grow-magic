@@ -62,6 +62,7 @@ const OrchestratorInternal = React.memo(({ companyId }: { companyId: string }) =
       <InventoryOrchestratorWrapper companyId={companyId} />
       <FinancialOrchestratorWrapper companyId={companyId} />
       <FiscalOrchestratorWrapper companyId={companyId} />
+      <StoreOrchestratorWrapper companyId={companyId} />
     </React.Fragment>
   );
 });
