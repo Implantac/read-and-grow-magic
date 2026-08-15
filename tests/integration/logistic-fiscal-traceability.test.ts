@@ -3,7 +3,7 @@ import { transferWorkflow } from '@/services/operational/inventory/transferWorkf
 import { supabase } from '@/integrations/supabase/client';
 import { useEventBus } from '@/core/events/useEventBus';
 
-// Mock implementation of Supabase and EventBus
+// Mock implementation of Supabase
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
     from: vi.fn().mockReturnThis(),
@@ -23,13 +23,19 @@ vi.mock('@/integrations/supabase/client', () => ({
   }
 }));
 
-vi.mock('@/core/events/useEventBus', () => ({
-  useEventBus: {
-    getState: () => ({
-      publish: vi.fn().mockResolvedValue(undefined)
-    })
-  }
-}));
+// Mock event bus getState
+vi.mock('@/core/events/useEventBus', () => {
+  const publish = vi.fn().mockResolvedValue(undefined);
+  return {
+    useEventBus: {
+      getState: () => ({
+        publish
+      }),
+      // Handle the hook call if it's used as useEventBus()
+      subscribe: vi.fn()
+    }
+  };
+});
 
 describe('Logistic-Fiscal Traceability Integration', () => {
   it('should propagate correlation_id during transfer transition', async () => {
