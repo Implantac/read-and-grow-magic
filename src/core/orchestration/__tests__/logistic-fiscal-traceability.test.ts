@@ -40,18 +40,18 @@ describe('Logistic-Fiscal Traceability Integration (Direct Event Test)', () => {
     const companyId = 'test-company-id';
     
     // 1. Initialize Hook
-    const { result } = renderHook(() => useInventoryOrchestrator(companyId));
+    renderHook(() => useInventoryOrchestrator(companyId));
     
-    // Wait for useEffect
+    // Wait for useEffect to register subscribers
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 150));
     });
 
     const eventBus = useEventBus.getState();
     const mockFiscalHandler = vi.fn();
     eventBus.subscribe('FISCAL_OPERATION_REQUESTED', mockFiscalHandler);
 
-    // 2. Publish event that SHOULD be caught by Orchestrator
+    // 2. Publish event directly
     console.log('--- TEST: Publishing WORKFLOW_COMPLETED ---');
     await act(async () => {
       eventBus.publish('WORKFLOW_COMPLETED', {
@@ -63,7 +63,7 @@ describe('Logistic-Fiscal Traceability Integration (Direct Event Test)', () => {
       });
     });
 
-    // 3. Poll for result
+    // 3. Poll for result (multiple async ticks)
     for (let i = 0; i < 50; i++) {
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 20));
