@@ -30,13 +30,17 @@ import {
   CheckCircle,
   XCircle,
   LayoutGrid,
-  FileText
+  FileText,
+  Lightbulb,
+  Map as MapIcon
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/ui/base/skeleton";
 import { useEnterprise } from "@/core/auth/EnterpriseContext";
+import { NetworkMap } from "./components/NetworkMap";
+import { PrescriptiveAlert } from "./components/PrescriptiveAlert";
 
 export default function StoreCentral() {
   const { kpis, alerts, health, reliability, isLoading, refetch } = useStoreCentral();
