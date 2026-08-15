@@ -44,15 +44,16 @@ describe('Logistic-Fiscal Traceability Integration (Direct Event Test)', () => {
     const mockFiscalHandler = vi.fn();
     eventBus.subscribe('FISCAL_OPERATION_REQUESTED', mockFiscalHandler);
 
-    // Initialize Hook
-    renderHook(() => useInventoryOrchestrator(companyId));
+    // Initialize Hook - Force companyId via props to bypass context isLoading if any
+    const { result } = renderHook(() => useInventoryOrchestrator(companyId));
     
     // Crucial: Wait for the subscription inside useEffect to settle
     await act(async () => {
       await new Promise(resolve => setTimeout(resolve, 500));
     });
 
-    // Publish event - This triggers handleTransferShipped in Orchestrator
+    // Publish event
+    console.log('--- TEST: Publishing WORKFLOW_COMPLETED ---');
     await act(async () => {
       eventBus.publish('WORKFLOW_COMPLETED', {
         transferId,
@@ -64,10 +65,8 @@ describe('Logistic-Fiscal Traceability Integration (Direct Event Test)', () => {
     });
 
     // Poll for the resulting FISCAL_OPERATION_REQUESTED event
-    // The EventBus uses setTimeout(..., 0) for publish, and the Orchestrator handleTransferShipped also uses one.
-    // Total of 3 async jumps (publish -> orchestrator receive -> orchestrator publish -> mock receive)
     let found = false;
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 20; i++) {
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 100));
       });
