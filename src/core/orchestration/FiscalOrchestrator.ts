@@ -1,4 +1,5 @@
 import { useEventBus } from '@/core/events/useEventBus';
+import { usePolicy } from '@/core/orchestration/policyEngine';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { useEffect, useRef, useCallback } from 'react';
 import { fiscalService } from '@/services/fiscal/fiscalService';
@@ -12,7 +13,8 @@ import { toastSuccess, toastError } from '@/lib/toastHelpers';
  * P4 - Orquestração Cross-Module
  */
 export const useFiscalOrchestrator = () => {
-  const { currentCompany, isLoading: isContextLoading, policies } = useEnterprise();
+  const { currentCompany, isLoading: isContextLoading } = useEnterprise();
+  const policies = usePolicy();
   const companyId = currentCompany?.id;
   const eventBus = useEventBus();
   
@@ -54,10 +56,10 @@ export const useFiscalOrchestrator = () => {
             status: 'draft',
             total: transfer.items?.reduce((acc: number, item: any) => acc + (Number(item.requested_qty) * 10), 0) || 0, // Mock price for now
             client_name: transfer.destination_unit_id, // Simplificação
-            correlation_id: payload.correlationId,
             metadata: {
               source: 'AUTO_ORCHESTRATION',
-              transferId: transfer.id
+              transferId: transfer.id,
+              correlation_id: payload.correlationId
             }
           })
           .select()

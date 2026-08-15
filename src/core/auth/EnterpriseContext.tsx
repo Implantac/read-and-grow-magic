@@ -30,14 +30,37 @@ interface HierarchyRow {
 export type OperationType = string | { key: string; label?: string };
 
 export interface Policy {
-  replenishmentMethod: 'MIN_MAX' | 'FORECAST' | 'MRP' | 'MANUAL' | 'AI_ASSISTED';
-  transferApprovalLimit: number;
-  inventoryAdjustmentPolicy: 'AUTO' | 'MANAGER_APPROVAL' | 'AUDIT_REQUIRED';
-  salesCreditCheck: 'NONE' | 'BASIC' | 'STRICT';
-  workflowEnabled: boolean;
-  eventOrchestrationEnabled: boolean;
-  auditLevel: 'NONE' | 'BASIC' | 'FULL';
-  taskBoardEnabled: boolean;
+  inventory: {
+    allowNegativeStock: boolean;
+    autoAdjustmentThreshold: number;
+    requiresTransferApproval: boolean;
+    minCoverageDays: number;
+    replenishmentMethod: 'MIN_MAX' | 'FORECAST' | 'MRP' | 'MANUAL' | 'AI_ASSISTED';
+    inventoryAdjustmentPolicy: 'AUTO' | 'MANAGER_APPROVAL' | 'AUDIT_REQUIRED';
+    transferApprovalLimit: number;
+  };
+  commercial: {
+    maxDiscountPercentage: number;
+    strictCreditCheck: boolean;
+    autoOrderApproval: boolean;
+    salesCreditCheck: 'NONE' | 'BASIC' | 'STRICT';
+  };
+  financial: {
+    autoReconcile: boolean;
+    maxPaymentAdvance: number;
+  };
+  fiscal: {
+    autoInvoiceEmission: boolean;
+    homologationMode: boolean;
+    taxRegime: string;
+    autoTransferInvoice: boolean;
+  };
+  core: {
+    workflowEnabled: boolean;
+    eventOrchestrationEnabled: boolean;
+    auditLevel: 'NONE' | 'BASIC' | 'FULL';
+    taskBoardEnabled: boolean;
+  };
 }
 
 interface EnterpriseContextType {
@@ -76,14 +99,37 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
   const [taxRegime, setTaxRegime] = useState<string>('Simples Nacional');
   const [operationTypes, setOperationTypes] = useState<OperationType[]>([]);
   const [policies, setPolicies] = useState<Policy>({
-    replenishmentMethod: 'MIN_MAX',
-    transferApprovalLimit: 0,
-    inventoryAdjustmentPolicy: 'AUTO',
-    salesCreditCheck: 'NONE',
-    workflowEnabled: false,
-    eventOrchestrationEnabled: false,
-    auditLevel: 'BASIC',
-    taskBoardEnabled: true
+    inventory: {
+      allowNegativeStock: false,
+      autoAdjustmentThreshold: 10,
+      requiresTransferApproval: true,
+      minCoverageDays: 7,
+      replenishmentMethod: 'MIN_MAX',
+      inventoryAdjustmentPolicy: 'MANAGER_APPROVAL',
+      transferApprovalLimit: 5000,
+    },
+    commercial: {
+      maxDiscountPercentage: 15,
+      strictCreditCheck: true,
+      autoOrderApproval: false,
+      salesCreditCheck: 'BASIC',
+    },
+    financial: {
+      autoReconcile: false,
+      maxPaymentAdvance: 0,
+    },
+    fiscal: {
+      autoInvoiceEmission: false,
+      homologationMode: true,
+      taxRegime: 'Simples Nacional',
+      autoTransferInvoice: true,
+    },
+    core: {
+      workflowEnabled: true,
+      eventOrchestrationEnabled: true,
+      auditLevel: 'FULL',
+      taskBoardEnabled: true,
+    }
   });
   const [isLoading, setIsLoading] = useState(true);
 
