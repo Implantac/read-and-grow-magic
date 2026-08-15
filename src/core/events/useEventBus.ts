@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-type EventType = 
+export type EventType = 
   | 'SALE_COMPLETED' 
   | 'STOCK_MOVED' 
   | 'PAYMENT_SETTLED' 
@@ -10,7 +10,7 @@ type EventType =
   | 'WORKFLOW_COMPLETED'
   | 'FISCAL_OPERATION_REQUESTED';
 
-interface EventPayload {
+export interface EventPayload {
   correlationId?: string;
   causationId?: string;
   [key: string]: any;
