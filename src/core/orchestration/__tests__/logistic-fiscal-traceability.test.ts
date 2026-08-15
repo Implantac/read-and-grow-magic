@@ -39,25 +39,31 @@ describe('Logistic-Fiscal Traceability Integration (Direct Event Test)', () => {
     const transferId = 'test-transfer-id';
     const companyId = 'test-company-id';
     
-    // Mount the hook to trigger the Effect
+    // 1. Initialize Hook FIRST
+    // Using renderHook to trigger the Effect
     renderHook(() => useInventoryOrchestrator(companyId));
     
-    // Crucial: useEventBus is a Zustand store. useEffect in useInventoryOrchestrator 
-    // runs AFTER the first render. act() ensures effects are flushed.
-    await act(async () => {
-        // Just a small wait for the React loop to finish effects
-        await new Promise(resolve => setTimeout(resolve, 0));
-    });
+    // Crucial: Wait for the subscription logic to settle.
+    // Zustand + useEffect in renderHook needs multiple microtasks
+    for (let i = 0; i < 5; i++) {
+        await act(async () => {
+            await new Promise(resolve => setTimeout(resolve, 50));
+        });
+    }
 
     const eventBus = useEventBus.getState();
     const mockFiscalHandler = vi.fn();
+    
+    // Subscribe our test listener to verify final output
     eventBus.subscribe('FISCAL_OPERATION_REQUESTED', mockFiscalHandler);
 
     // Verify subscription actually occurred
     const subscribers = useEventBus.getState().subscribers['WORKFLOW_COMPLETED'];
-    expect(subscribers?.size).toBeGreaterThan(0);
+    if (!subscribers || subscribers.size === 0) {
+        throw new Error('FAILED: Orchestrator did not subscribe to WORKFLOW_COMPLETED');
+    }
 
-    // Publish event
+    // 2. Publish event directly via store
     await act(async () => {
       eventBus.publish('WORKFLOW_COMPLETED', {
         transferId,
@@ -68,12 +74,10 @@ describe('Logistic-Fiscal Traceability Integration (Direct Event Test)', () => {
       });
     });
 
-    // We need to wait for TWO setTimeout(..., 0) calls in the event chain:
-    // 1. EventBus.publish(WORKFLOW_COMPLETED) -> setTimeout 0 -> call subscribers
-    // 2. Orchestrator -> eventBus.publish(FISCAL_OPERATION_REQUESTED) -> setTimeout 0 -> call subscribers
-    for (let i = 0; i < 20; i++) {
+    // 3. Robust Polling
+    for (let i = 0; i < 30; i++) {
       await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise(resolve => setTimeout(resolve, 50));
       });
       if (mockFiscalHandler.mock.calls.length > 0) break;
     }
@@ -84,5 +88,5 @@ describe('Logistic-Fiscal Traceability Integration (Direct Event Test)', () => {
       companyId: companyId,
       type: 'TRANSFER_OUT'
     }));
-  }, 10000); // 10s timeout
+  }, 10000);
 });
