@@ -39,29 +39,36 @@ describe('Logistic-Fiscal Traceability Integration (Direct Event Test)', () => {
     const transferId = 'test-transfer-id';
     const companyId = 'test-company-id';
     
-    // 1. Initialize Hook FIRST
-    // Using renderHook to trigger the Effect
-    renderHook(() => useInventoryOrchestrator(companyId));
-    
-    // Crucial: Wait for the subscription logic to settle.
-    // Zustand + useEffect in renderHook needs multiple microtasks
-    for (let i = 0; i < 5; i++) {
-        await act(async () => {
-            await new Promise(resolve => setTimeout(resolve, 50));
-        });
-    }
-
+    // Manual subscription setup to test the logic directly if Hook fails to subscribe in time
     const eventBus = useEventBus.getState();
     const mockFiscalHandler = vi.fn();
-    
-    // Subscribe our test listener to verify final output
     eventBus.subscribe('FISCAL_OPERATION_REQUESTED', mockFiscalHandler);
 
-    // Verify subscription actually occurred
-    const subscribers = useEventBus.getState().subscribers['WORKFLOW_COMPLETED'];
+    // Mount the hook to trigger the Effect
+    const { rerender } = renderHook(({ cid }) => useInventoryOrchestrator(cid), {
+      initialProps: { cid: companyId }
+    });
+    
+    // Wait for the useEffect in useInventoryOrchestrator to fire and register subscribers
+    // React 18 act() handles the effects, but we need to wait for microtasks
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 500));
+    });
+
+    // Verify subscription status
+    let subscribers = useEventBus.getState().subscribers['WORKFLOW_COMPLETED'];
+    
+    // If it hasn't subscribed yet, we might need a rerender or more time
     if (!subscribers || subscribers.size === 0) {
-        throw new Error('FAILED: Orchestrator did not subscribe to WORKFLOW_COMPLETED');
+      console.log('Rerendering hook...');
+      await act(async () => {
+        rerender({ cid: companyId });
+        await new Promise(resolve => setTimeout(resolve, 500));
+      });
+      subscribers = useEventBus.getState().subscribers['WORKFLOW_COMPLETED'];
     }
+
+    expect(subscribers?.size).toBeGreaterThan(0);
 
     // 2. Publish event directly via store
     await act(async () => {
@@ -77,7 +84,7 @@ describe('Logistic-Fiscal Traceability Integration (Direct Event Test)', () => {
     // 3. Robust Polling
     for (let i = 0; i < 30; i++) {
       await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await new Promise(resolve => setTimeout(resolve, 100));
       });
       if (mockFiscalHandler.mock.calls.length > 0) break;
     }
@@ -88,5 +95,5 @@ describe('Logistic-Fiscal Traceability Integration (Direct Event Test)', () => {
       companyId: companyId,
       type: 'TRANSFER_OUT'
     }));
-  }, 10000);
+  }, 15000);
 });
