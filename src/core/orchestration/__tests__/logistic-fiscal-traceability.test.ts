@@ -1,33 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { transferWorkflow, TransferStatus } from '@/services/operational/inventory/transferWorkflow';
 import { useEventBus } from '@/core/events/useEventBus';
-import { supabase } from '@/integrations/supabase/client';
 import { useInventoryOrchestrator } from '@/core/orchestration/InventoryOrchestrator';
 import { renderHook, act } from '@testing-library/react';
 
-// Mock Supabase
+// Mock Dependencies
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
     from: vi.fn(() => ({
       insert: vi.fn().mockReturnValue({ error: null }),
-      update: vi.fn().mockReturnValue({ 
-        eq: vi.fn().mockReturnValue({ error: null })
-      }),
-      select: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          single: vi.fn().mockReturnValue({
-            data: {
-              id: 'test-transfer-id',
-              company_id: 'test-company-id',
-              origin_unit_id: 'origin-id',
-              destination_unit_id: 'dest-id',
-              items: [
-                { product_id: 'prod-1', requested_qty: 10 }
-              ]
-            }
-          })
-        })
-      }),
+      update: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ error: null }) }),
+      select: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ single: vi.fn().mockReturnValue({ data: {} }) }) }),
       rpc: vi.fn().mockReturnValue({ error: null })
     })),
     rpc: vi.fn().mockReturnValue({ error: null })
@@ -46,62 +28,47 @@ vi.mock('@/lib/toastHelpers', () => ({
   toastError: vi.fn()
 }));
 
-describe('Logistic-Fiscal Traceability Integration', () => {
+describe('Logistic-Fiscal Traceability Integration (Direct Event Test)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     useEventBus.setState({ subscribers: {} });
   });
 
-  it('should propagate correlation_id from transferWorkflow through InventoryOrchestrator to FISCAL_OPERATION_REQUESTED', async () => {
+  it('should propagate correlation_id when WORKFLOW_COMPLETED is published', async () => {
     const correlationId = 'test-correlation-uuid';
     const transferId = 'test-transfer-id';
-    const userId = 'test-user-id';
     const companyId = 'test-company-id';
     
+    // 1. Initialize Hook
+    const { result } = renderHook(() => useInventoryOrchestrator(companyId));
+    
+    // Wait for useEffect
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    });
+
     const eventBus = useEventBus.getState();
     const mockFiscalHandler = vi.fn();
-    const mockWorkflowHandler = vi.fn();
-    
     eventBus.subscribe('FISCAL_OPERATION_REQUESTED', mockFiscalHandler);
-    eventBus.subscribe('WORKFLOW_COMPLETED', mockWorkflowHandler);
 
-    // Mount Orchestrator (it subscribes to WORKFLOW_COMPLETED)
-    renderHook(() => useInventoryOrchestrator(companyId));
-
-    const status: TransferStatus = 'EXPEDIDA';
-    
-    // We must ensure the subscription logic in Orchestrator's useEffect runs
-    // In Vitest/React-Testing-Library, useEffect might need a tick
+    // 2. Publish event that SHOULD be caught by Orchestrator
+    console.log('--- TEST: Publishing WORKFLOW_COMPLETED ---');
     await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 50));
+      eventBus.publish('WORKFLOW_COMPLETED', {
+        transferId,
+        status: 'EXPEDIDA',
+        type: 'TRANSFER',
+        companyId,
+        correlationId
+      });
     });
 
-    // 1. Publish event directly to test Orchestrator subscription
-    await act(async () => {
-        eventBus.publish('WORKFLOW_COMPLETED', {
-            transferId,
-            status,
-            type: 'TRANSFER',
-            userId,
-            correlationId,
-            companyId
-        });
-    });
-
-    // Wait for event chain: publish -> setTimeout 0 -> Orchestrator handle -> setTimeout 0 -> publish -> setTimeout 0 -> mock handle
+    // 3. Poll for result
     for (let i = 0; i < 50; i++) {
       await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise(resolve => setTimeout(resolve, 20));
       });
       if (mockFiscalHandler.mock.calls.length > 0) break;
-    }
-
-    if (mockFiscalHandler.mock.calls.length === 0) {
-        console.log('Orchestration did not complete in time.');
-        console.log('WORKFLOW_COMPLETED calls:', mockWorkflowHandler.mock.calls.length);
-        if (mockWorkflowHandler.mock.calls.length > 0) {
-            console.log('Payload:', JSON.stringify(mockWorkflowHandler.mock.calls[0][0]));
-        }
     }
 
     expect(mockFiscalHandler).toHaveBeenCalledWith(expect.objectContaining({
