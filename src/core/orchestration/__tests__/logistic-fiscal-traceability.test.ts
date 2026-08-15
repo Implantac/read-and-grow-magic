@@ -33,6 +33,13 @@ vi.mock('@/integrations/supabase/client', () => ({
   }
 }));
 
+vi.mock('@/core/auth/EnterpriseContext', () => ({
+  useEnterprise: vi.fn(() => ({
+    currentCompany: { id: 'test-company-id' },
+    isLoading: false
+  }))
+}));
+
 describe('Logistic-Fiscal Traceability Integration', () => {
   beforeEach(() => {
     vi.clearAllMocks();
