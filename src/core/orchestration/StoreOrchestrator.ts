@@ -3,7 +3,7 @@ import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { replenishmentEngine } from '@/services/operational/inventory/replenishmentEngine';
-import { toastInfo } from '@/lib/toastHelpers';
+import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 /**
  * Store Orchestrator
