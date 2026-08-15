@@ -87,6 +87,11 @@ const FiscalOrchestratorWrapper = React.memo(({ companyId }: { companyId: string
   return null;
 });
 
+const StoreOrchestratorWrapper = React.memo(({ companyId }: { companyId: string }) => {
+  useStoreOrchestrator(companyId);
+  return null;
+});
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
