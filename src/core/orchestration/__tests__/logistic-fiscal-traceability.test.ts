@@ -59,17 +59,24 @@ describe('Logistic-Fiscal Traceability Integration', () => {
     // Mount Orchestrator (it subscribes to WORKFLOW_COMPLETED)
     renderHook(() => useInventoryOrchestrator(companyId));
 
-    // 2. Act: Trigger transition
+    // 2. Act: Trigger transition (Status: EM TRÂNSITO)
+    // InventoryOrchestrator listens for (status === 'EM TRÂNSITO' && type === 'TRANSFER')
     await transferWorkflow.transition({
       transferId,
-      toStatus: 'EM TRÂNSITO',
+      toStatus: 'EM TRÂNSITO' as any,
       userId,
       correlationId
     });
 
     // 3. Assert: Verify end-to-end propagation
+    // We need to wait for two setTimeout(0) cycles in sequence:
+    // 1. EventBus.publish (WORKFLOW_COMPLETED)
+    // 2. InventoryOrchestrator.handleTransferShipped -> EventBus.publish (FISCAL_OPERATION_REQUESTED)
+    
     // Wait for all microtasks and event bus timeouts
-    await new Promise(resolve => setTimeout(resolve, 50));
+    for (let i = 0; i < 5; i++) {
+      await new Promise(resolve => setTimeout(resolve, 10));
+    }
 
     expect(mockFiscalHandler).toHaveBeenCalledWith(expect.objectContaining({
       originId: transferId,
