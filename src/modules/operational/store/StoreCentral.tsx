@@ -130,8 +130,28 @@ export default function StoreCentral() {
           </div>
 
           {/* Camada Prescritiva (Minha Loja 2.0) */}
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
              <PrescriptiveAlert />
+             <Card className="bg-primary/5 border-primary/20">
+               <CardHeader className="pb-2">
+                 <CardTitle className="text-sm font-bold flex items-center gap-2">
+                   <Lightbulb className="h-4 w-4 text-primary" /> Ações Sugeridas
+                 </CardTitle>
+               </CardHeader>
+               <CardContent className="p-0">
+                  <div className="divide-y divide-primary/10">
+                    <Button variant="ghost" className="w-full justify-start text-xs h-10 gap-2 rounded-none px-4">
+                      <Package className="h-3 w-3" /> Receber Mercadoria (2)
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start text-xs h-10 gap-2 rounded-none px-4">
+                      <RefreshCw className="h-3 w-3" /> Solicitar Abastecimento
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start text-xs h-10 gap-2 rounded-none px-4">
+                      <Truck className="h-3 w-3" /> Transferir Excesso
+                    </Button>
+                  </div>
+               </CardContent>
+             </Card>
           </div>
 
           {/* Central de Operação Unificada */}
