@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useEventBus } from '@/core/events/useEventBus';
 import { useInventoryOrchestrator } from '@/core/orchestration/InventoryOrchestrator';
 import { renderHook, act } from '@testing-library/react';
-import React from 'react';
 
 // Mock Dependencies
 vi.mock('@/integrations/supabase/client', () => ({
@@ -40,25 +39,25 @@ describe('Logistic-Fiscal Traceability Integration (Direct Event Test)', () => {
     const transferId = 'test-transfer-id';
     const companyId = 'test-company-id';
     
-    // 1. Initialize Hook
-    // We wrap in act and use unique instances
-    const { result, unmount } = renderHook(() => useInventoryOrchestrator(companyId));
+    // Mount the hook to trigger the Effect
+    renderHook(() => useInventoryOrchestrator(companyId));
     
-    // Wait for the useEffect to fire
+    // Crucial: useEventBus is a Zustand store. useEffect in useInventoryOrchestrator 
+    // runs AFTER the first render. act() ensures effects are flushed.
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 500));
+        // Just a small wait for the React loop to finish effects
+        await new Promise(resolve => setTimeout(resolve, 0));
     });
 
     const eventBus = useEventBus.getState();
     const mockFiscalHandler = vi.fn();
     eventBus.subscribe('FISCAL_OPERATION_REQUESTED', mockFiscalHandler);
 
-    // Verify subscription status
-    const subs = useEventBus.getState().subscribers['WORKFLOW_COMPLETED'];
-    console.log('--- TEST START ---');
-    console.log('WORKFLOW_COMPLETED subscribers count:', subs ? subs.size : 0);
+    // Verify subscription actually occurred
+    const subscribers = useEventBus.getState().subscribers['WORKFLOW_COMPLETED'];
+    expect(subscribers?.size).toBeGreaterThan(0);
 
-    // 2. Publish event directly to store
+    // Publish event
     await act(async () => {
       eventBus.publish('WORKFLOW_COMPLETED', {
         transferId,
@@ -69,16 +68,14 @@ describe('Logistic-Fiscal Traceability Integration (Direct Event Test)', () => {
       });
     });
 
-    // 3. Poll for result
-    for (let i = 0; i < 50; i++) {
+    // We need to wait for TWO setTimeout(..., 0) calls in the event chain:
+    // 1. EventBus.publish(WORKFLOW_COMPLETED) -> setTimeout 0 -> call subscribers
+    // 2. Orchestrator -> eventBus.publish(FISCAL_OPERATION_REQUESTED) -> setTimeout 0 -> call subscribers
+    for (let i = 0; i < 20; i++) {
       await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 10));
       });
       if (mockFiscalHandler.mock.calls.length > 0) break;
-    }
-
-    if (mockFiscalHandler.mock.calls.length === 0) {
-      console.log('Current subscribers:', Object.keys(useEventBus.getState().subscribers));
     }
 
     expect(mockFiscalHandler).toHaveBeenCalledWith(expect.objectContaining({
@@ -87,7 +84,5 @@ describe('Logistic-Fiscal Traceability Integration (Direct Event Test)', () => {
       companyId: companyId,
       type: 'TRANSFER_OUT'
     }));
-
-    unmount();
-  });
+  }, 10000); // 10s timeout
 });
