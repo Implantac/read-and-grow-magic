@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { transferWorkflow } from '@/services/operational/inventory/transferWorkflow';
-import { useEventBus } from '@/core/events/useEventBus';
+import { transferWorkflow, TransferStatus } from '@/services/operational/inventory/transferWorkflow';
+import { useEventBus, EventType, EventPayload } from '@/core/events/useEventBus';
 import { supabase } from '@/integrations/supabase/client';
 import { useInventoryOrchestrator } from '@/core/orchestration/InventoryOrchestrator';
 import { renderHook, act } from '@testing-library/react';
