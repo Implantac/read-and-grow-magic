@@ -29,7 +29,8 @@ vi.mock('@/integrations/supabase/client', () => ({
         })
       }),
       rpc: vi.fn().mockReturnValue({ error: null })
-    }))
+    })),
+    rpc: vi.fn().mockReturnValue({ error: null })
   }
 }));
 
@@ -64,10 +65,8 @@ describe('Logistic-Fiscal Traceability Integration', () => {
     eventBus.subscribe('FISCAL_OPERATION_REQUESTED', mockFiscalHandler);
     eventBus.subscribe('WORKFLOW_COMPLETED', mockWorkflowHandler);
 
-    // Initialize Orchestrator
     renderHook(() => useInventoryOrchestrator(companyId));
 
-    // Status matching orchestrator: EXPEDIDA
     const status: TransferStatus = 'EXPEDIDA';
     
     await act(async () => {
@@ -79,23 +78,11 @@ describe('Logistic-Fiscal Traceability Integration', () => {
       });
     });
 
-    // Wait for event chain
     for (let i = 0; i < 50; i++) {
       await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 5));
+        await new Promise(resolve => setTimeout(resolve, 10));
       });
       if (mockFiscalHandler.mock.calls.length > 0) break;
-    }
-
-    // Diagnostics
-    if (mockWorkflowHandler.mock.calls.length === 0) {
-      console.log('FAIL: WORKFLOW_COMPLETED never received');
-    }
-    if (mockFiscalHandler.mock.calls.length === 0) {
-      console.log('FAIL: FISCAL_OPERATION_REQUESTED never received');
-      if (mockWorkflowHandler.mock.calls.length > 0) {
-         console.log('WORKFLOW_COMPLETED was received with:', JSON.stringify(mockWorkflowHandler.mock.calls[0][0]));
-      }
     }
 
     expect(mockWorkflowHandler).toHaveBeenCalledWith(expect.objectContaining({
