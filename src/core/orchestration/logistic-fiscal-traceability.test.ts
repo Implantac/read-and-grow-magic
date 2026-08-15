@@ -1,14 +1,14 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { transferWorkflow } from '@/services/operational/inventory/transferWorkflow';
 import { supabase } from '@/integrations/supabase/client';
 import { useEventBus } from '@/core/events/useEventBus';
 
 // Mock implementation of Supabase
-vi.mock('@/integrations/supabase/client', () => ({
-  supabase: {
+vi.mock('@/integrations/supabase/client', () => {
+  const mockSupabase = {
     from: vi.fn().mockReturnThis(),
     insert: vi.fn().mockResolvedValue({ error: null }),
-    update: vi.fn().mockResolvedValue({ error: null }),
+    update: vi.fn().mockReturnThis(), // Return this for chaining eq()
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     single: vi.fn().mockResolvedValue({ 
@@ -20,8 +20,18 @@ vi.mock('@/integrations/supabase/client', () => ({
       error: null 
     }),
     rpc: vi.fn().mockResolvedValue({ error: null })
-  }
-}));
+  };
+  
+  // Handle the chaining: .update({}).eq('id', id)
+  // We need to return an object that has 'eq' which returns the result
+  mockSupabase.update = vi.fn().mockReturnValue({
+    eq: vi.fn().mockResolvedValue({ error: null })
+  });
+
+  return {
+    supabase: mockSupabase
+  };
+});
 
 // Mock event bus getState
 vi.mock('@/core/events/useEventBus', () => {
@@ -30,9 +40,7 @@ vi.mock('@/core/events/useEventBus', () => {
     useEventBus: {
       getState: () => ({
         publish
-      }),
-      // Handle the hook call if it's used as useEventBus()
-      subscribe: vi.fn()
+      })
     }
   };
 });
