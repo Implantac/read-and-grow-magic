@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { transferWorkflow, TransferStatus } from '@/services/operational/inventory/transferWorkflow';
-import { useEventBus, EventType, EventPayload } from '@/core/events/useEventBus';
+import { useEventBus } from '@/core/events/useEventBus';
 import { supabase } from '@/integrations/supabase/client';
 import { useInventoryOrchestrator } from '@/core/orchestration/InventoryOrchestrator';
 import { renderHook, act } from '@testing-library/react';
@@ -11,7 +11,10 @@ vi.mock('@/integrations/supabase/client', () => ({
     from: vi.fn(() => ({
       insert: vi.fn().mockReturnValue({ error: null }),
       update: vi.fn().mockReturnValue({ 
-        eq: vi.fn().mockReturnValue({ error: null }) 
+        eq: vi.fn().mockReturnValue({ 
+          eq: vi.fn().mockReturnValue({ error: null })
+        }),
+        match: vi.fn().mockReturnValue({ error: null })
       }),
       select: vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({
@@ -66,7 +69,7 @@ describe('Logistic-Fiscal Traceability Integration', () => {
     // Subscribe to the final event in the chain
     eventBus.subscribe('FISCAL_OPERATION_REQUESTED', mockFiscalHandler);
     
-    // Subscribe to the intermediate event for debugging if needed
+    // Subscribe to the intermediate event for debugging
     const mockWorkflowHandler = vi.fn();
     eventBus.subscribe('WORKFLOW_COMPLETED', mockWorkflowHandler);
 
@@ -74,33 +77,33 @@ describe('Logistic-Fiscal Traceability Integration', () => {
     renderHook(() => useInventoryOrchestrator(companyId));
 
     // 2. Act: Trigger transition (Status: EM TRÂNSITO)
+    const status: TransferStatus = 'EM TRÂNSITO';
+    
     await act(async () => {
       await transferWorkflow.transition({
         transferId,
-        toStatus: 'EM TRÂNSITO' as any,
+        toStatus: status,
         userId,
         correlationId
       });
     });
 
     // 3. Assert: Verify end-to-end propagation
-    // We need to wait for three event-bus cycles:
-    // 1. workflow transition -> publish WORKFLOW_COMPLETED (setTimeout 0)
-    // 2. InventoryOrchestrator -> handle WORKFLOW_COMPLETED -> publish FISCAL_OPERATION_REQUESTED (setTimeout 0)
-    
-    // Wait enough time for all microtasks and event bus timeouts
-    for (let i = 0; i < 10; i++) {
+    // Aguarda múltiplos ciclos do EventBus (cada publish é um setTimeout 0)
+    for (let i = 0; i < 20; i++) {
       await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise(resolve => setTimeout(resolve, 5));
       });
     }
 
     // Verify intermediate event was received
-    expect(mockWorkflowHandler).toHaveBeenCalledWith(expect.objectContaining({
+    expect(mockWorkflowHandler).toHaveBeenCalled();
+    const workflowPayload = mockWorkflowHandler.mock.calls[0][0];
+    expect(workflowPayload).objectContaining({
       transferId,
       correlationId,
       status: 'EM TRÂNSITO'
-    }));
+    });
 
     // Verify final event was received with preserved correlation_id
     expect(mockFiscalHandler).toHaveBeenCalledWith(expect.objectContaining({
