@@ -39,7 +39,7 @@ describe('Logistic-Fiscal Traceability Integration (Direct Event Test)', () => {
     const transferId = 'test-transfer-id';
     const companyId = 'test-company-id';
     
-    // Initialize the event bus before actions
+    // Initialize the event bus
     const eventBus = useEventBus.getState();
     const mockFiscalHandler = vi.fn();
     eventBus.subscribe('FISCAL_OPERATION_REQUESTED', mockFiscalHandler);
@@ -47,9 +47,9 @@ describe('Logistic-Fiscal Traceability Integration (Direct Event Test)', () => {
     // Initialize Hook
     renderHook(() => useInventoryOrchestrator(companyId));
     
-    // Give enough time to establish the subscription within useEffect
+    // Crucial: Wait for the subscription inside useEffect to settle
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise(resolve => setTimeout(resolve, 500));
     });
 
     // Publish event - This triggers handleTransferShipped in Orchestrator
@@ -64,11 +64,17 @@ describe('Logistic-Fiscal Traceability Integration (Direct Event Test)', () => {
     });
 
     // Poll for the resulting FISCAL_OPERATION_REQUESTED event
-    for (let i = 0; i < 30; i++) {
+    // The EventBus uses setTimeout(..., 0) for publish, and the Orchestrator handleTransferShipped also uses one.
+    // Total of 3 async jumps (publish -> orchestrator receive -> orchestrator publish -> mock receive)
+    let found = false;
+    for (let i = 0; i < 50; i++) {
       await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await new Promise(resolve => setTimeout(resolve, 100));
       });
-      if (mockFiscalHandler.mock.calls.length > 0) break;
+      if (mockFiscalHandler.mock.calls.length > 0) {
+        found = true;
+        break;
+      }
     }
 
     expect(mockFiscalHandler).toHaveBeenCalledWith(expect.objectContaining({
