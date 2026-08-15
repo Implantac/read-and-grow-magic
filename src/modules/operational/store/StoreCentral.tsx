@@ -114,25 +114,24 @@ export default function StoreCentral() {
 
           {/* Central de Operação Unificada */}
           <Tabs defaultValue="alertas" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 mb-4">
+            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 mb-4">
               <TabsTrigger value="alertas" className="gap-2">
                 <AlertTriangle className="h-4 w-4" /> Alertas
               </TabsTrigger>
               <TabsTrigger value="tarefas" className="gap-2">
-                <ListTodo className="h-4 w-4" /> Minhas Tarefas
+                <ListTodo className="h-4 w-4" /> Tarefas
                 {tasks.length > 0 && <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 flex items-center justify-center rounded-full text-[10px]">{tasks.length}</Badge>}
               </TabsTrigger>
               <TabsTrigger value="transito" className="gap-2">
-                <Truck className="h-4 w-4" /> Em Trânsito
+                <Truck className="h-4 w-4" /> Trânsito
                 {inTransit.length > 0 && <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center rounded-full text-[10px]">{inTransit.length}</Badge>}
               </TabsTrigger>
-              <TabsTrigger value="solicitacoes" className="gap-2">
-                <Package className="h-4 w-4" /> Solicitações
+              <TabsTrigger value="fiscal" className="gap-2">
+                <FileText className="h-4 w-4" /> Fiscal
               </TabsTrigger>
               <TabsTrigger value="novo" className="gap-2 text-primary font-bold">
                 <ArrowUpCircle className="h-4 w-4" /> Solicitar
               </TabsTrigger>
-
             </TabsList>
 
             <TabsContent value="alertas">
