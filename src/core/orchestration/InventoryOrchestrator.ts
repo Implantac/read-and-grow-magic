@@ -75,6 +75,13 @@ export const useInventoryOrchestrator = (providedCompanyId?: string) => {
   }, [companyId, eventBus]);
 
   const handleTransferShipped = useCallback((payload: any) => {
+    // Audit log for debug
+    console.log('[InventoryOrchestrator] handleTransferShipped called', {
+      payloadCompanyId: payload.companyId,
+      orchestratorCompanyId: companyId,
+      transferId: payload.transferId
+    });
+
     if (payload.companyId !== companyId) return;
     
     const correlationId = payload.correlationId;
@@ -97,21 +104,24 @@ export const useInventoryOrchestrator = (providedCompanyId?: string) => {
   }, [companyId, eventBus]);
 
   useEffect(() => {
-    if (!companyId || isContextLoading) {
+    // If we have a providedCompanyId (like in tests), we force subscription
+    const activeCompanyId = companyId;
+
+    if (!activeCompanyId || isContextLoading) {
       lastSubscribedCompanyId.current = null;
       return;
     }
 
-    if (lastSubscribedCompanyId.current === companyId) return;
+    if (lastSubscribedCompanyId.current === activeCompanyId) return;
 
-    const currentId = companyId;
-    lastSubscribedCompanyId.current = currentId;
+    lastSubscribedCompanyId.current = activeCompanyId;
 
-    console.log(`[InventoryOrchestrator] SSOT Subscribing for company: ${currentId}`);
+    console.log(`[InventoryOrchestrator] SSOT Subscribing for company: ${activeCompanyId}`);
     
     const unsubscribeSale = eventBus.subscribe('SALE_COMPLETED', handleSaleCompleted);
     
     const unsubscribeTransfer = eventBus.subscribe('WORKFLOW_COMPLETED', (payload) => {
+      console.log('[InventoryOrchestrator] WORKFLOW_COMPLETED event received:', payload.type, payload.status);
       if (payload.type === 'TRANSFER' && (payload.status === 'EM TRÂNSITO' || payload.status === 'EXPEDIDA' || payload.status === 'ENVIADO')) {
         handleTransferShipped({
           transferId: payload.transferId,
@@ -129,7 +139,7 @@ export const useInventoryOrchestrator = (providedCompanyId?: string) => {
       unsubscribeTransfer();
       
       setTimeout(() => {
-        if (lastSubscribedCompanyId.current === currentId) {
+        if (lastSubscribedCompanyId.current === activeCompanyId) {
           lastSubscribedCompanyId.current = null;
         }
         isHandlingCleanup.current = false;
