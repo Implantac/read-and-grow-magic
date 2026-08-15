@@ -62,7 +62,7 @@ export const useFiscalOrchestrator = () => {
             total: transfer.items?.reduce((acc: number, item: any) => acc + (Number(item.requested_qty) * 10), 0) || 0, // Mock price for now
             client_name: transfer.destination_unit_id, // Simplificação
             correlation_id: payload.correlationId
-          } as any) // Use as any to bypass generated types if correlation_id isn't updated in types.ts yet
+          })
           .select()
           .single();
 
