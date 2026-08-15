@@ -18671,6 +18671,7 @@ export type Database = {
           approved_by: string | null
           carrier_id: string | null
           company_id: string
+          correlation_id: string | null
           created_at: string
           current_status:
             | Database["public"]["Enums"]["transfer_workflow_status"]
@@ -18690,6 +18691,7 @@ export type Database = {
           approved_by?: string | null
           carrier_id?: string | null
           company_id: string
+          correlation_id?: string | null
           created_at?: string
           current_status?:
             | Database["public"]["Enums"]["transfer_workflow_status"]
@@ -18709,6 +18711,7 @@ export type Database = {
           approved_by?: string | null
           carrier_id?: string | null
           company_id?: string
+          correlation_id?: string | null
           created_at?: string
           current_status?:
             | Database["public"]["Enums"]["transfer_workflow_status"]
