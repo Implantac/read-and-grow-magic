@@ -11,10 +11,7 @@ vi.mock('@/integrations/supabase/client', () => ({
     from: vi.fn(() => ({
       insert: vi.fn().mockReturnValue({ error: null }),
       update: vi.fn().mockReturnValue({ 
-        eq: vi.fn().mockReturnValue({ 
-          eq: vi.fn().mockReturnValue({ error: null })
-        }),
-        match: vi.fn().mockReturnValue({ error: null })
+        eq: vi.fn().mockReturnValue({ error: null })
       }),
       select: vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({
@@ -43,7 +40,6 @@ vi.mock('@/core/auth/EnterpriseContext', () => ({
   }))
 }));
 
-// Mock toast helpers
 vi.mock('@/lib/toastHelpers', () => ({
   toastSuccess: vi.fn(),
   toastError: vi.fn()
@@ -68,9 +64,11 @@ describe('Logistic-Fiscal Traceability Integration', () => {
     eventBus.subscribe('FISCAL_OPERATION_REQUESTED', mockFiscalHandler);
     eventBus.subscribe('WORKFLOW_COMPLETED', mockWorkflowHandler);
 
+    // Initialize Orchestrator
     renderHook(() => useInventoryOrchestrator(companyId));
 
-    const status: TransferStatus = 'EM TRÂNSITO';
+    // Status matching orchestrator: EXPEDIDA
+    const status: TransferStatus = 'EXPEDIDA';
     
     await act(async () => {
       await transferWorkflow.transition({
@@ -81,32 +79,29 @@ describe('Logistic-Fiscal Traceability Integration', () => {
       });
     });
 
-    // Wait for event chain: workflow -> orchestrator -> fiscal request
-    // Incremental polling to be more resilient
-    let success = false;
+    // Wait for event chain
     for (let i = 0; i < 50; i++) {
       await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise(resolve => setTimeout(resolve, 5));
       });
-      if (mockFiscalHandler.mock.calls.length > 0) {
-        success = true;
-        break;
-      }
+      if (mockFiscalHandler.mock.calls.length > 0) break;
     }
 
-    if (!success) {
-      console.log('Final state check:');
-      console.log('WORKFLOW_COMPLETED calls:', mockWorkflowHandler.mock.calls.length);
+    // Diagnostics
+    if (mockWorkflowHandler.mock.calls.length === 0) {
+      console.log('FAIL: WORKFLOW_COMPLETED never received');
+    }
+    if (mockFiscalHandler.mock.calls.length === 0) {
+      console.log('FAIL: FISCAL_OPERATION_REQUESTED never received');
       if (mockWorkflowHandler.mock.calls.length > 0) {
-        console.log('WORKFLOW_COMPLETED payload:', JSON.stringify(mockWorkflowHandler.mock.calls[0][0]));
+         console.log('WORKFLOW_COMPLETED was received with:', JSON.stringify(mockWorkflowHandler.mock.calls[0][0]));
       }
-      console.log('FISCAL_OPERATION_REQUESTED calls:', mockFiscalHandler.mock.calls.length);
     }
 
     expect(mockWorkflowHandler).toHaveBeenCalledWith(expect.objectContaining({
       transferId,
       correlationId,
-      status: 'EM TRÂNSITO'
+      status: 'EXPEDIDA'
     }));
 
     expect(mockFiscalHandler).toHaveBeenCalledWith(expect.objectContaining({
