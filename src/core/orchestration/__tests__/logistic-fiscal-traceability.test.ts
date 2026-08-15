@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { transferWorkflow } from '@/services/operational/inventory/transferWorkflow';
 import { useEventBus } from '@/core/events/useEventBus';
 import { supabase } from '@/integrations/supabase/client';
+import { useInventoryOrchestrator } from '@/core/orchestration/InventoryOrchestrator';
+import { renderHook } from '@testing-library/react';
 
 // Mock Supabase
 vi.mock('@/integrations/supabase/client', () => ({
