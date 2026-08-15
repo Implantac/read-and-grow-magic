@@ -38,17 +38,21 @@ describe('Logistic-Fiscal Traceability Integration', () => {
     vi.clearAllMocks();
   });
 
-  it('should propagate correlation_id from transferWorkflow to EventBus', async () => {
+  it('should propagate correlation_id from transferWorkflow through InventoryOrchestrator to FISCAL_OPERATION_REQUESTED', async () => {
     const correlationId = 'test-correlation-uuid';
     const transferId = 'test-transfer-id';
     const userId = 'test-user-id';
+    const companyId = 'test-company-id';
     
-    // Subscribe to EventBus to verify publication
+    // 1. Setup Orquestradores e EventBus
     const eventBus = useEventBus.getState();
-    const mockHandler = vi.fn();
-    eventBus.subscribe('WORKFLOW_COMPLETED', mockHandler);
+    const mockFiscalHandler = vi.fn();
+    eventBus.subscribe('FISCAL_OPERATION_REQUESTED', mockFiscalHandler);
 
-    // Act
+    // Mount Orchestrator (it subscribes to WORKFLOW_COMPLETED)
+    renderHook(() => useInventoryOrchestrator(companyId));
+
+    // 2. Act: Trigger transition
     await transferWorkflow.transition({
       transferId,
       toStatus: 'EM TRÂNSITO',
@@ -56,14 +60,15 @@ describe('Logistic-Fiscal Traceability Integration', () => {
       correlationId
     });
 
-    // Wait for event bus async publish (setTimeout 0)
-    await new Promise(resolve => setTimeout(resolve, 10));
+    // 3. Assert: Verify end-to-end propagation
+    // Wait for all microtasks and event bus timeouts
+    await new Promise(resolve => setTimeout(resolve, 50));
 
-    // Assert
-    expect(mockHandler).toHaveBeenCalledWith(expect.objectContaining({
-      transferId,
+    expect(mockFiscalHandler).toHaveBeenCalledWith(expect.objectContaining({
+      originId: transferId,
       correlationId,
-      companyId: 'test-company-id'
+      companyId: companyId,
+      type: 'TRANSFER_OUT'
     }));
   });
 });
