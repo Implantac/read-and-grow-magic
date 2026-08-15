@@ -110,7 +110,7 @@ export const useInventoryOrchestrator = (providedCompanyId?: string) => {
     console.log(`[InventoryOrchestrator] SSOT Subscribing for company: ${currentId}`);
     const unsubscribeSale = eventBus.subscribe('SALE_COMPLETED', handleSaleCompleted);
     const unsubscribeTransfer = eventBus.subscribe('WORKFLOW_COMPLETED', (payload) => {
-      console.log('[InventoryOrchestrator] Received event:', payload.type, payload.status, 'transferId:', payload.transferId);
+      console.log('[InventoryOrchestrator] Received WORKFLOW_COMPLETED:', payload.type, payload.status, 'Payload Correlation:', payload.correlationId);
       if (payload.type === 'TRANSFER' && (payload.status === 'EM TRÂNSITO' || payload.status === 'EXPEDIDA' || payload.status === 'ENVIADO')) {
         handleTransferShipped({
           transferId: payload.transferId,
