@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { transferWorkflow } from '../../services/operational/inventory/transferWorkflow';
-import { useEventBus } from '../events/useEventBus';
+import { transferWorkflow } from '@/services/operational/inventory/transferWorkflow';
+import { useEventBus } from '@/core/events/useEventBus';
 import { supabase } from '@/integrations/supabase/client';
 
 // Mock Supabase
