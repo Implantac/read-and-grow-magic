@@ -168,11 +168,11 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
     });
 
     setPolicies(prev => {
-      const next = nextPolicies as any;
-      if (prev.replenishmentMethod === next.replenishmentMethod && 
-          prev.workflowEnabled === next.workflowEnabled &&
-          prev.eventOrchestrationEnabled === next.eventOrchestrationEnabled &&
-          prev.inventoryAdjustmentPolicy === next.inventoryAdjustmentPolicy) {
+      const next = nextPolicies as Policy;
+      if (prev.inventory.replenishmentMethod === next.inventory.replenishmentMethod && 
+          prev.core.workflowEnabled === next.core.workflowEnabled &&
+          prev.core.eventOrchestrationEnabled === next.core.eventOrchestrationEnabled &&
+          prev.inventory.inventoryAdjustmentPolicy === next.inventory.inventoryAdjustmentPolicy) {
         return prev;
       }
       return next;
@@ -417,9 +417,9 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
     companySize, 
     taxRegime, 
     operationTypes.length,
-    policies.replenishmentMethod,
-    policies.workflowEnabled,
-    policies.eventOrchestrationEnabled,
+    policies.inventory.replenishmentMethod,
+    policies.core.workflowEnabled,
+    policies.core.eventOrchestrationEnabled,
     isLoading,
     setCompany,
     setBranch
