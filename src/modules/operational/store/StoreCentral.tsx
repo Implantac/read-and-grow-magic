@@ -154,6 +154,9 @@ export default function StoreCentral() {
              </Card>
           </div>
 
+          {/* Mapa de Estoque da Rede */}
+          <NetworkMap />
+
           {/* Central de Operação Unificada */}
           <Tabs defaultValue="alertas" className="w-full">
             <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 mb-4">
@@ -170,6 +173,7 @@ export default function StoreCentral() {
               </TabsTrigger>
               <TabsTrigger value="fiscal" className="gap-2">
                 <FileText className="h-4 w-4" /> Fiscal
+                {inTransit.length > 0 && <Badge variant="outline" className="ml-1 h-5 w-5 p-0 flex items-center justify-center rounded-full text-[10px] bg-orange-500/10 text-orange-500 border-orange-500/20">!</Badge>}
               </TabsTrigger>
               <TabsTrigger value="novo" className="gap-2 text-primary font-bold">
                 <ArrowUpCircle className="h-4 w-4" /> Solicitar
@@ -404,14 +408,18 @@ export default function StoreCentral() {
                   <div className="space-y-4">
                     {inTransit.length > 0 ? (
                       inTransit.map((order: any) => (
-                        <div key={order.id} className="flex items-center justify-between p-3 border rounded-lg bg-muted/20">
+                        <div key={order.id} className="flex items-center justify-between p-3 border rounded-lg bg-orange-500/5 border-orange-500/20 group hover:bg-orange-500/10 transition-colors">
                           <div className="flex items-center gap-3">
-                            <div className="p-2 rounded bg-orange-500/10 text-orange-500">
+                            <div className="p-2 rounded bg-orange-500/10 text-orange-500 ring-1 ring-orange-500/20 shadow-[0_0_10px_rgba(249,115,22,0.1)]">
                               <FileText className="h-4 w-4" />
                             </div>
                             <div>
-                              <p className="text-sm font-medium">NF-e vinculada à TRF-{order.id.split('-')[0].toUpperCase()}</p>
-                              <p className="text-xs text-muted-foreground">Correlation ID: {order.correlation_id?.split('-')[0]}...</p>
+                              <p className="text-sm font-bold text-orange-600">NF-e aguardando conferência</p>
+                              <p className="text-[10px] text-muted-foreground flex items-center gap-2">
+                                <span className="font-mono uppercase">TRF-{order.id.split('-')[0]}</span>
+                                <span>•</span>
+                                <span className="opacity-70">Rastreio: {order.correlation_id?.split('-')[0]}</span>
+                              </p>
                             </div>
                           </div>
                           <Button variant="ghost" size="sm" asChild>
