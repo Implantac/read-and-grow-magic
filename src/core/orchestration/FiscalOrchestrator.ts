@@ -48,18 +48,21 @@ export const useFiscalOrchestrator = () => {
         if (transferError || !transfer) throw new Error('Transferência não encontrada');
 
         // 2. Criar rascunho de NF-e
-        // Nota: A tabela 'nfe' pode não ter a coluna 'metadata' ou 'correlation_id' direta se não foi migrada.
-        // Vamos usar o que sabemos que existe ou o que é seguro.
+        // number e series são obrigatórios no schema DB
+        const nextNumber = Math.floor(Math.random() * 999999).toString();
+        
         const { data: nfe, error: nfeError } = await supabase
           .from('nfe')
           .insert({
             company_id: companyId,
             operation_type: 'saida',
             status: 'draft',
+            number: nextNumber,
+            series: '1',
             total: transfer.items?.reduce((acc: number, item: any) => acc + (Number(item.requested_qty) * 10), 0) || 0, // Mock price for now
             client_name: transfer.destination_unit_id, // Simplificação
             correlation_id: payload.correlationId
-          })
+          } as any) // Use as any to bypass generated types if correlation_id isn't updated in types.ts yet
           .select()
           .single();
 
