@@ -71,7 +71,8 @@ export const transferWorkflow = {
       status: toStatus,
       type: 'TRANSFER',
       userId,
-      correlationId
+      correlationId,
+      companyId: order?.company_id
     });
 
     // 3. Efeitos colaterais no estoque (Lógica Centralizada)
