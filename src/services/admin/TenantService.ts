@@ -25,7 +25,7 @@ export class TenantService {
     const { data, error } = await supabase
       .from('companies')
       .select('*')
-      .limit(10); // Pequeno limite para segurança
+      .order('name', { ascending: true });
     
     if (error) throw error;
     return data;
