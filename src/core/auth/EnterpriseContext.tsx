@@ -169,12 +169,12 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
 
     setPolicies(prev => {
       const next = nextPolicies as Policy;
-      if (prev.inventory.replenishmentMethod === next.inventory.replenishmentMethod && 
-          prev.core.workflowEnabled === next.core.workflowEnabled &&
-          prev.core.eventOrchestrationEnabled === next.core.eventOrchestrationEnabled &&
-          prev.inventory.inventoryAdjustmentPolicy === next.inventory.inventoryAdjustmentPolicy) {
-        return prev;
+      // Validação de segurança: Sincroniza o regime tributário da empresa com a política fiscal
+      if (next.fiscal) {
+        next.fiscal.taxRegime = (company.tax_regime as string) || next.fiscal.taxRegime;
       }
+      
+      if (JSON.stringify(prev) === JSON.stringify(next)) return prev;
       return next;
     });
   }, []);
