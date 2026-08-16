@@ -6944,6 +6944,7 @@ export type Database = {
           category_id: string | null
           chart_account_id: string | null
           company_id: string
+          correlation_id: string | null
           cost_center_id: string | null
           created_at: string
           created_by: string | null
@@ -6969,6 +6970,7 @@ export type Database = {
           category_id?: string | null
           chart_account_id?: string | null
           company_id: string
+          correlation_id?: string | null
           cost_center_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -6994,6 +6996,7 @@ export type Database = {
           category_id?: string | null
           chart_account_id?: string | null
           company_id?: string
+          correlation_id?: string | null
           cost_center_id?: string | null
           created_at?: string
           created_by?: string | null
