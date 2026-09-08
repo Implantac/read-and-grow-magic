@@ -1,15 +1,24 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
+/**
+ * Idempotency cache. ALWAYS tenant-scoped: a key is only ever matched within
+ * the caller's own company, so a colliding key from another tenant can never
+ * return that tenant's cached response.
+ */
 export async function checkIdempotency(
   supabase: ReturnType<typeof createClient>,
   key: string,
   context: string,
+  companyId: string,
 ) {
+  if (!companyId) throw new Error("Tenant obrigatório para idempotência");
+
   const { data, error } = await supabase
     .from("idempotency_keys")
     .select("*")
     .eq("idempotency_key", key)
-    .eq("context", context)
+    .eq("request_path", context)
+    .eq("company_id", companyId)
     .maybeSingle();
 
   if (error) {
@@ -24,18 +33,21 @@ export async function recordIdempotency(
   supabase: ReturnType<typeof createClient>,
   key: string,
   context: string,
-  responseBody: any,
+  companyId: string,
+  responseBody: unknown,
   status: number = 200,
 ) {
+  if (!companyId) throw new Error("Tenant obrigatório para idempotência");
+
   const { error } = await supabase.from("idempotency_keys").upsert(
     {
       idempotency_key: key,
-      context,
+      request_path: context,
+      company_id: companyId,
       response_body: responseBody,
-      response_status: status,
-      expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24h
+      response_code: status,
     },
-    { onConflict: "idempotency_key, context" },
+    { onConflict: "idempotency_key,company_id,request_path" },
   );
 
   if (error) {
