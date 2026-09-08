@@ -5,12 +5,12 @@ export const gestaoSection: NavSection = {
   items: [
     {
       title: 'Business Intelligence',
-      href: '/dashboard',
+      href: '/financeiro/dashboard',
       icon: 'BarChart3',
       children: [
-        { title: 'BI Comercial', href: '/relatorios/vendas', icon: 'ShoppingBag' },
-        { title: 'BI Operacional', href: '/relatorios/producao', icon: 'Factory' },
-        { title: 'BI Financeiro', href: '/relatorios/financeiro', icon: 'Wallet' },
+        { title: 'BI Comercial', href: '/comercial/dashboard', icon: 'ShoppingBag' },
+        { title: 'BI Operacional', href: '/producao/pcp', icon: 'Factory' },
+        { title: 'BI Financeiro', href: '/financeiro/dashboard', icon: 'Wallet' },
       ],
     },
     {
@@ -30,7 +30,7 @@ export const gestaoSection: NavSection = {
         { title: 'Trilha de Auditoria', href: '/admin/auditoria-sistema', icon: 'History' },
         { title: 'Logs de Segurança', href: '/admin/seguranca/logs', icon: 'ShieldAlert' },
         { title: 'Manual do Sistema', href: '/admin/manual', icon: 'BookOpenCheck' },
-        { title: 'Hardening & Evolução', href: '/', icon: 'ShieldCheck' },
+        { title: 'Hardening & Evolução', href: '/evolucao/maturidade', icon: 'ShieldCheck' },
       ],
     },
   ],

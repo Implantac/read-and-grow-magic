@@ -5,7 +5,7 @@ export const operacionalSection: NavSection = {
   items: [
     {
       title: 'Estoque & Catálogo',
-      href: '/estoque',
+      href: '/estoque/produtos',
       icon: 'Package',
       children: [
         { title: 'Produtos & SKUs', href: '/estoque/produtos', icon: 'Box' },
@@ -30,12 +30,10 @@ export const operacionalSection: NavSection = {
     },
     {
       title: 'Compras & Suprimentos',
-      href: '/compras',
+      href: '/compras/dashboard',
       icon: 'ShoppingCart',
       children: [
         { title: 'Pedidos de Compra', href: '/compras/pedidos', icon: 'ClipboardList' },
-        { title: 'Fornecedores', href: '/compras/fornecedores', icon: 'Building2' },
-        { title: 'Cotações & BID', href: '/compras/cotacoes', icon: 'FileSearch' },
         { title: 'Painel MRP (Compras)', href: '/compras/dashboard', icon: 'BarChart3' },
       ],
     },

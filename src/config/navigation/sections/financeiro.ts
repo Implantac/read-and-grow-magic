@@ -10,7 +10,7 @@ export const financeiroSection: NavSection = {
       children: [
         { title: 'Central Financeira', href: '/financeiro/dashboard', icon: 'Zap' },
         { title: 'Fluxo de Caixa', href: '/financeiro/fluxo', icon: 'TrendingUp' },
-        { title: 'DRE Dinâmica', href: '/financeiro/dre-dinamica', icon: 'BarChart3' },
+        { title: 'DRE Dinâmica', href: '/financeiro/dre-dinamico', icon: 'BarChart3' },
         { title: 'Contas a Pagar', href: '/financeiro/pagar', icon: 'ArrowUpCircle' },
         { title: 'Contas a Receber', href: '/financeiro/receber', icon: 'ArrowDownCircle' },
         { title: 'Tesouraria & Bancos', href: '/financeiro/tesouraria', icon: 'Building2' },

@@ -97,11 +97,11 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 60 * 1000,
       gcTime: 5 * 60 * 1000,
-      retry: (failureCount, error: any) => {
-        if (error?.status === 401) return false;
+      retry: (failureCount, error: unknown) => {
+        if (typeof error === 'object' && error !== null && 'status' in error && error.status === 401) return false;
         return failureCount < 1;
       },
-      refetchOnWindowFocus: true,
+      refetchOnWindowFocus: false,
     },
   },
 });

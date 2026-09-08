@@ -43,6 +43,12 @@ const UnifiedSupplyChain = lazy(() => import('@/modules/operational/supply-chain
 const StoreCentral = lazy(() => import('@/modules/operational/store/StoreCentral'));
 const ManualModule = lazy(() => import('@/modules/admin/systemManual/SystemManual'));
 const SuccessDashboard = lazy(() => import('@/modules/success/SuccessDashboard'));
+const InventoryProductsPage = lazy(() => import('@/pages/inventory/Products'));
+const InventoryMovementsPage = lazy(() => import('@/pages/inventory/Movements'));
+const InventoryKardexPage = lazy(() => import('@/pages/inventory/Kardex'));
+const InventoryBalancesPage = lazy(() => import('@/modules/wms/StockBalances'));
+const PurchaseOrdersPage = lazy(() => import('@/pages/purchasing/PurchaseOrders'));
+const ProcurementDashboardPage = lazy(() => import('@/pages/purchasing/ProcurementDashboard'));
 
 /**
  * Performance-optimized Page Loader
@@ -82,6 +88,14 @@ const AppRoutes = memo(() => {
               <SuccessDashboard />
             </Suspense>
           } />
+
+          {/* Inventory and purchasing aliases used by the sidebar */}
+          <Route path="/estoque/produtos" element={<InventoryProductsPage />} />
+          <Route path="/estoque/saldos" element={<InventoryBalancesPage />} />
+          <Route path="/estoque/movimentacoes" element={<InventoryMovementsPage />} />
+          <Route path="/estoque/kardex" element={<InventoryKardexPage />} />
+          <Route path="/compras/pedidos" element={<PurchaseOrdersPage />} />
+          <Route path="/compras/dashboard" element={<ProcurementDashboardPage />} />
           
           {/* Commercial Domain */}
           <Route path="/comercial/*" element={
