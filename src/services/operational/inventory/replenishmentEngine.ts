@@ -1,125 +1,216 @@
 import { stockEngine, ProjectedStockResult } from './stockEngine';
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from '@/integrations/supabase/client';
+
+export type SourceType = 'FACTORY' | 'CD' | 'STORE' | 'PURCHASE';
+
+export interface SourceOption {
+  branchId: string;
+  branchName: string;
+  type: SourceType;
+  availableQty: number;
+}
 
 export interface ReplenishmentRecommendation {
   productId: string;
+  productCode: string;
   productName: string;
+  unit: string;
   branchId: string;
   branchName: string;
+  companyId?: string;
+  minStock: number;
+  targetStock: number;
   requiredQty: number;
   suggestedQty: number;
   coverageResult: ProjectedStockResult;
-  sourceType: 'CD' | 'STORE' | 'PURCHASE' | 'PRODUCTION';
+  sourceType: SourceType;
   sourceBranchId?: string;
   sourceBranchName?: string;
+  sourceOptions: SourceOption[];
   reason: string;
   urgency: 'critical' | 'attention' | 'normal';
-  companyId?: string;
+}
+
+const FACTORY_TIPOS = ['industria', 'FACTORY'];
+const CD_TIPOS = ['cd', 'DISTRIBUTION_CENTER'];
+
+function classifyBranch(tipo?: string | null): SourceType {
+  if (!tipo) return 'STORE';
+  if (FACTORY_TIPOS.includes(tipo)) return 'FACTORY';
+  if (CD_TIPOS.includes(tipo)) return 'CD';
+  return 'STORE';
+}
+
+async function loadDemand(branchId: string): Promise<Record<string, number>> {
+  const { data } = await (supabase as any).rpc('get_branch_daily_demand', {
+    p_branch_id: branchId,
+    p_days: 30,
+  });
+  const map: Record<string, number> = {};
+  (data || []).forEach((r: any) => {
+    map[r.product_id] = Number(r.daily_demand || 0);
+  });
+  return map;
 }
 
 export const replenishmentEngine = {
   /**
-   * P10 - Replenishment Intelligence
-   * Calcula a necessidade de reposição e prescreve a melhor origem.
+   * Analisa toda a posição de estoque da unidade e devolve as necessidades de
+   * reposição já com a melhor origem prescrita.
+   *
+   * Prioridade de origem: Fábrica/Indústria -> CD -> Loja com excesso -> Compra.
    */
-  async getPrescriptiveRecommendation(productId: string, branchId: string): Promise<ReplenishmentRecommendation | null> {
-    // 1. Obter dados de estoque e política da filial destino
-    const { data: stockData } = await (supabase as any)
-      .from('stock_balances')
-      .select('*, products(name, cost_price), branches(name, company_id)')
-      .eq('branch_id', branchId)
-      .eq('product_id', productId)
-      .single();
+  async getNetworkRecommendations(branchId: string): Promise<ReplenishmentRecommendation[]> {
+    if (!branchId) return [];
 
-    if (!stockData) return null;
-
-    const { data: policy } = await (supabase as any)
-      .from('replenishment_policies')
-      .select('*')
-      .eq('branch_id', branchId)
-      .eq('product_id', productId)
+    const { data: branch } = await (supabase as any)
+      .from('branches')
+      .select('id, name, tipo, company_id')
+      .eq('id', branchId)
       .maybeSingle();
 
-    const minStock = policy?.min_stock || 10;
-    const targetStock = policy?.target_stock || 30;
+    if (!branch) return [];
+    const companyId = branch.company_id;
 
-    const analysis = stockEngine.calculateProjected(stockData);
-    
-    // Análise de Ruptura Antecipada (Item 14)
-    const isCritical = analysis.status === 'critical' || analysis.coverageDays < 2;
-    
-    if (!isCritical && analysis.status !== 'attention') {
-      return null;
-    }
+    const [balancesRes, policiesRes, networkRes, branchesRes, demand] = await Promise.all([
+      (supabase as any)
+        .from('stock_balances')
+        .select('*, products(name, code, unit, min_stock, max_stock, abc_classification)')
+        .eq('branch_id', branchId),
+      (supabase as any)
+        .from('replenishment_policies')
+        .select('*')
+        .eq('branch_id', branchId)
+        .eq('is_active', true),
+      (supabase as any)
+        .from('stock_balances')
+        .select('product_id, branch_id, quantity, reserved_qty, in_transit_qty, products(max_stock)')
+        .eq('company_id', companyId)
+        .neq('branch_id', branchId),
+      (supabase as any)
+        .from('branches')
+        .select('id, name, tipo')
+        .eq('company_id', companyId)
+        .eq('is_active', true),
+      loadDemand(branchId),
+    ]);
 
-    const requiredQty = Math.max(0, targetStock - analysis.projected);
-    if (requiredQty <= 0) return null;
+    const balances = balancesRes.data || [];
+    const policies = policiesRes.data || [];
+    const network = networkRes.data || [];
+    const branchMap = new Map<string, any>((branchesRes.data || []).map((b: any) => [b.id, b]));
 
-    const companyId = stockData.branches?.company_id;
+    const policyByProduct = new Map<string, any>(policies.map((p: any) => [p.product_id, p]));
 
-    // 2. Localizar Melhor Origem (Motor de Origem - Item 9)
-    // Prioridade: CD Central -> Lojas com Excesso -> Pedido Compra
-    const { data: networkStock } = await (supabase as any)
-      .from('stock_balances')
-      .select('*, branches(name, type)')
-      .eq('product_id', productId)
-      .neq('branch_id', branchId);
+    const recommendations: ReplenishmentRecommendation[] = [];
 
-    const cdSource = networkStock?.find((s: any) => s.branches?.type === 'CD' && s.quantity > requiredQty);
-    
-    if (cdSource) {
-      return {
+    for (const row of balances) {
+      const productId = row.product_id;
+      if (!productId) continue;
+
+      const product = row.products || {};
+      const policy = policyByProduct.get(productId);
+      const dailyDemand = demand[productId] || 0;
+
+      const minStock = Number(policy?.min_stock ?? product.min_stock ?? 0);
+      const coverageTarget = Number(policy?.target_coverage_days ?? 0);
+      const targetStock = Number(
+        policy?.max_stock ??
+          (coverageTarget > 0 && dailyDemand > 0 ? Math.ceil(coverageTarget * dailyDemand) : 0) ??
+          0,
+      ) || Number(product.max_stock ?? 0) || Math.max(minStock * 3, 0);
+
+      const analysis = stockEngine.calculateProjected(row, {
+        dailyDemand,
+        minStock,
+        maxStock: targetStock || undefined,
+      });
+
+      if (analysis.status !== 'critical' && analysis.status !== 'attention') continue;
+
+      const requiredQty = Math.ceil(Math.max(0, (targetStock || minStock) - analysis.projected));
+      if (requiredQty <= 0) continue;
+
+      // Origens possíveis na malha
+      const sourceOptions: SourceOption[] = network
+        .filter((s: any) => s.product_id === productId)
+        .map((s: any) => {
+          const b = branchMap.get(s.branch_id);
+          const type = classifyBranch(b?.tipo);
+          const available = Number(s.quantity || 0) - Number(s.reserved_qty || 0);
+          const sourceMax = Number(s.products?.max_stock ?? 0);
+          // Loja só cede o que estiver acima do seu próprio nível saudável
+          const cedible = type === 'STORE' ? Math.max(0, available - (sourceMax || available * 0.5)) : available;
+          return {
+            branchId: s.branch_id,
+            branchName: b?.name || 'Unidade',
+            type,
+            availableQty: Math.floor(cedible),
+          };
+        })
+        .filter((o: SourceOption) => o.availableQty > 0 && branchMap.has(o.branchId))
+        .sort((a: SourceOption, b: SourceOption) => {
+          const rank = { FACTORY: 0, CD: 1, STORE: 2, PURCHASE: 3 } as Record<SourceType, number>;
+          if (rank[a.type] !== rank[b.type]) return rank[a.type] - rank[b.type];
+          return b.availableQty - a.availableQty;
+        });
+
+      const best =
+        sourceOptions.find((o) => o.availableQty >= requiredQty) || sourceOptions[0] || null;
+
+      const urgency: 'critical' | 'attention' =
+        analysis.status === 'critical' ? 'critical' : 'attention';
+
+      const coverageTxt =
+        analysis.dailyDemand > 0
+          ? `Cobertura de ${analysis.coverageDays.toFixed(1)} dia(s)`
+          : 'Sem histórico de saída recente';
+
+      let reason: string;
+      if (!best) {
+        reason = `${coverageTxt}. Sem disponibilidade na rede — necessário pedido de compra/produção.`;
+      } else if (best.type === 'FACTORY') {
+        reason = `${coverageTxt}. Pedido à fábrica ${best.branchName} (${best.availableQty} un disponíveis).`;
+      } else if (best.type === 'CD') {
+        reason = `${coverageTxt}. Reposição pelo CD ${best.branchName}.`;
+      } else {
+        reason = `${coverageTxt}. Remanejamento da ${best.branchName}, que está com sobra de ${best.availableQty} un.`;
+      }
+
+      recommendations.push({
         productId,
-        productName: stockData.products?.name,
+        productCode: product.code || row.product_code || '',
+        productName: product.name || row.product_name || 'Produto',
+        unit: row.unit || product.unit || 'UN',
         branchId,
-        branchName: stockData.branches?.name,
+        branchName: branch.name,
+        companyId,
+        minStock,
+        targetStock: targetStock || minStock,
         requiredQty,
-        suggestedQty: requiredQty,
+        suggestedQty: best ? Math.min(requiredQty, best.availableQty) : requiredQty,
         coverageResult: analysis,
-        sourceType: 'CD',
-        sourceBranchId: cdSource.branch_id,
-        sourceBranchName: cdSource.branches?.name,
-        reason: analysis.coverageDays < 2 ? `Ruptura iminente em ${analysis.coverageDays.toFixed(1)} dias. CD possui disponibilidade imediata.` : 'Reposição recomendada via CD central.',
-        urgency: isCritical ? 'critical' : 'attention',
-        companyId
-      };
+        sourceType: best ? best.type : 'PURCHASE',
+        sourceBranchId: best?.branchId,
+        sourceBranchName: best?.branchName,
+        sourceOptions,
+        reason,
+        urgency,
+      });
     }
 
-    const excessSource = networkStock?.find((s: any) => {
-      const sAnalysis = stockEngine.calculateProjected(s);
-      return sAnalysis.status === 'excess' && sAnalysis.excessQty > requiredQty;
+    return recommendations.sort((a, b) => {
+      if (a.urgency !== b.urgency) return a.urgency === 'critical' ? -1 : 1;
+      return a.coverageResult.coverageDays - b.coverageResult.coverageDays;
     });
+  },
 
-    if (excessSource) {
-      return {
-        productId,
-        productName: stockData.products?.name,
-        branchId,
-        branchName: stockData.branches?.name,
-        requiredQty,
-        suggestedQty: requiredQty,
-        coverageResult: analysis,
-        sourceType: 'STORE',
-        sourceBranchId: excessSource.branch_id,
-        sourceBranchName: excessSource.branches?.name,
-        reason: `Excesso de estoque identificado na ${excessSource.branches?.name} (${analysis.excessQty} un). Remanejamento ideal para cobertura.`,
-        urgency: isCritical ? 'critical' : 'attention',
-        companyId
-      };
-    }
-
-    return {
-      productId,
-      productName: stockData.products?.name,
-      branchId,
-      branchName: stockData.branches?.name,
-      requiredQty,
-      suggestedQty: requiredQty,
-      coverageResult: analysis,
-      sourceType: 'PURCHASE',
-      reason: 'Estoque zerado em toda a rede. Recomendação de urgência para Pedido de Compra.',
-      urgency: 'critical',
-      companyId
-    };
-  }
+  /** Recomendação pontual para um SKU (usada pelo StoreOrchestrator). */
+  async getPrescriptiveRecommendation(
+    productId: string,
+    branchId: string,
+  ): Promise<ReplenishmentRecommendation | null> {
+    const all = await this.getNetworkRecommendations(branchId);
+    return all.find((r) => r.productId === productId) || null;
+  },
 };
