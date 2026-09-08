@@ -31,11 +31,17 @@ Deno.serve(async (req) => {
     const period = new Date().toISOString().slice(0, 7); // YYYY-MM
     const periodStart = `${period}-01T00:00:00Z`;
 
-    // Iterate companies
-    const { data: companies, error: cErr } = await supabase
-      .from("companies")
-      .select("id");
-    if (cErr) throw cErr;
+    // Cron/system callers aggregate every tenant; a signed-in admin may only
+    // aggregate their own company's usage.
+    let companies: Array<{ id: string }> = [];
+    if (auth.viaCron) {
+      const { data, error: cErr } = await supabase.from("companies").select("id");
+      if (cErr) throw cErr;
+      companies = (data ?? []) as Array<{ id: string }>;
+    } else {
+      if (!auth.companyId) return jsonResponse({ error: "Forbidden" }, 403);
+      companies = [{ id: auth.companyId }];
+    }
 
     const results: Array<{ company_id: string; metrics: Record<string, number> }> = [];
 
