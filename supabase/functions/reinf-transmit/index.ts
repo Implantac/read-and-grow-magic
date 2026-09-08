@@ -86,7 +86,7 @@ Deno.serve(async (req) => {
   if (pre) return pre;
 
   try {
-    const auth = await requireAuth(req);
+    const auth = await requireAuth(req, { roles: ["admin", "manager"] });
     if (!auth.ok) {
       return new Response(JSON.stringify({ error: auth.message }), {
         status: auth.status, headers: { ...cors, "Content-Type": "application/json" },
