@@ -14,28 +14,28 @@ import { Loader2 } from 'lucide-react';
 
 export const MainLayout = () => {
   const { isAuthenticated, sidebarCollapsed, theme, user } = useAppStore();
-  const { loading } = useAuth();
+  const { loading, hasSession } = useAuth();
   const navigate = useNavigate();
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
 
   const isBypassPage = ['/upgrade', '/subscribe'].includes(pathname);
 
-  // Handle auto-login if session exists but store is empty
-  const lastNavPath = useRef<string | null>(null);
+  // Redirect to login only when there is truly no session. While Supabase has a
+  // session but the tenant context is still hydrating we keep showing the loader,
+  // otherwise deep links bounce login -> dashboard and the user loses the page.
   useEffect(() => {
-    if (!loading && !isAuthenticated && !isBypassPage) {
-      const currentPath = pathname;
-      if (currentPath !== '/login') {
-        // Use requestAnimationFrame to defer navigation to the next paint
-        // This is safer than setTimeout(0) for breaking render cycles
+    if (!loading && !hasSession && !isAuthenticated && !isBypassPage) {
+      if (pathname !== '/login') {
+        const next = encodeURIComponent(`${pathname}${search || ''}`);
         requestAnimationFrame(() => {
-          if (!useAppStore.getState().isAuthenticated) {
-            navigate('/login', { replace: true });
+          const state = useAppStore.getState();
+          if (!state.isAuthenticated) {
+            navigate(`/login?next=${next}`, { replace: true });
           }
         });
       }
     }
-  }, [isAuthenticated, loading, navigate, isBypassPage, pathname]);
+  }, [isAuthenticated, hasSession, loading, navigate, isBypassPage, pathname, search]);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
@@ -53,7 +53,7 @@ export const MainLayout = () => {
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
-  if (loading) {
+  if (loading || (hasSession && !isAuthenticated && !isBypassPage)) {
     return (
       <div className="flex min-h-dvh items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
@@ -70,6 +70,7 @@ export const MainLayout = () => {
   if (!isAuthenticated && !isBypassPage) {
     return null;
   }
+
 
   return (
     <div className="h-dvh overflow-hidden bg-background">
