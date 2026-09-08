@@ -18049,6 +18049,7 @@ export type Database = {
           created_at: string
           dc_id: string | null
           id: string
+          in_transit_qty: number
           last_movement_at: string | null
           location_code: string | null
           location_id: string | null
@@ -18072,6 +18073,7 @@ export type Database = {
           created_at?: string
           dc_id?: string | null
           id?: string
+          in_transit_qty?: number
           last_movement_at?: string | null
           location_code?: string | null
           location_id?: string | null
@@ -18095,6 +18097,7 @@ export type Database = {
           created_at?: string
           dc_id?: string | null
           id?: string
+          in_transit_qty?: number
           last_movement_at?: string | null
           location_code?: string | null
           location_id?: string | null
@@ -23804,6 +23807,16 @@ export type Database = {
       }
     }
     Functions: {
+      adjust_stock: {
+        Args: {
+          p_branch_id: string
+          p_product_id: string
+          p_quantity?: number
+          p_reserved?: number
+          p_transit_in?: number
+        }
+        Returns: undefined
+      }
       aps_schedule_multi: {
         Args: { _horizon_days?: number }
         Returns: {
@@ -24125,6 +24138,13 @@ export type Database = {
           kind: string
           reference: string
           running_balance: number
+        }[]
+      }
+      get_branch_daily_demand: {
+        Args: { p_branch_id: string; p_days?: number }
+        Returns: {
+          daily_demand: number
+          product_id: string
         }[]
       }
       get_cashflow_scenarios: {
