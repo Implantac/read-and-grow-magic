@@ -28,13 +28,17 @@ const RealtimeAlertsBridge = React.memo(() => {
   const [shouldMount, setShouldMount] = React.useState(false);
 
   React.useEffect(() => {
-    // Only mount if enterprise is fully loaded and we have a company ID
+    // Only mount if enterprise is fully loaded and we have a company ID.
     if (!enterprise.isLoading && companyId) {
-      // Use a slightly longer delay for initial mounting to ensure context stability
-      const timer = setTimeout(() => {
-        setShouldMount(true);
-      }, 800);
-      return () => clearTimeout(timer);
+      // Let the first frame render before background subscriptions and analysis start.
+      let timer: ReturnType<typeof setTimeout> | null = null;
+      const frame = requestAnimationFrame(() => {
+        timer = setTimeout(() => setShouldMount(true), 0);
+      });
+      return () => {
+        cancelAnimationFrame(frame);
+        if (timer) clearTimeout(timer);
+      };
     } else if (!enterprise.isLoading && !companyId) {
       // If finished loading but no company, don't mount
       setShouldMount(false);

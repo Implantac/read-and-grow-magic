@@ -225,7 +225,9 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
       // Update global app store with profile/role info once
       const { useAppStore: useStore } = await import('@/stores/useAppStore');
       const storeState = useStore.getState();
-      const finalRole = (userRoleData as any) || 'viewer';
+      const finalRole = typeof userRoleData === 'string'
+        ? userRoleData as NonNullable<ReturnType<typeof useStore.getState>>['userRole']
+        : 'viewer';
       const userName = profile?.name || user.user_metadata?.name || user.email?.split('@')[0] || 'Usuário';
       
       const needsUpdate = 
@@ -263,7 +265,8 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
         if (!isMounted.current) return;
 
         if (units) {
-          const mappedUnits = units.map((u: any) => ({
+          const operationalUnits = units as Array<{ id: string; name: string; type: string; is_active: boolean }>;
+          const mappedUnits = operationalUnits.map((u) => ({
             id: u.id,
             name: u.name,
             tipo: u.type.toUpperCase() as BranchRef['tipo'],
@@ -317,14 +320,11 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
 
     const isMounted = mounted;
     
-    // Initial load - use a small delay to let auth stabilize
-    // We check if we are already syncing or loading to avoid double trigger
-    const timeout = setTimeout(() => {
-      if (mounted.current && !isSyncing.current) {
-        console.log('[EnterpriseProvider] Initial load triggered');
-        loadActiveTenant(isMounted);
-      }
-    }, 250);
+    // Auth state is already hydrated by Supabase; start tenant loading immediately.
+    // The sync guard prevents duplicate work when the auth listener fires.
+    if (mounted.current && !isSyncing.current) {
+      void loadActiveTenant(isMounted);
+    }
 
     // Sync with auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -355,7 +355,6 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
 
     return () => {
       mounted.current = false;
-      clearTimeout(timeout);
       subscription.unsubscribe();
     };
   }, [loadActiveTenant]);
