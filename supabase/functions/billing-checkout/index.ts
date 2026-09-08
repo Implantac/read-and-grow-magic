@@ -44,10 +44,10 @@ Deno.serve(async (req) => {
   // Validação de idempotência
   const idempotencyKey = body.idempotency_key;
   if (idempotencyKey) {
-    const existing = await checkIdempotency(admin, idempotencyKey, "billing-checkout");
+    const existing = await checkIdempotency(admin, idempotencyKey, "billing-checkout", auth.companyId!);
     if (existing) {
       console.log("[billing-checkout] idempotency hit:", idempotencyKey);
-      return json(existing.response_body, existing.response_status);
+      return json(existing.response_body, existing.response_code);
     }
   }
 
@@ -101,7 +101,7 @@ Deno.serve(async (req) => {
       return json({ error: "Não foi possível ativar o plano" }, 500);
     }
     const responseBody = { ok: true, mode: "free", activated: true };
-    if (idempotencyKey) await recordIdempotency(admin, idempotencyKey, "billing-checkout", responseBody);
+    if (idempotencyKey) await recordIdempotency(admin, idempotencyKey, "billing-checkout", auth.companyId!, responseBody);
     return json(responseBody);
   }
 
@@ -142,7 +142,7 @@ Deno.serve(async (req) => {
       message:
         "Fatura gerada. A assinatura será ativada assim que o pagamento for confirmado pelo provedor.",
     };
-    if (idempotencyKey) await recordIdempotency(admin, idempotencyKey, "billing-checkout", responseBody);
+    if (idempotencyKey) await recordIdempotency(admin, idempotencyKey, "billing-checkout", auth.companyId!, responseBody);
     return json(responseBody);
   }
 
@@ -192,7 +192,7 @@ Deno.serve(async (req) => {
     .eq("id", invoice.id);
 
   const responseBody = { ok: true, mode: "stripe", invoice_id: invoice.id, checkout_url: session.url };
-  if (idempotencyKey) await recordIdempotency(admin, idempotencyKey, "billing-checkout", responseBody);
+  if (idempotencyKey) await recordIdempotency(admin, idempotencyKey, "billing-checkout", auth.companyId!, responseBody);
   return json(responseBody);
 });
 
