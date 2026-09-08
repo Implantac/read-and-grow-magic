@@ -8,6 +8,7 @@ const KEY = 'pdv:offline-queue:v1';
 
 export interface QueuedNFCe {
   id: string;
+  nfceId: string;
   queuedAt: string;
   payload: {
     items: {
@@ -33,7 +34,18 @@ export interface QueuedNFCe {
 function read(): QueuedNFCe[] {
   try {
     const raw = localStorage.getItem(KEY);
-    return raw ? (JSON.parse(raw) as QueuedNFCe[]) : [];
+    if (!raw) return [];
+
+    const list = JSON.parse(raw) as QueuedNFCe[];
+    let migrated = false;
+    const normalized = list.map((item) => {
+      if (item.nfceId) return item;
+      migrated = true;
+      return { ...item, nfceId: crypto.randomUUID() };
+    });
+
+    if (migrated) localStorage.setItem(KEY, JSON.stringify(normalized));
+    return normalized;
   } catch {
     return [];
   }
@@ -48,6 +60,7 @@ export function enqueue(payload: QueuedNFCe['payload']): QueuedNFCe {
   const list = read();
   const item: QueuedNFCe = {
     id: `off-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    nfceId: crypto.randomUUID(),
     queuedAt: new Date().toISOString(),
     payload,
     attempts: 0,

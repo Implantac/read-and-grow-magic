@@ -86,6 +86,7 @@ export function useNFCe() {
     terminalId?: string;
     operatorName?: string;
   }) => {
+    const nfceId = crypto.randomUUID();
     const number = 'NFCE-' + Date.now().toString().slice(-8);
     const subtotal = data.items.reduce((s, i) => s + i.quantity * i.unitPrice, 0);
     const discount = data.discount || 0;
@@ -95,6 +96,7 @@ export function useNFCe() {
     const protocol = '1' + Date.now().toString().slice(-14);
 
     const { data: nfce, error } = await supabase.from('nfce').insert({
+      id: nfceId,
       number,
       payment_method: data.paymentMethod,
       amount_paid: data.amountPaid,

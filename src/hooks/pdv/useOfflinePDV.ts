@@ -48,43 +48,63 @@ export function useOfflinePDV() {
     const accessKey = Array.from({ length: 44 }, () => Math.floor(Math.random() * 10)).join('');
     const protocol = '1' + Date.now().toString().slice(-14);
 
-    const { data: nfce, error } = await supabase
+    const { data: existing, error: existingError } = await supabase
       .from('nfce')
-      .insert({
-        number,
-        payment_method: p.paymentMethod,
-        amount_paid: p.amountPaid,
-        change_amount: Math.max(0, change),
-        subtotal,
-        discount,
-        total,
-        customer_name: p.customerName || null,
-        customer_document: p.customerDocument || null,
-        terminal_id: p.terminalId || 'PDV-01',
-        operator_name: p.operatorName || 'Operador',
-        status: 'authorized',
-        access_key: accessKey,
-        protocol,
-        authorization_date: new Date().toISOString(),
-      })
-      .select()
-      .single();
+      .select('id')
+      .eq('id', q.nfceId)
+      .maybeSingle();
+    if (existingError) throw new Error(existingError.message);
 
-    if (error || !nfce) throw new Error(error?.message || 'Falha ao emitir NFC-e');
+    let nfce = existing;
+    if (!nfce) {
+      const { data: inserted, error } = await supabase
+        .from('nfce')
+        .insert({
+          id: q.nfceId,
+          number,
+          payment_method: p.paymentMethod,
+          amount_paid: p.amountPaid,
+          change_amount: Math.max(0, change),
+          subtotal,
+          discount,
+          total,
+          customer_name: p.customerName || null,
+          customer_document: p.customerDocument || null,
+          terminal_id: p.terminalId || 'PDV-01',
+          operator_name: p.operatorName || 'Operador',
+          status: 'authorized',
+          access_key: accessKey,
+          protocol,
+          authorization_date: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (error || !inserted) throw new Error(error?.message || 'Falha ao emitir NFC-e');
+      nfce = inserted;
+    }
 
     if (p.items.length > 0) {
-      const items = p.items.map((i) => ({
-        nfce_id: nfce.id,
-        product_code: i.productCode,
-        product_name: i.productName,
-        product_id: i.productId || null,
-        quantity: i.quantity,
-        unit_price: i.unitPrice,
-        total: i.quantity * i.unitPrice,
-        unit: i.unit || 'UN',
-      }));
-      const { error: itErr } = await supabase.from('nfce_items').insert(items);
-      if (itErr) throw new Error(itErr.message);
+      const { count, error: countError } = await supabase
+        .from('nfce_items')
+        .select('id', { count: 'exact', head: true })
+        .eq('nfce_id', nfce.id);
+      if (countError) throw new Error(countError.message);
+
+      if (count === 0) {
+        const items = p.items.map((i) => ({
+          nfce_id: nfce.id,
+          product_code: i.productCode,
+          product_name: i.productName,
+          product_id: i.productId || null,
+          quantity: i.quantity,
+          unit_price: i.unitPrice,
+          total: i.quantity * i.unitPrice,
+          unit: i.unit || 'UN',
+        }));
+        const { error: itErr } = await supabase.from('nfce_items').insert(items);
+        if (itErr) throw new Error(itErr.message);
+      }
     }
   }, []);
 
