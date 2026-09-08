@@ -23807,6 +23807,10 @@ export type Database = {
       }
     }
     Functions: {
+      advance_transferencia_canal: {
+        Args: { p_status: string; p_transferencia_id: string }
+        Returns: Database["public"]["Tables"]["transferencias_canal"]["Row"]
+      }
       adjust_stock: {
         Args: {
           p_branch_id: string
