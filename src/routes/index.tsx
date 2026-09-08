@@ -32,11 +32,13 @@ import { WMSRoutes } from './WMSRoutes';
 import { RelacionamentoRoutes } from './RelacionamentoRoutes';
 import { NetworkRoutes } from './NetworkRoutes';
 import { MiscellaneousRoutes } from './MiscellaneousRoutes';
+import { ExecutiveRoutes } from './ExecutiveRoutes';
 
 // Domain-Specific Lazy Components
 const UnifiedSupplyChain = lazy(() => import('@/modules/operational/supply-chain/UnifiedSupplyChain'));
 const StoreCentral = lazy(() => import('@/modules/operational/store/StoreCentral'));
 const ManualModule = lazy(() => import('@/modules/admin/systemManual/SystemManual'));
+const SuccessDashboard = lazy(() => import('@/modules/success/SuccessDashboard'));
 
 /**
  * Performance-optimized Page Loader
@@ -63,7 +65,19 @@ const AppRoutes = memo(() => {
       <Route element={<MainLayout />}>
         <Route element={<OnboardingGuard />}>
           <Route path="/" element={<Dashboard />} />
-          <Route path="/dashboard" element={<Navigate to="/" replace />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+
+          {/* Executive & AI domain */}
+          <Route path="/executive/*" element={
+            <ModuleErrorBoundary moduleName="Executivo & IA">
+              <Routes>{ExecutiveRoutes}</Routes>
+            </ModuleErrorBoundary>
+          } />
+          <Route path="/success" element={
+            <Suspense fallback={<PageLoader />}>
+              <SuccessDashboard />
+            </Suspense>
+          } />
           
           {/* Commercial Domain */}
           <Route path="/comercial/*" element={
