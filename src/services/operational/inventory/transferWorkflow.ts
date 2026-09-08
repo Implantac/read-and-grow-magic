@@ -92,7 +92,7 @@ export const transferWorkflow = {
             p_quantity: 0,
             p_reserved: quantity || item.requested_qty
           });
-        } else if (toStatus === 'EXPEDIDA') {
+        } else if (toStatus === 'EXPEDIDA' || toStatus === 'EM TRÂNSITO') {
           // Baixa físico e reserva na origem
           await (supabase as any).rpc('adjust_stock', {
             p_branch_id: order.origin_unit_id,

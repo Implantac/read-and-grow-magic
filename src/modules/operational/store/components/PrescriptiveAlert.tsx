@@ -1,133 +1,76 @@
-import { Card, CardContent } from "@/ui/base/card";
-import { AlertTriangle, Lightbulb, CheckCircle2, RefreshCw } from "lucide-react";
-import { Button } from "@/ui/base/button";
-import { useStoreCentral } from "@/hooks/operational/store/useStoreCentral";
-import { supabase } from "@/integrations/supabase/client";
-import { toastSuccess, toastError } from "@/lib/toastHelpers";
-import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { Card, CardContent } from '@/ui/base/card';
+import { AlertTriangle, Lightbulb, CheckCircle2, RefreshCw, ShoppingCart } from 'lucide-react';
+import { Button } from '@/ui/base/button';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useStoreReplenishment } from '@/hooks/operational/store/useStoreReplenishment';
 
 export function PrescriptiveAlert() {
-  const { alerts, refetch } = useStoreCentral();
-  const [isProcessing, setIsProcessing] = useState<string | null>(null);
+  const { recommendations, createRequest, isSubmitting } = useStoreReplenishment();
+  const [processing, setProcessing] = useState<string | null>(null);
 
-  const replenishmentAlerts = alerts?.filter(a => a.category === 'replenishment' && a.id) || [];
+  const critical = recommendations.filter((r) => r.urgency === 'critical').slice(0, 3);
+  if (critical.length === 0) return null;
 
-  const handleApprove = async (alertId: string, metadata: any) => {
-    setIsProcessing(alertId);
+  const handleApprove = async (productId: string) => {
+    const rec = critical.find((r) => r.productId === productId);
+    if (!rec?.sourceBranchId) return;
+    setProcessing(productId);
     try {
-      const recommendation = metadata?.recommendation;
-      if (!recommendation) throw new Error("Dados da recomendação não encontrados.");
-
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) throw new Error("Usuário não autenticado");
-
-      const correlationId = crypto.randomUUID();
-      const companyId = recommendation.companyId || (await getCompanyId(recommendation.branchId));
-
-      // Criar a transferência sugerida
-      const { data: transfer, error: transferError } = await (supabase as any)
-        .from('stock_transfer_orders')
-        .insert({
-          company_id: companyId,
-          origin_unit_id: recommendation.sourceBranchId,
-          destination_unit_id: recommendation.branchId,
-          current_status: 'SUGERIDA',
-          correlation_id: correlationId,
-          type: 'AUTOMATIC'
-        })
-        .select()
-        .single();
-
-      if (transferError) throw transferError;
-
-      // Adicionar item
-      await (supabase as any)
-        .from('stock_transfer_items')
-        .insert({
-          transfer_id: transfer.id,
-          product_id: recommendation.productId,
-          requested_qty: recommendation.suggestedQty
-        });
-
-      // Fechar a tarefa
-      await (supabase as any)
-        .from('operational_tasks')
-        .update({ status: 'completed' })
-        .eq('id', alertId);
-
-      // Integrar com o workflow formal para disparar orquestração
-      // A transição para APROVADA ativa a reserva no InventoryOrchestrator via evento
-      const { transferWorkflow } = await import("@/services/operational/inventory/transferWorkflow");
-      await transferWorkflow.transition({
-        transferId: transfer.id,
-        toStatus: 'APROVADA',
-        userId: userData.user.id,
-        correlationId
+      await createRequest({
+        recommendation: rec,
+        sourceBranchId: rec.sourceBranchId,
+        quantity: rec.suggestedQty,
       });
-
-      toastSuccess("Ação aprovada", "Transferência criada e aprovada automaticamente.");
-      refetch();
-    } catch (error) {
-      console.error(error);
-      toastError(error, "Falha ao processar aprovação.");
     } finally {
-      setIsProcessing(null);
+      setProcessing(null);
     }
   };
 
-  async function getCompanyId(branchId: string) {
-    const { data } = await (supabase as any)
-      .from('branches')
-      .select('company_id')
-      .eq('id', branchId)
-      .single();
-    return data?.company_id;
-  }
-
-  if (replenishmentAlerts.length === 0) return null;
-
-  const alert = replenishmentAlerts[0]; // Mostra o mais prioritário
-  // @ts-ignore
-  const recommendation = alert.metadata?.recommendation;
-
   return (
     <Card className="border-l-4 border-l-destructive bg-destructive/5 overflow-hidden">
-      <CardContent className="p-4">
-        <div className="flex items-start gap-4">
+      <CardContent className="p-4 space-y-3">
+        <div className="flex items-center gap-2">
           <div className="p-2 rounded-full bg-destructive/10 text-destructive">
-            <AlertTriangle className="h-5 w-5" />
+            <AlertTriangle className="h-4 w-4" />
           </div>
-          <div className="flex-1 space-y-3">
-            <div>
-              <h4 className="text-sm font-bold text-destructive">{alert.title}</h4>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {alert.description}
-              </p>
-            </div>
-            
-            <div className="bg-background/50 p-3 rounded border border-destructive/20 space-y-2">
+          <div>
+            <h4 className="text-sm font-bold text-destructive">Risco de ruptura ({critical.length})</h4>
+            <p className="text-[11px] text-muted-foreground">Ações recomendadas para hoje</p>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          {critical.map((rec) => (
+            <div key={rec.productId} className="bg-background/60 p-3 rounded border border-destructive/20 space-y-2">
               <div className="flex items-center gap-2 text-xs font-bold">
-                <Lightbulb className="h-3 w-3 text-amber-500" /> Recomendação ERP Prescritivo
+                <Lightbulb className="h-3 w-3 text-warning" /> {rec.productName}
               </div>
-              <p className="text-[11px]">
-                {recommendation?.reason || "Ação recomendada para evitar ruptura de estoque."}
-              </p>
-              <Button 
-                size="sm" 
-                disabled={!!isProcessing}
-                onClick={() => handleApprove(alert.id, (alert as any).metadata)}
-                className="w-full h-8 gap-2 bg-destructive hover:bg-destructive/90 text-white border-none"
-              >
-                {isProcessing === alert.id ? (
-                  <RefreshCw className="h-3 w-3 animate-spin" />
-                ) : (
-                  <CheckCircle2 className="h-3 w-3" />
-                )}
-                Aprovar Ação
-              </Button>
+              <p className="text-[11px] text-muted-foreground">{rec.reason}</p>
+              {rec.sourceBranchId ? (
+                <Button
+                  size="sm"
+                  disabled={isSubmitting || processing === rec.productId}
+                  onClick={() => handleApprove(rec.productId)}
+                  className="w-full h-8 gap-2 text-xs"
+                  variant="destructive"
+                >
+                  {processing === rec.productId ? (
+                    <RefreshCw className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <CheckCircle2 className="h-3 w-3" />
+                  )}
+                  Solicitar {rec.suggestedQty} un de {rec.sourceBranchName}
+                </Button>
+              ) : (
+                <Button size="sm" variant="outline" className="w-full h-8 gap-2 text-xs" asChild>
+                  <Link to="/compras/pedidos">
+                    <ShoppingCart className="h-3 w-3" /> Abrir pedido de compra
+                  </Link>
+                </Button>
+              )}
             </div>
-          </div>
+          ))}
         </div>
       </CardContent>
     </Card>
