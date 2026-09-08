@@ -60,15 +60,21 @@ export function withRenderMonitor<P extends object>(
   Component: React.ComponentType<P>,
   componentName?: string
 ) {
-  const name = componentName || Component.displayName || Component.name || 'UnknownComponent';
-  
-  // Return the component directly if we're not in a situation where we can safely wrap it
-  // and keep the same behavior (like forwardRef)
   if (!Component) return Component;
 
-  const MonitorWrapper = (props: P) => {
+  const name = componentName || Component.displayName || Component.name || 'UnknownComponent';
+
+  // Only components that actually accept a ref (forwardRef / memo(forwardRef) /
+  // class components) may receive one. Wrapping a plain function component in
+  // forwardRef triggers React's "Function components cannot be given refs" warning.
+  const anyComp = Component as unknown as { $$typeof?: symbol; prototype?: { isReactComponent?: unknown }; render?: unknown };
+  const acceptsRef =
+    typeof Component === 'function'
+      ? Boolean(anyComp.prototype?.isReactComponent)
+      : Boolean(anyComp.render || (anyComp as { type?: unknown }).type);
+
+  const useTracking = () => {
     const isInitialRender = React.useRef(true);
-    
     React.useLayoutEffect(() => {
       if (isInitialRender.current) {
         isInitialRender.current = false;
@@ -76,27 +82,22 @@ export function withRenderMonitor<P extends object>(
       }
       monitor.trackUpdate(name);
     });
-
-    return React.createElement(Component as any, props);
   };
 
-  const ForwardedMonitor = React.forwardRef<any, P>((props, ref) => {
-    const isInitialRender = React.useRef(true);
-    
-    React.useLayoutEffect(() => {
-      if (isInitialRender.current) {
-        isInitialRender.current = false;
-        return;
-      }
-      monitor.trackUpdate(name);
+  if (acceptsRef) {
+    const ForwardedMonitor = React.forwardRef<unknown, P>((props, ref) => {
+      useTracking();
+      return React.createElement(Component as never, { ...props, ref } as never);
     });
+    ForwardedMonitor.displayName = `withRenderMonitor(${name})`;
+    return ForwardedMonitor as unknown as React.ComponentType<P>;
+  }
 
-    return React.createElement(Component as any, { ...props, ref });
-  });
-
-  ForwardedMonitor.displayName = `withRenderMonitor(${name})`;
+  const MonitorWrapper = (props: P) => {
+    useTracking();
+    return React.createElement(Component as never, props as never);
+  };
   MonitorWrapper.displayName = `withRenderMonitor(${name})`;
-
-  // We always use forwardRef by default to be safe, as it handles most cases
-  return ForwardedMonitor;
+  return MonitorWrapper as React.ComponentType<P>;
 }
+
