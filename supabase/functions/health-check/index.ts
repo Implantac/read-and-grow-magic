@@ -89,10 +89,12 @@ Deno.serve(async (req) => {
   checks.push(
     await timed("automation_1h", async () => {
       const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-      const { count, error } = await supabase
+      let q = supabase
         .from("automation_runs")
         .select("id", { count: "exact", head: true })
         .gte("created_at", since);
+      if (scoped) q = q.eq("company_id", companyId!);
+      const { count, error } = await q;
       if (error) throw error;
       return { runs: count ?? 0 };
     }),
@@ -101,10 +103,12 @@ Deno.serve(async (req) => {
   // 4. Cross-module events pending
   checks.push(
     await timed("events_pending", async () => {
-      const { count, error } = await supabase
+      let q = supabase
         .from("cross_module_events")
         .select("id", { count: "exact", head: true })
         .eq("processed", false);
+      if (scoped) q = q.eq("company_id", companyId!);
+      const { count, error } = await q;
       if (error) throw error;
       return { pending: count ?? 0 };
     }),
