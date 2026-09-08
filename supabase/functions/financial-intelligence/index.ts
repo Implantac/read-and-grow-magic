@@ -42,10 +42,10 @@ const handler = async (req: Request): Promise<Response> => {
       try { body = await req.json(); } catch { /* ignore */ }
     }
 
-    const idempotencyKey = body.idempotency_key || url.searchParams.get('idempotency_key');
+    const idempotencyKey = callerCompany ? (body.idempotency_key || url.searchParams.get('idempotency_key')) : null;
     if (idempotencyKey) {
-      const existing = await checkIdempotency(supabase, idempotencyKey, `fin-intel:${action}`);
-      if (existing) return Response.json(existing.response_body, { status: existing.response_status, headers: corsHeaders });
+      const existing = await checkIdempotency(supabase, idempotencyKey, `fin-intel:${action}`, callerCompany!);
+      if (existing) return Response.json(existing.response_body, { status: existing.response_code, headers: corsHeaders });
     }
 
     if (action === 'compute') {
@@ -57,7 +57,7 @@ const handler = async (req: Request): Promise<Response> => {
       if (e1) throw e1;
       if (e2) throw e2;
       const resBody = { ok: true, score, risks };
-      if (idempotencyKey) await recordIdempotency(supabase, idempotencyKey, `fin-intel:${action}`, resBody);
+      if (idempotencyKey) await recordIdempotency(supabase, idempotencyKey, `fin-intel:${action}`, callerCompany!, resBody);
       return Response.json(resBody, { headers: corsHeaders });
 
     }
@@ -73,7 +73,7 @@ const handler = async (req: Request): Promise<Response> => {
         if ((data as any)?.matched_entry_id) matched++;
       }
       const resBody = { ok: true, processed: pending?.length ?? 0, matched };
-      if (idempotencyKey) await recordIdempotency(supabase, idempotencyKey, `fin-intel:${action}`, resBody);
+      if (idempotencyKey) await recordIdempotency(supabase, idempotencyKey, `fin-intel:${action}`, callerCompany!, resBody);
       return Response.json(resBody, { headers: corsHeaders });
 
     }

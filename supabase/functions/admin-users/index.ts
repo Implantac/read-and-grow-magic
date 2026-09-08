@@ -82,11 +82,17 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     if (action === 'list') {
-      let profilesQuery = supabaseAdmin
+      // Fail closed: without a resolved tenant we must never return cross-company profiles.
+      if (!callerCompanyId) {
+        return new Response(JSON.stringify({ error: 'Forbidden' }), {
+          status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      const profilesQuery = supabaseAdmin
         .from('profiles')
         .select('*')
+        .eq('company_id', callerCompanyId)
         .order('created_at', { ascending: false });
-      if (callerCompanyId) profilesQuery = profilesQuery.eq('company_id', callerCompanyId);
       const { data: profiles } = await profilesQuery;
 
       const profileIds = (profiles || []).map((p: any) => p.id);

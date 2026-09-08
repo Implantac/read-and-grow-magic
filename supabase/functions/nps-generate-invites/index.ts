@@ -34,9 +34,22 @@ Deno.serve(async (req) => {
     const { data: profile } = await admin.from('profiles').select('company_id').eq('id', userId).maybeSingle();
     if (!profile || profile.company_id !== campaign.company_id) return json({ error: 'Sem permissão' }, 403);
 
+    // Todo client_id precisa pertencer à mesma empresa da campanha (isolamento multiempresa).
+    const uniqueClientIds = Array.from(new Set(client_ids.map((c: unknown) => String(c))));
+    const { data: validClients, error: clientsErr } = await admin
+      .from('clients')
+      .select('id')
+      .eq('company_id', campaign.company_id)
+      .in('id', uniqueClientIds);
+    if (clientsErr) throw clientsErr;
+    const validIds = new Set((validClients ?? []).map((c: { id: string }) => c.id));
+    if (validIds.size !== uniqueClientIds.length) {
+      return json({ error: 'Um ou mais clientes não pertencem a esta empresa' }, 400);
+    }
+
     const expires_at = expires_in_days ? new Date(Date.now() + expires_in_days * 86400000).toISOString() : null;
 
-    const invitesRows = client_ids.map((cid: string) => ({
+    const invitesRows = uniqueClientIds.map((cid: string) => ({
       company_id: campaign.company_id,
       campaign_id,
       client_id: cid,
