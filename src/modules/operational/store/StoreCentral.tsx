@@ -41,6 +41,8 @@ import { Skeleton } from "@/ui/base/skeleton";
 import { useEnterprise } from "@/core/auth/EnterpriseContext";
 import { NetworkMap } from "./components/NetworkMap";
 import { PrescriptiveAlert } from "./components/PrescriptiveAlert";
+import { ReplenishmentPanel } from "./components/ReplenishmentPanel";
+
 
 export default function StoreCentral() {
   const { kpis, alerts, health, reliability, isLoading, refetch } = useStoreCentral();
@@ -166,8 +168,11 @@ export default function StoreCentral() {
           </div>
 
           {/* Central de Operação Unificada */}
-          <Tabs defaultValue="alertas" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 mb-4">
+          <Tabs defaultValue="reposicao" className="w-full">
+            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 mb-4">
+              <TabsTrigger value="reposicao" className="gap-2 font-bold">
+                <RefreshCw className="h-4 w-4" /> Reposição
+              </TabsTrigger>
               <TabsTrigger value="alertas" className="gap-2">
                 <AlertTriangle className="h-4 w-4" /> Alertas
               </TabsTrigger>
@@ -187,6 +192,11 @@ export default function StoreCentral() {
                 <ArrowUpCircle className="h-4 w-4" /> Solicitar
               </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="reposicao">
+              <ReplenishmentPanel />
+            </TabsContent>
+
 
             <TabsContent value="alertas">
               <Card className="border-primary/20 shadow-elevation-2">
