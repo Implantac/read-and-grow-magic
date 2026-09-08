@@ -10,6 +10,9 @@ export function useAuth(options: UseAuthOptions = {}) {
   const { initialize = true } = options;
   const { logout: storeLogout } = useAppStore();
   const [loading, setLoading] = useState(initialize);
+  // Whether Supabase itself has a valid session. The app store may still be
+  // hydrating the tenant, so this is the authoritative signal for guards.
+  const [hasSession, setHasSession] = useState(false);
 
   useEffect(() => {
     if (!initialize) {
@@ -23,7 +26,9 @@ export function useAuth(options: UseAuthOptions = {}) {
     const checkSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (!session && mounted) {
+        if (!mounted) return;
+        setHasSession(!!session);
+        if (!session) {
           const state = useAppStore.getState();
           if (state.isAuthenticated) {
             useAppStore.setState((s) => ({ ...s, isAuthenticated: false, user: null, userRole: null }));
@@ -36,8 +41,10 @@ export function useAuth(options: UseAuthOptions = {}) {
 
     checkSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_OUT' && mounted) {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!mounted) return;
+      setHasSession(!!session);
+      if (event === 'SIGNED_OUT') {
         const currentState = useAppStore.getState();
         if (currentState.isAuthenticated) {
           storeLogout();
@@ -50,6 +57,7 @@ export function useAuth(options: UseAuthOptions = {}) {
       subscription.unsubscribe();
     };
   }, [initialize, storeLogout]);
+
 
   const signIn = useCallback(async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -77,5 +85,5 @@ export function useAuth(options: UseAuthOptions = {}) {
     if (error) throw error;
   }, []);
 
-  return { loading, signIn, signUp, signOut, resetPassword };
+  return { loading, hasSession, signIn, signUp, signOut, resetPassword };
 }
