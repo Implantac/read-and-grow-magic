@@ -19,6 +19,7 @@ import { PageLoading } from '@/shared/components/PageLoading';
 // Critical Pages - Eager Load to prevent white screens on initial entry
 import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
+import NotFound from "@/pages/NotFound";
 
 // Route Collections - These export arrays of Route elements
 import { CommercialRoutes } from './CommercialRoutes';
@@ -33,6 +34,9 @@ import { RelacionamentoRoutes } from './RelacionamentoRoutes';
 import { NetworkRoutes } from './NetworkRoutes';
 import { MiscellaneousRoutes } from './MiscellaneousRoutes';
 import { ExecutiveRoutes } from './ExecutiveRoutes';
+import { EvolutionAuditRoutes } from './EvolutionAuditRoutes';
+import { StoreRoutes } from './StoreRoutes';
+import { VerticalPackRoutes } from '@/core/routes/VerticalPackRoutes';
 
 // Domain-Specific Lazy Components
 const UnifiedSupplyChain = lazy(() => import('@/modules/operational/supply-chain/UnifiedSupplyChain'));
@@ -162,13 +166,18 @@ const AppRoutes = memo(() => {
             </ModuleErrorBoundary>
           } />
 
-          {/* Miscellaneous & Vertical Packs */}
+          {/* Existing standalone route collections */}
+          {StoreRoutes}
+          {EvolutionAuditRoutes}
+          {VerticalPackRoutes}
+
+          {/* Miscellaneous routes */}
           {MiscellaneousRoutes}
         </Route>
       </Route>
 
       {/* 404 & Redirects */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   ), []);
 

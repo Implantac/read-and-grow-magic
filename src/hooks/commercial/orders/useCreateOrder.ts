@@ -5,13 +5,17 @@ import { toastSuccess, toastError } from '@/lib/toastHelpers';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { SalesOrchestrator } from '@/services/orchestration/SalesOrchestrator';
 import type { CreateOrderInput } from './types';
+import { useCanalStore } from '@/stores/useCanalStore';
 
 export function useCreateOrder() {
   const qc = useQueryClient();
   const { currentCompany } = useEnterprise();
+  const { canal, branchId } = useCanalStore();
   return useMutation({
     mutationFn: async (input: CreateOrderInput) => {
       if (!currentCompany?.id) throw new Error('Empresa não selecionada');
+      if (!branchId) throw new Error('Selecione uma filial antes de criar o pedido');
+      if (canal === 'CONSOLIDADO') throw new Error('Selecione um canal operacional antes de criar o pedido');
 
       let safeClientId: string | null = input.client_id || null;
       if (safeClientId) {
@@ -29,6 +33,8 @@ export function useCreateOrder() {
         .from('orders')
         .select('number')
         .eq('company_id', currentCompany.id)
+        .eq('branch_id', branchId)
+        .eq('canal_operacional', canal)
         .order('number', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -48,7 +54,9 @@ export function useCreateOrder() {
           .from('products')
           .select('id, cost_price')
           .in('id', productIds);
-        (prodCosts ?? []).forEach((p: any) => costMap.set(p.id, Number(p.cost_price) || 0));
+        (prodCosts ?? []).forEach((p: { id: string; cost_price: number | null }) => {
+          costMap.set(p.id, Number(p.cost_price) || 0);
+        });
       }
       const estimated_cost = input.items.reduce(
         (s, i) => s + (i.product_id ? (costMap.get(i.product_id) ?? 0) : 0) * i.quantity,
@@ -62,6 +70,8 @@ export function useCreateOrder() {
         .from('orders')
         .insert({
           company_id: currentCompany.id,
+          branch_id: branchId,
+          canal_operacional: canal,
           number: nextNum,
           client_id: safeClientId,
           client_name: input.client_name,
