@@ -53,6 +53,17 @@ const handler = async (req: Request): Promise<Response> => {
       return new Response(JSON.stringify({ error: "no_company" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    // Executar automações é ação privilegiada: exige papel operacional ou superior.
+    const { data: roleRows } = await admin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userData.user.id);
+    const allowedRoles = ["admin", "manager", "operator"];
+    const hasRole = (roleRows ?? []).some((r: { role: string }) => allowedRoles.includes(r.role));
+    if (!hasRole) {
+      return new Response(JSON.stringify({ error: "forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     const raw = await req.json().catch(() => ({})) as Partial<DispatchPayload>;
     const event = typeof raw?.event === 'string' ? raw.event.trim() : '';
     if (!event || event.length > 120 || !/^[a-zA-Z0-9._-]+$/.test(event)) {
