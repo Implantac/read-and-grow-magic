@@ -48,12 +48,22 @@ Deno.serve(async (req) => {
 
   const checks: CheckResult[] = [];
 
+  // Platform-wide stats only for cron/system callers. Tenant admins see their own company only.
+  const scoped = !auth.viaCron;
+  if (scoped && !auth.companyId) {
+    return new Response(JSON.stringify({ error: "Forbidden" }), {
+      status: 403,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  const companyId = auth.companyId;
+
   // 1. DB reachability + core count
   checks.push(
     await timed("db_companies", async () => {
-      const { count, error } = await supabase
-        .from("companies")
-        .select("id", { count: "exact", head: true });
+      let q = supabase.from("companies").select("id", { count: "exact", head: true });
+      if (scoped) q = q.eq("id", companyId!);
+      const { count, error } = await q;
       if (error) throw error;
       return { count };
     }),
@@ -63,11 +73,13 @@ Deno.serve(async (req) => {
   checks.push(
     await timed("incidents_24h", async () => {
       const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      const { count, error } = await supabase
+      let q = supabase
         .from("system_incidents")
         .select("id", { count: "exact", head: true })
         .gte("created_at", since)
         .neq("status", "resolved");
+      if (scoped) q = q.eq("company_id", companyId!);
+      const { count, error } = await q;
       if (error) throw error;
       return { open_incidents: count ?? 0 };
     }),
