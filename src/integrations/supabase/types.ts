@@ -15328,6 +15328,71 @@ export type Database = {
           },
         ]
       }
+      quality_inspections: {
+        Row: {
+          approved_quantity: number
+          company_id: string
+          corrective_action: string | null
+          created_at: string
+          defect_category: string | null
+          defect_reason: string | null
+          id: string
+          inspection_date: string
+          inspector: string
+          notes: string | null
+          production_order_id: string | null
+          rejected_quantity: number
+          severity: string
+          status: string
+          step_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_quantity?: number
+          company_id?: string
+          corrective_action?: string | null
+          created_at?: string
+          defect_category?: string | null
+          defect_reason?: string | null
+          id?: string
+          inspection_date?: string
+          inspector?: string
+          notes?: string | null
+          production_order_id?: string | null
+          rejected_quantity?: number
+          severity?: string
+          status?: string
+          step_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_quantity?: number
+          company_id?: string
+          corrective_action?: string | null
+          created_at?: string
+          defect_category?: string | null
+          defect_reason?: string | null
+          id?: string
+          inspection_date?: string
+          inspector?: string
+          notes?: string | null
+          production_order_id?: string | null
+          rejected_quantity?: number
+          severity?: string
+          status?: string
+          step_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quality_inspections_production_order_id_fkey"
+            columns: ["production_order_id"]
+            isOneToOne: false
+            referencedRelation: "production_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quotation_items: {
         Row: {
           company_id: string
@@ -23807,10 +23872,6 @@ export type Database = {
       }
     }
     Functions: {
-      advance_transferencia_canal: {
-        Args: { p_status: string; p_transferencia_id: string }
-        Returns: Database["public"]["Tables"]["transferencias_canal"]["Row"]
-      }
       adjust_stock: {
         Args: {
           p_branch_id: string
