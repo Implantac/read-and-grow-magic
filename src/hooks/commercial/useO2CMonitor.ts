@@ -47,13 +47,23 @@ export function useO2CMonitor(windowDays = 7, sellerId?: string | null) {
       const since = new Date(Date.now() - windowDays * 86_400_000).toISOString();
       const { data, error } = await supabase
         .from('cross_module_events')
-        .select('entity_id, event_type, payload, created_at')
+        .select('source_id, event_type, metadata, created_at')
         .like('event_type', 'o2c.%')
         .gte('created_at', since)
         .order('created_at', { ascending: true })
         .limit(5000);
       if (error) throw error;
-      const allRows = ((data ?? []) as unknown) as EventRow[];
+      const allRows: EventRow[] = ((data ?? []) as Array<{
+        source_id: string | null;
+        event_type: string;
+        metadata: unknown;
+        created_at: string;
+      }>).map((r) => ({
+        entity_id: r.source_id ?? '',
+        event_type: r.event_type,
+        payload: (r.metadata ?? {}) as any,
+        created_at: r.created_at,
+      }));
       const rows = sellerId ? allRows.filter((r) => r.payload?.seller_id === sellerId) : allRows;
 
       // Agrupa por run_id (fallback: entity_id) e step
