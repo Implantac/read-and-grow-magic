@@ -153,7 +153,7 @@ export default function ChartOfAccountsPage() {
     <PageContainer loading={loading}>
       <PageHeader title="Plano de Contas" description="Estrutura hierárquica das contas contábeis">
         <ExportButton data={accounts as unknown as Record<string, unknown>[]} columns={exportColumns} filename="plano_de_contas" />
-        <Button className="gap-2"><Plus className="h-4 w-4" /> Nova Conta</Button>
+        <Button className="gap-2" onClick={() => setIsFormOpen(true)}><Plus className="h-4 w-4" /> Nova Conta</Button>
       </PageHeader>
 
       <div className="grid gap-4 md:grid-cols-4">

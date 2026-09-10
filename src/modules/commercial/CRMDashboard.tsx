@@ -131,8 +131,7 @@ export default function CRMDashboard() {
                 icon={Target}
                 title="Nenhuma oportunidade aberta"
                 description="Crie a primeira oportunidade para acompanhar o funil."
-                actionLabel="Nova Oportunidade"
-                onAction={() => { setFormData(EMPTY_FORM); setIsFormOpen(true); }}
+                action={{ label: 'Nova Oportunidade', onClick: () => { setFormData(EMPTY_FORM); setIsFormOpen(true); } }}
               />
             ) : (
               <div className="h-[300px] flex items-end justify-between gap-2 px-4">
