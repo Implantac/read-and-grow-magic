@@ -27,6 +27,7 @@ export default function Pendencias() {
       <div className="space-y-4">
         <AttentionCenter />
         <QuickActions />
+        <SetupChecklist />
       </div>
     </PageContainer>
   );
