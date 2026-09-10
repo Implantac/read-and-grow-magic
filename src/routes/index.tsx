@@ -108,7 +108,7 @@ const AppRoutes = memo(() => {
           {/* Executive & AI domain */}
           <Route path="/executive/*" element={
             <ModuleErrorBoundary moduleName="Executivo & IA">
-              <Routes>{ExecutiveRoutes}</Routes>
+              <Routes>{ExecutiveRoutes}<Route path="*" element={<NotFound />} /></Routes>
             </ModuleErrorBoundary>
           } />
           <Route path="/success" element={
@@ -154,21 +154,21 @@ const AppRoutes = memo(() => {
           {/* Commercial Domain */}
           <Route path="/comercial/*" element={
             <ModuleErrorBoundary moduleName="Comercial">
-              <Routes>{CommercialRoutes}</Routes>
+              <Routes>{CommercialRoutes}<Route path="*" element={<NotFound />} /></Routes>
             </ModuleErrorBoundary>
           } />
           
           {/* Financial Domain */}
           <Route path="/financeiro/*" element={
             <ModuleErrorBoundary moduleName="Financeiro">
-              <Routes>{FinancialRoutes}</Routes>
+              <Routes>{FinancialRoutes}<Route path="*" element={<NotFound />} /></Routes>
             </ModuleErrorBoundary>
           } />
 
           {/* Logistics & WMS Domain */}
           <Route path="/wms/*" element={
             <ModuleErrorBoundary moduleName="WMS">
-              <Routes>{WMSRoutes}</Routes>
+              <Routes>{WMSRoutes}<Route path="*" element={<NotFound />} /></Routes>
             </ModuleErrorBoundary>
           } />
 
@@ -185,40 +185,40 @@ const AppRoutes = memo(() => {
           } />
           <Route path="/operacional/rede/*" element={
             <ModuleErrorBoundary moduleName="Rede">
-              <Routes>{NetworkRoutes}</Routes>
+              <Routes>{NetworkRoutes}<Route path="*" element={<NotFound />} /></Routes>
             </ModuleErrorBoundary>
           } />
           <Route path="/operacional/*" element={
             <ModuleErrorBoundary moduleName="Operacional">
-              <Routes>{OperationalRoutes}</Routes>
+              <Routes>{OperationalRoutes}<Route path="*" element={<NotFound />} /></Routes>
             </ModuleErrorBoundary>
           } />
 
           {/* Accounting Domain */}
           <Route path="/contabilidade/*" element={
             <ModuleErrorBoundary moduleName="Contábil">
-              <Routes>{AccountingRoutes}</Routes>
+              <Routes>{AccountingRoutes}<Route path="*" element={<NotFound />} /></Routes>
             </ModuleErrorBoundary>
           } />
 
           {/* Production Domain */}
           <Route path="/producao/*" element={
             <ModuleErrorBoundary moduleName="Produção">
-              <Routes>{ProductionRoutes}</Routes>
+              <Routes>{ProductionRoutes}<Route path="*" element={<NotFound />} /></Routes>
             </ModuleErrorBoundary>
           } />
 
           {/* Fiscal Domain */}
           <Route path="/fiscal/*" element={
             <ModuleErrorBoundary moduleName="Fiscal">
-              <Routes>{FiscalRoutes}</Routes>
+              <Routes>{FiscalRoutes}<Route path="*" element={<NotFound />} /></Routes>
             </ModuleErrorBoundary>
           } />
 
           {/* Relationship (CRM/NPS) Domain */}
           <Route path="/relacionamento/*" element={
             <ModuleErrorBoundary moduleName="Relacionamento">
-              <Routes>{RelacionamentoRoutes}</Routes>
+              <Routes>{RelacionamentoRoutes}<Route path="*" element={<NotFound />} /></Routes>
             </ModuleErrorBoundary>
           } />
 
@@ -230,7 +230,7 @@ const AppRoutes = memo(() => {
           } />
           <Route path="/admin/*" element={
             <ModuleErrorBoundary moduleName="Admin">
-              <Routes>{AdminRoutes}</Routes>
+              <Routes>{AdminRoutes}<Route path="*" element={<NotFound />} /></Routes>
             </ModuleErrorBoundary>
           } />
 

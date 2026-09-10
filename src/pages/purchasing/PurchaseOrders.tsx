@@ -25,9 +25,11 @@ import { Separator } from '@/ui/base/separator';
 import { purchaseOrderStatuses } from '@/config/purchasing';
 import { PurchaseOrder } from '@/types/purchasing';
 import { usePurchasing } from '@/hooks/purchasing/usePurchasingQuery';
+import { useProducts, type DbProduct } from '@/hooks/inventory/useProducts';
 import { KPICard } from '@/shared/components/KPICard';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { ClipboardList } from 'lucide-react';
+import { toastError } from '@/lib/toastHelpers';
 
 const priorityConfig: Record<string, { label: string; className: string }> = {
   low: { label: 'Baixa', className: 'bg-muted text-muted-foreground' },
@@ -36,8 +38,20 @@ const priorityConfig: Record<string, { label: string; className: string }> = {
   urgent: { label: 'Urgente', className: 'bg-destructive/10 text-destructive' },
 };
 
+interface DraftItem {
+  productId: string;
+  quantity: number;
+  unitPrice: number;
+}
+
 export default function PurchaseOrdersPage() {
-  const { orders, ordersLoading: loading } = usePurchasing();
+  const { orders, ordersLoading: loading, suppliers, createOrder, creatingOrder } = usePurchasing();
+  const { data: products } = useProducts() as { data: DbProduct[] | undefined };
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [newSupplierId, setNewSupplierId] = useState('');
+  const [newPriority, setNewPriority] = useState('medium');
+  const [newExpected, setNewExpected] = useState('');
+  const [draftItems, setDraftItems] = useState<DraftItem[]>([{ productId: '', quantity: 1, unitPrice: 0 }]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
@@ -60,6 +74,44 @@ export default function PurchaseOrdersPage() {
     received: orders.filter((o) => o.status === 'received').length,
   }), [orders]);
 
+  const draftTotal = useMemo(
+    () => draftItems.reduce((sum, i) => sum + (Number(i.quantity) || 0) * (Number(i.unitPrice) || 0), 0),
+    [draftItems],
+  );
+
+  const handleCreateOrder = async () => {
+    const supplier = suppliers.find((s) => s.id === newSupplierId);
+    const validItems = draftItems.filter((i) => i.productId && Number(i.quantity) > 0);
+    if (!supplier || validItems.length === 0) {
+      toastError('Selecione um fornecedor e ao menos um item com quantidade.');
+      return;
+    }
+
+    await createOrder({
+      supplierId: supplier.id,
+      supplierName: supplier.name,
+      expectedDelivery: newExpected || null,
+      priority: newPriority,
+      items: validItems.map((i) => {
+        const product = (products || []).find((p) => p.id === i.productId);
+        return {
+          productId: i.productId,
+          productCode: product?.code || '',
+          productName: product?.name || '',
+          unit: product?.unit || 'UN',
+          quantity: Number(i.quantity),
+          unitPrice: Number(i.unitPrice),
+        };
+      }),
+    });
+
+    setIsCreateOpen(false);
+    setNewSupplierId('');
+    setNewExpected('');
+    setNewPriority('medium');
+    setDraftItems([{ productId: '', quantity: 1, unitPrice: 0 }]);
+  };
+
   if (loading) return <div className="flex items-center justify-center min-h-[400px]"><Loader2 className="animate-spin" /></div>;
 
   return (
@@ -77,7 +129,7 @@ export default function PurchaseOrdersPage() {
           ]}
           filename="pedidos_compra"
         />
-        <Button onClick={() => {}}><Plus className="mr-2 h-4 w-4" />Novo Pedido</Button>
+        <Button onClick={() => setIsCreateOpen(true)}><Plus className="mr-2 h-4 w-4" />Novo Pedido</Button>
       </PageHeader>
 
       <div className="grid gap-4 md:grid-cols-4 mb-6">
@@ -184,6 +236,106 @@ export default function PurchaseOrdersPage() {
                </Table>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Novo Pedido de Compra</DialogTitle>
+            <DialogDescription>Selecione o fornecedor e os itens que deseja comprar.</DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="space-y-2">
+                <Label>Fornecedor</Label>
+                <Select value={newSupplierId} onValueChange={setNewSupplierId}>
+                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectContent>
+                    {suppliers.map((s) => (<SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Prioridade</Label>
+                <Select value={newPriority} onValueChange={setNewPriority}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(priorityConfig).map(([key, value]) => (
+                      <SelectItem key={key} value={key}>{value.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Entrega prevista</Label>
+                <Input type="date" value={newExpected} onChange={(e) => setNewExpected(e.target.value)} />
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-3">
+              {draftItems.map((item, index) => (
+                <div key={index} className="grid gap-2 md:grid-cols-[2fr_1fr_1fr_auto] md:items-end">
+                  <div className="space-y-2">
+                    <Label className="text-xs uppercase text-muted-foreground">Produto</Label>
+                    <Select
+                      value={item.productId}
+                      onValueChange={(value) => setDraftItems((prev) => prev.map((it, i) => {
+                        if (i !== index) return it;
+                        const product = (products || []).find((p) => p.id === value);
+                        return { ...it, productId: value, unitPrice: it.unitPrice || Number(product?.cost_price || 0) };
+                      }))}
+                    >
+                      <SelectTrigger><SelectValue placeholder="Selecione o produto" /></SelectTrigger>
+                      <SelectContent>
+                        {(products || []).map((p) => (<SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs uppercase text-muted-foreground">Quantidade</Label>
+                    <Input
+                      type="number" min={1} value={item.quantity}
+                      onChange={(e) => setDraftItems((prev) => prev.map((it, i) => i === index ? { ...it, quantity: Number(e.target.value) } : it))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs uppercase text-muted-foreground">Preço unit.</Label>
+                    <Input
+                      type="number" min={0} step="0.01" value={item.unitPrice}
+                      onChange={(e) => setDraftItems((prev) => prev.map((it, i) => i === index ? { ...it, unitPrice: Number(e.target.value) } : it))}
+                    />
+                  </div>
+                  <Button
+                    variant="ghost" size="icon" aria-label="Remover item"
+                    disabled={draftItems.length === 1}
+                    onClick={() => setDraftItems((prev) => prev.filter((_, i) => i !== index))}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button variant="outline" size="sm" onClick={() => setDraftItems((prev) => [...prev, { productId: '', quantity: 1, unitPrice: 0 }])}>
+                <Plus className="mr-2 h-4 w-4" />Adicionar item
+              </Button>
+            </div>
+
+            <Separator />
+            <div className="flex justify-end text-sm">
+              <span className="text-muted-foreground mr-2">Total:</span>
+              <span className="font-bold">{formatBRL(draftTotal)}</span>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCreateOpen(false)}>Cancelar</Button>
+            <Button onClick={handleCreateOrder} disabled={creatingOrder}>
+              {creatingOrder && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Criar pedido
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </PageContainer>

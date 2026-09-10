@@ -38,6 +38,30 @@ export const purchasingService = {
     return data;
   },
 
+  async createPurchaseOrderWithItems(
+    order: TablesInsert<'purchase_orders'>,
+    items: Omit<TablesInsert<'purchase_order_items'>, 'purchase_order_id'>[],
+  ) {
+    const { data, error } = await supabase.from('purchase_orders').insert(order).select().single();
+    if (error) throw error;
+
+    if (items.length > 0) {
+      const payload = items.map((item) => ({
+        ...item,
+        purchase_order_id: data.id,
+        company_id: order.company_id,
+      }));
+      const { error: itemsError } = await supabase.from('purchase_order_items').insert(payload);
+      if (itemsError) {
+        await supabase.from('purchase_orders').delete().eq('id', data.id);
+        throw itemsError;
+      }
+    }
+
+    return data;
+  },
+
+
   // Quotations — tabela real é `quotations` (não `purchase_quotations`).
   async getQuotations(): Promise<Tables<'quotations'>[]> {
     const { data, error } = await supabase
