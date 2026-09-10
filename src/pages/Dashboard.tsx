@@ -154,6 +154,13 @@ export default function Dashboard() {
         <QuickActions />
       </section>
 
+      {/* Guia de primeira configuração — some quando tudo está feito */}
+      <SetupChecklist />
+    </>
+  );
+}
+
+
       {/* KPIs Principais — sempre visíveis */}
       <section aria-label="Indicadores principais" className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {mainKPIs.map((kpi, idx) => {
