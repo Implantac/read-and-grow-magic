@@ -17,9 +17,9 @@ Escala 0 a 10. "Depois" reflete apenas o que foi realmente entregue nesta fase (
 | Financeiro | 8,0 | 8,0 | Preservado |
 | Fiscal | 8,0 | 8,0 | Preservado |
 | Produção | 7,5 | 7,5 | Preservado |
-| Mobile | 6,5 | 6,5 | Não tratado nesta fase |
+| Mobile | 6,5 | 7,0 | Ações rápidas e etapas do guia empilham em coluna única no celular |
 | Acessibilidade | 7,0 | 7,5 | Severidade com ícone e texto, não só cor; foco e aria preservados |
 | Performance | 7,5 | 7,5 | Consultas novas são leves e em cache de 60s |
 | Mensagens | 7,0 | 8,0 | Linguagem do dia a dia nas pendências e ações |
-| Onboarding | 5,0 | 5,0 | Não tratado nesta fase |
-| **Geral** | **7,2** | **7,8** | Ganho concentrado em navegação, descoberta e decisão |
+| Onboarding | 5,0 | 7,5 | Guia "Primeiros passos" com progresso real e ação por etapa; some quando concluído |
+| **Geral** | **7,2** | **8,0** | Ganho concentrado em navegação, descoberta e decisão |

@@ -20,7 +20,7 @@ Data: 2026-09-10. Escopo: navegação, arquitetura de informação, telas de aba
 | Busca Ctrl+K | Só encontrava nome de tela | Usuário novo não sabe o nome da função | Não | P1 | Grupo "O que você quer fazer?" com sinônimos (receber, chegou carga, repor, falta, ruptura) |
 | Vocabulário de estados | "Expedido", "Em trânsito", "Em envio" em telas diferentes | Confusão sobre o estado real | Sim | P1 | Estados do ciclo de transferência unificados no motor de workflow; badges com ícone + texto |
 | Cor como único sinal | Alguns indicadores dependiam só de cor | Acessibilidade | Não | P1 | Itens de pendência trazem ícone, texto de severidade e rótulo |
-| Onboarding de primeira configuração | Não guia o novo cliente | Adoção lenta | P2 | Não | Planejado para a fase seguinte |
+| Onboarding de primeira configuração | Não guiava o novo cliente | Adoção lenta | Não | P2 | Guia "Primeiros passos" na visão geral e em Pendências, com contagens reais de unidades, produtos, estoque, clientes e primeiro envio |
 | Refino mobile das telas de loja | Layout desktop reduzido | Operação no balcão | P2 | Não | Planejado para a fase seguinte |
 
 ## Teste de UX (descoberta → execução → feedback → próximo passo)

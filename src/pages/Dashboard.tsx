@@ -14,6 +14,7 @@ import { ExecutiveActionsPanel } from '@/components/executive/ExecutiveActionsPa
 import { useDashboardData } from '@/hooks/system/useDashboardData';
 import { AttentionCenter } from '@/shared/components/AttentionCenter';
 import { QuickActions } from '@/shared/components/QuickActions';
+import { SetupChecklist } from '@/shared/components/SetupChecklist';
 import { useExecutiveDashboard, useUnifiedChat } from '@/hooks/ai/useExecutiveAI';
 import {
   ShoppingCart, Wallet, Package, Factory, Truck, Warehouse,
@@ -153,6 +154,11 @@ export default function Dashboard() {
         <AttentionCenter limit={4} showAllLink className="lg:col-span-2" />
         <QuickActions />
       </section>
+
+      {/* Guia de primeira configuração — some quando tudo está feito */}
+      <SetupChecklist />
+
+
 
       {/* KPIs Principais — sempre visíveis */}
       <section aria-label="Indicadores principais" className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
