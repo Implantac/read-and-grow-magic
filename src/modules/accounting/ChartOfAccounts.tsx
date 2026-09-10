@@ -19,6 +19,17 @@ import { KPICard } from '@/shared/components/KPICard';
 
 import { formatBRL } from '@/lib/formatters';
 import { EmptyState } from '@/shared/components/EmptyState';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/ui/base/dialog';
+import { Label } from '@/ui/base/label';
+import { Checkbox } from '@/ui/base/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
+import { toastError } from '@/lib/toastHelpers';
+import type { AccountType, AccountNature } from '@/types/accounting';
+
+const EMPTY_ACCOUNT_FORM = {
+  code: '', name: '', type: 'asset' as AccountType, nature: 'debit' as AccountNature,
+  parentId: 'none', isAnalytical: true,
+};
 const typeColorMap: Record<string, string> = {
   asset: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
   liability: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
@@ -64,11 +75,34 @@ const accountFilterFields: FilterField[] = [
 ];
 
 export default function ChartOfAccountsPage() {
-  const { accounts, accountsLoading: loading } = useAccounting();
+  const { accounts, accountsLoading: loading, createAccount } = useAccounting();
 
   const [search, setSearch] = useState('');
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [filters, setFilters] = useState<Record<string, string>>({});
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [form, setForm] = useState(EMPTY_ACCOUNT_FORM);
+
+  const handleCreateAccount = () => {
+    if (!form.code.trim() || !form.name.trim()) {
+      toastError('Informe código e nome da conta');
+      return;
+    }
+    const parent = form.parentId !== 'none' ? accounts.find((a) => a.id === form.parentId) : null;
+    createAccount({
+      code: form.code.trim(),
+      name: form.name.trim(),
+      type: form.type,
+      nature: form.nature,
+      parentId: parent ? parent.id : null,
+      level: parent ? parent.level + 1 : 1,
+      isAnalytical: form.isAnalytical,
+      balance: 0,
+      active: true,
+    });
+    setIsFormOpen(false);
+    setForm(EMPTY_ACCOUNT_FORM);
+  };
 
   // Auto-expand root accounts when data loads
   useMemo(() => {
@@ -153,7 +187,7 @@ export default function ChartOfAccountsPage() {
     <PageContainer loading={loading}>
       <PageHeader title="Plano de Contas" description="Estrutura hierárquica das contas contábeis">
         <ExportButton data={accounts as unknown as Record<string, unknown>[]} columns={exportColumns} filename="plano_de_contas" />
-        <Button className="gap-2"><Plus className="h-4 w-4" /> Nova Conta</Button>
+        <Button className="gap-2" onClick={() => setIsFormOpen(true)}><Plus className="h-4 w-4" /> Nova Conta</Button>
       </PageHeader>
 
       <div className="grid gap-4 md:grid-cols-4">
@@ -189,6 +223,70 @@ export default function ChartOfAccountsPage() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Nova Conta Contábil</DialogTitle>
+            <DialogDescription>Cadastre uma conta no plano de contas</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Código *</Label>
+                <Input value={form.code} onChange={(e) => setForm((p) => ({ ...p, code: e.target.value }))} placeholder="1.1.01" />
+              </div>
+              <div>
+                <Label>Conta pai</Label>
+                <Select value={form.parentId} onValueChange={(v) => setForm((p) => ({ ...p, parentId: v }))}>
+                  <SelectTrigger><SelectValue placeholder="Nenhuma (raiz)" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Nenhuma (raiz)</SelectItem>
+                    {accounts.map((a) => <SelectItem key={a.id} value={a.id}>{a.code} — {a.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div>
+              <Label>Nome *</Label>
+              <Input value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} placeholder="Caixa Geral" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Tipo</Label>
+                <Select value={form.type} onValueChange={(v) => setForm((p) => ({ ...p, type: v as AccountType }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="asset">Ativo</SelectItem>
+                    <SelectItem value="liability">Passivo</SelectItem>
+                    <SelectItem value="equity">Patrimônio Líquido</SelectItem>
+                    <SelectItem value="revenue">Receita</SelectItem>
+                    <SelectItem value="expense">Despesa</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Natureza</Label>
+                <Select value={form.nature} onValueChange={(v) => setForm((p) => ({ ...p, nature: v as AccountNature }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="debit">Devedora</SelectItem>
+                    <SelectItem value="credit">Credora</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox id="analytical" checked={form.isAnalytical} onCheckedChange={(v) => setForm((p) => ({ ...p, isAnalytical: Boolean(v) }))} />
+              <Label htmlFor="analytical">Conta analítica (aceita lançamentos)</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsFormOpen(false)}>Cancelar</Button>
+            <Button onClick={handleCreateAccount}>Criar conta</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 }
