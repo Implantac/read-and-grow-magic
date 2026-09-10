@@ -49,6 +49,7 @@ const InventoryKardexPage = lazy(() => import('@/pages/inventory/Kardex'));
 const InventoryBalancesPage = lazy(() => import('@/modules/wms/StockBalances'));
 const PurchaseOrdersPage = lazy(() => import('@/pages/purchasing/PurchaseOrders'));
 const ProcurementDashboardPage = lazy(() => import('@/pages/purchasing/ProcurementDashboard'));
+const PendenciasPage = lazy(() => import('@/pages/Pendencias'));
 
 /**
  * Performance-optimized Page Loader
@@ -104,6 +105,11 @@ const AppRoutes = memo(() => {
         <Route element={<OnboardingGuard />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/pendencias" element={
+            <Suspense fallback={<PageLoader />}>
+              <PendenciasPage />
+            </Suspense>
+          } />
 
           {/* Executive & AI domain */}
           <Route path="/executive/*" element={
