@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef, type MutableRefObject } from 'react';
-import { withRenderMonitor } from '@/core/debug/RenderDepthMonitor';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import { TenantService, type CompanyRow } from '@/services/admin/TenantService';
@@ -246,7 +245,7 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
               id: user.id,
               name: userName,
               email: user.email || '',
-              role: finalRole,
+              role: finalRole as NonNullable<typeof storeState.user>['role'],
               permissions: ['all'],
             },
             userRole: finalRole,
@@ -265,7 +264,7 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
         if (!isMounted.current) return;
 
         if (units) {
-          const operationalUnits = units as Array<{ id: string; name: string; type: string; is_active: boolean }>;
+          const operationalUnits = units as unknown as Array<{ id: string; name: string; type: string; is_active: boolean }>;
           const mappedUnits = operationalUnits.map((u) => ({
             id: u.id,
             name: u.name,

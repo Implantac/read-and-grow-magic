@@ -1,5 +1,4 @@
 import { Suspense, useEffect, useRef } from 'react';
-import { withRenderMonitor } from '@/core/debug/RenderDepthMonitor';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAppStore } from '@/stores/useAppStore';
 import { useAuth } from '@/hooks/system/useAuth';
