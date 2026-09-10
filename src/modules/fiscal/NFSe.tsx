@@ -33,13 +33,13 @@ export default function NFSePage() {
   const nfseQuery = useQuery({
     queryKey: ['nfse'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('nfse')
         .select('id, number, customer_name, service_value, status, issue_date')
         .order('issue_date', { ascending: false })
         .limit(100);
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []) as Array<{ id: string; number: string; customer_name: string; service_value: number; status: string; issue_date: string }>;
     },
   });
 

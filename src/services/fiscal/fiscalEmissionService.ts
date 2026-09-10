@@ -29,7 +29,7 @@ export type FiscalEmissionJob = {
 };
 
 export async function createNfseDraft(payload: NfseDraftPayload) {
-  const { data, error } = await supabase.rpc('create_nfse_draft', {
+  const { data, error } = await (supabase.rpc as any)('create_nfse_draft', {
     _payload: payload,
   });
   if (error) throw error;
@@ -41,7 +41,7 @@ export async function enqueueFiscalEmission(
   documentId: string,
   payload: Record<string, unknown> = {},
 ) {
-  const { data, error } = await supabase.rpc('enqueue_fiscal_emission', {
+  const { data, error } = await (supabase.rpc as any)('enqueue_fiscal_emission', {
     _document_type: documentType,
     _document_id: documentId,
     _payload: payload,
