@@ -2,7 +2,323 @@
 // To take ownership, delete this banner line; the plugin then leaves the file alone.
 // supabase function: mcp
 // Bundled from src/lib/mcp/index.ts by @lovable.dev/mcp-js.
+// src/lib/mcp/index.ts
+import { auth, defineMcp } from "npm:@lovable.dev/mcp-js@0.20.0";
+
+// src/lib/mcp/tools/whoami.ts
+import { defineTool } from "npm:@lovable.dev/mcp-js@0.20.0";
+var whoami_default = defineTool({
+  name: "whoami",
+  title: "Quem sou eu",
+  description: "Retorna o usu\xE1rio autenticado no ERP (id, email, client_id).",
+  inputSchema: {},
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: (_input, ctx) => {
+    if (!ctx.isAuthenticated()) {
+      return { content: [{ type: "text", text: "N\xE3o autenticado" }], isError: true };
+    }
+    const info = {
+      user_id: ctx.getUserId(),
+      email: ctx.getUserEmail(),
+      client_id: ctx.getClientId()
+    };
+    return {
+      content: [{ type: "text", text: JSON.stringify(info, null, 2) }],
+      structuredContent: info
+    };
+  }
+});
+
+// src/lib/mcp/tools/search-products.ts
+import { createClient } from "npm:@supabase/supabase-js@^2.108.2";
+import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z } from "npm:zod@^3.25.76";
+function userClient(ctx) {
+  return createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_PUBLISHABLE_KEY,
+    {
+      global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
+      auth: { persistSession: false, autoRefreshToken: false }
+    }
+  );
+}
+var search_products_default = defineTool2({
+  name: "search_products",
+  title: "Buscar produtos",
+  description: "Lista produtos do estoque do usu\xE1rio. Filtra por termo (nome/SKU) e retorna at\xE9 `limit` resultados. Respeita RLS multi-tenant.",
+  inputSchema: {
+    query: z.string().trim().optional().describe("Termo de busca por nome ou SKU."),
+    limit: z.number().int().positive().max(50).optional().describe("M\xE1ximo de resultados (padr\xE3o 20).")
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ query, limit }, ctx) => {
+    if (!ctx.isAuthenticated()) {
+      return { content: [{ type: "text", text: "N\xE3o autenticado" }], isError: true };
+    }
+    const supabase = userClient(ctx);
+    const max = limit ?? 20;
+    let q = supabase.from("products").select("id, sku, name, unit, sale_price, stock_quantity").limit(max);
+    if (query && query.length > 0) {
+      const term = `%${query}%`;
+      q = q.or(`name.ilike.${term},sku.ilike.${term}`);
+    }
+    const { data, error } = await q;
+    if (error) {
+      return { content: [{ type: "text", text: error.message }], isError: true };
+    }
+    return {
+      content: [{ type: "text", text: JSON.stringify(data ?? [], null, 2) }],
+      structuredContent: { rows: data ?? [], count: data?.length ?? 0 }
+    };
+  }
+});
+
+// src/lib/mcp/tools/list-payables.ts
+import { createClient as createClient2 } from "npm:@supabase/supabase-js@^2.108.2";
+import { defineTool as defineTool3 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z2 } from "npm:zod@^3.25.76";
+function userClient2(ctx) {
+  return createClient2(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_PUBLISHABLE_KEY,
+    {
+      global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
+      auth: { persistSession: false, autoRefreshToken: false }
+    }
+  );
+}
+var list_payables_default = defineTool3({
+  name: "list_payables",
+  title: "Contas a pagar",
+  description: "Lista t\xEDtulos financeiros a pagar (accounts_payable). Filtra por status ('open', 'paid', 'overdue') e retorna at\xE9 `limit` registros ordenados por vencimento.",
+  inputSchema: {
+    status: z2.enum(["open", "paid", "overdue"]).optional().describe("Filtra pelo status do t\xEDtulo."),
+    limit: z2.number().int().positive().max(100).optional().describe("M\xE1ximo de resultados (padr\xE3o 20).")
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ status, limit }, ctx) => {
+    if (!ctx.isAuthenticated()) {
+      return { content: [{ type: "text", text: "N\xE3o autenticado" }], isError: true };
+    }
+    const supabase = userClient2(ctx);
+    let q = supabase.from("accounts_payable").select("id, description, supplier_name, amount, due_date, status").order("due_date", { ascending: true }).limit(limit ?? 20);
+    if (status) q = q.eq("status", status);
+    const { data, error } = await q;
+    if (error) {
+      return { content: [{ type: "text", text: error.message }], isError: true };
+    }
+    const total = (data ?? []).reduce((s, r) => s + Number(r.amount ?? 0), 0);
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Encontrados ${data?.length ?? 0} t\xEDtulos (soma R$ ${total.toFixed(2)})
+
+${JSON.stringify(
+            data ?? [],
+            null,
+            2
+          )}`
+        }
+      ],
+      structuredContent: { rows: data ?? [], count: data?.length ?? 0, total_amount: total }
+    };
+  }
+});
+
+// src/lib/mcp/tools/list-orders.ts
+import { createClient as createClient3 } from "npm:@supabase/supabase-js@^2.108.2";
+import { defineTool as defineTool4 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z3 } from "npm:zod@^3.25.76";
+function userClient3(ctx) {
+  return createClient3(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_PUBLISHABLE_KEY,
+    {
+      global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
+      auth: { persistSession: false, autoRefreshToken: false }
+    }
+  );
+}
+var STATUS_VALUES = [
+  "pending",
+  "confirmed",
+  "processing",
+  "separated",
+  "invoiced",
+  "shipped",
+  "delivered",
+  "cancelled",
+  "quote",
+  "awaiting_commercial_approval",
+  "awaiting_financial_approval",
+  "blocked",
+  "awaiting_separation",
+  "in_separation",
+  "awaiting_production",
+  "in_production",
+  "partial_production",
+  "awaiting_conference",
+  "conferenced",
+  "awaiting_billing"
+];
+function encodeCursor(p) {
+  return btoa(JSON.stringify(p));
+}
+function decodeCursor(raw) {
+  try {
+    const p = JSON.parse(atob(raw));
+    if (typeof p?.d === "string" && typeof p?.i === "string") return p;
+    return null;
+  } catch {
+    return null;
+  }
+}
+var list_orders_default = defineTool4({
+  name: "list_orders",
+  title: "Listar pedidos",
+  description: "Lista pedidos comerciais (orders) filtrando por status, intervalo de datas (campo `date`), cliente (`client_id` UUID ou `client_search` por nome ILIKE). Respeita RLS multi-tenant. Ordena\xE7\xE3o est\xE1vel por (date desc, id desc). Pagina\xE7\xE3o por cursor keyset: passe `cursor` (retornado como `next_cursor` na resposta anterior) para buscar a pr\xF3xima p\xE1gina. `has_more=true` indica que existem mais resultados.",
+  inputSchema: {
+    status: z3.enum(STATUS_VALUES).optional().describe("Filtra pelo status do pedido."),
+    date_from: z3.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().describe("Data inicial (YYYY-MM-DD), inclusive."),
+    date_to: z3.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().describe("Data final (YYYY-MM-DD), inclusive."),
+    client_id: z3.string().uuid().optional().describe("Filtra pelo UUID do cliente (orders.client_id). Combina com os demais filtros."),
+    client_search: z3.string().trim().min(2).optional().describe(
+      "Busca case-insensitive por nome do cliente (orders.client_name ILIKE %termo%). Use quando n\xE3o souber o UUID. Combina com os demais filtros."
+    ),
+    limit: z3.number().int().positive().max(100).optional().describe("M\xE1ximo de resultados por p\xE1gina (padr\xE3o 20, teto 100)."),
+    cursor: z3.string().optional().describe(
+      "Cursor opaco de pagina\xE7\xE3o (use `next_cursor` da resposta anterior). Ignorar na primeira chamada."
+    )
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ status, date_from, date_to, client_id, client_search, limit, cursor }, ctx) => {
+    if (!ctx.isAuthenticated()) {
+      return { content: [{ type: "text", text: "N\xE3o autenticado" }], isError: true };
+    }
+    const supabase = userClient3(ctx);
+    const pageSize = limit ?? 20;
+    let q = supabase.from("orders").select(
+      "id, number, client_id, client_name, date, delivery_date, total, status, priority, payment_method"
+    ).order("date", { ascending: false }).order("id", { ascending: false }).limit(pageSize + 1);
+    if (status) q = q.eq("status", status);
+    if (date_from) q = q.gte("date", `${date_from}T00:00:00.000Z`);
+    if (date_to) q = q.lte("date", `${date_to}T23:59:59.999Z`);
+    if (client_id) q = q.eq("client_id", client_id);
+    if (client_search) {
+      const term = client_search.replace(/[,%]/g, " ").trim();
+      if (term.length > 0) q = q.ilike("client_name", `%${term}%`);
+    }
+    if (cursor) {
+      const c = decodeCursor(cursor);
+      if (!c) {
+        return {
+          content: [{ type: "text", text: "Cursor inv\xE1lido." }],
+          isError: true
+        };
+      }
+      q = q.or(`date.lt.${c.d},and(date.eq.${c.d},id.lt.${c.i})`);
+    }
+    const { data, error } = await q;
+    if (error) {
+      return { content: [{ type: "text", text: error.message }], isError: true };
+    }
+    const rowsAll = data ?? [];
+    const hasMore = rowsAll.length > pageSize;
+    const rows = hasMore ? rowsAll.slice(0, pageSize) : rowsAll;
+    const last = rows[rows.length - 1];
+    const nextCursor = hasMore && last ? encodeCursor({ d: last.date, i: last.id }) : null;
+    const pageTotal = rows.reduce((s, r) => s + Number(r.total ?? 0), 0);
+    return {
+      content: [
+        {
+          type: "text",
+          text: `P\xE1gina com ${rows.length} pedidos (soma R$ ${pageTotal.toFixed(2)})` + (hasMore ? " \u2014 h\xE1 mais resultados (use next_cursor)." : " \u2014 fim dos resultados.") + `
+
+${JSON.stringify(rows, null, 2)}`
+        }
+      ],
+      structuredContent: {
+        rows,
+        count: rows.length,
+        total_amount: pageTotal,
+        has_more: hasMore,
+        next_cursor: nextCursor
+      }
+    };
+  }
+});
+
+// src/lib/mcp/tools/get-order.ts
+import { createClient as createClient4 } from "npm:@supabase/supabase-js@^2.108.2";
+import { defineTool as defineTool5 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z4 } from "npm:zod@^3.25.76";
+function userClient4(ctx) {
+  return createClient4(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_PUBLISHABLE_KEY,
+    {
+      global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
+      auth: { persistSession: false, autoRefreshToken: false }
+    }
+  );
+}
+var get_order_default = defineTool5({
+  name: "get_order",
+  title: "Buscar pedido por ID",
+  description: "Retorna um pedido comercial (orders) pelo `order_id` com seus itens (order_items). Respeita RLS multi-tenant \u2014 s\xF3 retorna o pedido se o usu\xE1rio tiver acesso.",
+  inputSchema: {
+    order_id: z4.string().uuid().describe("UUID do pedido.")
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ order_id }, ctx) => {
+    if (!ctx.isAuthenticated()) {
+      return { content: [{ type: "text", text: "N\xE3o autenticado" }], isError: true };
+    }
+    const supabase = userClient4(ctx);
+    const { data, error } = await supabase.from("orders").select(
+      `id, number, client_id, client_name, date, delivery_date,
+         subtotal, discount, shipping, total,
+         payment_method, payment_condition,
+         status, priority,
+         sales_rep_id, sales_rep_name,
+         fulfillment_status, production_status, separation_status,
+         conference_status, billing_status, shipment_status,
+         commercial_approval, financial_approval,
+         notes, created_at, updated_at,
+         items:order_items(id, product_id, product_name, product_code, quantity, unit_price, discount, total)`
+    ).eq("id", order_id).maybeSingle();
+    if (error) {
+      return { content: [{ type: "text", text: error.message }], isError: true };
+    }
+    if (!data) {
+      return {
+        content: [{ type: "text", text: "Pedido n\xE3o encontrado ou sem permiss\xE3o de acesso." }],
+        isError: true
+      };
+    }
+    return {
+      content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+      structuredContent: { order: data }
+    };
+  }
+});
+
+// src/lib/mcp/index.ts
+var projectRef = "arcuhqdiydlvekanychw";
+var mcp_default = defineMcp({
+  name: "use-sistemas-erp-mcp",
+  title: "Use Sistemas ERP",
+  version: "0.1.0",
+  instructions: "Ferramentas do ERP Use Sistemas (multi-tenant, RLS por empresa). Use `whoami` para confirmar o usu\xE1rio conectado. Use `search_products` para consultar o cadastro de produtos. Use `list_payables` para revisar contas a pagar por status e vencimento. Use `list_orders` para consultar pedidos comerciais por status e intervalo de datas. Use `get_order` para obter um pedido espec\xEDfico (com itens) pelo seu UUID. Todas as consultas respeitam o escopo de empresa do usu\xE1rio autenticado.",
+  auth: auth.oauth.issuer({
+    issuer: `https://${projectRef}.supabase.co/auth/v1`,
+    acceptedAudiences: "authenticated"
+  }),
+  tools: [whoami_default, search_products_default, list_payables_default, list_orders_default, get_order_default]
+});
+
 // lovable-mcp-supabase-entry.ts
-import mcp from "npm:C:\\xampp\\htdocs\\ERP\\src\\lib\\mcp\\index.ts";
 import { createSupabaseHandler } from "npm:@lovable.dev/mcp-js@0.20.0/stacks/supabase";
-Deno.serve(createSupabaseHandler(mcp, { functionName: "mcp" }));
+Deno.serve(createSupabaseHandler(mcp_default, { functionName: "mcp" }));
