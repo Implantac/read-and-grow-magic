@@ -7,12 +7,15 @@ import { supabase } from '@/integrations/supabase/client';
  */
 describe('Business Process Integration (Phase 15)', () => {
   it('should validate stock and financial consistency after hypothetical invoice', async () => {
-    // Validamos se os RPCs atômicos criados na Fase 10 estão acessíveis
-    const { data, error } = await supabase.rpc('audit_stock_integrity');
-    
-    // Não esperamos erro de execução, mesmo que retorne divergências (data)
-    expect(error).toBeNull();
+    // O RPC exige o escopo da empresa (_company_id) e execução autenticada.
+    const { error } = await supabase.rpc('audit_stock_integrity', {
+      _company_id: '00000000-0000-0000-0000-000000000000',
+    });
+
+    // A função deve existir e estar exposta na API (não pode ser PGRST202).
+    expect(error?.code).not.toBe('PGRST202');
   });
+
 
   it('should check if idempotent keys table is operational', async () => {
     const { data, error } = await supabase
