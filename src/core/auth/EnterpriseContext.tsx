@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef, type MutableRefObject } from 'react';
-import { withRenderMonitor } from '@/core/debug/RenderDepthMonitor';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import { TenantService, type CompanyRow } from '@/services/admin/TenantService';
