@@ -10,6 +10,8 @@ export const redeOperacionalSection: NavSection = {
       children: [
         { title: 'Painel Gerencial', href: '/operacional/abastecimento/central', icon: 'LayoutDashboard' },
         { title: 'Torre de Controle', href: '/operacional/rede/painel', icon: 'Layers' },
+        { title: 'Transferências', href: '/operacional/rede/transferencias', icon: 'Truck' },
+        { title: 'Receber Mercadoria', href: '/operacional/rede/receber', icon: 'PackageCheck' },
       ],
     },
   ],

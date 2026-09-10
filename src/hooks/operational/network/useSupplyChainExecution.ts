@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnterprise } from "@/core/auth/EnterpriseContext";
 import { useAppStore } from "@/stores/useAppStore";
-import { transferWorkflow, TransferStatus } from "@/services/operational/inventory/transferWorkflow";
+import { transferWorkflow, TransferStatus, ItemQuantity } from "@/services/operational/inventory/transferWorkflow";
 import { useInventoryOrchestrator } from "@/core/orchestration/InventoryOrchestrator";
 import { toast } from "sonner";
 
@@ -63,9 +63,10 @@ export function useSupplyChainExecution() {
   });
 
   const transitionMutation = useMutation({
-    mutationFn: async ({ transferId, toStatus, quantity, notes }: { 
-      transferId: string, 
+    mutationFn: async ({ transferId, toStatus, itemQuantities, quantity, notes }: {
+      transferId: string,
       toStatus: TransferStatus,
+      itemQuantities?: ItemQuantity[],
       quantity?: number,
       notes?: string
     }) => {
@@ -77,7 +78,7 @@ export function useSupplyChainExecution() {
         transferId,
         toStatus,
         userId: user.id,
-        quantity,
+        itemQuantities,
         notes,
         correlationId
       });

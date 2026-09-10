@@ -11,6 +11,7 @@ const UnifiedSupplyChain = lazy(() => import("../modules/operational/supply-chai
 const SupplyChainTower = lazy(() => import("../modules/operational/network/SupplyChainTower"));
 const NetworkControlTower = lazy(() => import("../modules/operational/network/components/NetworkControlTower"));
 const StockTransfers = lazy(() => import("../modules/operational/network/StockTransfers"));
+const ReceiveTransfers = lazy(() => import("../modules/operational/network/ReceiveTransfers"));
 const ReplenishmentIntelligence = lazy(() => import("../modules/operational/network/ReplenishmentIntelligence"));
 const PosTerminals = lazy(() => import("../modules/operational/network/PosTerminals"));
 
@@ -32,6 +33,7 @@ export const OperationalRoutes = [
   <Route key="op-abastecimento-central" path="abastecimento/central" element={<UnifiedSupplyChain />} />,
 
   <Route key="op-rede-transfers" path="rede/transferencias" element={<StockTransfers />} />,
+  <Route key="op-rede-receber" path="rede/receber" element={<ReceiveTransfers />} />,
   <Route key="op-rede-replenish" path="rede/ressuprimento" element={<ReplenishmentIntelligence />} />,
   <Route key="op-rede-pos" path="rede/terminais" element={<PosTerminals />} />,
 ];

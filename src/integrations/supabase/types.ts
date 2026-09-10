@@ -18643,6 +18643,7 @@ export type Database = {
           divergence_qty: number
           expected_qty: number
           id: string
+          item_id: string | null
           notes: string | null
           product_id: string
           reason: string | null
@@ -18655,6 +18656,7 @@ export type Database = {
           divergence_qty: number
           expected_qty: number
           id?: string
+          item_id?: string | null
           notes?: string | null
           product_id: string
           reason?: string | null
@@ -18667,12 +18669,20 @@ export type Database = {
           divergence_qty?: number
           expected_qty?: number
           id?: string
+          item_id?: string | null
           notes?: string | null
           product_id?: string
           reason?: string | null
           transfer_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "stock_transfer_divergences_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "stock_transfer_items"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "stock_transfer_divergences_product_id_fkey"
             columns: ["product_id"]
@@ -24850,6 +24860,10 @@ export type Database = {
         | "RECEBIDA"
         | "CONFERIDA"
         | "ENCERRADA"
+        | "REJEITADA"
+        | "CANCELADA"
+        | "RECEBIDA PARCIAL"
+        | "RECEBIDA COM DIVERGÊNCIA"
       unit_type: "factory" | "distribution_center" | "store" | "office"
     }
     CompositeTypes: {
@@ -25031,6 +25045,10 @@ export const Constants = {
         "RECEBIDA",
         "CONFERIDA",
         "ENCERRADA",
+        "REJEITADA",
+        "CANCELADA",
+        "RECEBIDA PARCIAL",
+        "RECEBIDA COM DIVERGÊNCIA",
       ],
       unit_type: ["factory", "distribution_center", "store", "office"],
     },
