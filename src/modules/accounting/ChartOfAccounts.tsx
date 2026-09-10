@@ -189,6 +189,70 @@ export default function ChartOfAccountsPage() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Nova Conta Contábil</DialogTitle>
+            <DialogDescription>Cadastre uma conta no plano de contas</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Código *</Label>
+                <Input value={form.code} onChange={(e) => setForm((p) => ({ ...p, code: e.target.value }))} placeholder="1.1.01" />
+              </div>
+              <div>
+                <Label>Conta pai</Label>
+                <Select value={form.parentId} onValueChange={(v) => setForm((p) => ({ ...p, parentId: v }))}>
+                  <SelectTrigger><SelectValue placeholder="Nenhuma (raiz)" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Nenhuma (raiz)</SelectItem>
+                    {accounts.map((a) => <SelectItem key={a.id} value={a.id}>{a.code} — {a.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div>
+              <Label>Nome *</Label>
+              <Input value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} placeholder="Caixa Geral" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Tipo</Label>
+                <Select value={form.type} onValueChange={(v) => setForm((p) => ({ ...p, type: v as AccountType }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="asset">Ativo</SelectItem>
+                    <SelectItem value="liability">Passivo</SelectItem>
+                    <SelectItem value="equity">Patrimônio Líquido</SelectItem>
+                    <SelectItem value="revenue">Receita</SelectItem>
+                    <SelectItem value="expense">Despesa</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Natureza</Label>
+                <Select value={form.nature} onValueChange={(v) => setForm((p) => ({ ...p, nature: v as AccountNature }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="debit">Devedora</SelectItem>
+                    <SelectItem value="credit">Credora</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox id="analytical" checked={form.isAnalytical} onCheckedChange={(v) => setForm((p) => ({ ...p, isAnalytical: Boolean(v) }))} />
+              <Label htmlFor="analytical">Conta analítica (aceita lançamentos)</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsFormOpen(false)}>Cancelar</Button>
+            <Button onClick={handleCreateAccount}>Criar conta</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 }
