@@ -156,9 +156,7 @@ export default function Dashboard() {
 
       {/* Guia de primeira configuração — some quando tudo está feito */}
       <SetupChecklist />
-    </>
-  );
-}
+
 
 
       {/* KPIs Principais — sempre visíveis */}
