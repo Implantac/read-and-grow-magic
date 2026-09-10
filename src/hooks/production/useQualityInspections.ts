@@ -43,13 +43,14 @@ export function useQualityInspections() {
   const fetch = useCallback(async () => {
     setLoading(true);
     const { data, error } = await looseTable('quality_inspections')
-      .select('*, production_orders(order_number)')
+      .select('*, production_orders(order_number), production_steps(name)')
       .order('inspection_date', { ascending: false });
     if (error) { console.error(error); toast.error('Erro ao carregar inspeções'); }
     else {
       setInspections(((data as InspectionRow[] | null) || []).map((d) => ({
         ...d,
         order_number: d.production_orders?.order_number,
+        step_name: d.production_steps?.name,
       })));
     }
     setLoading(false);

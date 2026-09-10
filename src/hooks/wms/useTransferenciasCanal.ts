@@ -116,7 +116,7 @@ export function useConfirmTransferenciaCanal() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { data, error } = await (supabase as any).rpc('advance_transferencia_canal', {
+      const { data, error } = await supabase.rpc('advance_transferencia_canal', {
         p_transferencia_id: id,
         p_status: 'recebido',
       });
