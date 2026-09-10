@@ -245,7 +245,7 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
               id: user.id,
               name: userName,
               email: user.email || '',
-              role: finalRole,
+              role: finalRole as NonNullable<typeof storeState.user>['role'],
               permissions: ['all'],
             },
             userRole: finalRole,
