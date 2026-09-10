@@ -4,6 +4,7 @@ import { PageHeader } from '@/shared/components/PageHeader';
 import { Button } from '@/ui/base/button';
 import { AttentionCenter } from '@/shared/components/AttentionCenter';
 import { QuickActions } from '@/shared/components/QuickActions';
+import { SetupChecklist } from '@/shared/components/SetupChecklist';
 import { usePendingWork } from '@/hooks/system/usePendingWork';
 
 export default function Pendencias() {
