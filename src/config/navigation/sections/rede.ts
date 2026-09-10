@@ -1,7 +1,7 @@
 import type { NavSection } from '../types';
 
 export const redeOperacionalSection: NavSection = {
-  label: 'Abastecimento',
+  label: 'Rede & Distribuição',
   items: [
     {
       title: 'Abastecimento',

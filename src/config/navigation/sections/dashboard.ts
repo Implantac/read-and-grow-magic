@@ -1,7 +1,7 @@
 import type { NavSection } from '../types';
 
 export const dashboardSection: NavSection = {
-  label: 'Início',
+  label: 'Executivo & IA',
   items: [
     { title: 'Visão geral', href: '/dashboard', icon: 'LayoutDashboard' },
     { title: 'Pendências', href: '/pendencias', icon: 'ListChecks' },
