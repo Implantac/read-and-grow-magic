@@ -264,7 +264,7 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
         if (!isMounted.current) return;
 
         if (units) {
-          const operationalUnits = units as Array<{ id: string; name: string; type: string; is_active: boolean }>;
+          const operationalUnits = units as unknown as Array<{ id: string; name: string; type: string; is_active: boolean }>;
           const mappedUnits = operationalUnits.map((u) => ({
             id: u.id,
             name: u.name,
