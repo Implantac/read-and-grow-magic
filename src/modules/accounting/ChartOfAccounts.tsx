@@ -19,6 +19,17 @@ import { KPICard } from '@/shared/components/KPICard';
 
 import { formatBRL } from '@/lib/formatters';
 import { EmptyState } from '@/shared/components/EmptyState';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/ui/base/dialog';
+import { Label } from '@/ui/base/label';
+import { Checkbox } from '@/ui/base/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
+import { toastError } from '@/lib/toastHelpers';
+import type { AccountType, AccountNature } from '@/types/accounting';
+
+const EMPTY_ACCOUNT_FORM = {
+  code: '', name: '', type: 'asset' as AccountType, nature: 'debit' as AccountNature,
+  parentId: 'none', isAnalytical: true,
+};
 const typeColorMap: Record<string, string> = {
   asset: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
   liability: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
