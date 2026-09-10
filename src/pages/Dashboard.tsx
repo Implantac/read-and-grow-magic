@@ -12,6 +12,8 @@ import { ExecutiveConsensus } from '@/components/executive/ExecutiveConsensus';
 import { ExecutiveCouncilPanel } from '@/components/executive/ExecutiveCouncilPanel';
 import { ExecutiveActionsPanel } from '@/components/executive/ExecutiveActionsPanel';
 import { useDashboardData } from '@/hooks/system/useDashboardData';
+import { AttentionCenter } from '@/shared/components/AttentionCenter';
+import { QuickActions } from '@/shared/components/QuickActions';
 import { useExecutiveDashboard, useUnifiedChat } from '@/hooks/ai/useExecutiveAI';
 import {
   ShoppingCart, Wallet, Package, Factory, Truck, Warehouse,
@@ -145,6 +147,12 @@ export default function Dashboard() {
           </div>
         </div>
       </header>
+
+      {/* O que precisa da atenção + atalhos por tarefa */}
+      <section aria-label="Pendências e ações rápidas" className="grid gap-4 lg:grid-cols-3">
+        <AttentionCenter limit={4} showAllLink className="lg:col-span-2" />
+        <QuickActions />
+      </section>
 
       {/* KPIs Principais — sempre visíveis */}
       <section aria-label="Indicadores principais" className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

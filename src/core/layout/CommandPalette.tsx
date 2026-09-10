@@ -30,6 +30,18 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Plug, BookOpen, Scale, Radio, Wifi, Tag, Activity,
 };
 
+/** Ações orientadas à tarefa — o usuário novo não sabe o nome do módulo. */
+const taskActions = [
+  { title: 'Receber mercadoria', href: '/operacional/rede/receber', icon: 'PackageCheck', keywords: 'receber recebimento chegou carga entrada conferir mercadoria' },
+  { title: 'Transferir mercadoria', href: '/operacional/rede/transferencias', icon: 'ArrowLeftRight', keywords: 'transferir transferencia enviar mandar remessa loja cd fabrica' },
+  { title: 'Pedir reposição', href: '/operacional/rede/ressuprimento', icon: 'Package', keywords: 'reposicao repor ressuprimento abastecer pedir falta ruptura' },
+  { title: 'Consultar estoque', href: '/estoque/saldos', icon: 'Calculator', keywords: 'estoque saldo quanto tenho disponivel reservado transito' },
+  { title: 'Ver pendências', href: '/pendencias', icon: 'Activity', keywords: 'pendencia atencao problema resolver alerta' },
+  { title: 'Ver lojas', href: '/operacional/loja/central', icon: 'Building', keywords: 'loja lojas unidade filial minha loja' },
+  { title: 'Novo pedido de compra', href: '/compras/pedidos', icon: 'ShoppingCart', keywords: 'comprar compra fornecedor pedido' },
+  { title: 'Vender no PDV', href: '/comercial/pdv', icon: 'ShoppingBag', keywords: 'venda vender pdv caixa frente de loja' },
+];
+
 interface FlatItem {
   title: string;
   href: string;
@@ -87,9 +99,26 @@ export function CommandPalette() {
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
-      <CommandInput placeholder="Buscar módulo, tela ou funcionalidade..." />
+      <CommandInput placeholder="O que você quer fazer?" />
       <CommandList>
         <CommandEmpty>Nenhum resultado encontrado.</CommandEmpty>
+        <CommandGroup heading="O que você quer fazer?">
+          {taskActions.map((action) => {
+            const Icon = iconMap[action.icon] || Activity;
+            return (
+              <CommandItem
+                key={action.href + action.title}
+                value={`${action.title} ${action.keywords}`}
+                onSelect={() => handleSelect(action.href)}
+                className="gap-2"
+              >
+                <Icon className="h-4 w-4 text-primary" />
+                <span>{action.title}</span>
+              </CommandItem>
+            );
+          })}
+        </CommandGroup>
+        <CommandSeparator />
         {groups.map(([group, items], idx) => (
           <div key={group}>
             {idx > 0 && <CommandSeparator />}

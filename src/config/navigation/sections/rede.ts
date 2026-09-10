@@ -1,17 +1,18 @@
 import type { NavSection } from '../types';
 
 export const redeOperacionalSection: NavSection = {
-  label: 'Rede & Distribuição',
+  label: 'Abastecimento',
   items: [
     {
-      title: 'Central de Abastecimento',
+      title: 'Abastecimento',
       href: '/operacional/abastecimento',
       icon: 'ArrowRightLeft',
       children: [
-        { title: 'Painel Gerencial', href: '/operacional/abastecimento/central', icon: 'LayoutDashboard' },
-        { title: 'Torre de Controle', href: '/operacional/rede/painel', icon: 'Layers' },
+        { title: 'Painel de abastecimento', href: '/operacional/abastecimento/central', icon: 'LayoutDashboard' },
+        { title: 'Reposição', href: '/operacional/rede/ressuprimento', icon: 'RefreshCw' },
         { title: 'Transferências', href: '/operacional/rede/transferencias', icon: 'Truck' },
-        { title: 'Receber Mercadoria', href: '/operacional/rede/receber', icon: 'PackageCheck' },
+        { title: 'Receber mercadoria', href: '/operacional/rede/receber', icon: 'PackageCheck' },
+        { title: 'Situação das lojas', href: '/operacional/rede/painel', icon: 'Layers' },
       ],
     },
   ],
