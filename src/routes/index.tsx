@@ -8,7 +8,7 @@
  * 4. Security Hardening: RLS consolidation and data integrity triggers active.
  */
 import { Suspense, lazy, useMemo, memo } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { OnboardingGuard } from '@/components/OnboardingGuard';
 import { MainLayout } from '@/core/layout/MainLayout';
@@ -56,6 +56,34 @@ const ProcurementDashboardPage = lazy(() => import('@/pages/purchasing/Procureme
  */
 const PageLoader = () => <PageLoading message="Sincronizando Ecossistema..." />;
 
+const legacyAliasMap: Array<[string, string]> = [
+  ['/production/', '/producao/'],
+  ['/commerce/', '/comercial/'],
+  ['/logistica/', '/wms/'],
+  ['/billing/', '/financeiro/'],
+  ['/wms/reposicao', '/wms/ressuprimento'],
+  ['/logistica/recebimento', '/wms/recebimento'],
+  ['/logistica/transferencias', '/operacional/rede/transferencias'],
+  ['/estoque/inventario', '/estoque/saldos'],
+  ['/marketplace', '/admin/manual'],
+  ['/saude/', '/dashboard'],
+  ['/agro/', '/dashboard'],
+  ['/construcao/', '/dashboard'],
+];
+
+const LegacyAliasRedirect = () => {
+  const { pathname, search } = useLocation();
+
+  for (const [from, to] of legacyAliasMap) {
+    if (pathname === from || pathname.startsWith(from)) {
+      const suffix = pathname === from ? '' : pathname.slice(from.length);
+      const target = `${to}${suffix}`;
+      return <Navigate to={`${target}${search || ''}`} replace />;
+    }
+  }
+
+  return <Navigate to={`/dashboard${search || ''}`} replace />;
+};
 
 /**
  * Enterprise Operating Ecosystem (EOE) Optimized Router
@@ -88,6 +116,32 @@ const AppRoutes = memo(() => {
               <SuccessDashboard />
             </Suspense>
           } />
+
+          {/* Parent routes used by navigation and direct URL entry */}
+          <Route path="/comercial" element={<Navigate to="/comercial/dashboard" replace />} />
+          <Route path="/financeiro" element={<Navigate to="/financeiro/dashboard" replace />} />
+          <Route path="/fiscal" element={<Navigate to="/fiscal/dashboard" replace />} />
+          <Route path="/contabilidade" element={<Navigate to="/contabilidade/dashboard" replace />} />
+          <Route path="/producao" element={<Navigate to="/producao/dashboard" replace />} />
+          <Route path="/wms" element={<Navigate to="/wms/dashboard" replace />} />
+          <Route path="/tms" element={<Navigate to="/tms/dashboard" replace />} />
+          <Route path="/rfid" element={<Navigate to="/rfid/dashboard" replace />} />
+          <Route path="/admin" element={<Navigate to="/admin/manual" replace />} />
+          <Route path="/operacional" element={<Navigate to="/operacional/abastecimento" replace />} />
+
+          {/* Legacy aliases for old URLs and stale links */}
+          <Route path="/production/*" element={<LegacyAliasRedirect />} />
+          <Route path="/commerce/*" element={<LegacyAliasRedirect />} />
+          <Route path="/logistica/*" element={<LegacyAliasRedirect />} />
+          <Route path="/billing/*" element={<LegacyAliasRedirect />} />
+          <Route path="/marketplace" element={<LegacyAliasRedirect />} />
+          <Route path="/saude/*" element={<LegacyAliasRedirect />} />
+          <Route path="/agro/*" element={<LegacyAliasRedirect />} />
+          <Route path="/construcao/*" element={<LegacyAliasRedirect />} />
+          <Route path="/estoque/inventario" element={<LegacyAliasRedirect />} />
+          <Route path="/wms/reposicao" element={<LegacyAliasRedirect />} />
+          <Route path="/logistica/recebimento" element={<LegacyAliasRedirect />} />
+          <Route path="/logistica/transferencias" element={<LegacyAliasRedirect />} />
 
           {/* Inventory and purchasing aliases used by the sidebar */}
           <Route path="/estoque/produtos" element={<InventoryProductsPage />} />
