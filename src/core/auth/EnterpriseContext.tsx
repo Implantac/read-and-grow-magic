@@ -251,7 +251,7 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
             },
             userRole: finalRole,
             isAuthenticated: true
-          };
+          } as unknown as ReturnType<typeof useStore.getState>;
         });
       }
 
