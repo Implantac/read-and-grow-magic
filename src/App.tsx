@@ -15,10 +15,8 @@ import { useFinancialOrchestrator } from '@/core/orchestration/FinancialOrchestr
 import { useFiscalOrchestrator } from '@/core/orchestration/FiscalOrchestrator';
 import { useStoreOrchestrator } from '@/core/orchestration/StoreOrchestrator';
 
-import { withRenderMonitor } from '@/core/debug/RenderDepthMonitor';
-
 // Centralized Routing System (EOE optimized)
-const AppRoutes = React.memo(lazy(() => import('./routes/index')));
+const AppRoutes = lazy(() => import('./routes/index'));
 
 const RealtimeAlertsBridge = React.memo(() => {
   const enterprise = useEnterprise();
