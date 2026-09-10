@@ -4,9 +4,28 @@ import { toastSuccess, toastError } from '@/lib/toastHelpers';
 import type { PurchaseOrder, Quotation, Supplier } from '@/types/purchasing';
 import type { PurchaseOrderRow, PurchaseOrderItemRow } from '@/services/purchasing/purchasingService';
 import type { Tables, TablesInsert } from '@/integrations/supabase/types';
+import { useEnterprise } from '@/core/auth/EnterpriseContext';
+
+export interface NewPurchaseOrderInput {
+  supplierId: string;
+  supplierName: string;
+  expectedDelivery?: string | null;
+  priority: string;
+  paymentTerms?: string | null;
+  notes?: string | null;
+  items: {
+    productId: string | null;
+    productCode: string;
+    productName: string;
+    unit: string;
+    quantity: number;
+    unitPrice: number;
+  }[];
+}
 
 export function usePurchasing() {
   const queryClient = useQueryClient();
+  const { currentCompany } = useEnterprise();
 
   const suppliersQuery = useQuery<Supplier[]>({
     queryKey: ['purchasing_suppliers'],
@@ -68,6 +87,46 @@ export function usePurchasing() {
     }
   });
 
+  const createOrderMutation = useMutation({
+    mutationFn: async (input: NewPurchaseOrderInput) => {
+      const subtotal = input.items.reduce((sum, i) => sum + i.quantity * i.unitPrice, 0);
+      const order: TablesInsert<'purchase_orders'> = {
+        number: `PC-${Date.now().toString().slice(-8)}`,
+        supplier_id: input.supplierId || null,
+        supplier_name: input.supplierName,
+        date: new Date().toISOString().slice(0, 10),
+        expected_delivery: input.expectedDelivery || null,
+        priority: input.priority,
+        payment_terms: input.paymentTerms || null,
+        notes: input.notes || null,
+        status: 'draft',
+        subtotal,
+        total: subtotal,
+        ...(currentCompany?.id ? { company_id: currentCompany.id } : {}),
+      };
+
+      return purchasingService.createPurchaseOrderWithItems(
+        order,
+        input.items.map((i) => ({
+          product_id: i.productId,
+          product_code: i.productCode,
+          product_name: i.productName,
+          unit: i.unit,
+          quantity: i.quantity,
+          unit_price: i.unitPrice,
+          total: i.quantity * i.unitPrice,
+        })),
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['purchasing_orders'] });
+      toastSuccess('Pedido de compra criado com sucesso');
+    },
+    onError: (error: unknown) => {
+      toastError(error instanceof Error ? error.message : 'Erro ao criar pedido de compra');
+    },
+  });
+
   return {
     suppliers: (suppliersQuery.data || []) as Supplier[],
     suppliersLoading: suppliersQuery.isLoading,
@@ -77,5 +136,7 @@ export function usePurchasing() {
     quotationsLoading: quotationsQuery.isLoading,
     
     createSupplier: createSupplierMutation.mutateAsync,
+    createOrder: createOrderMutation.mutateAsync,
+    creatingOrder: createOrderMutation.isPending,
   };
 }
