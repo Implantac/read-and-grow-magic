@@ -75,11 +75,34 @@ const accountFilterFields: FilterField[] = [
 ];
 
 export default function ChartOfAccountsPage() {
-  const { accounts, accountsLoading: loading } = useAccounting();
+  const { accounts, accountsLoading: loading, createAccount } = useAccounting();
 
   const [search, setSearch] = useState('');
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [filters, setFilters] = useState<Record<string, string>>({});
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [form, setForm] = useState(EMPTY_ACCOUNT_FORM);
+
+  const handleCreateAccount = () => {
+    if (!form.code.trim() || !form.name.trim()) {
+      toastError('Informe código e nome da conta');
+      return;
+    }
+    const parent = form.parentId !== 'none' ? accounts.find((a) => a.id === form.parentId) : null;
+    createAccount({
+      code: form.code.trim(),
+      name: form.name.trim(),
+      type: form.type,
+      nature: form.nature,
+      parentId: parent ? parent.id : null,
+      level: parent ? parent.level + 1 : 1,
+      isAnalytical: form.isAnalytical,
+      balance: 0,
+      active: true,
+    });
+    setIsFormOpen(false);
+    setForm(EMPTY_ACCOUNT_FORM);
+  };
 
   // Auto-expand root accounts when data loads
   useMemo(() => {
