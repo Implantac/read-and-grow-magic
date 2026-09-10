@@ -9855,6 +9855,102 @@ export type Database = {
           },
         ]
       }
+      nfse: {
+        Row: {
+          access_key: string | null
+          authorization_date: string | null
+          branch_id: string
+          cancellation_date: string | null
+          cancellation_reason: string | null
+          canal_operacional: string
+          city_code: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          customer_document: string | null
+          customer_name: string
+          deductions: number
+          id: string
+          iss_rate: number
+          iss_value: number
+          issue_date: string
+          number: string
+          protocol: string | null
+          provider_document: string
+          provider_name: string
+          series: string
+          service_code: string
+          service_description: string
+          service_value: number
+          status: string
+          total: number
+          updated_at: string
+          xml_content: string | null
+        }
+        Insert: {
+          access_key?: string | null
+          authorization_date?: string | null
+          branch_id: string
+          cancellation_date?: string | null
+          cancellation_reason?: string | null
+          canal_operacional?: string
+          city_code: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          customer_document?: string | null
+          customer_name: string
+          deductions?: number
+          id?: string
+          iss_rate?: number
+          iss_value?: number
+          issue_date?: string
+          number: string
+          protocol?: string | null
+          provider_document: string
+          provider_name: string
+          series?: string
+          service_code: string
+          service_description: string
+          service_value?: number
+          status?: string
+          total?: number
+          updated_at?: string
+          xml_content?: string | null
+        }
+        Update: {
+          access_key?: string | null
+          authorization_date?: string | null
+          branch_id?: string
+          cancellation_date?: string | null
+          cancellation_reason?: string | null
+          canal_operacional?: string
+          city_code?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          customer_document?: string | null
+          customer_name?: string
+          deductions?: number
+          id?: string
+          iss_rate?: number
+          iss_value?: number
+          issue_date?: string
+          number?: string
+          protocol?: string | null
+          provider_document?: string
+          provider_name?: string
+          series?: string
+          service_code?: string
+          service_description?: string
+          service_value?: number
+          status?: string
+          total?: number
+          updated_at?: string
+          xml_content?: string | null
+        }
+        Relationships: []
+      }
       nfe: {
         Row: {
           access_key: string | null
@@ -15324,71 +15420,6 @@ export type Database = {
             columns: ["suggested_location_id"]
             isOneToOne: false
             referencedRelation: "wms_storage_locations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      quality_inspections: {
-        Row: {
-          approved_quantity: number
-          company_id: string
-          corrective_action: string | null
-          created_at: string
-          defect_category: string | null
-          defect_reason: string | null
-          id: string
-          inspection_date: string
-          inspector: string
-          notes: string | null
-          production_order_id: string | null
-          rejected_quantity: number
-          severity: string
-          status: string
-          step_id: string | null
-          updated_at: string
-        }
-        Insert: {
-          approved_quantity?: number
-          company_id?: string
-          corrective_action?: string | null
-          created_at?: string
-          defect_category?: string | null
-          defect_reason?: string | null
-          id?: string
-          inspection_date?: string
-          inspector?: string
-          notes?: string | null
-          production_order_id?: string | null
-          rejected_quantity?: number
-          severity?: string
-          status?: string
-          step_id?: string | null
-          updated_at?: string
-        }
-        Update: {
-          approved_quantity?: number
-          company_id?: string
-          corrective_action?: string | null
-          created_at?: string
-          defect_category?: string | null
-          defect_reason?: string | null
-          id?: string
-          inspection_date?: string
-          inspector?: string
-          notes?: string | null
-          production_order_id?: string | null
-          rejected_quantity?: number
-          severity?: string
-          status?: string
-          step_id?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "quality_inspections_production_order_id_fkey"
-            columns: ["production_order_id"]
-            isOneToOne: false
-            referencedRelation: "production_orders"
             referencedColumns: ["id"]
           },
         ]
@@ -23872,6 +23903,28 @@ export type Database = {
       }
     }
     Functions: {
+      complete_fiscal_emission: {
+        Args: {
+          _access_key?: string
+          _error?: string
+          _job_id: string
+          _protocol?: string
+          _status: string
+        }
+        Returns: Json
+      }
+      create_nfse_draft: {
+        Args: { _payload: Json }
+        Returns: Json
+      }
+      enqueue_fiscal_emission: {
+        Args: { _document_id: string; _document_type: string; _payload?: Json }
+        Returns: Json
+      }
+      advance_transferencia_canal: {
+        Args: { p_status: string; p_transferencia_id: string }
+        Returns: Database["public"]["Tables"]["transferencias_canal"]["Row"]
+      }
       adjust_stock: {
         Args: {
           p_branch_id: string

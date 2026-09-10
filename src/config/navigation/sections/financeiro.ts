@@ -23,7 +23,11 @@ export const financeiroSection: NavSection = {
       icon: 'FileCheck',
       children: [
         { title: 'Painel Fiscal', href: '/fiscal/dashboard', icon: 'Gauge' },
-        { title: 'Emissão NF-e / NFC-e', href: '/fiscal/nfe', icon: 'FileText' },
+        { title: 'Emissão NF-e', href: '/fiscal/nfe', icon: 'FileText' },
+        { title: 'Emissão NFC-e', href: '/fiscal/nfce', icon: 'Receipt' },
+        { title: 'Emissão NFS-e', href: '/fiscal/nfse', icon: 'FilePlus' },
+        { title: 'Emissão CT-e', href: '/fiscal/cte', icon: 'Truck' },
+        { title: 'Emissão MDF-e', href: '/fiscal/mdfe', icon: 'Route' },
         { title: 'SPED & Obrigações', href: '/fiscal/sped', icon: 'FileDown' },
         { title: 'Regras de Impostos', href: '/fiscal/regras-fiscais', icon: 'Sliders' },
       ],

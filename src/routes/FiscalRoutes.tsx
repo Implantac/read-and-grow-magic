@@ -4,6 +4,7 @@ import { Route, Navigate } from 'react-router-dom';
 const FiscalDashboardPage = lazy(() => import("../modules/fiscal/FiscalDashboard"));
 const NFePage = lazy(() => import("../modules/fiscal/NFe"));
 const NFCePage = lazy(() => import("../modules/fiscal/NFCe"));
+const NFSePage = lazy(() => import("../modules/fiscal/NFSe"));
 const CTePage = lazy(() => import("../modules/fiscal/CTe"));
 const MDFePage = lazy(() => import("../modules/fiscal/MDFe"));
 const TaxRulesPage = lazy(() => import("../modules/fiscal/TaxRules"));
@@ -19,6 +20,7 @@ export const FiscalRoutes = [
   <Route key="fiscal-dash" path="dashboard" element={<FiscalDashboardPage />} />,
   <Route key="fiscal-nfe" path="nfe" element={<NFePage />} />,
   <Route key="fiscal-nfce" path="nfce" element={<NFCePage />} />,
+  <Route key="fiscal-nfse" path="nfse" element={<NFSePage />} />,
   <Route key="fiscal-cte" path="cte" element={<CTePage />} />,
   <Route key="fiscal-mdfe" path="mdfe" element={<MDFePage />} />,
   <Route key="fiscal-regras" path="regras-fiscais" element={<TaxRulesPage />} />,
