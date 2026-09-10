@@ -37,7 +37,7 @@ export function useSetupProgress() {
         countRows('branches', companyId!),
         countRows('products', companyId!),
         countRows('stock_balances', companyId!),
-        countRows('customers', companyId!),
+        countRows('clients', companyId!),
         countRows('stock_transfer_orders', companyId!),
       ]);
 
@@ -48,7 +48,7 @@ export function useSetupProgress() {
           description: 'Cada unidade que guarda ou vende mercadoria precisa existir no sistema.',
           done: branches > 0,
           actionLabel: 'Cadastrar unidades',
-          href: '/gestao/filiais',
+          href: '/admin/empresas',
         },
         {
           id: 'products',
