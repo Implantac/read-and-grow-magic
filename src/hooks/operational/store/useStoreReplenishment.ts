@@ -67,7 +67,6 @@ export function useStoreReplenishment() {
         transferId: transfer.id,
         toStatus: 'APROVADA',
         userId: userData.user.id,
-        quantity,
         correlationId,
       });
 
