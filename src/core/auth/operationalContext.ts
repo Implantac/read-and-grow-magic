@@ -43,7 +43,11 @@ const UNIT_TYPE_ALIASES: Record<string, OperationalUnitType> = {
 
 export function normalizeUnitType(value: string | null | undefined): OperationalUnitType {
   if (!value) return 'STORE';
-  const normalized = value.trim().toUpperCase().replace(/[ÁÀÂÃ]/g, 'A').replace(/Í/g, 'I');
+  const normalized = value
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase();
   return UNIT_TYPE_ALIASES[normalized] ?? 'STORE';
 }
 
