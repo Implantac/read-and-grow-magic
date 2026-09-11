@@ -1,6 +1,6 @@
 # Baseline técnico atual
 
-Gerado automaticamente em 2026-09-11T12:01:48.297Z por `npm run baseline`.
+Gerado automaticamente em 2026-09-11T12:02:33.682Z por `npm run baseline`.
 
 ## Ambiente
 
@@ -25,6 +25,7 @@ Gerado automaticamente em 2026-09-11T12:01:48.297Z por `npm run baseline`.
 - `npm run build` — `vite build`
 - `npm run lint:ci` — `node scripts/lint-ci.mjs`
 - `npm run typecheck` — `tsgo --noEmit`
+- `npm run test` — `vitest run`
 - `npm run e2e` — `playwright test --project=chromium`
 - `npm run baseline` — `node scripts/generate-baseline.mjs`
 - `npm run regression` — `node scripts/regression-suite.mjs`
