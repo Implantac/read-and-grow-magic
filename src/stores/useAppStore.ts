@@ -2,11 +2,13 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User, Company, Branch } from '@/types';
 
+export type UserRole = 'admin' | 'manager' | 'operator' | 'viewer' | 'diretor' | 'financeiro' | 'fiscal' | 'contabil' | 'compras' | 'producao' | 'logistica' | 'comercial' | 'loja' | 'franquia' | 'system_admin' | 'admin_matriz';
+
 interface AppState {
   // Auth
   user: User | null;
   isAuthenticated: boolean;
-  userRole: 'admin' | 'manager' | 'operator' | 'viewer' | 'diretor' | 'financeiro' | 'fiscal' | 'contabil' | 'compras' | 'producao' | 'logistica' | 'comercial' | 'loja' | 'franquia' | 'system_admin' | 'admin_matriz' | null;
+  userRole: UserRole | null;
   
   // Company/Branch
   activeCompany: Company | null;
@@ -21,7 +23,7 @@ interface AppState {
   // Actions
   setUser: (user: User | null) => void;
   logout: () => void;
-  setUserRole: (role: 'admin' | 'manager' | 'operator' | 'viewer' | 'diretor' | 'financeiro' | 'fiscal' | 'contabil' | 'compras' | 'producao' | 'logistica' | 'comercial' | 'loja' | 'franquia' | 'system_admin' | 'admin_matriz' | null) => void;
+  setUserRole: (role: UserRole | null) => void;
   setActiveCompany: (company: Company | null) => void;
   setActiveBranch: (branch: Branch | null) => void;
   toggleSidebar: () => void;
