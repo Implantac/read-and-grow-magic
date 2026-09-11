@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
-import { useAppStore } from '@/stores/useAppStore';
+import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { useCanalStore, type CanalFilter } from '@/stores/useCanalStore';
 
 import { formatBRL } from '@/lib/formatters';
@@ -25,9 +25,9 @@ function withCanal<TQ>(
 }
 
 export function useDashboardData() {
-  const { activeCompany } = useAppStore();
+  const { currentCompany } = useEnterprise();
   const { canal, branchId } = useCanalStore();
-  const companyId = activeCompany?.id;
+  const companyId = currentCompany?.id;
 
   return useQuery({
     queryKey: ['dashboard-consolidated', companyId, canal, branchId],

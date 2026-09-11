@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { useAppStore } from '@/stores/useAppStore';
+import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
@@ -17,7 +18,8 @@ import { toastSuccess, toastError } from '@/lib/toastHelpers';
 import { validateFile, MB } from '@/lib/fileValidation';
 
 export default function ProfilePage() {
-  const { user, activeCompany, activeBranch, theme, toggleTheme, setUser } = useAppStore();
+  const { user, theme, toggleTheme, setUser } = useAppStore();
+  const { currentCompany, currentBranch } = useEnterprise();
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
   const [phone, setPhone] = useState('');
@@ -182,12 +184,12 @@ export default function ProfilePage() {
               <div className="flex items-center gap-2 text-sm">
                 <Building2 className="h-4 w-4 text-muted-foreground" />
                 <span className="text-muted-foreground">Empresa:</span>
-                <span className="font-medium text-foreground">{activeCompany?.name || '—'}</span>
+                <span className="font-medium text-foreground">{currentCompany?.name || '—'}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <MapPin className="h-4 w-4 text-muted-foreground" />
                 <span className="text-muted-foreground">Filial:</span>
-                <span className="font-medium text-foreground">{activeBranch?.name || '—'}</span>
+                <span className="font-medium text-foreground">{currentBranch?.name || '—'}</span>
               </div>
             </div>
           </CardContent>

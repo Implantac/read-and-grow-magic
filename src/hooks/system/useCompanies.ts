@@ -1,31 +1,13 @@
-import { useAppStore } from '@/stores/useAppStore';
 import { useSupabaseQuery } from '@/hooks/shared/useSupabaseQuery';
-import { useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { companiesService } from '@/services/system/companiesService';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 import { Company } from '@/types/administration';
 import { errorMessage } from '@/lib/errors';
-import type { Company as StoreCompany } from '@/types';
 
 export function useCompanies() {
   const queryClient = useQueryClient();
-  const { setCompanies, activeCompany, setActiveCompany } = useAppStore();
   const query = useSupabaseQuery(['companies'], () => companiesService.getAll());
-
-  useEffect(() => {
-    if (query.data && query.data.length > 0) {
-      const companies = (query.data as unknown as Company[]).map((c) => ({
-        ...c,
-        branches: [],
-      })) as unknown as StoreCompany[];
-      setCompanies(companies);
-      if (!activeCompany) {
-        setActiveCompany(companies[0]);
-      }
-    }
-
-  }, [query.data, setCompanies, activeCompany, setActiveCompany]);
 
   const createCompanyMutation = useMutation({
     mutationFn: (company: Omit<Company, 'id' | 'createdAt' | 'updatedAt'>) => companiesService.create(company),

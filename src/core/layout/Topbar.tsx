@@ -1,8 +1,6 @@
-import { useEffect } from 'react';
 import { Command, Menu, Moon, Search, Sparkles, Sun } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '@/stores/useAppStore';
-import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 import { Button } from '@/ui/base/button';
 import { cn } from '@/lib/utils';
 import { TenantSelector } from './topbar/TenantSelector';
@@ -12,13 +10,7 @@ import { UserMenu } from './topbar/UserMenu';
 
 export function Topbar() {
   const navigate = useNavigate();
-  const { activeCompany, activeBranch, sidebarCollapsed, theme, toggleSidebar, toggleSidebarMobile, toggleTheme } = useAppStore();
-
-  const setActiveCompanyId = useEnterpriseStore((s) => s.setActiveCompanyId);
-  const setActiveBranchId = useEnterpriseStore((s) => s.setActiveBranchId);
-
-  useEffect(() => { setActiveCompanyId(activeCompany?.id ?? null); }, [activeCompany?.id, setActiveCompanyId]);
-  useEffect(() => { setActiveBranchId(activeBranch?.id ?? null); }, [activeBranch?.id, setActiveBranchId]);
+  const { sidebarCollapsed, theme, toggleSidebar, toggleSidebarMobile, toggleTheme } = useAppStore();
 
   return (
     <header
