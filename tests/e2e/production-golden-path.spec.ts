@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 
 test.describe('Produção - Golden Path', () => {
   test.fixme('deve completar fluxo completo de manufatura (PCP)', async () => {

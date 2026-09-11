@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 
 test.describe('Compras - Golden Path', () => {
   test.fixme('deve completar fluxo completo de suprimentos', async () => {
