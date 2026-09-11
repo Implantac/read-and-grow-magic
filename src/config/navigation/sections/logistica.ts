@@ -7,6 +7,9 @@ export const logisticaSection: NavSection = {
       title: 'WMS Avançado',
       href: '/wms',
       icon: 'Warehouse',
+      unitTypes: ['DISTRIBUTION_CENTER', 'INDUSTRY'],
+      channels: ['ATACADO_INDUSTRIA'],
+      scopes: ['SINGLE_UNIT'],
       children: [
         { title: 'Dashboard WMS', href: '/wms/dashboard', icon: 'LayoutDashboard' },
         { title: 'Inventário Geral', href: '/wms/inventario', icon: 'Package' },
@@ -34,6 +37,9 @@ export const logisticaSection: NavSection = {
       title: 'RFID & IoT',
       href: '/rfid/dashboard',
       icon: 'Radio',
+      unitTypes: ['DISTRIBUTION_CENTER', 'INDUSTRY'],
+      channels: ['ATACADO_INDUSTRIA'],
+      scopes: ['SINGLE_UNIT'],
       children: [
         { title: 'Dashboard RFID', href: '/rfid/dashboard', icon: 'LayoutDashboard' },
         { title: 'Status Leitores', href: '/rfid/leitores', icon: 'Wifi' },

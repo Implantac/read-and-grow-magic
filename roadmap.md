@@ -1,7 +1,7 @@
 # Roadmap
 
 - [x] Fase 0 — Baseline, inventário e matriz de rastreabilidade
-- [ ] Fase 1 — Segurança multiempresa, filial e canal (Lote 1 concluído: contexto canônico, empresas/unidades autorizadas, troca atômica, cache, seletor validado e testes; navegação contextual e RLS por unidade/canal seguem no próximo lote)
+- [ ] Fase 1 — Segurança multiempresa, filial e canal (Lotes 1–2 concluídos: contexto canônico, troca atômica, seletor, navegação contextual e proteção de páginas; RLS por unidade/canal segue no próximo lote)
 - [ ] Fase 3 — Ledger e integridade de estoque
 - [ ] Fases 4–5 — PDV, fiscal e financeiro idempotentes
 - [ ] Fase 2 — Consolidação arquitetural e tipagem por domínio

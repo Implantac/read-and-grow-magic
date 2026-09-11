@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/system/useAuth';
 import { useEnterprise } from '../auth/EnterpriseContext';
 import { SEGMENTS } from '@/config/adaptive';
 
-import { navigationSections } from '@/config/navigation';
+import { getNavigationForContext } from '@/config/navigation';
 import { TooltipProvider } from '@/ui/base/tooltip';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Input } from '@/ui/base/input';
@@ -25,7 +25,15 @@ export function Sidebar() {
   const isMobile = useIsMobile();
   const sidebarCollapsed = isMobile ? false : rawCollapsed;
   const { signOut } = useAuth({ initialize: false });
-  const { segment } = useEnterprise();
+  const { segment, activeUnitType, activeChannel, scope, role, permissions } = useEnterprise();
+
+  const contextualSections = useMemo(() => getNavigationForContext({
+    unitType: activeUnitType,
+    channel: activeChannel,
+    scope,
+    role,
+    permissions,
+  }), [activeUnitType, activeChannel, scope, role, permissions]);
 
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -39,11 +47,11 @@ export function Sidebar() {
   };
 
   const filteredSections = useMemo(() => {
-    if (!searchQuery.trim()) return navigationSections;
+    if (!searchQuery.trim()) return contextualSections;
 
     const query = searchQuery.toLowerCase().trim();
     
-    return navigationSections.map(section => {
+    return contextualSections.map(section => {
       const filteredItems = section.items.filter(item => {
         const matchesTitle = item.title.toLowerCase().includes(query);
         const matchesHref = item.href.toLowerCase().includes(query);
@@ -61,8 +69,8 @@ export function Sidebar() {
         ...section,
         items: filteredItems
       };
-    }).filter(Boolean) as typeof navigationSections;
-  }, [searchQuery]);
+    }).filter(Boolean) as typeof contextualSections;
+  }, [contextualSections, searchQuery]);
 
   const flatItems = useMemo(() => {
     const items: any[] = [];
@@ -107,7 +115,7 @@ export function Sidebar() {
   // Auto-expand any parent whose child matches the current route
   useEffect(() => {
     const toExpand: string[] = [];
-    for (const section of navigationSections) {
+    for (const section of contextualSections) {
       for (const item of section.items) {
         if (item.children && item.children.length > 0) {
           const hit = item.children.some((c) => c && location.pathname.startsWith(c.href));
@@ -119,7 +127,7 @@ export function Sidebar() {
       setExpandedItems((prev) => Array.from(new Set([...prev, ...toExpand])));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname]);
+  }, [contextualSections, location.pathname]);
 
   // Auto-close mobile drawer on route change
   useEffect(() => {

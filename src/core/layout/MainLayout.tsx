@@ -11,6 +11,7 @@ import { BrainDrawer, BRAIN_OPEN_EVENT } from '@/components/ai/BrainDrawer';
 import { DrillDownDrawer } from '@/shared/components/DrillDownDrawer';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
+import { OperationalScopeGuard } from '@/components/auth/OperationalScopeGuard';
 
 export const MainLayout = () => {
   const { isAuthenticated, sidebarCollapsed, theme, user } = useAppStore();
@@ -106,7 +107,9 @@ export const MainLayout = () => {
               </div>
             }
           >
-            <Outlet />
+            <OperationalScopeGuard>
+              <Outlet />
+            </OperationalScopeGuard>
           </Suspense>
         </div>
 

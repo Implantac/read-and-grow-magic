@@ -18,6 +18,9 @@ export const operacionalSection: NavSection = {
       title: 'Produção (PCP)',
       href: '/producao',
       icon: 'Factory',
+      unitTypes: ['INDUSTRY'],
+      channels: ['ATACADO_INDUSTRIA'],
+      scopes: ['SINGLE_UNIT'],
       children: [
         { title: 'Painel PCP Industrial', href: '/producao/pcp', icon: 'BarChart3' },
         { title: 'Ordens de Produção', href: '/producao/ordens', icon: 'ClipboardCheck' },
