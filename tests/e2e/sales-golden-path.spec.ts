@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Vendas - Golden Path', () => {
-  test('deve completar fluxo completo de venda', async ({ page }) => {
+  test.fixme('deve completar fluxo completo de venda', async () => {
     // 1. Login
     // 2. Seleção de Empresa/Filial
     // 3. Seleção de Cliente
@@ -13,8 +13,6 @@ test.describe('Vendas - Golden Path', () => {
     // 9. Geração de Títulos Financeiros
     // 10. Verificação de Auditoria
     
-    // Nota: Estes testes são estruturais para o CI e devem ser expandidos 
-    // conforme o ambiente de staging for provisionado com dados reais.
-    expect(true).toBe(true);
+    // Pendente: fixture determinística e asserções de estoque, fiscal e financeiro.
   });
 });

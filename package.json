@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "lint:ci": "node scripts/lint-ci.mjs",
     "typecheck": "tsgo --noEmit",
+    "test": "vitest run",
     "preview": "vite preview",
     "seed:replenishment": "python3 scripts/seed-replenishment.py",
     "e2e": "playwright test --project=chromium",
