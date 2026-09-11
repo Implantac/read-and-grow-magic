@@ -5,6 +5,7 @@ import type { Database } from '@/integrations/supabase/types';
 import { TenantService, type CompanyRow } from '@/services/admin/TenantService';
 import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 import { useCanalStore } from '@/stores/useCanalStore';
+import type { UserRole } from '@/stores/useAppStore';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   getAllowedChannels,
@@ -27,12 +28,6 @@ export interface BranchRef {
   name: string; 
   code?: string; 
   tipo?: 'FACTORY' | 'DISTRIBUTION_CENTER' | 'STORE' | 'industria' | 'filial' | 'cd' | string;
-}
-
-type UserRole = NonNullable<ReturnType<typeof useAppStoreState>['userRole']>;
-
-function useAppStoreState() {
-  return {} as typeof import('@/stores/useAppStore').useAppStore extends { getState: () => infer State } ? State : never;
 }
 
 function mapOperationalUnits(units: Array<{ id: string; name: string; type: string }>): OperationalUnit[] {
