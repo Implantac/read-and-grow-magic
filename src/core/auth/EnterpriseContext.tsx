@@ -371,7 +371,12 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
       await applyCompany(data as CompanyRow);
 
       const units = await TenantService.getOperationalUnits(data.id);
-      const mappedUnits = (units ?? []).map((unit) => ({
+      const operationalUnits = (units ?? []) as unknown as Array<{
+        id: string;
+        name: string;
+        type: string;
+      }>;
+      const mappedUnits = operationalUnits.map((unit) => ({
         id: unit.id,
         name: unit.name,
         tipo: unit.type.toUpperCase() as BranchRef['tipo'],
