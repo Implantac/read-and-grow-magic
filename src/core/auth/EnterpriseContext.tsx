@@ -5,6 +5,18 @@ import type { Database } from '@/integrations/supabase/types';
 import { TenantService, type CompanyRow } from '@/services/admin/TenantService';
 import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 import { useCanalStore } from '@/stores/useCanalStore';
+import { useQueryClient } from '@tanstack/react-query';
+import {
+  getAllowedChannels,
+  getDefaultChannel,
+  normalizeUnitType,
+  resolveContextSelection,
+  type OperationalChannel,
+  type OperationalScope,
+  type OperationalUnit,
+  type OperationalUnitType,
+  type SwitchContextInput,
+} from './operationalContext';
 
 export type Segment = 'textile' | 'food_factory' | 'pharma' | 'distribution' | 'services' | 'retail' | 'general' | 'fio' | 'tecelagem' | 'animal_feed' | 'industry' | 'wholesaler' | 'retail_chain' | 'franchise' | 'holding' | 'apparel';
 
@@ -15,6 +27,29 @@ export interface BranchRef {
   name: string; 
   code?: string; 
   tipo?: 'FACTORY' | 'DISTRIBUTION_CENTER' | 'STORE' | 'industria' | 'filial' | 'cd' | string;
+}
+
+type UserRole = NonNullable<ReturnType<typeof useAppStoreState>['userRole']>;
+
+function useAppStoreState() {
+  return {} as typeof import('@/stores/useAppStore').useAppStore extends { getState: () => infer State } ? State : never;
+}
+
+function mapOperationalUnits(units: Array<{ id: string; name: string; type: string }>): OperationalUnit[] {
+  return units.map((unit) => {
+    const unitType = normalizeUnitType(unit.type);
+    return {
+      id: unit.id,
+      name: unit.name,
+      unitType,
+      defaultChannel: getDefaultChannel(unitType),
+      allowedChannels: getAllowedChannels(unitType),
+    };
+  });
+}
+
+function toBranchRef(unit: OperationalUnit | null): BranchRef | null {
+  return unit ? { id: unit.id, name: unit.name, code: unit.code, tipo: unit.unitType } : null;
 }
 
 
@@ -65,12 +100,21 @@ export interface Policy {
   };
 }
 
-interface EnterpriseContextType {
+export interface EnterpriseContextType {
+  userId: string | null;
   currentTenant: TenantRef | null;
   currentGroup: GroupRef | null;
+  allowedCompanies: CompanyRow[];
   currentCompany: CompanyRow | null;
   currentBranch: BranchRef | null;
   allBranches: BranchRef[];
+  allowedUnits: OperationalUnit[];
+  activeUnitType: OperationalUnitType | null;
+  activeChannel: OperationalChannel;
+  scope: OperationalScope;
+  role: UserRole | null;
+  permissions: string[];
+  isMatrixManager: boolean;
   segment: Segment;
   subSegment: string;
   companySize: string;
@@ -78,8 +122,12 @@ interface EnterpriseContextType {
   operationTypes: OperationType[];
   policies: Policy;
   isLoading: boolean;
+  isSwitching: boolean;
+  isReady: boolean;
+  error: string | null;
+  switchContext: (input: SwitchContextInput) => Promise<void>;
   setCompany: (id: string) => Promise<void>;
-  setBranch: (id: string | null) => void;
+  setBranch: (id: string | null) => Promise<void>;
   executiveCouncil: {
     roles: string[];
     mission: string;
@@ -89,11 +137,21 @@ interface EnterpriseContextType {
 const EnterpriseContext = createContext<EnterpriseContextType | undefined>(undefined);
 
 export const EnterpriseProvider = React.memo(({ children }: { children: React.ReactNode }) => {
+  const queryClient = useQueryClient();
+  const [userId, setUserId] = useState<string | null>(null);
   const [currentTenant, setCurrentTenant] = useState<TenantRef | null>(null);
   const [currentGroup, setCurrentGroup] = useState<GroupRef | null>(null);
+  const [allowedCompanies, setAllowedCompanies] = useState<CompanyRow[]>([]);
   const [currentCompany, setCurrentCompany] = useState<CompanyRow | null>(null);
   const [currentBranch, setCurrentBranch] = useState<BranchRef | null>(null);
   const [allBranches, setAllBranches] = useState<BranchRef[]>([]);
+  const [allowedUnits, setAllowedUnits] = useState<OperationalUnit[]>([]);
+  const [activeChannel, setActiveChannel] = useState<OperationalChannel>('CONSOLIDADO');
+  const [scope, setScope] = useState<OperationalScope>('CONSOLIDATED');
+  const [role, setRole] = useState<UserRole | null>(null);
+  const [permissions, setPermissions] = useState<string[]>([]);
+  const [isSwitching, setIsSwitching] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [segment, setSegment] = useState<Segment>('general');
   const [subSegment, setSubSegment] = useState<string>('');
@@ -134,6 +192,7 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
     }
   });
   const [isLoading, setIsLoading] = useState(true);
+  const isMatrixManager = role === 'admin_matriz' || role === 'system_admin' || role === 'admin';
 
   const executiveCouncil = {
     roles: [
@@ -198,9 +257,16 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
 
       if (!user) {
         if (isMounted.current) {
+          setUserId(null);
+          setAllowedCompanies([]);
           setCurrentCompany(null);
           setCurrentBranch(null);
           setAllBranches([]);
+          setAllowedUnits([]);
+          setActiveChannel('CONSOLIDADO');
+          setScope('CONSOLIDATED');
+          setRole(null);
+          setPermissions([]);
           setIsLoading(false);
           lastSyncUser.current = null;
         }
@@ -215,6 +281,7 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
       }
       
       lastSyncUser.current = user.id;
+      setUserId(user.id);
       setIsLoading(true);
 
       const [companies, profile, userRoleData] = await Promise.all([
@@ -232,6 +299,9 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
         ? userRoleData as NonNullable<ReturnType<typeof useStore.getState>>['userRole']
         : 'viewer';
       const userName = profile?.name || user.user_metadata?.name || user.email?.split('@')[0] || 'Usuário';
+      setRole(finalRole);
+      setPermissions(['all']);
+      setAllowedCompanies(companies ?? []);
       
       const needsUpdate = 
         storeState.user?.id !== user.id || 
@@ -269,19 +339,17 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
 
         if (units) {
           const operationalUnits = units as unknown as Array<{ id: string; name: string; type: string; is_active: boolean }>;
-          const mappedUnits = operationalUnits.map((u) => ({
-            id: u.id,
-            name: u.name,
-            tipo: u.type.toUpperCase() as BranchRef['tipo'],
-            is_active: u.is_active
-          }));
+          const canonicalUnits = mapOperationalUnits(operationalUnits);
+          const mappedUnits = canonicalUnits.map(toBranchRef).filter((unit): unit is BranchRef => unit !== null);
+          setAllowedUnits(canonicalUnits);
           
           setAllBranches(prev => {
             if (prev.length === mappedUnits.length && prev.every((v, i) => v.id === mappedUnits[i].id)) return prev;
             return mappedUnits;
           });
           
-          const defaultBranch = mappedUnits.find(b => b.id === profile?.default_branch_id) || mappedUnits[0] || null;
+          const defaultUnit = canonicalUnits.find(unit => unit.id === profile?.default_branch_id) || canonicalUnits[0] || null;
+          const defaultBranch = toBranchRef(defaultUnit);
           
           setCurrentBranch(prev => {
             if (prev?.id === defaultBranch?.id) return prev;
@@ -294,9 +362,16 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
               enterpriseStore.setActiveBranchId(defaultBranch.id);
             }
             useCanalStore.getState().setBranchId(defaultBranch.id);
+            const defaultChannel = defaultUnit?.defaultChannel ?? 'VAREJO_PDV';
+            useCanalStore.getState().setCanal(defaultChannel);
+            setActiveChannel(defaultChannel);
+            setScope('SINGLE_UNIT');
           } else {
             useEnterpriseStore.getState().setActiveBranchId(null);
             useCanalStore.getState().setBranchId(null);
+            useCanalStore.getState().setCanal('CONSOLIDADO');
+            setActiveChannel('CONSOLIDADO');
+            setScope('CONSOLIDATED');
           }
         }
       }
@@ -344,9 +419,16 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
       } else if (event === 'SIGNED_OUT') {
         if (lastSyncUser.current !== null) {
           lastSyncUser.current = null;
+          setUserId(null);
+          setAllowedCompanies([]);
           setCurrentCompany(null);
           setCurrentBranch(null);
           setAllBranches([]);
+          setAllowedUnits([]);
+          setActiveChannel('CONSOLIDADO');
+          setScope('CONSOLIDATED');
+          setRole(null);
+          setPermissions([]);
           setIsLoading(false);
           
           // Clear global stores on sign out
@@ -365,56 +447,91 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
   }, [loadActiveTenant]);
 
 
-  const setCompany = useCallback(async (id: string) => {
-    const { data } = await supabase.from('companies').select('*').eq('id', id).maybeSingle();
-    if (data) {
-      await applyCompany(data as CompanyRow);
+  const switchContext = useCallback(async (input: SwitchContextInput) => {
+    if (isSwitching) return;
+    setIsSwitching(true);
+    setError(null);
 
-      const units = await TenantService.getOperationalUnits(data.id);
-      const operationalUnits = (units ?? []) as unknown as Array<{
-        id: string;
-        name: string;
-        type: string;
-      }>;
-      const mappedUnits = operationalUnits.map((unit) => ({
-        id: unit.id,
-        name: unit.name,
-        tipo: unit.type.toUpperCase() as BranchRef['tipo'],
-      }));
-      setAllBranches(mappedUnits);
+    try {
+      const company = allowedCompanies.find((candidate) => candidate.id === input.companyId);
+      if (!company) throw new Error('Empresa não autorizada para este usuário.');
 
-      const nextBranch = mappedUnits[0] ?? null;
-      setCurrentBranch(nextBranch);
-      useEnterpriseStore.getState().setActiveBranchId(nextBranch?.id ?? null);
-      useCanalStore.getState().setBranchId(nextBranch?.id ?? null);
+      await queryClient.cancelQueries();
+      const unitsResult = company.id === currentCompany?.id && allowedUnits.length > 0
+        ? allowedUnits
+        : mapOperationalUnits((await TenantService.getOperationalUnits(company.id) ?? []) as Array<{ id: string; name: string; type: string }>);
+      const selection = resolveContextSelection(unitsResult, input, isMatrixManager);
+
+      await applyCompany(company);
+      setAllowedUnits(unitsResult);
+      setAllBranches(unitsResult.map(toBranchRef).filter((unit): unit is BranchRef => unit !== null));
+      setCurrentBranch(toBranchRef(selection.unit));
+      setActiveChannel(selection.channel);
+      setScope(selection.scope);
+
+      useEnterpriseStore.getState().setActiveCompanyId(company.id);
+      useEnterpriseStore.getState().setActiveBranchId(selection.unit?.id ?? null);
+      useCanalStore.getState().setBranchId(selection.unit?.id ?? null);
+      useCanalStore.getState().setCanal(selection.channel);
+
+      queryClient.removeQueries();
+      await queryClient.invalidateQueries();
+
+      if (userId) {
+        const { error: auditError } = await supabase.from('system_audit_logs').insert({
+          user_id: userId,
+          company_id: company.id,
+          action: 'OPERATIONAL_CONTEXT_SWITCHED',
+          module: 'core',
+          entity_name: 'operational_context',
+          entity_id: selection.unit?.id ?? null,
+          new_data: {
+            company_id: company.id,
+            unit_id: selection.unit?.id ?? null,
+            channel: selection.channel,
+            scope: selection.scope,
+          },
+        });
+        if (auditError) console.warn('Não foi possível registrar a troca de contexto.');
+      }
+    } catch (switchError) {
+      const message = switchError instanceof Error ? switchError.message : 'Não foi possível trocar o contexto operacional.';
+      setError(message);
+      throw switchError;
+    } finally {
+      setIsSwitching(false);
     }
-  }, [applyCompany]);
+  }, [allowedCompanies, allowedUnits, applyCompany, currentCompany?.id, isMatrixManager, isSwitching, queryClient, userId]);
+
+  const setCompany = useCallback(async (id: string) => {
+    await switchContext({ companyId: id, scope: 'SINGLE_UNIT' });
+  }, [switchContext]);
 
   const setBranch = useCallback(async (id: string | null) => {
-    if (!id) {
-      setCurrentBranch(null);
-      useEnterpriseStore.getState().setActiveBranchId(null);
-      useCanalStore.getState().setBranchId(null);
-      return;
-    }
-    const branch = allBranches.find(b => b.id === id);
-    if (branch) {
-      setCurrentBranch(prev => {
-        if (prev?.id === branch.id) return prev;
-        return { ...branch };
-      });
-      useEnterpriseStore.getState().setActiveBranchId(id);
-      useCanalStore.getState().setBranchId(id);
-    }
-  }, [allBranches]);
+    if (!currentCompany) return;
+    await switchContext({
+      companyId: currentCompany.id,
+      unitId: id,
+      scope: id ? 'SINGLE_UNIT' : 'CONSOLIDATED',
+    });
+  }, [currentCompany, switchContext]);
 
   const value = useMemo(() => {
     return {
+      userId,
       currentTenant,
       currentGroup,
+      allowedCompanies,
       currentCompany,
       currentBranch,
       allBranches,
+      allowedUnits,
+      activeUnitType: allowedUnits.find((unit) => unit.id === currentBranch?.id)?.unitType ?? null,
+      activeChannel,
+      scope,
+      role,
+      permissions,
+      isMatrixManager,
       segment,
       subSegment,
       companySize,
@@ -422,25 +539,40 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
       operationTypes,
       policies,
       isLoading,
+      isSwitching,
+      isReady: !isLoading && !isSwitching && Boolean(userId && currentCompany),
+      error,
+      switchContext,
       setCompany,
       setBranch,
       executiveCouncil
     };
   }, [
-    currentTenant, 
-    currentGroup, 
-    currentCompany?.id, 
-    currentBranch?.id, 
-    allBranches.length,
+    userId,
+    currentTenant,
+    currentGroup,
+    allowedCompanies,
+    currentCompany,
+    currentBranch,
+    allBranches,
+    allowedUnits,
+    activeChannel,
+    scope,
+    role,
+    permissions,
+    isMatrixManager,
     segment, 
     subSegment, 
     companySize, 
     taxRegime, 
-    operationTypes.length,
+    operationTypes,
     policies.inventory.replenishmentMethod,
     policies.core.workflowEnabled,
     policies.core.eventOrchestrationEnabled,
     isLoading,
+    isSwitching,
+    error,
+    switchContext,
     setCompany,
     setBranch
   ]);
