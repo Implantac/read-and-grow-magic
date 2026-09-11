@@ -3,6 +3,8 @@ import { withRenderMonitor } from '@/core/debug/RenderDepthMonitor';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import { TenantService, type CompanyRow } from '@/services/admin/TenantService';
+import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
+import { useCanalStore } from '@/stores/useCanalStore';
 
 export type Segment = 'textile' | 'food_factory' | 'pharma' | 'distribution' | 'services' | 'retail' | 'general' | 'fio' | 'tecelagem' | 'animal_feed' | 'industry' | 'wholesaler' | 'retail_chain' | 'franchise' | 'holding' | 'apparel';
 
@@ -151,6 +153,7 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
       if (prev?.id === company.id) return prev;
       return { ...company };
     });
+    useEnterpriseStore.getState().setActiveCompanyId(company.id);
 
     const { getEnterprisePolicies } = await import('@/core/orchestration/policyEngine');
     const seg = (company.segment as Segment | null) ?? 'general';
@@ -286,11 +289,14 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
           });
           
           if (defaultBranch) {
-            const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
             const enterpriseStore = useEnterpriseStore.getState();
             if (enterpriseStore.activeBranchId !== defaultBranch.id) {
-              useEnterpriseStore.setState({ activeBranchId: defaultBranch.id });
+              enterpriseStore.setActiveBranchId(defaultBranch.id);
             }
+            useCanalStore.getState().setBranchId(defaultBranch.id);
+          } else {
+            useEnterpriseStore.getState().setActiveBranchId(null);
+            useCanalStore.getState().setBranchId(null);
           }
         }
       }
@@ -345,10 +351,9 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
           
           // Clear global stores on sign out
           import('@/stores/useAppStore').then(({ useAppStore }) => useAppStore.getState().logout());
-          import('@/core/stores/useEnterpriseStore').then(({ useEnterpriseStore }) => {
-            useEnterpriseStore.getState().setActiveCompanyId(null);
-            useEnterpriseStore.getState().setActiveBranchId(null);
-          });
+          useEnterpriseStore.getState().setActiveCompanyId(null);
+          useEnterpriseStore.getState().setActiveBranchId(null);
+          useCanalStore.getState().setBranchId(null);
         }
       }
     });
@@ -363,17 +368,28 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
   const setCompany = useCallback(async (id: string) => {
     const { data } = await supabase.from('companies').select('*').eq('id', id).maybeSingle();
     if (data) {
-      applyCompany(data as CompanyRow);
-      const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
-      useEnterpriseStore.setState({ activeCompanyId: id });
+      await applyCompany(data as CompanyRow);
+
+      const units = await TenantService.getOperationalUnits(data.id);
+      const mappedUnits = (units ?? []).map((unit) => ({
+        id: unit.id,
+        name: unit.name,
+        tipo: unit.type.toUpperCase() as BranchRef['tipo'],
+      }));
+      setAllBranches(mappedUnits);
+
+      const nextBranch = mappedUnits[0] ?? null;
+      setCurrentBranch(nextBranch);
+      useEnterpriseStore.getState().setActiveBranchId(nextBranch?.id ?? null);
+      useCanalStore.getState().setBranchId(nextBranch?.id ?? null);
     }
   }, [applyCompany]);
 
   const setBranch = useCallback(async (id: string | null) => {
     if (!id) {
       setCurrentBranch(null);
-      const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
-      useEnterpriseStore.setState({ activeBranchId: null });
+      useEnterpriseStore.getState().setActiveBranchId(null);
+      useCanalStore.getState().setBranchId(null);
       return;
     }
     const branch = allBranches.find(b => b.id === id);
@@ -382,8 +398,8 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
         if (prev?.id === branch.id) return prev;
         return { ...branch };
       });
-      const { useEnterpriseStore } = await import('@/core/stores/useEnterpriseStore');
-      useEnterpriseStore.setState({ activeBranchId: id });
+      useEnterpriseStore.getState().setActiveBranchId(id);
+      useCanalStore.getState().setBranchId(id);
     }
   }, [allBranches]);
 
