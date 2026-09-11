@@ -11,9 +11,15 @@ import { join } from "node:path";
 
 const DIR = ".lovable/tests";
 const url = process.env.RLS_CHECK_DATABASE_URL;
+const required = process.argv.includes("--require-connection") || process.env.CI === "true";
 
 if (!url) {
-  console.log("⚠️  RLS_CHECK_DATABASE_URL ausente — checagem de RLS ignorada.");
+  const message = "RLS_CHECK_DATABASE_URL ausente — checagem de RLS não executada.";
+  if (required) {
+    console.error(`❌ ${message}`);
+    process.exit(1);
+  }
+  console.warn(`⚠️  ${message}`);
   process.exit(0);
 }
 
