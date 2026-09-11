@@ -69,7 +69,7 @@ export function Sidebar() {
         ...section,
         items: filteredItems
       };
-    }).filter(Boolean) as typeof navigationSections;
+    }).filter(Boolean) as typeof contextualSections;
   }, [contextualSections, searchQuery]);
 
   const flatItems = useMemo(() => {
