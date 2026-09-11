@@ -17,6 +17,7 @@ export const gestaoSection: NavSection = {
       title: 'Configurações',
       href: '/admin/usuarios',
       icon: 'Settings',
+      roles: ['admin', 'manager', 'system_admin', 'admin_matriz'],
       children: [
         { title: 'Usuários & Permissões', href: '/admin/usuarios', icon: 'Users' },
         { title: 'Empresas & Filiais', href: '/admin/empresas', icon: 'Building' },
