@@ -33,9 +33,11 @@ export class TenantService {
 
   static async getOperationalUnits(companyId: string) {
     const { data, error } = await supabase
-      .from('operational_units' as any)
-      .select('id, name, type, is_active')
-      .eq('company_id', companyId);
+      .from('branches')
+      .select('id, name, code, tipo, canal_padrao, is_active')
+      .eq('company_id', companyId)
+      .eq('is_active', true)
+      .order('name');
     
     if (error) throw error;
     return data;

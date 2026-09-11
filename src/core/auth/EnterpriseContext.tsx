@@ -30,14 +30,27 @@ export interface BranchRef {
   tipo?: 'FACTORY' | 'DISTRIBUTION_CENTER' | 'STORE' | 'industria' | 'filial' | 'cd' | string;
 }
 
-function mapOperationalUnits(units: Array<{ id: string; name: string; type: string }>): OperationalUnit[] {
+interface OperationalUnitSource {
+  id: string;
+  name: string;
+  code?: string | null;
+  type?: string | null;
+  tipo?: string | null;
+  canal_padrao?: string | null;
+}
+
+function mapOperationalUnits(units: OperationalUnitSource[]): OperationalUnit[] {
   return units.map((unit) => {
-    const unitType = normalizeUnitType(unit.type);
+    const unitType = normalizeUnitType(unit.tipo ?? unit.type);
+    const defaultChannel = unit.canal_padrao === 'VAREJO_PDV' || unit.canal_padrao === 'ATACADO_INDUSTRIA'
+      ? unit.canal_padrao
+      : getDefaultChannel(unitType);
     return {
       id: unit.id,
       name: unit.name,
+      code: unit.code ?? undefined,
       unitType,
-      defaultChannel: getDefaultChannel(unitType),
+      defaultChannel,
       allowedChannels: getAllowedChannels(unitType),
     };
   });
@@ -333,7 +346,7 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
         if (!isMounted.current) return;
 
         if (units) {
-          const operationalUnits = units as unknown as Array<{ id: string; name: string; type: string; is_active: boolean }>;
+          const operationalUnits = units as unknown as OperationalUnitSource[];
           const canonicalUnits = mapOperationalUnits(operationalUnits);
           const mappedUnits = canonicalUnits.map(toBranchRef).filter((unit): unit is BranchRef => unit !== null);
           setAllowedUnits(canonicalUnits);
@@ -454,7 +467,7 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
       await queryClient.cancelQueries();
       const unitsResult = company.id === currentCompany?.id && allowedUnits.length > 0
         ? allowedUnits
-        : mapOperationalUnits((await TenantService.getOperationalUnits(company.id) ?? []) as unknown as Array<{ id: string; name: string; type: string }>);
+        : mapOperationalUnits((await TenantService.getOperationalUnits(company.id) ?? []) as unknown as OperationalUnitSource[]);
       const selection = resolveContextSelection(unitsResult, input, isMatrixManager);
 
       await applyCompany(company);
