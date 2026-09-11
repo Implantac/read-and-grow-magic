@@ -1,5 +1,4 @@
 import type { LucideIcon } from 'lucide-react';
-import { useAppStore } from '@/stores/useAppStore';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { ModuleKPISection } from '@/components/dashboard/ModuleKPISection';
 import { ConsolidatedCharts } from '@/components/dashboard/ConsolidatedCharts';
@@ -70,8 +69,7 @@ const verticalStyles: Record<string, { border: string; bg: string; bgHover: stri
 };
 
 export default function Dashboard() {
-  const { activeCompany, activeBranch } = useAppStore();
-  const { segment } = useEnterprise();
+  const { currentCompany, currentBranch, segment } = useEnterprise();
   const { data, isLoading } = useDashboardData();
   const queryClient = useQueryClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -125,7 +123,7 @@ export default function Dashboard() {
         <div>
           <h1 className="text-2xl font-bold text-foreground tracking-tight">Dashboard Consolidado</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Visão geral • {activeCompany?.name}{activeBranch ? ` - ${activeBranch.name}` : ''}
+            Visão geral • {currentCompany?.name}{currentBranch ? ` - ${currentBranch.name}` : ''}
           </p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
