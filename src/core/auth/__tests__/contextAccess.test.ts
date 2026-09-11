@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { evaluateContextAccess, getRouteContextCriteria } from '../contextAccess';
+import { getNavigationForContext } from '@/config/navigation';
 
 const storeContext = {
   unitType: 'STORE' as const,
@@ -41,5 +42,13 @@ describe('contextAccess', () => {
   it('mantém rotas gerais sem restrição contextual', () => {
     expect(getRouteContextCriteria('/dashboard')).toBeNull();
     expect(getRouteContextCriteria('/financeiro/dashboard')).toBeNull();
+  });
+
+  it('remove grupos e filhos incompatíveis do menu da loja', () => {
+    const sections = getNavigationForContext(storeContext);
+    const items = sections.flatMap((section) => section.items);
+    expect(items.some((item) => item.title === 'Produção (PCP)')).toBe(false);
+    expect(items.some((item) => item.title === 'WMS Avançado')).toBe(false);
+    expect(items.some((item) => item.children?.some((child) => child.href === '/comercial/pdv'))).toBe(true);
   });
 });

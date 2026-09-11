@@ -29,7 +29,13 @@ export const navigationItems = navigationSections.flatMap((s) => s.items);
 export function getNavigationForContext(context: OperationalAccessContext): NavSection[] {
   return navigationSections.flatMap((section) => {
     const items = section.items.flatMap((item) => {
-      const children = item.children?.filter((child) => evaluateContextAccess(child, context).allowed);
+      const children = item.children?.filter((child) => evaluateContextAccess({
+        unitTypes: child.unitTypes ?? item.unitTypes,
+        channels: child.channels ?? item.channels,
+        scopes: child.scopes ?? item.scopes,
+        roles: child.roles ?? item.roles,
+        permission: child.permission ?? item.permission,
+      }, context).allowed);
       const itemAllowed = evaluateContextAccess(item, context).allowed;
 
       if (!itemAllowed && (!children || children.length === 0)) return [];
