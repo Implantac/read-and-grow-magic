@@ -26,7 +26,7 @@ console.log("=== USE ERP - REGRESSION SUITE (FASE 17) ===\n");
 // 1. Static Analysis
 run("node", ["scripts/lint-ci.mjs"], "Lint (Strict)");
 run("npm", ["run", "typecheck"], "TypeScript (Typecheck)");
-run("node", ["scripts/rls-static-check.mjs"], "RLS Static Analysis");
+run("node", ["scripts/rls-static-check.mjs", "--require-connection"], "RLS Static Analysis");
 
 // 2. Automated Tests
 run("npm", ["run", "test", "--", "run"], "Unit & Integration (Vitest)");

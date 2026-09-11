@@ -18,11 +18,10 @@ test.describe('Logistic-Fiscal Correlation Traceability', () => {
     // In a real E2E environment, we expect seeded data or a previous step creating a transfer
     const taskCount = await page.locator('text=TRF-').count();
     
-    if (taskCount === 0) {
-      console.log('No tasks found. Skipping UI interaction and validating Orchestrator logic directly.');
-      // Since seeding via UI is complex in a single test, we validate the presence of the orchestrators
-      return;
-    }
+    expect(
+      taskCount,
+      'O ambiente E2E precisa conter uma transferência preparada para validar o fluxo logístico-fiscal',
+    ).toBeGreaterThan(0);
 
     // 4. Trigger Transition: SEPARAÇÃO -> EM TRÂNSITO (Expedir)
     // This is the trigger point for FiscalOrchestrator
