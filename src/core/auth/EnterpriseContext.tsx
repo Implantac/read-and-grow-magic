@@ -454,7 +454,7 @@ export const EnterpriseProvider = React.memo(({ children }: { children: React.Re
       await queryClient.cancelQueries();
       const unitsResult = company.id === currentCompany?.id && allowedUnits.length > 0
         ? allowedUnits
-        : mapOperationalUnits((await TenantService.getOperationalUnits(company.id) ?? []) as Array<{ id: string; name: string; type: string }>);
+        : mapOperationalUnits((await TenantService.getOperationalUnits(company.id) ?? []) as unknown as Array<{ id: string; name: string; type: string }>);
       const selection = resolveContextSelection(unitsResult, input, isMatrixManager);
 
       await applyCompany(company);
