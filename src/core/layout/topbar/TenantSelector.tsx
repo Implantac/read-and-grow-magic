@@ -1,4 +1,5 @@
-import { Building2, ChevronDown, Factory, Landmark, Package, Store, Warehouse } from 'lucide-react';
+import { Building2, Check, ChevronDown, Factory, Landmark, Loader2, Package, Store, Warehouse } from 'lucide-react';
+import { toast } from 'sonner';
 import { Badge } from '@/ui/base/badge';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { Button } from '@/ui/base/button';
@@ -7,6 +8,15 @@ import {
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/ui/base/dropdown-menu';
 import { cn } from '@/lib/utils';
+import { normalizeUnitType } from '@/core/auth/operationalContext';
+
+const unitLabels = {
+  STORE: 'Loja',
+  INDUSTRY: 'Indústria',
+  DISTRIBUTION_CENTER: 'Centro de distribuição',
+  OFFICE: 'Administrativo',
+  WHOLESALE: 'Atacado',
+} as const;
 
 export function TenantSelector() {
   const { 
@@ -25,22 +35,18 @@ export function TenantSelector() {
   } = useEnterprise();
 
   const handleSelectCompany = async (id: string) => {
-    await setCompany(id);
+    if (id === currentCompany?.id) return;
+    try { await setCompany(id); } catch { toast.error('Não foi possível trocar a empresa. Tente novamente.'); }
   };
 
   const handleSelectBranch = async (id: string | null) => {
-    await setBranch(id);
+    if (id === currentBranch?.id || (id === null && scope === 'CONSOLIDATED')) return;
+    try { await setBranch(id); } catch { toast.error('Não foi possível trocar a unidade. Tente novamente.'); }
   };
 
-  if (isLoading || isSwitching) return <div className="h-9 w-48 animate-pulse bg-sidebar-accent/20 rounded-lg" aria-label="Atualizando contexto operacional" />;
+  if (isLoading && !currentCompany) return <div className="h-9 w-48 animate-pulse bg-sidebar-accent/20 rounded-lg" aria-label="Carregando empresas e unidades" />;
 
-  const unitTypeLabel = {
-    STORE: 'Loja',
-    INDUSTRY: 'Indústria',
-    DISTRIBUTION_CENTER: 'CD',
-    OFFICE: 'Administrativo',
-    WHOLESALE: 'Atacado',
-  }[activeUnitType ?? 'OFFICE'];
+  const unitTypeLabel = unitLabels[activeUnitType ?? 'OFFICE'];
 
   const channelLabel = activeChannel === 'VAREJO_PDV'
     ? 'Varejo / PDV'
@@ -56,14 +62,14 @@ export function TenantSelector() {
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" aria-label={`Empresa: ${currentCompany?.name || 'nenhuma selecionada'}. Trocar empresa`} className="group flex min-w-0 items-center gap-1.5 h-9 px-2 sm:px-3 rounded-lg border border-sidebar-border/50 bg-sidebar-accent/20 text-sidebar-foreground hover:text-primary hover:bg-sidebar-accent/50 hover:border-primary/30 text-sm font-medium transition-all">
+          <Button variant="ghost" disabled={isLoading || isSwitching || allowedCompanies.length === 0} aria-label={`Empresa ativa: ${currentCompany?.name || 'nenhuma selecionada'}. Trocar empresa`} className="group flex min-w-0 items-center gap-1.5 h-9 px-2 sm:px-3 rounded-lg border border-sidebar-border/50 bg-sidebar-accent/20 text-sidebar-foreground hover:text-primary hover:bg-sidebar-accent/50 hover:border-primary/30 text-sm font-medium transition-all">
             <Building2 className="h-3.5 w-3.5 text-primary/70 group-hover:text-primary shrink-0" aria-hidden="true" />
             <span className="hidden max-w-[180px] truncate sm:inline">{currentCompany?.name || 'Empresa'}</span>
-            <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-50 transition-transform group-data-[state=open]:rotate-180" />
+            {isSwitching ? <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin" /> : <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-50 transition-transform group-data-[state=open]:rotate-180" />}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-64 bg-sidebar border-sidebar-border">
-          <DropdownMenuLabel className="text-sidebar-foreground/60 text-xs uppercase tracking-wider">Empresas</DropdownMenuLabel>
+        <DropdownMenuContent align="start" className="w-72 max-h-80 overflow-y-auto bg-sidebar border-sidebar-border">
+          <DropdownMenuLabel className="text-sidebar-foreground/60 text-xs">Empresa ativa · {allowedCompanies.length} {allowedCompanies.length === 1 ? 'disponível' : 'disponíveis'}</DropdownMenuLabel>
           <DropdownMenuSeparator className="bg-sidebar-border" />
            {allowedCompanies.map((company) => (
             <DropdownMenuItem
@@ -74,7 +80,8 @@ export function TenantSelector() {
                  currentCompany?.id === company.id && 'text-primary bg-sidebar-accent',
                )}
             >
-               {company.name}
+               <span className="min-w-0 flex-1 truncate">{company.name}</span>
+               {currentCompany?.id === company.id && <Check className="ml-2 h-4 w-4 shrink-0" aria-label="Selecionada" />}
             </DropdownMenuItem>
            ))}
         </DropdownMenuContent>
@@ -82,7 +89,7 @@ export function TenantSelector() {
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" aria-label={`Unidade: ${currentBranch?.name || 'Toda a rede'}. Trocar unidade`} className="group flex min-w-0 items-center gap-1.5 h-9 px-1 sm:px-3 rounded-lg text-sidebar-foreground/60 hover:text-primary hover:bg-sidebar-accent/50 text-sm transition-all">
+          <Button variant="ghost" disabled={isLoading || isSwitching || (!isMatrixManager && allBranches.length === 0)} aria-label={`Unidade ativa na empresa ${currentCompany?.name || 'não selecionada'}: ${currentBranch?.name || 'Visão consolidada'}. Trocar unidade`} className="group flex min-w-0 items-center gap-1.5 h-9 px-1 sm:px-3 rounded-lg text-sidebar-foreground/60 hover:text-primary hover:bg-sidebar-accent/50 text-sm transition-all">
             <span className="hidden text-sidebar-foreground/40 sm:inline">/</span>
              {activeUnitType === 'INDUSTRY' && <Factory className="h-3.5 w-3.5 opacity-70 group-hover:text-primary" />}
              {activeUnitType === 'DISTRIBUTION_CENTER' && <Warehouse className="h-3.5 w-3.5 opacity-70 group-hover:text-primary" />}
@@ -92,19 +99,15 @@ export function TenantSelector() {
              <span className="max-w-[80px] min-w-0 truncate min-[400px]:max-w-[120px] sm:max-w-[180px]">
               {currentBranch ? (
                  <span className="flex min-w-0 items-center gap-1.5">
-                  {currentBranch.tipo?.toUpperCase() === 'FACTORY' && <Building2 className="h-3 w-3 text-amber-500" />}
-                  {currentBranch.tipo?.toUpperCase() === 'DISTRIBUTION_CENTER' && <Package className="h-3 w-3 text-blue-500" />}
-                  {currentBranch.tipo?.toUpperCase() === 'STORE' && <Store className="h-3 w-3 text-green-500" />}
-                  {currentBranch.tipo?.toUpperCase() === 'OFFICE' && <Building2 className="h-3 w-3 text-slate-500" />}
                    <span className="truncate">{currentBranch.name}</span>
                 </span>
-               ) : 'Toda a rede'}
+               ) : 'Visão consolidada'}
             </span>
-             <ChevronDown className="h-3 w-3 shrink-0 opacity-50 transition-transform group-data-[state=open]:rotate-180" />
+             {isSwitching ? <Loader2 className="h-3 w-3 shrink-0 animate-spin" /> : <ChevronDown className="h-3 w-3 shrink-0 opacity-50 transition-transform group-data-[state=open]:rotate-180" />}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-64 bg-sidebar border-sidebar-border">
-          <DropdownMenuLabel className="text-sidebar-foreground/60 text-xs uppercase tracking-wider">Unidades Operacionais</DropdownMenuLabel>
+        <DropdownMenuContent align="start" className="w-72 max-h-80 overflow-y-auto bg-sidebar border-sidebar-border">
+          <DropdownMenuLabel className="text-sidebar-foreground/60 text-xs truncate">Unidades de {currentCompany?.name || 'empresa selecionada'}</DropdownMenuLabel>
           <DropdownMenuSeparator className="bg-sidebar-border" />
            {isMatrixManager && (
              <>
@@ -114,26 +117,29 @@ export function TenantSelector() {
                    scope === 'CONSOLIDATED' && 'text-primary bg-sidebar-accent font-bold')}
                >
                  Visão consolidada
+                 {scope === 'CONSOLIDATED' && <Check className="ml-auto h-4 w-4" aria-label="Selecionada" />}
                </DropdownMenuItem>
                <DropdownMenuSeparator className="bg-sidebar-border/50" />
              </>
            )}
-          {allBranches.map((branch) => (
+           {allBranches.length === 0 && <DropdownMenuLabel className="text-xs text-sidebar-foreground/60">Nenhuma unidade ativa nesta empresa</DropdownMenuLabel>}
+           {allBranches.map((branch) => (
             <DropdownMenuItem
               key={branch.id}
               onClick={() => handleSelectBranch(branch.id)}
               className={cn('text-sidebar-foreground/80 hover:text-primary focus:text-primary',
                 currentBranch?.id === branch.id && 'text-primary bg-sidebar-accent')}
             >
-              <div className="flex flex-col">
+               <div className="flex min-w-0 flex-1 flex-col">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium">{branch.name}</span>
+                   <span className="truncate font-medium">{branch.name}</span>
                   {branch.tipo && (
-                    <Badge variant="outline" className="text-[8px] px-1 h-3.5 leading-none">
-                      {branch.tipo}
+                     <Badge variant="outline" className="shrink-0 text-[10px] px-1 leading-none">
+                       {unitLabels[normalizeUnitType(branch.tipo)]}
                     </Badge>
                   )}
                 </div>
+               {currentBranch?.id === branch.id && <Check className="ml-2 h-4 w-4 shrink-0" aria-label="Selecionada" />}
                 {branch.code && <span className="text-[10px] opacity-50">{branch.code}</span>}
               </div>
             </DropdownMenuItem>

@@ -20,8 +20,8 @@ export const gestaoSection: NavSection = {
       roles: ['admin', 'manager', 'system_admin', 'admin_matriz'],
       children: [
         { title: 'Usuários & Permissões', href: '/admin/usuarios', icon: 'Users' },
-        { title: 'Empresas & Filiais', href: '/admin/empresas', icon: 'Building' },
-        { title: 'Configuração da Empresa', href: '/admin/empresa', icon: 'Building2' },
+         { title: 'Cadastro de empresas', href: '/admin/empresas', icon: 'Building' },
+         { title: 'Parâmetros da empresa', href: '/admin/empresa', icon: 'Building2' },
 
         { title: 'Parâmetros do Sistema', href: '/admin/parametros', icon: 'Sliders' },
         { title: 'Configurações Globais', href: '/admin/configuracoes', icon: 'Settings' },

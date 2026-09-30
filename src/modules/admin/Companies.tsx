@@ -4,16 +4,14 @@ import { PageHeader } from '@/shared/components/PageHeader';
 import { useCompanies } from '@/hooks/system/useCompanies';
 import { Card, CardContent } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
-import { Input } from '@/ui/base/input';
 import { Badge } from '@/ui/base/badge';
 import { 
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow 
 } from '@/ui/base/table';
 import { 
-  Plus, Edit2, Building2, Loader2,
-  Settings2, CheckCircle
+  Plus, Edit2, Building2, Loader2, CheckCircle
 } from 'lucide-react';
-import { Company, CompanyStatus } from '@/types/administration';
+import { Company } from '@/types/administration';
 import { CompanyDialog } from './companies/CompanyDialog';
 import { EmptyState } from '@/shared/components/EmptyState';
 
@@ -24,7 +22,7 @@ const Companies = () => {
 
   const stats = useMemo(() => ({
     headquarters: companies.find(c => c.isHeadquarters),
-    activeBranches: companies.filter(c => !c.isHeadquarters && c.status === 'active').length,
+    activeCompanies: companies.filter(c => c.status === 'active').length,
     total: companies.length
   }), [companies]);
 
@@ -51,11 +49,11 @@ const Companies = () => {
   return (
     <PageContainer>
       <PageHeader 
-        title="Gestão de Empresas" 
-        description="Configuração adaptativa e automação fiscal"
+        title="Empresas" 
+        description="Cadastre pessoas jurídicas aqui. Lojas, fábricas e centros de distribuição são unidades vinculadas a cada empresa."
       >
         <Button onClick={handleCreate}>
-          <Plus className="h-4 w-4 mr-2" /> Nova Filial
+          <Plus className="h-4 w-4 mr-2" /> Nova empresa
         </Button>
       </PageHeader>
 
@@ -64,8 +62,8 @@ const Companies = () => {
           <CardContent className="p-4 flex items-center gap-4">
             <div className="p-3 bg-primary/10 rounded-xl"><Building2 className="text-primary h-6 w-6" /></div>
             <div>
-              <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Matriz</p>
-              <p className="font-bold">{stats.headquarters?.tradeName || 'Matriz não configurada'}</p>
+              <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Empresa matriz</p>
+              <p className="font-bold">{stats.headquarters?.tradeName || 'Não identificada'}</p>
             </div>
           </CardContent>
         </Card>
@@ -73,16 +71,16 @@ const Companies = () => {
           <CardContent className="p-4 flex items-center gap-4">
             <div className="p-3 bg-green-50 rounded-xl"><CheckCircle className="text-green-600 h-6 w-6" /></div>
             <div>
-              <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Filiais Ativas</p>
-              <p className="text-2xl font-black">{stats.activeBranches}</p>
+              <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Empresas ativas</p>
+              <p className="text-2xl font-black">{stats.activeCompanies}</p>
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-4">
-            <div className="p-3 bg-blue-50 rounded-xl"><Settings2 className="text-blue-600 h-6 w-6" /></div>
+            <div className="p-3 bg-primary/10 rounded-lg"><Building2 className="text-primary h-6 w-6" /></div>
             <div>
-              <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Total de Unidades</p>
+              <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Total de empresas</p>
               <p className="text-2xl font-black">{stats.total}</p>
             </div>
           </CardContent>
@@ -109,8 +107,8 @@ const Companies = () => {
                       compact
                       icon={Building2}
                       title="Nenhuma empresa cadastrada"
-                      description="Cadastre a matriz e filiais para habilitar operações multi-empresa."
-                      action={{ label: 'Nova Empresa', icon: Plus, onClick: () => setIsDialogOpen(true) }}
+                       description="Cadastre uma empresa para começar a organizar suas unidades."
+                       action={{ label: 'Nova empresa', icon: Plus, onClick: handleCreate }}
                     />
                   </TableCell>
                 </TableRow>
@@ -132,7 +130,7 @@ const Companies = () => {
                     {company.address.city} - {company.address.state}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={() => handleEdit(company)}>
+                     <Button variant="ghost" size="icon" aria-label={`Editar empresa ${company.tradeName}`} onClick={() => handleEdit(company)}>
                       <Edit2 className="h-4 w-4" />
                     </Button>
                   </TableCell>
