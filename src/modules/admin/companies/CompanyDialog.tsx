@@ -138,7 +138,7 @@ export const CompanyDialog = ({ open, onOpenChange, editingCompany }: CompanyDia
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Building2 className="h-5 w-5 text-primary" />
-            {editingCompany ? 'Editar Empresa' : 'Cadastrar Nova Unidade'}
+             {editingCompany ? 'Editar empresa' : 'Cadastrar empresa'}
           </DialogTitle>
         </DialogHeader>
         

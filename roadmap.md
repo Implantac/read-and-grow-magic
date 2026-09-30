@@ -12,6 +12,7 @@
   - [x] Ajustar seleção de empresa e unidade para caber no topo do celular.
   - [x] Facilitar a escolha de produtos na transferência, mostrar saldos e impedir solicitações acima do disponível antes do envio.
   - [x] Diferenciar listas vazias de falhas de consulta em transferências, recebimentos e histórico, com atualização manual.
+  - [x] Clarificar empresa jurídica versus unidade operacional no seletor e cadastro, com seleção ativa e feedback de troca.
 - [ ] Fase 9 — IA e automações governadas
 - [ ] Fase 10 — Preparação e validação de produção
 
