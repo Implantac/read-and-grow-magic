@@ -5,7 +5,9 @@ import { Input } from '@/ui/base/input';
 import { Label } from '@/ui/base/label';
 import { Textarea } from '@/ui/base/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
-import { Plus, Trash2 } from 'lucide-react';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/ui/base/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/ui/base/popover';
+import { Check, ChevronsUpDown, Plus, Trash2 } from 'lucide-react';
 import { useAvailableBalances, useBranchesList, useTransferActions } from '@/hooks/operational/network/useTransfers';
 import { AUTO_APPROVAL_LIMIT_UNITS } from '@/services/operational/inventory/transferService';
 
@@ -20,16 +22,24 @@ interface ItemRow {
 }
 
 export function NewTransferDialog({ open, onOpenChange }: Props) {
-  const { data: branches = [] } = useBranchesList();
+  const { data: branches = [], isLoading: loadingBranches, isError: branchesError, refetch: retryBranches } = useBranchesList();
   const [origin, setOrigin] = useState('');
   const [destination, setDestination] = useState('');
   const [priority, setPriority] = useState('normal');
   const [reason, setReason] = useState('');
   const [items, setItems] = useState<ItemRow[]>([{ productId: '', quantity: 1 }]);
-  const { data: balances = [], isLoading: loadingBalances } = useAvailableBalances(origin || undefined);
+  const { data: balances = [], isLoading: loadingBalances, isError: balancesError, refetch: retryBalances } = useAvailableBalances(origin || undefined);
+  const [openProductRow, setOpenProductRow] = useState<number | null>(null);
   const { createTransfer, isCreating } = useTransferActions();
 
   const totalUnits = useMemo(() => items.reduce((sum, i) => sum + (Number(i.quantity) || 0), 0), [items]);
+  const requestedByProduct = useMemo(() => items.reduce<Record<string, number>>((totals, item) => {
+    if (item.productId) totals[item.productId] = (totals[item.productId] || 0) + (Number(item.quantity) || 0);
+    return totals;
+  }, {}), [items]);
+  const hasInvalidQuantity = items.some((item) => !Number.isInteger(item.quantity) || item.quantity <= 0);
+  const hasInsufficientStock = items.some((item) => item.productId && requestedByProduct[item.productId] >
+    (balances.find((balance) => balance.productId === item.productId)?.available ?? 0));
 
   const reset = () => {
     setOrigin('');
@@ -37,6 +47,7 @@ export function NewTransferDialog({ open, onOpenChange }: Props) {
     setPriority('normal');
     setReason('');
     setItems([{ productId: '', quantity: 1 }]);
+    setOpenProductRow(null);
   };
 
   const handleSubmit = async () => {
@@ -56,7 +67,7 @@ export function NewTransferDialog({ open, onOpenChange }: Props) {
   };
 
   const availableFor = (productId: string) =>
-    balances.find((b: any) => b.productId === productId)?.available ?? 0;
+    balances.find((balance) => balance.productId === productId)?.available ?? 0;
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) reset(); onOpenChange(o); }}>
@@ -72,10 +83,10 @@ export function NewTransferDialog({ open, onOpenChange }: Props) {
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label>Origem</Label>
-              <Select value={origin} onValueChange={(v) => { setOrigin(v); setItems([{ productId: '', quantity: 1 }]); }}>
+              <Select value={origin} onValueChange={(v) => { setOrigin(v); setItems([{ productId: '', quantity: 1 }]); setOpenProductRow(null); }}>
                 <SelectTrigger><SelectValue placeholder="Selecione a unidade de origem" /></SelectTrigger>
                 <SelectContent>
-                  {branches.map((b: any) => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
+                  {branches.map((b) => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -84,7 +95,7 @@ export function NewTransferDialog({ open, onOpenChange }: Props) {
               <Select value={destination} onValueChange={setDestination}>
                 <SelectTrigger><SelectValue placeholder="Selecione a unidade de destino" /></SelectTrigger>
                 <SelectContent>
-                  {branches.filter((b: any) => b.id !== origin).map((b: any) => (
+                  {branches.filter((b) => b.id !== origin).map((b) => (
                     <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
                   ))}
                 </SelectContent>
@@ -107,6 +118,8 @@ export function NewTransferDialog({ open, onOpenChange }: Props) {
               <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Ex.: reposição de ruptura" />
             </div>
           </div>
+          {loadingBranches && <p className="text-sm text-muted-foreground">Carregando unidades...</p>}
+          {branchesError && <div role="alert" className="text-sm text-destructive">Não foi possível consultar as unidades. <Button type="button" variant="link" size="sm" onClick={() => retryBranches()}>Tentar novamente</Button></div>}
 
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -117,37 +130,60 @@ export function NewTransferDialog({ open, onOpenChange }: Props) {
             </div>
 
             {!origin && <p className="text-sm text-muted-foreground">Selecione a origem para ver o que há disponível.</p>}
-            {origin && !loadingBalances && balances.length === 0 && (
+            {origin && loadingBalances && <p className="text-sm text-muted-foreground">Consultando saldos da origem...</p>}
+            {origin && balancesError && <div role="alert" className="text-sm text-destructive">Não foi possível consultar os saldos. <Button type="button" variant="link" size="sm" onClick={() => retryBalances()}>Tentar novamente</Button></div>}
+            {origin && !loadingBalances && !balancesError && balances.length === 0 && (
               <p className="text-sm text-muted-foreground">Nenhum saldo disponível nesta unidade de origem.</p>
             )}
 
-            {origin && balances.length > 0 && items.map((item, idx) => (
-              <div key={idx} className="flex items-end gap-2">
-                <div className="flex-1 space-y-1">
-                  <Select
-                    value={item.productId}
-                    onValueChange={(v) => setItems(items.map((it, i) => (i === idx ? { ...it, productId: v } : it)))}
-                  >
-                    <SelectTrigger><SelectValue placeholder="Produto" /></SelectTrigger>
-                    <SelectContent>
-                      {balances.map((b: any) => (
-                        <SelectItem key={b.productId} value={b.productId}>
-                          {b.code ? `${b.code} — ` : ''}{b.name} (disp. {b.available})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {item.productId && item.quantity > availableFor(item.productId) && (
-                    <p className="text-xs text-destructive">Quantidade acima do disponível ({availableFor(item.productId)}).</p>
+            {origin && !loadingBalances && !balancesError && balances.length > 0 && items.map((item, idx) => (
+              <div key={idx} className="flex items-start gap-2">
+                <div className="min-w-0 flex-1 space-y-1">
+                  <Popover open={openProductRow === idx} onOpenChange={(next) => setOpenProductRow(next ? idx : null)}>
+                    <PopoverTrigger asChild>
+                      <Button type="button" variant="outline" role="combobox" aria-expanded={openProductRow === idx} aria-label={`Produto ${idx + 1}`} className="w-full justify-between font-normal">
+                        <span className="truncate">{item.productId ? (() => {
+                          const product = balances.find((balance) => balance.productId === item.productId);
+                          return product ? `${product.code ? `${product.code} — ` : ''}${product.name}` : 'Selecione um produto';
+                        })() : 'Buscar produto por nome ou código'}</span>
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent align="start" className="w-[min(86vw,28rem)] p-0">
+                      <Command>
+                        <CommandInput placeholder="Buscar nome ou código..." aria-label="Buscar produto" />
+                        <CommandList>
+                          <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
+                          <CommandGroup>
+                            {balances.map((balance) => (
+                              <CommandItem key={balance.productId} value={`${balance.code} ${balance.name}`} onSelect={() => {
+                                setItems((current) => current.map((row, i) => i === idx ? { ...row, productId: balance.productId } : row));
+                                setOpenProductRow(null);
+                              }}>
+                                <Check className={`mr-2 h-4 w-4 shrink-0 ${item.productId === balance.productId ? 'opacity-100' : 'opacity-0'}`} />
+                                <span className="min-w-0 flex-1 truncate">{balance.code ? `${balance.code} — ` : ''}{balance.name}</span>
+                                <span className="ml-2 shrink-0 text-xs text-muted-foreground">{balance.available} disp.</span>
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  {item.productId && requestedByProduct[item.productId] > availableFor(item.productId) && (
+                    <p role="alert" className="text-xs text-destructive">Solicitado: {requestedByProduct[item.productId]} no total; disponível: {availableFor(item.productId)}.</p>
                   )}
                 </div>
                 <div className="w-24 space-y-1">
                   <Input
                     type="number"
                     min={1}
+                    step={1}
+                    aria-label={`Quantidade do produto ${idx + 1}`}
                     value={item.quantity}
                     onChange={(e) => setItems(items.map((it, i) => (i === idx ? { ...it, quantity: Number(e.target.value) } : it)))}
                   />
+                  {(!Number.isInteger(item.quantity) || item.quantity <= 0) && <p className="text-xs text-destructive">Use um inteiro positivo.</p>}
                 </div>
                 <Button
                   type="button"
@@ -170,7 +206,7 @@ export function NewTransferDialog({ open, onOpenChange }: Props) {
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
           <Button
             onClick={handleSubmit}
-            disabled={isCreating || !origin || !destination || totalUnits <= 0 || items.some((i) => !i.productId)}
+            disabled={isCreating || loadingBranches || branchesError || loadingBalances || balancesError || !origin || !destination || origin === destination || hasInvalidQuantity || hasInsufficientStock || items.some((i) => !i.productId)}
           >
             {isCreating ? 'Criando...' : 'Criar transferência'}
           </Button>
