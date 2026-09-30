@@ -21,6 +21,7 @@ export function useWMSOperationalConsole() {
     inventory: []
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -37,6 +38,7 @@ export function useWMSOperationalConsole() {
       if ([rec, put, pick, pack, ship, inv].some((result) => result.error)) {
         throw new Error('Uma ou mais consultas operacionais falharam');
       }
+      setError(false);
 
       setData({
         receiving: rec.data || [],
@@ -57,12 +59,14 @@ export function useWMSOperationalConsole() {
   useEffect(() => {
     fetchAll();
 
-    const channel = supabase.channel('wms-operational-console')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'wms_movements' }, () => fetchAll())
-      .subscribe();
+    const channel = supabase.channel('wms-operational-console');
+    ['wms_receiving_orders', 'putaway_tasks', 'wms_picking_orders', 'wms_packing_orders', 'wms_shipments', 'wms_inventory_items'].forEach((table) => {
+      channel.on('postgres_changes', { event: '*', schema: 'public', table }, () => { void fetchAll(); });
+    });
+    channel.subscribe();
 
     return () => { supabase.removeChannel(channel); };
   }, [fetchAll]);
 
-  return { ...data, loading, refetch: fetchAll };
+  return { ...data, loading, error, refetch: fetchAll };
 }

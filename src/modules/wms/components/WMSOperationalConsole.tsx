@@ -18,7 +18,7 @@ import { Link } from "react-router-dom";
 import { Skeleton } from "@/ui/base/skeleton";
 
 export default function WMSOperationalConsole() {
-  const { receiving, putaway, picking, packing, shipments, inventory, loading } = useWMSOperationalConsole();
+  const { receiving, putaway, picking, packing, shipments, inventory, loading, error, refetch } = useWMSOperationalConsole();
 
   if (loading) {
     return (
@@ -30,13 +30,15 @@ export default function WMSOperationalConsole() {
     );
   }
 
+  if (error) return <div role="alert" className="text-destructive flex items-center gap-3">Não foi possível carregar as operações WMS. <Button variant="outline" onClick={() => void refetch()}>Tentar novamente</Button></div>;
+
   const sections = [
     {
       title: "Recebimento & Docas",
       description: "Pedidos aguardando descarga ou em conferência",
       icon: Truck,
       data: receiving,
-      link: "/wms/recebimento",
+       link: "/wms/recebimento",
       renderItem: (item: any) => (
         <div key={item.id} className="flex items-center justify-between p-2 rounded-lg border bg-muted/30">
           <div className="flex flex-col">
@@ -73,7 +75,7 @@ export default function WMSOperationalConsole() {
       description: "Separação de pedidos ativa",
       icon: PackageSearch,
       data: picking,
-      link: "/wms/picking",
+       link: "/wms/separacao",
       renderItem: (item: any) => {
         const progress = item.items_count > 0 ? (item.picked_items / item.items_count) * 100 : 0;
         return (
@@ -96,12 +98,12 @@ export default function WMSOperationalConsole() {
       description: "Aguardando embalagem e checkout",
       icon: PackageCheck,
       data: packing,
-      link: "/wms/packing",
+       link: "/wms/embalagem",
       renderItem: (item: any) => (
         <div key={item.id} className="flex items-center justify-between p-2 rounded-lg border bg-muted/30">
           <span className="text-sm font-medium">{item.order_number}</span>
           <Button size="sm" variant="ghost" asChild className="h-7 px-2">
-            <Link to={`/wms/packing/${item.id}`}>Conferir <ArrowRight className="ml-1 h-3 w-3" /></Link>
+             <Link to="/wms/embalagem">Conferir <ArrowRight className="ml-1 h-3 w-3" /></Link>
           </Button>
         </div>
       )
@@ -130,15 +132,15 @@ export default function WMSOperationalConsole() {
       description: "Itens abaixo do estoque de segurança",
       icon: AlertTriangle,
       data: inventory,
-      link: "/wms/inventory",
+       link: "/wms/inventario",
       renderItem: (item: any) => (
         <div key={item.id} className="flex items-center justify-between p-2 rounded-lg border border-destructive/20 bg-destructive/5">
           <div className="flex flex-col overflow-hidden">
             <span className="text-sm font-medium truncate">{item.product_name}</span>
-            <span className="text-xs text-muted-foreground">Local: {item.location_code}</span>
+             <span className="text-xs text-muted-foreground">Local: {item.location || 'Não informado'}</span>
           </div>
           <div className="text-right">
-            <div className="text-sm font-bold text-destructive">{item.quantity}</div>
+             <div className="text-sm font-bold text-destructive">{item.available_qty}</div>
             <div className="text-[10px] text-muted-foreground">un</div>
           </div>
         </div>
