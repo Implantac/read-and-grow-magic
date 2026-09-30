@@ -40,12 +40,17 @@ export function usePDVSplits({ total, customer, onRequestCustomer, onOpenPix }: 
 
     const inst = method === 'credit_card' ? installments : undefined;
     const id = crypto.randomUUID();
+    if (method === 'pix') { onOpenPix({ splitId: id, amount }); return; }
     setSplits((prev) => [...prev, { id, method, amount, installments: inst }]);
-    if (method === 'pix') onOpenPix({ splitId: id, amount });
+  };
+
+  const confirmPix = (id: string, amount: number, chargeId: string) => {
+    setSplits((prev) => [...prev, { id, method: 'pix', amount, chargeId }]);
   };
 
   const handleSplitAmountChange = (id: string, text: string) => {
     const cleaned = text.replace(',', '.').replace(/[^0-9.]/g, '');
+    if (splits.some((p) => p.id === id && p.method === 'pix')) return;
     const parts = cleaned.split('.');
     const normalized = parts.length > 2 ? `${parts[0]}.${parts.slice(1).join('')}` : cleaned;
     setSplitDrafts((prev) => ({ ...prev, [id]: normalized }));
@@ -69,6 +74,7 @@ export function usePDVSplits({ total, customer, onRequestCustomer, onOpenPix }: 
   };
 
   const removeSplit = (id: string) => {
+    if (splits.some((p) => p.id === id && p.method === 'pix')) { toastError('PIX recebido não pode ser removido da venda.'); return; }
     setSplits((prev) => prev.filter((p) => p.id !== id));
     setSplitDrafts((prev) => {
       if (!(id in prev)) return prev;
@@ -88,7 +94,7 @@ export function usePDVSplits({ total, customer, onRequestCustomer, onOpenPix }: 
     splits, setSplits,
     splitDrafts, installments, setInstallments,
     paidTotal, remaining, change, availableCredit,
-    addSplit, handleSplitAmountChange, commitSplitAmount, removeSplit,
+    addSplit, confirmPix, handleSplitAmountChange, commitSplitAmount, removeSplit,
     resetSplits,
   };
 }

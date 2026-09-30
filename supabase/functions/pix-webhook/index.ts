@@ -47,23 +47,9 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
 
-    // Simulação: criar cobrança PIX
+    // Sem integração PSP provisionada, não emitir cobrança ou BR Code fictício.
     if (action === 'create' && req.method === 'POST') {
-      const body = await req.json();
-      const { receivable_id, amount, client_name, client_id, description, expires_minutes = 60, bank_account_id } = body;
-      if (!amount || amount <= 0) {
-        return Response.json({ ok: false, error: 'amount obrigatório' }, { status: 400, headers: corsHeaders });
-      }
-      const txid = 'TX' + crypto.randomUUID().replace(/-/g, '').slice(0, 24).toUpperCase();
-      const expires_at = new Date(Date.now() + expires_minutes * 60 * 1000).toISOString();
-      const copy_paste = `00020126580014BR.GOV.BCB.PIX0136${crypto.randomUUID()}5204000053039865802BR5913USE SISTEMAS6009SAO PAULO62070503***6304XXXX`;
-
-      const { data, error } = await supabase.from('pix_charges').insert({
-        external_id: txid, txid, receivable_id, amount, client_name, client_id,
-        description, copy_paste, qr_code: copy_paste, expires_at, bank_account_id,
-      }).select().single();
-      if (error) throw error;
-      return Response.json({ ok: true, charge: data }, { headers: corsHeaders });
+      return Response.json({ ok: false, error: 'Provedor PIX não configurado. Cobrança não criada.' }, { status: 503, headers: corsHeaders });
     }
 
     // Simulação: marcar como paga (para testes)

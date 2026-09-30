@@ -168,6 +168,7 @@ export function PDVPaymentPanel({
                         inputMode="decimal"
                         value={(splitDrafts[s.id] ?? (s.amount ? s.amount.toFixed(2) : '')).replace('.', ',')}
                         onChange={(e) => onSplitAmountChange(s.id, e.target.value)}
+                        disabled={s.method === 'pix'}
                         onFocus={(e) => {
                           e.currentTarget.select();
                           setActiveSplitId(s.id);
@@ -193,7 +194,7 @@ export function PDVPaymentPanel({
                         <Hash className="h-3 w-3" />
                       </Button>
                     </div>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10 rounded-full" onClick={() => onRemoveSplit(s.id)}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10 rounded-full" onClick={() => onRemoveSplit(s.id)} disabled={s.method === 'pix'} title={s.method === 'pix' ? 'PIX recebido não pode ser removido' : 'Remover pagamento'}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>

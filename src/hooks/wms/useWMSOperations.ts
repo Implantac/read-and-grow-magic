@@ -208,27 +208,36 @@ function mapStorageLocation(r: StorageLocationRow) {
 }
 
 export function useWMSDashboardStats() {
-  const [stats, setStats] = useState({ receiving: 0, picking: 0, packing: 0, shipped: 0, occupancy: 0, totalLocations: 0, occupied: 0, capacity: 0 });
+  const [stats, setStats] = useState({ receiving: 0, picking: 0, packing: 0, shipped: 0, occupancy: 0, totalLocations: 0, occupied: 0, capacity: 0, receivedItems: 0, shippedVolumes: 0, pendingPickingItems: 0, activeDocks: 0 });
   const [recentMovements, setRecentMovements] = useState<Array<{ id: string; productName: string; type: string; quantity: number; createdAt: string }>>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   const fetch = useCallback(async () => {
     setLoading(true);
-    const [recRes, pickRes, packRes, storRes, movRes] = await Promise.all([
-      supabase.from('wms_receiving_orders').select('status'),
-      supabase.from('wms_picking_orders').select('status'),
+    const [recRes, pickRes, packRes, storRes, movRes, shipRes, dockRes] = await Promise.all([
+      supabase.from('wms_receiving_orders').select('status,received_items'),
+      supabase.from('wms_picking_orders').select('status,items_count,picked_items'),
       supabase.from('wms_packing_orders').select('status'),
-      supabase.from('wms_storage_locations').select('capacity,occupied'),
+      supabase.from('wms_storage_locations').select('capacity,occupied').eq('active', true),
       supabase.from('wms_movements').select('*').order('created_at', { ascending: false }).limit(5),
+      supabase.from('wms_shipments').select('status,volumes'),
+      supabase.from('loading_docks').select('status'),
     ]);
+    if ([recRes, pickRes, packRes, storRes, movRes, shipRes, dockRes].some((result) => result.error)) {
+      setError(true);
+      setLoading(false);
+      return;
+    }
+    setError(false);
 
     const receiving = (recRes.data || []).filter((r) => ['pending', 'in_progress'].includes(r.status)).length;
     const picking = (pickRes.data || []).filter((r) => ['pending', 'assigned', 'in_progress'].includes(r.status)).length;
     const packing = (packRes.data || []).filter((r) => r.status === 'pending').length;
     const shipped = (packRes.data || []).filter((r) => r.status === 'shipped').length;
 
-    const totalCap = (storRes.data || []).reduce((s: number, l) => s + (l.capacity || 0), 0);
-    const totalOcc = (storRes.data || []).reduce((s: number, l) => s + (l.occupied || 0), 0);
+    const totalCap = (storRes.data || []).reduce((s: number, l) => s + Number(l.capacity || 0), 0);
+    const totalOcc = (storRes.data || []).reduce((s: number, l) => s + Number(l.occupied || 0), 0);
 
     setStats({
       receiving, picking, packing, shipped,
@@ -236,6 +245,10 @@ export function useWMSDashboardStats() {
       totalLocations: (storRes.data || []).length,
       occupied: totalOcc,
       capacity: totalCap,
+      receivedItems: (recRes.data || []).reduce((sum, row) => sum + Number(row.received_items || 0), 0),
+      shippedVolumes: (shipRes.data || []).filter((row) => ['shipped', 'delivered'].includes(row.status)).reduce((sum, row) => sum + Number(row.volumes || 0), 0),
+      pendingPickingItems: (pickRes.data || []).filter((row) => ['pending', 'assigned', 'in_progress'].includes(row.status)).reduce((sum, row) => sum + Math.max(0, Number(row.items_count || 0) - Number(row.picked_items || 0)), 0),
+      activeDocks: (dockRes.data || []).filter((row) => ['occupied', 'in_progress', 'loading'].includes(row.status)).length,
     });
 
     setRecentMovements((movRes.data || []).map((r) => ({
@@ -245,8 +258,16 @@ export function useWMSDashboardStats() {
     setLoading(false);
   }, []);
 
-  useEffect(() => { fetch(); }, [fetch]);
-  return { stats, recentMovements, loading };
+  useEffect(() => {
+    fetch();
+    const channel = supabase.channel('wms-dashboard-operations');
+    ['wms_receiving_orders', 'wms_picking_orders', 'wms_packing_orders', 'wms_storage_locations', 'wms_movements', 'wms_shipments', 'loading_docks'].forEach((table) => {
+      channel.on('postgres_changes', { event: '*', schema: 'public', table }, () => { void fetch(); });
+    });
+    channel.subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [fetch]);
+  return { stats, recentMovements, loading, error, refetch: fetch };
 }
 
 /** Views tipadas expostas para os componentes WMS */

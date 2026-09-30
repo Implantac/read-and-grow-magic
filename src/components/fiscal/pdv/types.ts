@@ -17,6 +17,7 @@ export interface SplitPayment {
   method: SplitMethod;
   amount: number;
   installments?: number;
+  chargeId?: string;
 }
 
 export interface PaymentMethodMeta {

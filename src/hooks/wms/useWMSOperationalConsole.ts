@@ -21,6 +21,7 @@ export function useWMSOperationalConsole() {
     inventory: []
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -31,8 +32,13 @@ export function useWMSOperationalConsole() {
         supabase.from('wms_picking_orders').select('*').in('status', ['pending', 'assigned', 'in_progress']).limit(10),
         supabase.from('wms_packing_orders').select('*').eq('status', 'pending').limit(10),
         supabase.from('wms_shipments').select('*').in('status', ['pending', 'loading']).limit(10),
-        supabase.from('wms_storage_locations').select('*').lt('occupied', 5).limit(10) // Mock for low stock
+        supabase.from('wms_inventory_items').select('*').gt('min_stock', 0).limit(1000)
       ]);
+
+      if ([rec, put, pick, pack, ship, inv].some((result) => result.error)) {
+        throw new Error('Uma ou mais consultas operacionais falharam');
+      }
+      setError(false);
 
       setData({
         receiving: rec.data || [],
@@ -40,10 +46,11 @@ export function useWMSOperationalConsole() {
         picking: pick.data || [],
         packing: pack.data || [],
         shipments: ship.data || [],
-        inventory: inv.data || []
+        inventory: (inv.data || []).filter((item) => Number(item.available_qty) < Number(item.min_stock)).slice(0, 10)
       });
     } catch (e) {
       console.error('Erro ao carregar console operacional:', e);
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -52,12 +59,14 @@ export function useWMSOperationalConsole() {
   useEffect(() => {
     fetchAll();
 
-    const channel = supabase.channel('wms-operational-console')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'wms_movements' }, () => fetchAll())
-      .subscribe();
+    const channel = supabase.channel('wms-operational-console');
+    ['wms_receiving_orders', 'putaway_tasks', 'wms_picking_orders', 'wms_packing_orders', 'wms_shipments', 'wms_inventory_items'].forEach((table) => {
+      channel.on('postgres_changes', { event: '*', schema: 'public', table }, () => { void fetchAll(); });
+    });
+    channel.subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => { void supabase.removeChannel(channel); };
   }, [fetchAll]);
 
-  return { ...data, loading, refetch: fetchAll };
+  return { ...data, loading, error, refetch: fetchAll };
 }

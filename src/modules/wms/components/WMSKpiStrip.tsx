@@ -23,8 +23,8 @@ export default function WMSKpiStrip({ days = 7 }: { days?: number }) {
       setLoading(true);
       const { data: res, error: err } = await supabase.rpc("get_wms_kpis", { _days: days });
       if (!alive) return;
-      if (err) setError(err.message);
-      else setData(res as unknown as Kpis);
+      if (err) { setError('Não foi possível consultar os indicadores.'); setData(null); }
+      else { setError(null); setData(res as unknown as Kpis); }
       setLoading(false);
     })();
     return () => {
@@ -51,7 +51,7 @@ export default function WMSKpiStrip({ days = 7 }: { days?: number }) {
     {
       icon: AlertCircle,
       label: "Recomendações abertas",
-      value: data?.open_recommendations ?? 0,
+      value: data?.open_recommendations ?? '—',
       color: "border-l-orange-500",
     },
   ];
