@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { Building2, Check, ChevronDown, Factory, Landmark, Loader2, Package, Store, Warehouse } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/ui/base/badge';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { Button } from '@/ui/base/button';
+import { Input } from '@/ui/base/input';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
@@ -19,6 +21,7 @@ const unitLabels = {
 } as const;
 
 export function TenantSelector() {
+  const [unitSearch, setUnitSearch] = useState('');
   const { 
     allowedCompanies,
     currentCompany, 
@@ -53,10 +56,14 @@ export function TenantSelector() {
     : activeChannel === 'ATACADO_INDUSTRIA'
       ? 'Indústria / Atacado'
       : 'Visão consolidada';
+  const matchingBranches = allBranches.filter((branch) =>
+    `${branch.name} ${branch.code ?? ''} ${unitLabels[normalizeUnitType(branch.tipo)]}`
+      .toLocaleLowerCase('pt-BR').includes(unitSearch.trim().toLocaleLowerCase('pt-BR'))
+  );
 
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu onOpenChange={(open) => { if (!open) setUnitSearch(''); }}>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" disabled={isLoading || isSwitching || allowedCompanies.length === 0} aria-label={`Empresa ativa: ${currentCompany?.name || 'nenhuma selecionada'}. Trocar empresa`} className="group flex min-w-0 items-center gap-1.5 h-9 px-2 sm:px-3 rounded-lg border border-sidebar-border/50 bg-sidebar-accent/20 text-sidebar-foreground hover:text-primary hover:bg-sidebar-accent/50 hover:border-primary/30 text-sm font-medium transition-all">
             <Building2 className="h-3.5 w-3.5 text-primary/70 group-hover:text-primary shrink-0" aria-hidden="true" />
@@ -104,6 +111,17 @@ export function TenantSelector() {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-72 max-h-80 overflow-y-auto bg-sidebar border-sidebar-border">
           <DropdownMenuLabel className="text-sidebar-foreground/60 text-xs truncate">Unidades de {currentCompany?.name || 'empresa selecionada'}</DropdownMenuLabel>
+          {allBranches.length > 5 && (
+            <div className="px-2 py-1" onKeyDown={(event) => event.stopPropagation()}>
+              <Input
+                aria-label="Buscar unidade por nome, código ou tipo"
+                placeholder="Buscar unidade..."
+                value={unitSearch}
+                onChange={(event) => setUnitSearch(event.target.value)}
+                className="h-8 border-sidebar-border bg-sidebar-accent/30 text-sidebar-foreground"
+              />
+            </div>
+          )}
           <DropdownMenuSeparator className="bg-sidebar-border" />
            {isMatrixManager && (
              <>
@@ -119,7 +137,8 @@ export function TenantSelector() {
              </>
            )}
            {allBranches.length === 0 && <DropdownMenuLabel className="text-xs text-sidebar-foreground/60">Nenhuma unidade ativa nesta empresa</DropdownMenuLabel>}
-           {allBranches.map((branch) => (
+           {allBranches.length > 0 && matchingBranches.length === 0 && <DropdownMenuLabel className="text-xs text-sidebar-foreground/60">Nenhuma unidade encontrada</DropdownMenuLabel>}
+           {matchingBranches.map((branch) => (
             <DropdownMenuItem
               key={branch.id}
               onClick={() => handleSelectBranch(branch.id)}
