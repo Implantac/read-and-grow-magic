@@ -56,21 +56,9 @@ export class CompaniesService extends BaseService<'companies'> {
       branches: [],
     }));
 
-    // Build hierarchy: root companies get their sub-companies as branches
-    const rootCompanies = allCompanies.filter(c => !c.parentCompanyId || c.isHeadquarters);
-
-    rootCompanies.forEach(root => {
-      const children: CompanyBranchRef[] = allCompanies
-        .filter(c => c.parentCompanyId === root.id)
-        .map(c => ({ id: c.id, name: c.name, companyId: root.id }));
-
-      // If no sub-companies, add itself as a "Matriz" branch to ensure dropdown works
-      root.branches = children.length > 0
-        ? children
-        : [{ id: root.id, name: 'Matriz', code: '001', companyId: root.id }];
-    });
-
-    return rootCompanies;
+    // Companies are legal entities. Operational units belong to the branches table;
+    // never invent a "Matriz" unit or hide subsidiary companies from this list.
+    return allCompanies;
   }
 
 
