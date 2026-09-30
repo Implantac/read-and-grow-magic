@@ -13,6 +13,7 @@ import { Plus, Tag, RefreshCw, Trash2, Search } from 'lucide-react';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useConfirm } from '@/shared/components/ConfirmDialog';
 
 const tagTypeLabels: Record<string, string> = { product: 'Produto', pallet: 'Palete', location: 'Local', asset: 'Ativo' };
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
@@ -23,7 +24,8 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
 };
 
 export default function RFIDTagsPage() {
-  const { tags, tagsLoading: loading, createTag: create, deleteTag: remove } = useRFID();
+  const { tags, tagsLoading: loading, refreshTags, createTag: create, deleteTag: remove } = useRFID();
+  const confirm = useConfirm();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [form, setForm] = useState({
@@ -55,7 +57,7 @@ export default function RFIDTagsPage() {
           <p className="text-muted-foreground">Gerencie as etiquetas RFID vinculadas a produtos e paletes</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => {}}><RefreshCw className="h-4 w-4 mr-1" /> Atualizar</Button>
+          <Button variant="outline" size="sm" onClick={() => void refreshTags()}><RefreshCw className="h-4 w-4 mr-1" /> Atualizar</Button>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-1" /> Nova Tag</Button></DialogTrigger>
             <DialogContent className="max-w-lg">
@@ -154,7 +156,10 @@ export default function RFIDTagsPage() {
                         {tag.lastReadAt ? format(new Date(tag.lastReadAt), "dd/MM HH:mm", { locale: ptBR }) : 'Nunca'}
                       </TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="icon" onClick={() => remove(tag.id)}>
+                        <Button variant="ghost" size="icon" aria-label={`Excluir tag ${tag.epc}`} onClick={async () => {
+                          const approved = await confirm({ title: 'Excluir tag RFID?', description: `A tag ${tag.epc} será removida.`, confirmLabel: 'Excluir', variant: 'destructive' });
+                          if (approved) await remove(tag.id);
+                        }}>
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       </TableCell>

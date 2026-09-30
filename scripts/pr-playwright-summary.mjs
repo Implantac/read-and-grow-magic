@@ -17,9 +17,8 @@ if (!fs.existsSync(REPORT)) {
 
 const data = JSON.parse(fs.readFileSync(REPORT, "utf8"));
 
-type T = { title: string; ok: boolean; duration: number; file: string; error?: string };
-const all: T[] = [];
-const walk = (suite: any, file = suite.file ?? "") => {
+const all = [];
+const walk = (suite, file = suite.file ?? "") => {
   for (const s of suite.suites ?? []) walk(s, s.file ?? file);
   for (const spec of suite.specs ?? []) {
     for (const test of spec.tests ?? []) {
@@ -38,7 +37,7 @@ for (const s of data.suites ?? []) walk(s);
 
 const cmdk = all.filter((t) => t.file.includes("cmdk.spec"));
 const others = all.filter((t) => !t.file.includes("cmdk.spec"));
-const stats = (rows: T[]) => {
+const stats = (rows) => {
   const pass = rows.filter((r) => r.ok).length;
   return { pass, fail: rows.length - pass, total: rows.length };
 };

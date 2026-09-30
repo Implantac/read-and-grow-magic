@@ -185,9 +185,8 @@ Deno.serve(async (req) => {
     ? new Date(evt.period_end)
     : (() => {
         const d = new Date(now);
-        invoice.billing_cycle === "annual"
-          ? d.setFullYear(d.getFullYear() + 1)
-          : d.setMonth(d.getMonth() + 1);
+        if (invoice.billing_cycle === "annual") d.setFullYear(d.getFullYear() + 1);
+        else d.setMonth(d.getMonth() + 1);
         return d;
       })();
 

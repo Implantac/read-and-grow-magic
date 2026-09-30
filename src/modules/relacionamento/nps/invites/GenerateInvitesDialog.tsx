@@ -77,7 +77,12 @@ export function GenerateInvitesDialog({
                 <label key={c.id} className={`flex items-center gap-2 p-2 hover:bg-muted cursor-pointer border-b border-border last:border-0 ${invalid ? 'opacity-60' : ''}`}>
                   <Checkbox
                     checked={selectedClients.has(c.id)}
-                    onCheckedChange={(v) => { const s = new Set(selectedClients); v ? s.add(c.id) : s.delete(c.id); setSelectedClients(s); }}
+                    onCheckedChange={(v) => {
+                      const next = new Set(selectedClients);
+                      if (v) next.add(c.id);
+                      else next.delete(c.id);
+                      setSelectedClients(next);
+                    }}
                   />
                   <div className="flex-1 min-w-0">
                     <div className="text-sm">{c.name}</div>

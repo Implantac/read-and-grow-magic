@@ -16,7 +16,7 @@ import { errorMessage } from '@/lib/errors';
 const cnpjRegex = /^\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2}$/;
 const ufRegex = /^[A-Z]{2}$/;
 const cepRegex = /^\d{5}-?\d{3}$/;
-const phoneRegex = /^[\d\s()+\-]{8,20}$/;
+const phoneRegex = /^[\d\s()+-]{8,20}$/;
 
 const onboardingSchema = z.object({
   company_name: z.string().trim().min(2, 'Razão social muito curta').max(150, 'Razão social muito longa'),

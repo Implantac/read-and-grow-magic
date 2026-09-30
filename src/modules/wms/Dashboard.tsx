@@ -32,6 +32,28 @@ const quickActions = [
 
 export default function WMSDashboardPage() {
   const { stats, recentMovements, loading } = useWMSDashboardStats();
+  const { locations } = useWMSStorageLocations();
+
+  // Análise de ocupação real consolidada por zona para o Gêmeo Digital
+  const zoneData = useMemo(() => {
+    const zones = Array.from(new Set(locations.map(l => l.zone || 'Sem Zona')));
+    if (zones.length === 0) return [];
+
+    return zones.map(zone => {
+      const zoneLocations = locations.filter(l => l.zone === zone);
+      const totalCap = zoneLocations.reduce((s, l) => s + (l.capacity || 0), 0);
+      const totalOcc = zoneLocations.reduce((s, l) => s + (l.occupied || 0), 0);
+      const type = zone.toLowerCase().includes('picking') ? 'rack' :
+                   zone.toLowerCase().includes('pulmão') ? 'shelf' : 'floor';
+
+      return {
+        zone,
+        occupancy: totalCap > 0 ? Math.round((totalOcc / totalCap) * 100) : 0,
+        totalLocations: zoneLocations.length,
+        type: type as 'rack' | 'shelf' | 'floor'
+      };
+    });
+  }, [locations]);
 
   if (loading) {
     return (
@@ -50,30 +72,6 @@ export default function WMSDashboardPage() {
       </PageContainer>
     );
   }
-
-  const { locations } = useWMSStorageLocations();
-  
-  // Análise de ocupação real consolidada por zona para o Gêmeo Digital
-  const zoneData = useMemo(() => {
-    const zones = Array.from(new Set(locations.map(l => l.zone || 'Sem Zona')));
-    if (zones.length === 0) return [];
-    
-    return zones.map(zone => {
-      const zoneLocations = locations.filter(l => l.zone === zone);
-      const totalCap = zoneLocations.reduce((s, l) => s + (l.capacity || 0), 0);
-      const totalOcc = zoneLocations.reduce((s, l) => s + (l.occupied || 0), 0);
-      const type = zone.toLowerCase().includes('picking') ? 'rack' : 
-                   zone.toLowerCase().includes('pulmão') ? 'shelf' : 'floor';
-                   
-      return {
-        zone,
-        occupancy: totalCap > 0 ? Math.round((totalOcc / totalCap) * 100) : 0,
-        totalLocations: zoneLocations.length,
-        type: type as 'rack' | 'shelf' | 'floor'
-      };
-    });
-  }, [locations]);
-
 
   return (
     <PageContainer>

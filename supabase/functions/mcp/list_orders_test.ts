@@ -668,7 +668,7 @@ function fakeSupabaseRLS(allRows: TenantRow[], callerTenant: string) {
     or: [] as string[],
     limit: undefined as number | undefined,
   };
-  let filters: Array<(r: TenantRow) => boolean> = [
+  const filters: Array<(r: TenantRow) => boolean> = [
     (r) => r.company_id === callerTenant, // RLS
   ];
   const builder: any = {

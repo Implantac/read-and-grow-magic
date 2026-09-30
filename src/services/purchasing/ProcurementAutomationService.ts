@@ -35,19 +35,38 @@ export class ProcurementAutomationService extends BaseService<'products'> {
 
     if (error) throw error;
 
+    const productIds = (products || []).map((product: any) => product.id);
+    const { data: balances, error: balanceError } = productIds.length > 0
+      ? await (supabase as any)
+          .from('stock_balances')
+          .select('product_id, quantity, available_qty')
+          .eq('company_id', companyId)
+          .in('product_id', productIds)
+      : { data: [], error: null };
+    if (balanceError) throw balanceError;
+
+    const stockByProduct = new Map<string, number>();
+    for (const balance of balances || []) {
+      const quantity = Number(balance.available_qty ?? balance.quantity ?? 0);
+      stockByProduct.set(balance.product_id, (stockByProduct.get(balance.product_id) ?? 0) + quantity);
+    }
+
     return (products || [])
       .filter((p: any) => (p.min_stock > 0 || p.reorder_point > 0))
-      .map((p: any) => ({
-        product_id: p.id,
-        product_name: p.name,
-        product_code: p.code,
-        current_stock: 0,
-        min_stock: p.min_stock || 0,
-        reorder_point: p.reorder_point || 0,
-        suggested_quantity: (p.max_stock || p.min_stock * 2) - 0, 
-        lead_time_days: p.lead_time_days || 0,
-        supplier: p.supplier
-      }))
+      .map((p: any) => {
+        const currentStock = stockByProduct.get(p.id) ?? 0;
+        return {
+          product_id: p.id,
+          product_name: p.name,
+          product_code: p.code,
+          current_stock: currentStock,
+          min_stock: p.min_stock || 0,
+          reorder_point: p.reorder_point || 0,
+          suggested_quantity: Math.max(0, (p.max_stock || p.min_stock * 2) - currentStock),
+          lead_time_days: p.lead_time_days || 0,
+          supplier: p.supplier
+        };
+      })
       .filter((s: any) => s.current_stock <= s.reorder_point);
   }
 
