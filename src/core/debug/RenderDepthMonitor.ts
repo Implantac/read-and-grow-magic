@@ -67,11 +67,18 @@ export function withRenderMonitor<P extends object>(
   // Only components that actually accept a ref (forwardRef / memo(forwardRef) /
   // class components) may receive one. Wrapping a plain function component in
   // forwardRef triggers React's "Function components cannot be given refs" warning.
-  const anyComp = Component as unknown as { $$typeof?: symbol; prototype?: { isReactComponent?: unknown }; render?: unknown };
-  const acceptsRef =
-    typeof Component === 'function'
-      ? Boolean(anyComp.prototype?.isReactComponent)
-      : Boolean(anyComp.render || (anyComp as { type?: unknown }).type);
+  const anyComp = Component as unknown as {
+    $$typeof?: symbol;
+    prototype?: { isReactComponent?: unknown };
+    render?: unknown;
+    type?: { $$typeof?: symbol };
+  };
+  const forwardRefSymbol = Symbol.for('react.forward_ref');
+  const acceptsRef = Boolean(
+    anyComp.prototype?.isReactComponent ||
+    anyComp.$$typeof === forwardRefSymbol ||
+    anyComp.type?.$$typeof === forwardRefSymbol,
+  );
 
   const useTracking = () => {
     const isInitialRender = React.useRef(true);
