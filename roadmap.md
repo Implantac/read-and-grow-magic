@@ -10,6 +10,7 @@
 - [ ] Fase 8 — UX, acessibilidade e navegação
   - [x] Evoluir navegação por tarefas conforme contexto ativo e dar feedback confiável às pendências (lote de experiência operacional).
   - [x] Ajustar seleção de empresa e unidade para caber no topo do celular.
+  - [x] Facilitar a escolha de produtos na transferência, mostrar saldos e impedir solicitações acima do disponível antes do envio.
 - [ ] Fase 9 — IA e automações governadas
 - [ ] Fase 10 — Preparação e validação de produção
 
