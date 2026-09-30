@@ -28,6 +28,7 @@ import { useCnpjLookup } from '@/hooks/system/useCnpjLookup';
 import { Supplier } from '@/types/purchasing';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { Building2 } from 'lucide-react';
+import { toastError } from '@/lib/toastHelpers';
 
 interface SupplierRow {
   id: string; code: string; name: string; trade_name?: string; document: string;
@@ -46,18 +47,8 @@ const statusConfig: Record<string, { label: string; className: string }> = {
 };
 
 export default function SuppliersPage() {
-  const { suppliers: rawSuppliers, suppliersLoading: loading, createSupplier } = usePurchasing();
+  const { suppliers, suppliersLoading: loading, createSupplier, updateSupplier, savingSupplier } = usePurchasing();
   
-  const suppliers: Supplier[] = useMemo(() => ((rawSuppliers || []) as unknown as SupplierRow[]).map((s) => ({
-    id: s.id, code: s.code, name: s.name, tradeName: s.trade_name,
-    document: s.document, documentType: s.document_type, email: s.email || '',
-    phone: s.phone || '', cellphone: s.cellphone, status: s.status,
-    category: s.category || '', paymentTerms: s.payment_terms || '', deliveryTime: s.delivery_time,
-    rating: Number(s.rating), createdAt: s.created_at, updatedAt: s.updated_at,
-    address: { street: s.address_street, number: s.address_number, complement: s.address_complement,
-      neighborhood: s.address_neighborhood, city: s.address_city, state: s.address_state, zipCode: s.address_zip_code },
-  })), [rawSuppliers]);
-
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -108,19 +99,31 @@ export default function SuppliersPage() {
   });
 
   const handleSave = async () => {
-    if (!selectedSupplier) {
-      await createSupplier({
-        code: `F${String(suppliers.length + 1).padStart(4, '0')}`,
-        name: formData.name || '', document: formData.document || '', document_type: formData.documentType || 'cnpj',
+    if (!formData.name?.trim() || !formData.document?.trim()) {
+      toastError('Informe o nome e o documento do fornecedor.');
+      return;
+    }
+    const values = {
+        name: formData.name.trim(), document: formData.document.trim(), document_type: formData.documentType || 'cnpj',
         email: formData.email, phone: formData.phone, cellphone: formData.cellphone,
         trade_name: formData.tradeName, category: formData.category, status: formData.status || 'active',
         payment_terms: formData.paymentTerms, delivery_time: formData.deliveryTime || 7, rating: formData.rating || 3,
         address_street: formData.address?.street || '', address_number: formData.address?.number || '',
         address_complement: formData.address?.complement, address_neighborhood: formData.address?.neighborhood || '',
         address_city: formData.address?.city || '', address_state: formData.address?.state || '', address_zip_code: formData.address?.zipCode || '',
-      });
+    };
+    try {
+      if (selectedSupplier) {
+        await updateSupplier({ id: selectedSupplier.id, values });
+      } else {
+        await createSupplier({ ...values, code: `F-${crypto.randomUUID().slice(0, 8).toUpperCase()}` });
+      }
+      setIsFormOpen(false);
+      setSelectedSupplier(null);
+      setFormData({});
+    } catch {
+      // A mensagem de erro é exibida pela mutação; mantenha o formulário aberto.
     }
-    setIsFormOpen(false);
   };
 
   if (loading) return <div className="flex items-center justify-center min-h-[400px]"><Loader2 className="animate-spin" /></div>;
@@ -141,7 +144,7 @@ export default function SuppliersPage() {
           ]}
           filename="fornecedores"
         />
-        <Button onClick={() => setIsFormOpen(true)}><Plus className="mr-2 h-4 w-4" />Novo Fornecedor</Button>
+        <Button onClick={() => { setSelectedSupplier(null); setFormData({}); setIsFormOpen(true); }}><Plus className="mr-2 h-4 w-4" />Novo Fornecedor</Button>
       </PageHeader>
 
       <Card className="mb-6">
@@ -224,6 +227,34 @@ export default function SuppliersPage() {
         onOpenChange={setIs360Open} 
         supplier={selectedSupplier} 
       />
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{selectedSupplier ? 'Editar fornecedor' : 'Novo fornecedor'}</DialogTitle>
+            <DialogDescription>Preencha os dados do fornecedor para utilizá-lo nas compras.</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-2">
+            <div className="space-y-2"><Label htmlFor="supplier-name">Razão social *</Label><Input id="supplier-name" value={formData.name || ''} onChange={e => setFormData(p => ({ ...p, name: e.target.value }))} /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2"><Label htmlFor="supplier-document">Documento *</Label><Input id="supplier-document" value={formData.document || ''} onChange={e => setFormData(p => ({ ...p, document: e.target.value }))} /></div>
+              <div className="space-y-2"><Label htmlFor="supplier-type">Tipo</Label><Select value={formData.documentType || 'cnpj'} onValueChange={v => setFormData(p => ({ ...p, documentType: v as Supplier['documentType'] }))}><SelectTrigger id="supplier-type"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="cnpj">CNPJ</SelectItem><SelectItem value="cpf">CPF</SelectItem></SelectContent></Select></div>
+            </div>
+            <div className="space-y-2"><Label htmlFor="supplier-trade">Nome fantasia</Label><Input id="supplier-trade" value={formData.tradeName || ''} onChange={e => setFormData(p => ({ ...p, tradeName: e.target.value }))} /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2"><Label htmlFor="supplier-email">E-mail</Label><Input id="supplier-email" type="email" value={formData.email || ''} onChange={e => setFormData(p => ({ ...p, email: e.target.value }))} /></div>
+              <div className="space-y-2"><Label htmlFor="supplier-phone">Telefone</Label><Input id="supplier-phone" value={formData.phone || ''} onChange={e => setFormData(p => ({ ...p, phone: e.target.value }))} /></div>
+            </div>
+            <div className="space-y-2"><Label htmlFor="supplier-status">Situação</Label><Select value={formData.status || 'active'} onValueChange={v => setFormData(p => ({ ...p, status: v as Supplier['status'] }))}><SelectTrigger id="supplier-status"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="active">Ativo</SelectItem><SelectItem value="inactive">Inativo</SelectItem><SelectItem value="blocked">Bloqueado</SelectItem></SelectContent></Select></div>
+          </div>
+          <DialogFooter><Button variant="outline" onClick={() => setIsFormOpen(false)}>Cancelar</Button><Button disabled={savingSupplier} onClick={handleSave}>{savingSupplier ? 'Salvando...' : 'Salvar fornecedor'}</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
+        <DialogContent><DialogHeader><DialogTitle>{selectedSupplier?.name}</DialogTitle><DialogDescription>Dados do fornecedor</DialogDescription></DialogHeader>
+          {selectedSupplier && <div className="space-y-2 text-sm"><p><strong>Documento:</strong> {selectedSupplier.document}</p><p><strong>Contato:</strong> {selectedSupplier.email || 'Não informado'} · {selectedSupplier.phone || 'Não informado'}</p><p><strong>Situação:</strong> {statusConfig[selectedSupplier.status]?.label || selectedSupplier.status}</p></div>}
+          <DialogFooter><Button variant="outline" onClick={() => setIsViewOpen(false)}>Fechar</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 }
