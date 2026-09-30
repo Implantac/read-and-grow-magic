@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Copy, QrCode, X, Loader2 } from 'lucide-react';
 import { Button } from '@/ui/base/button';
 import { formatBRL } from '@/lib/formatters';
@@ -17,10 +17,12 @@ export function PDVPixDialog({ open, amount, onConfirm, onCancel }: Props) {
   const [charge, setCharge] = useState<PixCharge | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const confirmed = useRef(false);
 
   useEffect(() => {
     if (!open) { setCharge(null); setError(null); return; }
     let active = true;
+    confirmed.current = false;
     setLoading(true);
     setError(null);
     void (async () => {
@@ -47,7 +49,8 @@ export function PDVPixDialog({ open, amount, onConfirm, onCancel }: Props) {
         .select('id,status,amount,expires_at').eq('id', charge.id).single();
       if (!active) return;
       if (requestError) { setError('Não foi possível consultar o pagamento.'); return; }
-      if (data?.status === 'paid' && Math.abs(Number(data.amount) - amount) < 0.001) {
+      if (data?.status === 'paid' && Math.abs(Number(data.amount) - amount) < 0.001 && !confirmed.current) {
+        confirmed.current = true;
         onConfirm(charge.id);
       } else if (data?.status !== 'pending' || (data.expires_at && new Date(data.expires_at).getTime() < Date.now())) {
         setError('Cobrança expirada ou cancelada. Selecione outra forma de pagamento.');

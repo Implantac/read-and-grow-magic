@@ -5,7 +5,6 @@ import {
   PackagePlus, 
   MapPin, 
   PackageSearch, 
-  Layers, 
   RefreshCw, 
   PackageCheck,
   ScanBarcode,
@@ -76,13 +75,13 @@ export default function WMSDashboard() {
         <Card className="border-l-4 border-l-blue-500">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium">Ondas de Picking</CardTitle>
-            <Layers className="h-4 w-4 text-muted-foreground" />
+            <PackageSearch className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             {loading ? <Skeleton className="h-8 w-20" /> : error ? <span>—</span> : (
               <>
                 <div className="text-2xl font-bold">{stats.picking} Ativas</div>
-                <p className="text-xs text-green-500 mt-1">Monitoramento live</p>
+                <p className="text-xs text-muted-foreground mt-1">Ordens em separação</p>
               </>
             )}
           </CardContent>
@@ -121,9 +120,9 @@ export default function WMSDashboard() {
 
       <WMSOperationalConsole />
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+        <div className="grid gap-6">
 
-        <Card className="lg:col-span-4">
+        <Card>
           <CardHeader>
             <CardTitle>Fluxo de Logística Interna</CardTitle>
           </CardHeader>
@@ -135,7 +134,7 @@ export default function WMSDashboard() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold">Recebimento</p>
-                   <p className="text-xl font-bold">{error ? '—' : stats.receivedItems} itens</p>
+                   <p className="text-xl font-bold">{loading || error ? '—' : stats.receivedItems} itens</p>
                 </div>
               </div>
               <div className="p-4 rounded-xl border bg-secondary/10 flex items-center gap-4">
@@ -144,7 +143,7 @@ export default function WMSDashboard() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold">Expedição</p>
-                   <p className="text-xl font-bold">{error ? '—' : stats.shippedVolumes} vol</p>
+                   <p className="text-xl font-bold">{loading || error ? '—' : stats.shippedVolumes} vol</p>
                 </div>
               </div>
               <div className="p-4 rounded-xl border bg-secondary/10 flex items-center gap-4">
@@ -153,7 +152,7 @@ export default function WMSDashboard() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold">Endereçados</p>
-                   <p className="text-xl font-bold">{error ? '—' : stats.occupancy}%</p>
+                   <p className="text-xl font-bold">{loading || error ? '—' : `${stats.occupancy}%`}</p>
                 </div>
               </div>
               <div className="p-4 rounded-xl border bg-secondary/10 flex items-center gap-4">
@@ -162,7 +161,7 @@ export default function WMSDashboard() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold">Picking Pendente</p>
-                   <p className="text-xl font-bold">{error ? '—' : stats.pendingPickingItems} itens</p>
+                   <p className="text-xl font-bold">{loading || error ? '—' : stats.pendingPickingItems} itens</p>
                 </div>
               </div>
             </div>

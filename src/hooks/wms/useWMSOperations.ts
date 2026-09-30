@@ -246,7 +246,7 @@ export function useWMSDashboardStats() {
       occupied: totalOcc,
       capacity: totalCap,
       receivedItems: (recRes.data || []).reduce((sum, row) => sum + Number(row.received_items || 0), 0),
-      shippedVolumes: (shipRes.data || []).filter((row) => row.status === 'shipped').reduce((sum, row) => sum + Number(row.volumes || 0), 0),
+      shippedVolumes: (shipRes.data || []).filter((row) => ['shipped', 'delivered'].includes(row.status)).reduce((sum, row) => sum + Number(row.volumes || 0), 0),
       pendingPickingItems: (pickRes.data || []).filter((row) => ['pending', 'assigned', 'in_progress'].includes(row.status)).reduce((sum, row) => sum + Math.max(0, Number(row.items_count || 0) - Number(row.picked_items || 0)), 0),
       activeDocks: (dockRes.data || []).filter((row) => ['occupied', 'in_progress', 'loading'].includes(row.status)).length,
     });

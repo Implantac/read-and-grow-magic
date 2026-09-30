@@ -104,11 +104,8 @@ export function usePDVFinalize(args: UsePDVFinalizeArgs) {
           return;
         }
       }
-    } finally {
-      setSaving(false);
-    }
-    const primary = splits.length === 1 ? splits[0].method : 'multiple';
-    const receiptSnapshot = {
+      const primary = splits.length === 1 ? splits[0].method : 'multiple';
+      const receiptSnapshot = {
       items: cart.map((i) => ({
         productCode: i.productCode,
         productName: i.productName,
@@ -127,8 +124,7 @@ export function usePDVFinalize(args: UsePDVFinalizeArgs) {
       loyaltyPoints,
       terminalId: session.terminalId,
       operatorName: session.operatorName,
-    };
-    try {
+      };
       const emitResult = await onEmit({
         items: cart,
         paymentMethod: primary,
@@ -170,6 +166,8 @@ export function usePDVFinalize(args: UsePDVFinalizeArgs) {
       clearAll();
       setShowPayment(false);
       onClose();
+    } catch {
+      toastError('Não foi possível finalizar a venda. Confira o pagamento e tente novamente.');
     } finally {
       setSaving(false);
     }

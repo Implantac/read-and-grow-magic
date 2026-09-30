@@ -65,7 +65,7 @@ export function useWMSOperationalConsole() {
     });
     channel.subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => { void supabase.removeChannel(channel); };
   }, [fetchAll]);
 
   return { ...data, loading, error, refetch: fetchAll };

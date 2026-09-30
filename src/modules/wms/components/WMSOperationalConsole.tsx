@@ -35,7 +35,7 @@ export default function WMSOperationalConsole() {
   const sections = [
     {
       title: "Recebimento & Docas",
-      description: "Pedidos aguardando descarga ou em conferência",
+       description: "Pedidos aguardando descarga ou em conferência",
       icon: Truck,
       data: receiving,
        link: "/wms/recebimento",
@@ -71,7 +71,7 @@ export default function WMSOperationalConsole() {
       )
     },
     {
-      title: "Ondas de Picking",
+       title: "Ordens de Picking",
       description: "Separação de pedidos ativa",
       icon: PackageSearch,
       data: picking,
@@ -129,7 +129,7 @@ export default function WMSOperationalConsole() {
     },
     {
       title: "Alertas de Inventário",
-      description: "Itens abaixo do estoque de segurança",
+       description: "Itens abaixo do estoque mínimo",
       icon: AlertTriangle,
       data: inventory,
        link: "/wms/inventario",
