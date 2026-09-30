@@ -42,6 +42,10 @@ export interface ERPPolicy {
   };
 }
 
+type CompanySettings = {
+  policies?: Partial<ERPPolicy>;
+};
+
 const DEFAULT_POLICY: ERPPolicy = {
   inventory: {
     allowNegativeStock: false,
@@ -83,15 +87,15 @@ export function PolicyProvider({ children }: { children: React.ReactNode }) {
 
   const policy = useMemo(() => {
     const base = { ...DEFAULT_POLICY };
-    const metadata = currentCompany?.metadata as { policies?: Partial<ERPPolicy> } | null | undefined;
+    const settings = currentCompany?.settings as CompanySettings | null | undefined;
 
     if (segment === 'retail') {
       base.inventory.allowNegativeStock = false;
       base.commercial.autoOrderApproval = true;
     }
 
-    if (metadata?.policies) {
-      return { ...base, ...metadata.policies } as ERPPolicy;
+    if (settings?.policies) {
+      return { ...base, ...settings.policies } as ERPPolicy;
     }
 
     return base;
