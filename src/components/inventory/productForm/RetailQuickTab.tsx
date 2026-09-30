@@ -10,7 +10,7 @@ export function RetailQuickTab({ form, update }: { form: ProductForm; update: Up
         <div className="space-y-2"><Label htmlFor="retail-code">Código do produto *</Label>
           <Input id="retail-code" value={form.code} onChange={(e) => update({ code: e.target.value })} /></div>
         <div className="space-y-2"><Label htmlFor="retail-barcode">Código de barras</Label>
-          <Input id="retail-barcode" value={form.barcode} onChange={(e) => update({ barcode: e.target.value, gtin: e.target.value })} /></div>
+          <Input id="retail-barcode" value={form.barcode} onChange={(e) => update({ barcode: e.target.value })} /></div>
         <div className="space-y-2 sm:col-span-2"><Label htmlFor="retail-name">Nome do produto *</Label>
           <Input id="retail-name" value={form.name} onChange={(e) => update({ name: e.target.value })} /></div>
         <div className="space-y-2"><Label htmlFor="retail-price">Preço de venda</Label>

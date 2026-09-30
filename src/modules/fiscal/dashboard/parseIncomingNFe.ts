@@ -49,7 +49,7 @@ export function parseIncomingNFe(xml: string): XMLData {
     };
   });
   const invoiceTotal = amount(text(child(total, 'ICMSTot'), 'vNF'));
-  if (!products.length || products.some((p) => !p.code || !p.description || !p.uCom || !Number.isFinite(p.qCom) || p.qCom <= 0 || !Number.isFinite(p.vProd) || p.vProd < 0)
+  if (!products.length || products.some((p) => !p.code || !p.description || !p.uCom || !Number.isFinite(p.qCom) || p.qCom <= 0 || !Number.isFinite(p.vUnCom) || p.vUnCom < 0 || !Number.isFinite(p.vProd) || p.vProd < 0)
     || !Number.isFinite(invoiceTotal) || invoiceTotal <= 0 || !/^\d{14}$/.test(text(emit, 'CNPJ'))) {
     throw new Error('A nota possui itens, fornecedor ou valores inválidos.');
   }
