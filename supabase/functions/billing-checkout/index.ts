@@ -83,7 +83,8 @@ Deno.serve(async (req) => {
   if (amount <= 0) {
     const now = new Date();
     const end = new Date(now);
-    cycle === "annual" ? end.setFullYear(end.getFullYear() + 1) : end.setMonth(end.getMonth() + 1);
+    if (cycle === "annual") end.setFullYear(end.getFullYear() + 1);
+    else end.setMonth(end.getMonth() + 1);
     const { error } = await admin.from("subscriptions").upsert(
       {
         company_id: auth.companyId,

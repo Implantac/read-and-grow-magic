@@ -39,7 +39,7 @@ export function useOrderProfitability(items: LineItem[], shipping: number = 0) {
     enabled: items.length > 0 && items.some((i) => i.unit_price > 0),
     staleTime: 30_000,
     queryFn: async (): Promise<OrderProfitability> => {
-      let costMap = new Map<string, number>();
+      const costMap = new Map<string, number>();
       if (productIds.length > 0) {
         const { data } = await supabase
           .from('products')

@@ -83,16 +83,15 @@ export function PolicyProvider({ children }: { children: React.ReactNode }) {
 
   const policy = useMemo(() => {
     const base = { ...DEFAULT_POLICY };
+    const metadata = currentCompany?.metadata as { policies?: Partial<ERPPolicy> } | null | undefined;
 
     if (segment === 'retail') {
       base.inventory.allowNegativeStock = false;
       base.commercial.autoOrderApproval = true;
     }
 
-    // @ts-ignore
-    if (currentCompany?.metadata?.policies) {
-      // @ts-ignore
-      return { ...base, ...currentCompany.metadata.policies };
+    if (metadata?.policies) {
+      return { ...base, ...metadata.policies } as ERPPolicy;
     }
 
     return base;
@@ -107,6 +106,6 @@ export const usePolicy = () => useContext(PolicyContext);
  * Legacy support for EnterpriseContext.tsx
  */
 export function getEnterprisePolicies(segment: string) {
-  const base = DEFAULT_POLICY;
+  void segment;
   return DEFAULT_POLICY;
 }

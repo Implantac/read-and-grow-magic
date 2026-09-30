@@ -771,6 +771,7 @@ const ERP_TOOLS = [
       },
     },
   },
+  {
     type: "function",
     function: {
       name: "analise_estrategica",

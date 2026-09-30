@@ -27,7 +27,7 @@ function buildMatrix(payload: string, size = 29): boolean[][] {
       m[oy + y][ox + x] = border || inner;
     }
     for (let y = -1; y <= 7; y++) if (oy + y >= 0 && oy + y < size) {
-      if (ox - 1 >= 0) m[oy + y]?.[ox - 1] !== undefined && (m[oy + y][ox - 1] = false);
+      if (ox - 1 >= 0 && m[oy + y]?.[ox - 1] !== undefined) m[oy + y][ox - 1] = false;
       if (ox + 7 < size) m[oy + y][ox + 7] = false;
     }
     for (let x = -1; x <= 7; x++) if (ox + x >= 0 && ox + x < size) {

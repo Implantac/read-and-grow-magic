@@ -57,9 +57,10 @@ export function InvitesTable({
                 <tr key={i.id} className="border-t border-border hover:bg-muted/20">
                   <td className="p-3">
                     <Checkbox checked={checked} onCheckedChange={(v) => {
-                      const s = new Set(selectedInvites);
-                      v ? s.add(i.id) : s.delete(i.id);
-                      setSelectedInvites(s);
+                      const next = new Set(selectedInvites);
+                      if (v) next.add(i.id);
+                      else next.delete(i.id);
+                      setSelectedInvites(next);
                     }} />
                   </td>
                   <td className="p-3">
