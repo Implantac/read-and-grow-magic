@@ -13,6 +13,9 @@
 
 ## Revisão ponta a ponta — 2026-09-30
 
+- [ ] Corrigir painel WMS: retirar indicadores fictícios, mostrar falhas e atualizar dados operacionais.
+- [ ] Corrigir PIX no PDV: impedir QR e confirmação fictícios; só aceitar cobrança paga pelo provedor.
+
 - [x] Corrigir ordem instável de hooks no painel WMS.
 - [x] Impedir conclusão automática prematura de pedidos recém-criados.
 - [x] Remover fallback de boleto fictício; falhar com segurança sem provedor válido.
