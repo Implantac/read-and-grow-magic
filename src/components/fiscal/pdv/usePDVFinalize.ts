@@ -4,6 +4,7 @@ import { toastError } from '@/lib/toastHelpers';
 import { openReceipt } from '../pdvReceipt';
 import { logAudit, type CashSession } from './usePDVCashSession';
 import type { DbClient } from '@/hooks/commercial/useClients';
+import { supabase } from '@/integrations/supabase/client';
 
 type CartLine = {
   productCode: string;
@@ -14,7 +15,7 @@ type CartLine = {
   unit?: string;
 };
 
-type Split = { id: string; method: string; amount: number; installments?: number };
+type Split = { id: string; method: string; amount: number; installments?: number; chargeId?: string };
 
 export type PDVEmitPayload = {
   items: CartLine[];
@@ -78,9 +79,9 @@ export function usePDVFinalize(args: UsePDVFinalizeArgs) {
     }
 
     if (isOffline) {
-      const allowedOffline = splits.every(s => s.method === 'cash' || s.method === 'pix');
+      const allowedOffline = splits.every(s => s.method === 'cash');
       if (!allowedOffline) {
-        toastError('Modo offline aceita apenas Dinheiro ou PIX.');
+        toastError('PIX exige confirmação bancária online. No modo offline, use dinheiro.');
         return;
       }
     }
@@ -93,6 +94,19 @@ export function usePDVFinalize(args: UsePDVFinalizeArgs) {
     }
 
     setSaving(true);
+    try {
+      for (const split of splits.filter((item) => item.method === 'pix')) {
+        if (!split.chargeId || isOffline) { toastError('Aguarde a confirmação bancária do PIX.'); return; }
+        const { data: charge, error: chargeError } = await supabase.from('pix_charges')
+          .select('status,amount').eq('id', split.chargeId).single();
+        if (chargeError || charge?.status !== 'paid' || Math.abs(Number(charge.amount) - split.amount) > 0.001) {
+          toastError('O PIX ainda não foi confirmado pelo banco.');
+          return;
+        }
+      }
+    } finally {
+      setSaving(false);
+    }
     const primary = splits.length === 1 ? splits[0].method : 'multiple';
     const receiptSnapshot = {
       items: cart.map((i) => ({

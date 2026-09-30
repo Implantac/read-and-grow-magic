@@ -35,6 +35,7 @@ interface Props {
   showPixDialog: { splitId: string; amount: number } | null;
   setShowPixDialog: (v: { splitId: string; amount: number } | null) => void;
   removeSplit: (id: string) => void;
+  confirmPix: (id: string, amount: number, chargeId: string) => void;
   // Close session
   showCloseSession: boolean;
   closeSessionSummary: CashCloseSummary | null;
@@ -89,11 +90,11 @@ export function PDVDialogsStack(p: Props) {
       <PDVPixDialog
         open={!!p.showPixDialog}
         amount={p.showPixDialog?.amount || 0}
-        onConfirm={() => p.setShowPixDialog(null)}
-        onCancel={() => {
-          if (p.showPixDialog) p.removeSplit(p.showPixDialog.splitId);
+        onConfirm={(chargeId) => {
+          if (p.showPixDialog) p.confirmPix(p.showPixDialog.splitId, p.showPixDialog.amount, chargeId);
           p.setShowPixDialog(null);
         }}
+        onCancel={() => p.setShowPixDialog(null)}
       />
 
       <PDVCloseSessionDialog

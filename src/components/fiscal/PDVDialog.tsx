@@ -85,7 +85,7 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
   const {
     splits, setSplits, splitDrafts, installments, setInstallments,
     paidTotal, remaining, change, availableCredit,
-    addSplit, handleSplitAmountChange, commitSplitAmount, removeSplit, resetSplits,
+    addSplit, confirmPix, handleSplitAmountChange, commitSplitAmount, removeSplit, resetSplits,
   } = usePDVSplits({
     total,
     customer,
@@ -433,6 +433,7 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
           showPixDialog={showPixDialog}
           setShowPixDialog={setShowPixDialog}
           removeSplit={removeSplit}
+          confirmPix={confirmPix}
           showCloseSession={showCloseSession}
           closeSessionSummary={closeSessionSummary}
           setShowCloseSession={setShowCloseSession}
