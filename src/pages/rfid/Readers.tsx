@@ -13,6 +13,7 @@ import { Plus, Radio, Wifi, WifiOff, Settings, Trash2, RefreshCw } from 'lucide-
 import { EmptyState } from '@/shared/components/EmptyState';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useConfirm } from '@/shared/components/ConfirmDialog';
 
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   active: { label: 'Ativo', variant: 'default' },
@@ -22,7 +23,8 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
 };
 
 export default function RFIDReadersPage() {
-  const { readers, readersLoading: loading, createReader: create, deleteReader: remove } = useRFID();
+  const { readers, readersLoading: loading, refreshReaders, createReader: create, deleteReader: remove } = useRFID();
+  const confirm = useConfirm();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     code: '', name: '', location: '', zone: '', ipAddress: '', port: '',
@@ -50,7 +52,7 @@ export default function RFIDReadersPage() {
           <p className="text-muted-foreground">Gerencie os leitores RFID do armazém</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => {}}><RefreshCw className="h-4 w-4 mr-1" /> Atualizar</Button>
+          <Button variant="outline" size="sm" onClick={() => void refreshReaders()}><RefreshCw className="h-4 w-4 mr-1" /> Atualizar</Button>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button><Plus className="h-4 w-4 mr-1" /> Novo Leitor</Button>
@@ -147,7 +149,10 @@ export default function RFIDReadersPage() {
                         {reader.lastHeartbeat ? format(new Date(reader.lastHeartbeat), "dd/MM HH:mm", { locale: ptBR }) : 'Nunca'}
                       </TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="icon" onClick={() => remove(reader.id)}>
+                        <Button variant="ghost" size="icon" aria-label={`Excluir leitor ${reader.name}`} onClick={async () => {
+                          const approved = await confirm({ title: 'Excluir leitor RFID?', description: `O leitor ${reader.name} será removido.`, confirmLabel: 'Excluir', variant: 'destructive' });
+                          if (approved) await remove(reader.id);
+                        }}>
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       </TableCell>

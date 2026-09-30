@@ -26,16 +26,6 @@ export interface FinancialBoleto {
   created_at: string;
 }
 
-// Mock generator: creates a fake digitable line + our_number locally.
-// Replace by edge function when boleto provider is configured.
-function mockBoleto(amount: number) {
-  const onum = String(Date.now()).slice(-10);
-  const cents = Math.round(amount * 100).toString().padStart(10, '0');
-  const part = (n: number) => Math.floor(Math.random() * 1e5).toString().padStart(5, '0');
-  const dig = `${part(0)}.${part(0)} ${part(0)}.${part(0)} ${part(0)}.${part(0)} 1 9999${cents}`;
-  return { our_number: onum, digitable_line: dig, barcode: dig.replace(/[^0-9]/g, '') };
-}
-
 export function useFinancialBoletos(filters?: { status?: string }) {
   return useQuery({
     queryKey: ['financial_boletos', filters],
@@ -58,26 +48,13 @@ export function useCreateBoleto() {
       const idempotencyKey = `boleto-${input.receivable_id || 'manual'}-${Date.now()}`;
 
       
-      // Attempt real generation via Edge Function if possible, fallback to mock
-      try {
-        const { data, error } = await supabase.functions.invoke('financial-intelligence', {
-          body: { action: 'generate_boleto', ...input, company_id: companyId, idempotency_key: idempotencyKey }
-        });
-
-        if (!error && data?.id) return data;
-      } catch (e) {
-        console.warn('Edge Function fallback to local mock:', e);
+      const { data, error } = await supabase.functions.invoke('financial-intelligence', {
+        body: { action: 'generate_boleto', ...input, company_id: companyId, idempotency_key: idempotencyKey }
+      });
+      if (error) throw new Error(`Não foi possível gerar o boleto no provedor bancário: ${error.message}`);
+      if (!data?.id || !data?.digitable_line) {
+        throw new Error('O provedor bancário não retornou um boleto válido. Nenhuma cobrança foi criada.');
       }
-
-      const fake = mockBoleto(input.amount);
-      const { data, error } = await supabase.from('financial_boletos').insert({
-        ...input,
-        ...fake,
-        provider: 'mock',
-        status: 'registered',
-        company_id: companyId,
-      }).select().single();
-      if (error) throw error;
       return data;
     },
     onSuccess: () => {

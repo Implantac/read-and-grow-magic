@@ -290,6 +290,9 @@ function computeKPIs(d: any, months: number = 12) {
       moMGrowth: growthTrends[growthTrends.length - 1]?.revenueMoM || 0,
       yoYGrowth: growthTrends[growthTrends.length - 1]?.revenueYoY || 0,
       defaultRate: +defaultRate.toFixed(1),
+      totalReceivable,
+      overdueReceivable,
+      totalPayable: d.payables.filter((p: any) => p.status === 'pending').reduce((s: number, p: any) => s + (p.open_amount || p.amount || 0), 0),
       churnRate: +churnRate.toFixed(1),
       avgDailyRevenue: +(totalRevenue / 30).toFixed(0),
       cashFlowProjection30d: futureReceivablesTotal - futurePayablesTotal,
@@ -1550,7 +1553,7 @@ ${patternInsights}${realDataSnapshot}${canonicalBlock}`, supabase, 'ai-executive
         const args = typeof fn.arguments === "string" ? JSON.parse(fn.arguments) : fn.arguments;
         toolResult = executor ? await executor(supabase, args, user_id, company_id) : { erro: `Função ${fn.name} não encontrada` };
       } catch (e) {
-        toolResult = { erro: `Erro: ${e.message}` };
+        toolResult = { erro: `Erro: ${e instanceof Error ? e.message : 'falha desconhecida'}` };
       }
       aiMessages.push({ role: "tool", tool_call_id: toolCall.id, content: JSON.stringify(toolResult) });
     }

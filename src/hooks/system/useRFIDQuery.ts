@@ -124,8 +124,10 @@ export function useRFID() {
   return {
     readers: readersQuery.data || [],
     readersLoading: readersQuery.isLoading,
+    refreshReaders: readersQuery.refetch,
     tags: tagsQuery.data || [],
     tagsLoading: tagsQuery.isLoading,
+    refreshTags: tagsQuery.refetch,
     getEvents: eventsQuery,
     
     // Mutations

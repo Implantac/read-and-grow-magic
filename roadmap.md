@@ -10,3 +10,18 @@
 - [ ] Fase 8 — UX, acessibilidade e navegação
 - [ ] Fase 9 — IA e automações governadas
 - [ ] Fase 10 — Preparação e validação de produção
+
+## Revisão ponta a ponta — 2026-09-30
+
+- [x] Corrigir ordem instável de hooks no painel WMS.
+- [x] Impedir conclusão automática prematura de pedidos recém-criados.
+- [x] Remover fallback de boleto fictício; falhar com segurança sem provedor válido.
+- [x] Calcular sugestões de compras com saldos reais de estoque.
+- [x] Bloquear NF-e automática de transferência enquanto faltarem numeração e valores fiscais reais.
+- [x] Tornar atualização e exclusão RFID funcionais, com confirmação destrutiva.
+- [ ] Implementar emissão fiscal real de transferência com numeração idempotente e valores dos itens.
+- [ ] Implementar consumo de matéria-prima e quantidade produzida na conclusão da OP.
+- [ ] Implementar CRUD completo de cotações de compra.
+- [ ] Substituir indicadores simulados da governança por consultas reais.
+- [ ] Ativar fixtures e testes E2E completos de O2C, P2P, PCP e PDV no pipeline.
+- [ ] Concluir isolamento por filial/canal e revisar funções privilegiadas apontadas pelo linter.
