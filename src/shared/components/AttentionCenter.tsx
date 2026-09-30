@@ -26,7 +26,7 @@ interface AttentionCenterProps {
 
 export function AttentionCenter({ limit, showAllLink = false, className }: AttentionCenterProps) {
   const navigate = useNavigate();
-  const { items, isLoading, hasCompany } = usePendingWork();
+  const { items, isLoading, hasCompany, error, refetch } = usePendingWork();
 
   const visible = typeof limit === 'number' ? items.slice(0, limit) : items;
 
@@ -48,6 +48,13 @@ export function AttentionCenter({ limit, showAllLink = false, className }: Atten
           </div>
         )}
 
+        {!isLoading && hasCompany && error && (
+          <div role="alert" className="flex flex-col gap-3 rounded-md border border-destructive/30 bg-destructive/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-foreground">Não foi possível consultar as pendências agora.</p>
+            <Button variant="outline" size="sm" onClick={() => refetch()}>Tentar novamente</Button>
+          </div>
+        )}
+
         {!isLoading && !hasCompany && (
           <EmptyState
             compact
@@ -57,7 +64,7 @@ export function AttentionCenter({ limit, showAllLink = false, className }: Atten
           />
         )}
 
-        {!isLoading && hasCompany && visible.length === 0 && (
+        {!isLoading && hasCompany && !error && visible.length === 0 && (
           <EmptyState
             compact
             icon={CheckCircle2}
@@ -66,7 +73,7 @@ export function AttentionCenter({ limit, showAllLink = false, className }: Atten
           />
         )}
 
-        {!isLoading &&
+        {!isLoading && !error &&
           visible.map((item) => {
             const cfg = severityConfig[item.severity];
             const Icon = cfg.icon;

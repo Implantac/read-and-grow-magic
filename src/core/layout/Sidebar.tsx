@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -38,7 +38,6 @@ export function Sidebar() {
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(-1);
-  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const toggleExpanded = (title: string) => {
     setExpandedItems((prev) =>
@@ -141,22 +140,6 @@ export function Sidebar() {
     signOut().then(() => (window.location.href = '/login'));
   };
 
-  // Shortcut Ctrl+K to focus search
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault();
-        if (sidebarCollapsed) {
-          useAppStore.getState().setSidebarCollapsed(false);
-        }
-        setTimeout(() => searchInputRef.current?.focus(), 100);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [sidebarCollapsed]);
-
   const handleSearchKeyDown = (e: React.KeyboardEvent) => {
     if (flatItems.length === 0) return;
 
@@ -217,8 +200,7 @@ export function Sidebar() {
             <div className="relative group">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-sidebar-foreground/30 group-focus-within:text-primary transition-colors" />
                 <Input
-                  ref={searchInputRef}
-                  placeholder="Buscar menu ou rota... (Ctrl+K)"
+                  placeholder="Buscar no menu..."
                   value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={handleSearchKeyDown}

@@ -9,7 +9,9 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/ui/base/command';
-import { navigationItems } from '@/config/navigation';
+import { getNavigationForContext } from '@/config/navigation';
+import { useEnterprise } from '@/core/auth/EnterpriseContext';
+import { evaluateContextAccess, getRouteContextCriteria } from '@/core/auth/contextAccess';
 import {
   LayoutDashboard, Users, Wallet, FileCheck, Package, ShoppingCart,
   Factory, Warehouse, Settings, UserCircle, ShoppingBag, ClipboardList,
@@ -52,6 +54,13 @@ interface FlatItem {
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const { activeUnitType, activeChannel, scope, role, permissions } = useEnterprise();
+  const context = useMemo(() => ({ unitType: activeUnitType, channel: activeChannel, scope, role, permissions }),
+    [activeUnitType, activeChannel, scope, role, permissions]);
+  const visibleTasks = useMemo(() => taskActions.filter((action) => {
+    const criteria = getRouteContextCriteria(action.href);
+    return !criteria || evaluateContextAccess(criteria, context).allowed;
+  }), [context]);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -70,17 +79,19 @@ export function CommandPalette() {
 
   const flatItems = useMemo(() => {
     const items: FlatItem[] = [];
-    navigationItems.forEach((item) => {
-      if (!item.children || item.children.length === 0) {
-        items.push({ title: item.title, href: item.href, icon: item.icon, group: 'Navegação' });
-      } else {
-        item.children.forEach((child) => {
-          items.push({ title: child.title, href: child.href, icon: child.icon, group: item.title });
-        });
-      }
+    getNavigationForContext(context).forEach((section) => {
+      section.items.forEach((item) => {
+        if (!item.children || item.children.length === 0) {
+          items.push({ title: item.title, href: item.href, icon: item.icon, group: section.label || 'Navegação' });
+        } else {
+          item.children.forEach((child) => {
+            items.push({ title: child.title, href: child.href, icon: child.icon, group: item.title });
+          });
+        }
+      });
     });
     return items;
-  }, []);
+  }, [context]);
 
   const groups = useMemo(() => {
     const map = new Map<string, FlatItem[]>();
@@ -103,7 +114,7 @@ export function CommandPalette() {
       <CommandList>
         <CommandEmpty>Nenhum resultado encontrado.</CommandEmpty>
         <CommandGroup heading="O que você quer fazer?">
-          {taskActions.map((action) => {
+          {visibleTasks.map((action) => {
             const Icon = iconMap[action.icon] || Activity;
             return (
               <CommandItem
