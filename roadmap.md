@@ -13,7 +13,8 @@
   - [x] Facilitar a escolha de produtos na transferência, mostrar saldos e impedir solicitações acima do disponível antes do envio.
   - [x] Diferenciar listas vazias de falhas de consulta em transferências, recebimentos e histórico, com atualização manual.
   - [x] Clarificar empresa jurídica versus unidade operacional no seletor e cadastro, com seleção ativa e feedback de troca.
-  - [ ] Auditar comandos operacionais inertes e corrigir o cadastro/edição de fornecedores, com validação real no navegador.
+  - [x] Corrigir cadastro, edição e visualização de fornecedores; tornar a tela acessível e validar formulário no navegador.
+  - [ ] Completar auditoria dos demais módulos e testar gravação real de fornecedores (bloqueio: não criar registros de teste em dados operacionais sem ambiente isolado).
 - [ ] Fase 9 — IA e automações governadas
 - [ ] Fase 10 — Preparação e validação de produção
 
@@ -30,7 +31,7 @@
 - [x] Tornar atualização e exclusão RFID funcionais, com confirmação destrutiva.
 - [ ] Implementar emissão fiscal real de transferência com numeração idempotente e valores dos itens.
 - [ ] Implementar consumo de matéria-prima e quantidade produzida na conclusão da OP.
-- [ ] Implementar CRUD completo de cotações de compra.
+- [ ] Implementar CRUD completo de cotações de compra (tela legada possui comandos sem ação e usa tabela de cotações comerciais; requer modelo próprio para compras).
 - [ ] Substituir indicadores simulados da governança por consultas reais.
 - [ ] Ativar fixtures e testes E2E completos de O2C, P2P, PCP e PDV no pipeline.
 - [ ] Concluir isolamento por filial/canal e revisar funções privilegiadas apontadas pelo linter.
