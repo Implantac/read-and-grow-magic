@@ -9,7 +9,6 @@ import { EmptyState } from '@/shared/components/EmptyState';
 import { ScrollArea } from '@/ui/base/scroll-area';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/ui/base/dialog';
 import { transferWorkflow, TransferStatus, nextStatuses } from '@/services/operational/inventory/transferWorkflow';
-import { toast } from 'sonner';
 import { Textarea } from '@/ui/base/textarea';
 import { Input } from '@/ui/base/input';
 import { Label } from '@/ui/base/label';
