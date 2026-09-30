@@ -1,8 +1,10 @@
 import { useNavigate } from 'react-router-dom';
-import { PackageCheck, RefreshCw, ArrowLeftRight, Boxes, Store } from 'lucide-react';
+import { PackageCheck, RefreshCw, ArrowLeftRight, Boxes, Store, ShoppingBag } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { cn } from '@/lib/utils';
+import { useEnterprise } from '@/core/auth/EnterpriseContext';
+import { getRouteContextCriteria, evaluateContextAccess } from '@/core/auth/contextAccess';
 
 export interface QuickAction {
   label: string;
@@ -16,6 +18,7 @@ export const defaultQuickActions: QuickAction[] = [
   { label: 'Transferir mercadoria', href: '/operacional/rede/transferencias', icon: ArrowLeftRight },
   { label: 'Consultar estoque', href: '/estoque/saldos', icon: Boxes },
   { label: 'Ver lojas', href: '/operacional/loja/central', icon: Store },
+  { label: 'Vender no PDV', href: '/comercial/pdv', icon: ShoppingBag },
 ];
 
 interface QuickActionsProps {
@@ -25,6 +28,12 @@ interface QuickActionsProps {
 
 export function QuickActions({ actions = defaultQuickActions, className }: QuickActionsProps) {
   const navigate = useNavigate();
+  const { activeUnitType, activeChannel, scope, role, permissions } = useEnterprise();
+  const context = { unitType: activeUnitType, channel: activeChannel, scope, role, permissions };
+  const visibleActions = actions.filter((action) => {
+    const criteria = getRouteContextCriteria(action.href);
+    return !criteria || evaluateContextAccess(criteria, context).allowed;
+  });
 
   return (
     <Card className={cn('border-border/60', className)}>
@@ -33,7 +42,7 @@ export function QuickActions({ actions = defaultQuickActions, className }: Quick
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap">
-          {actions.map((action) => {
+          {visibleActions.map((action) => {
             const Icon = action.icon;
             return (
               <Button

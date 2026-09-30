@@ -56,10 +56,10 @@ export function TenantSelector() {
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="group flex items-center gap-2 h-9 px-2 sm:px-3 rounded-lg border border-sidebar-border/50 bg-sidebar-accent/20 text-sidebar-foreground hover:text-primary hover:bg-sidebar-accent/50 hover:border-primary/30 text-sm font-medium transition-all">
+          <Button variant="ghost" aria-label={`Empresa: ${currentCompany?.name || 'nenhuma selecionada'}. Trocar empresa`} className="group flex min-w-0 items-center gap-1.5 h-9 px-2 sm:px-3 rounded-lg border border-sidebar-border/50 bg-sidebar-accent/20 text-sidebar-foreground hover:text-primary hover:bg-sidebar-accent/50 hover:border-primary/30 text-sm font-medium transition-all">
             <Building2 className="h-3.5 w-3.5 text-primary/70 group-hover:text-primary shrink-0" aria-hidden="true" />
-            <span className="max-w-[110px] sm:max-w-[180px] truncate">{currentCompany?.name || 'Empresa'}</span>
-            <ChevronDown className="h-3.5 w-3.5 opacity-50 transition-transform group-data-[state=open]:rotate-180" />
+            <span className="hidden max-w-[180px] truncate sm:inline">{currentCompany?.name || 'Empresa'}</span>
+            <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-50 transition-transform group-data-[state=open]:rotate-180" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-64 bg-sidebar border-sidebar-border">
@@ -82,25 +82,25 @@ export function TenantSelector() {
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="group flex items-center gap-2 h-9 px-3 rounded-lg text-sidebar-foreground/60 hover:text-primary hover:bg-sidebar-accent/50 text-sm transition-all">
-            <span className="text-sidebar-foreground/40">/</span>
+          <Button variant="ghost" aria-label={`Unidade: ${currentBranch?.name || 'Toda a rede'}. Trocar unidade`} className="group flex min-w-0 items-center gap-1.5 h-9 px-1 sm:px-3 rounded-lg text-sidebar-foreground/60 hover:text-primary hover:bg-sidebar-accent/50 text-sm transition-all">
+            <span className="hidden text-sidebar-foreground/40 sm:inline">/</span>
              {activeUnitType === 'INDUSTRY' && <Factory className="h-3.5 w-3.5 opacity-70 group-hover:text-primary" />}
              {activeUnitType === 'DISTRIBUTION_CENTER' && <Warehouse className="h-3.5 w-3.5 opacity-70 group-hover:text-primary" />}
              {activeUnitType === 'OFFICE' && <Landmark className="h-3.5 w-3.5 opacity-70 group-hover:text-primary" />}
              {activeUnitType === 'WHOLESALE' && <Package className="h-3.5 w-3.5 opacity-70 group-hover:text-primary" />}
              {(!activeUnitType || activeUnitType === 'STORE') && <Store className="h-3.5 w-3.5 opacity-70 group-hover:text-primary" />}
-            <span className="max-w-[120px] truncate">
+             <span className="max-w-[80px] min-w-0 truncate min-[400px]:max-w-[120px] sm:max-w-[180px]">
               {currentBranch ? (
-                <span className="flex items-center gap-1.5">
+                 <span className="flex min-w-0 items-center gap-1.5">
                   {currentBranch.tipo?.toUpperCase() === 'FACTORY' && <Building2 className="h-3 w-3 text-amber-500" />}
                   {currentBranch.tipo?.toUpperCase() === 'DISTRIBUTION_CENTER' && <Package className="h-3 w-3 text-blue-500" />}
                   {currentBranch.tipo?.toUpperCase() === 'STORE' && <Store className="h-3 w-3 text-green-500" />}
                   {currentBranch.tipo?.toUpperCase() === 'OFFICE' && <Building2 className="h-3 w-3 text-slate-500" />}
-                  {currentBranch.name}
+                   <span className="truncate">{currentBranch.name}</span>
                 </span>
                ) : 'Toda a rede'}
             </span>
-            <ChevronDown className="h-3 w-3 opacity-50 transition-transform group-data-[state=open]:rotate-180" />
+             <ChevronDown className="h-3 w-3 shrink-0 opacity-50 transition-transform group-data-[state=open]:rotate-180" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-64 bg-sidebar border-sidebar-border">

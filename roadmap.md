@@ -8,6 +8,8 @@
 - [ ] Fase 6 — E2E críticos e CI bloqueante (pipeline bloqueante criado; fixtures O2C/P2P/PCP pendentes)
 - [ ] Fase 7 — Performance e observabilidade
 - [ ] Fase 8 — UX, acessibilidade e navegação
+  - [x] Evoluir navegação por tarefas conforme contexto ativo e dar feedback confiável às pendências (lote de experiência operacional).
+  - [x] Ajustar seleção de empresa e unidade para caber no topo do celular.
 - [ ] Fase 9 — IA e automações governadas
 - [ ] Fase 10 — Preparação e validação de produção
 
