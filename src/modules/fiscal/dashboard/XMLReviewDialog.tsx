@@ -120,7 +120,7 @@ export function XMLReviewDialog({
                           <td className="px-3 py-3">
                             {p.linkedProductId ? (
                               <div className="flex flex-col">
-                                <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100 w-fit gap-1 mb-1">
+                                  <Badge variant="secondary" className="w-fit gap-1 mb-1">
                                   <CheckCircle className="h-2 w-2" /> Vínculo OK
                                 </Badge>
                                 <span className="text-xs font-bold text-primary">{p.linkedProductName}</span>
@@ -167,7 +167,7 @@ export function XMLReviewDialog({
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] uppercase font-bold text-muted-foreground">Fornecedor</span>
-                  <Badge className="bg-blue-100 text-blue-700 w-fit">Reconhecido</Badge>
+                  <Badge variant="outline" className="w-fit">Conforme o XML</Badge>
                 </div>
               </div>
               <div className="text-right">
@@ -190,13 +190,14 @@ export function XMLReviewDialog({
           ) : (
             <>
               <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-              <Button onClick={onConfirm} className="gap-2">
+              <Button onClick={onConfirm} disabled className="gap-2" title="Entrada indisponível até ser possível registrar estoque e financeiro na mesma operação">
                 <CheckCircle className="h-4 w-4" />
-                Confirmar Cadastro Automático
+                Entrada indisponível
               </Button>
             </>
           )}
         </DialogFooter>
+        <p role="status" className="text-xs text-muted-foreground">Esta nota foi lida apenas para conferência. Nenhum produto, estoque ou valor financeiro foi lançado.</p>
       </DialogContent>
     </Dialog>
   );

@@ -1,5 +1,9 @@
 # Roadmap
 
+- [x] Adaptar cadastro de produtos ao perfil somente loja/PDV, preservando campos avançados para empresas industriais.
+- [ ] Concluir lançamento atômico e idempotente de nota de entrada: leitura e revisão reais prontas; cadastro automático, estoque e financeiro bloqueados até transação segura, regras fiscais e vínculo da unidade.
+- [x] Remover documentos fiscais simulados do painel e consultar notas reais da empresa.
+
 - [x] Fase 0 — Baseline, inventário e matriz de rastreabilidade
 - [ ] Fase 1 — Segurança multiempresa, filial e canal (Lotes 1–2 concluídos; Lote 4 auditado: guards pendentes em `settle_account`, faturamento atômico, auditoria financeira, ajustes e RLS por filial/canal; aplicação bloqueada enquanto o Lovable Cloud finaliza alterações)
 - [ ] Fase 3 — Ledger e integridade de estoque
