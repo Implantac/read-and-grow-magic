@@ -36,6 +36,10 @@ async function loadPendingWork(companyId: string): Promise<PendingItem[]> {
       .limit(3000),
   ]);
 
+  if (ordersRes.error || balancesRes.error) {
+    throw ordersRes.error || balancesRes.error;
+  }
+
   const orders: any[] = ordersRes?.data || [];
   const balances: any[] = balancesRes?.data || [];
 
