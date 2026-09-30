@@ -9,3 +9,4 @@
 - Pagamentos PIX no PDV só contam como recebidos após consulta autenticada de cobrança paga; sem provedor, nenhuma cobrança é criada.
 - A busca global usa a navegação filtrada pelo contexto operacional e o atalho Ctrl/Cmd+K tem um único destino, evitando oferecer telas incompatíveis com a unidade ativa.
 - A lista de empresas exibe todas as entidades jurídicas sem fabricar filiais; unidades operacionais vêm exclusivamente de `branches`, para não confundir tenant com local de operação.
+- A entrada de NF-e só pode confirmar após processamento transacional e idempotente de produtos, estoque e financeiro; leitura do XML sozinha nunca altera saldos nem simula conclusão.
