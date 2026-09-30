@@ -9,7 +9,7 @@ import { Label } from '@/ui/base/label';
 import { Textarea } from '@/ui/base/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { EmptyState } from '@/shared/components/EmptyState';
-import { PackageCheck, Truck, CheckCircle2 } from 'lucide-react';
+import { PackageCheck, Truck, CheckCircle2, RefreshCcw } from 'lucide-react';
 import { useInboundTransfers, useTransferActions } from '@/hooks/operational/network/useTransfers';
 import type { DivergenceReason, ItemQuantity, TransferStatus } from '@/services/operational/inventory/transferWorkflow';
 
@@ -27,7 +27,7 @@ interface Draft {
 }
 
 export default function ReceiveTransfersPage() {
-  const { data: inbound = [], isLoading } = useInboundTransfers();
+  const { data: inbound = [], isLoading, isError, isFetching, refetch } = useInboundTransfers();
   const { advance, isAdvancing } = useTransferActions();
   const [drafts, setDrafts] = useState<Record<string, Draft>>({});
 
@@ -103,7 +103,18 @@ export default function ReceiveTransfersPage() {
         description="Confira o que chegou na sua unidade e registre faltas, sobras ou avarias"
       />
 
-      {inbound.length === 0 ? (
+      <div className="flex justify-end">
+        <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
+          <RefreshCcw className="mr-2 h-4 w-4" />{isFetching ? 'Atualizando...' : 'Atualizar recebimentos'}
+        </Button>
+      </div>
+
+      {isError ? (
+        <div role="alert" className="flex flex-col items-start gap-3 rounded-md border border-destructive/30 bg-destructive/5 p-4">
+          <p className="text-sm text-destructive">Não foi possível consultar os recebimentos. Tente novamente.</p>
+          <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>Tentar novamente</Button>
+        </div>
+      ) : inbound.length === 0 ? (
         <EmptyState
           icon={Truck}
           title="Nada a receber agora"

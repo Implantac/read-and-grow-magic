@@ -4,7 +4,7 @@ import { PageHeader } from '@/shared/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
 import { Button } from '@/ui/base/button';
-import { Truck, Plus, ArrowRight, Clock, CheckCircle2, AlertTriangle, List, History, ClipboardCheck, PackageCheck, Send, User, Calendar, XCircle, Ban } from 'lucide-react';
+import { Truck, Plus, ArrowRight, Clock, CheckCircle2, AlertTriangle, List, History, ClipboardCheck, PackageCheck, Send, User, Calendar, XCircle, Ban, RefreshCcw } from 'lucide-react';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { ScrollArea } from '@/ui/base/scroll-area';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/ui/base/dialog';
@@ -37,16 +37,21 @@ const stepFor = (status?: string) =>
   workflowSteps.find((s) => s.status === status) || workflowSteps[0];
 
 export default function StockTransfersPage() {
-  const { data: transfers, isLoading } = useTransferOrdersList();
+  const { data: transfers, isLoading, isError, isFetching, refetch } = useTransferOrdersList();
   const { advance, isAdvancing } = useTransferActions();
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [history, setHistory] = useState<any[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState(false);
   const [notes, setNotes] = useState('');
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [isNewOpen, setIsNewOpen] = useState(false);
 
   const handleOpenDetails = async (order: any) => {
     setSelectedOrder(order);
+    setHistory([]);
+    setHistoryError(false);
+    setHistoryLoading(true);
     setNotes('');
     const initial: Record<string, number> = {};
     (order.items || []).forEach((item: any) => {
@@ -56,7 +61,22 @@ export default function StockTransfersPage() {
     try {
       setHistory(await transferWorkflow.getHistory(order.id));
     } catch {
-      toast.error('Erro ao carregar histórico');
+      setHistoryError(true);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  const retryHistory = async () => {
+    if (!selectedOrder) return;
+    setHistoryLoading(true);
+    setHistoryError(false);
+    try {
+      setHistory(await transferWorkflow.getHistory(selectedOrder.id));
+    } catch {
+      setHistoryError(true);
+    } finally {
+      setHistoryLoading(false);
     }
   };
 
@@ -95,8 +115,19 @@ export default function StockTransfersPage() {
 
       <NewTransferDialog open={isNewOpen} onOpenChange={setIsNewOpen} />
 
+      <div className="flex justify-end">
+        <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
+          <RefreshCcw className="mr-2 h-4 w-4" />{isFetching ? 'Atualizando...' : 'Atualizar lista'}
+        </Button>
+      </div>
+
       <div className="grid gap-6">
-        {transfers && transfers.length > 0 ? (
+        {isError ? (
+          <div role="alert" className="flex flex-col items-start gap-3 rounded-md border border-destructive/30 bg-destructive/5 p-4">
+            <p className="text-sm text-destructive">Não foi possível consultar as transferências. Tente novamente.</p>
+            <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>Tentar novamente</Button>
+          </div>
+        ) : transfers && transfers.length > 0 ? (
           <div className="space-y-4">
             {transfers.map((order: any) => {
               const step = stepFor(order.current_status);
@@ -220,7 +251,9 @@ export default function StockTransfersPage() {
                           )}
                         </div>
                       ))}
-                      {history.length === 0 && <p className="text-sm text-muted-foreground">Sem movimentações registradas.</p>}
+                      {historyLoading && <p role="status" className="text-sm text-muted-foreground">Consultando histórico...</p>}
+                      {historyError && <div role="alert" className="space-y-2"><p className="text-sm text-destructive">Não foi possível consultar o histórico.</p><Button size="sm" variant="outline" onClick={retryHistory}>Tentar novamente</Button></div>}
+                      {!historyLoading && !historyError && history.length === 0 && <p className="text-sm text-muted-foreground">Sem movimentações registradas.</p>}
                     </div>
                   </ScrollArea>
                 </CardContent>
