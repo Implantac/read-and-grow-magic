@@ -2,9 +2,7 @@ import { useEventBus } from '@/core/events/useEventBus';
 import { usePolicy } from '@/core/orchestration/policyEngine';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { useEffect, useRef, useCallback } from 'react';
-import { fiscalService } from '@/services/fiscal/fiscalService';
-import { supabase } from '@/integrations/supabase/client';
-import { toastSuccess, toastError } from '@/lib/toastHelpers';
+import { toastError } from '@/lib/toastHelpers';
 
 /**
  * Fiscal Orchestrator
