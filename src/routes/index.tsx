@@ -48,6 +48,7 @@ const InventoryMovementsPage = lazy(() => import('@/pages/inventory/Movements'))
 const InventoryKardexPage = lazy(() => import('@/pages/inventory/Kardex'));
 const InventoryBalancesPage = lazy(() => import('@/modules/wms/StockBalances'));
 const PurchaseOrdersPage = lazy(() => import('@/pages/purchasing/PurchaseOrders'));
+const SuppliersPage = lazy(() => import('@/pages/purchasing/Suppliers'));
 const ProcurementDashboardPage = lazy(() => import('@/pages/purchasing/ProcurementDashboard'));
 const PendenciasPage = lazy(() => import('@/pages/Pendencias'));
 
@@ -155,6 +156,7 @@ const AppRoutes = memo(() => {
           <Route path="/estoque/movimentacoes" element={<InventoryMovementsPage />} />
           <Route path="/estoque/kardex" element={<InventoryKardexPage />} />
           <Route path="/compras/pedidos" element={<PurchaseOrdersPage />} />
+          <Route path="/compras/fornecedores" element={<SuppliersPage />} />
           <Route path="/compras/dashboard" element={<ProcurementDashboardPage />} />
           
           {/* Commercial Domain */}

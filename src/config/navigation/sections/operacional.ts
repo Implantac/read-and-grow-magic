@@ -36,6 +36,7 @@ export const operacionalSection: NavSection = {
       href: '/compras/dashboard',
       icon: 'ShoppingCart',
       children: [
+        { title: 'Fornecedores', href: '/compras/fornecedores', icon: 'Building2' },
         { title: 'Pedidos de Compra', href: '/compras/pedidos', icon: 'ClipboardList' },
         { title: 'Painel MRP (Compras)', href: '/compras/dashboard', icon: 'BarChart3' },
       ],

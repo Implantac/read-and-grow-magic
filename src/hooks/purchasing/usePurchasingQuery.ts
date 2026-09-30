@@ -28,7 +28,8 @@ export function usePurchasing() {
   const { currentCompany } = useEnterprise();
 
   const suppliersQuery = useQuery<Supplier[]>({
-    queryKey: ['purchasing_suppliers'],
+    queryKey: ['purchasing_suppliers', currentCompany?.id],
+    enabled: Boolean(currentCompany?.id),
     queryFn: async () => {
       const data = await purchasingService.getSuppliers();
       return (data || []).map((s: Tables<'suppliers'>) => ({
@@ -44,7 +45,8 @@ export function usePurchasing() {
   });
 
   const ordersQuery = useQuery<PurchaseOrder[]>({
-    queryKey: ['purchasing_orders'],
+    queryKey: ['purchasing_orders', currentCompany?.id],
+    enabled: Boolean(currentCompany?.id),
     queryFn: async () => {
       const data = await purchasingService.getPurchaseOrders();
       return (data || []).map((o: PurchaseOrderRow) => ({
@@ -65,7 +67,8 @@ export function usePurchasing() {
   });
 
   const quotationsQuery = useQuery<Quotation[]>({
-    queryKey: ['purchasing_quotations'],
+    queryKey: ['purchasing_quotations', currentCompany?.id],
+    enabled: Boolean(currentCompany?.id),
     queryFn: async () => {
       const data = await purchasingService.getQuotations();
       return (data || []).map((q: Tables<'quotations'>) => ({
@@ -80,11 +83,27 @@ export function usePurchasing() {
 
 
   const createSupplierMutation = useMutation({
-    mutationFn: (supplier: TablesInsert<'suppliers'>) => purchasingService.createSupplier(supplier),
+    mutationFn: (supplier: TablesInsert<'suppliers'>) => {
+      if (!currentCompany?.id) throw new Error('Selecione uma empresa antes de cadastrar fornecedores.');
+      return purchasingService.createSupplier({ ...supplier, company_id: currentCompany.id });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['purchasing_suppliers'] });
       toastSuccess('Fornecedor cadastrado com sucesso');
-    }
+    },
+    onError: (error: Error) => toastError(error.message),
+  });
+
+  const updateSupplierMutation = useMutation({
+    mutationFn: ({ id, values }: { id: string; values: Partial<Tables<'suppliers'>> }) => {
+      if (!currentCompany?.id) throw new Error('Selecione uma empresa antes de editar fornecedores.');
+      return purchasingService.updateSupplier(id, currentCompany.id, values);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['purchasing_suppliers'] });
+      toastSuccess('Fornecedor atualizado com sucesso');
+    },
+    onError: (error: Error) => toastError(error.message),
   });
 
   const createOrderMutation = useMutation({
@@ -136,6 +155,8 @@ export function usePurchasing() {
     quotationsLoading: quotationsQuery.isLoading,
     
     createSupplier: createSupplierMutation.mutateAsync,
+    updateSupplier: updateSupplierMutation.mutateAsync,
+    savingSupplier: createSupplierMutation.isPending || updateSupplierMutation.isPending,
     createOrder: createOrderMutation.mutateAsync,
     creatingOrder: createOrderMutation.isPending,
   };

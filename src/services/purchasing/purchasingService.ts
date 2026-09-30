@@ -22,6 +22,13 @@ export const purchasingService = {
     return data;
   },
 
+  async updateSupplier(id: string, companyId: string, supplier: Partial<Tables<'suppliers'>>) {
+    const { data, error } = await supabase.from('suppliers').update(supplier)
+      .eq('id', id).eq('company_id', companyId).select().single();
+    if (error) throw error;
+    return data;
+  },
+
   // Purchase Orders
   async getPurchaseOrders(): Promise<PurchaseOrderRow[]> {
     const { data, error } = await supabase
