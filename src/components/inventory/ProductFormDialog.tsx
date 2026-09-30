@@ -25,6 +25,8 @@ import { LotTab } from './productForm/LotTab';
 import { StockTab } from './productForm/StockTab';
 import { FiscalTab } from './productForm/FiscalTab';
 import { SpecificTab } from './productForm/SpecificTab';
+import { RetailQuickTab } from './productForm/RetailQuickTab';
+import { useEnterprise } from '@/core/auth/EnterpriseContext';
 
 interface Props {
   open: boolean;
@@ -34,14 +36,19 @@ interface Props {
 }
 
 export function ProductFormDialog({ open, onOpenChange, product, categories }: Props) {
+  const { segment, allowedUnits } = useEnterprise();
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [form, setForm] = useState<ProductForm>(emptyForm);
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
 
   useEffect(() => {
     setForm(product ? productToForm(product) : emptyForm);
+    setShowAdvanced(false);
   }, [product, open]);
 
+  const retailOnly = segment === 'retail' || (allowedUnits.length > 0 && allowedUnits.every((unit) => unit.unitType === 'STORE'));
+  const quickMode = retailOnly && (!product || product.product_nature === 'commerce') && !showAdvanced;
   const isService = form.product_nature === 'service';
   const isIndustry = form.product_nature === 'industry';
   const isCommerce = form.product_nature === 'commerce';
@@ -62,6 +69,10 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
     if (!form.code || !form.name) return;
     if (ncmError || gtinError) {
       toast.error(ncmError || gtinError);
+      return;
+    }
+    if ([form.cost_price, form.sale_price].some((value) => value !== '' && (!Number.isFinite(Number(value)) || Number(value) < 0))) {
+      toast.error('Informe preços válidos, sem valores negativos.');
       return;
     }
     const payload = buildPayload(form);
@@ -93,9 +104,16 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
           <DialogTitle>{product ? 'Editar Produto' : 'Novo Produto'}</DialogTitle>
         </DialogHeader>
 
-        <NatureSelector value={form.product_nature} onChange={(v) => update({ product_nature: v })} />
+        {retailOnly && (!product || product.product_nature === 'commerce') && (
+          <div className="flex justify-end">
+            <Button type="button" variant="link" onClick={() => setShowAdvanced((value) => !value)}>
+              {showAdvanced ? 'Cadastro simples' : 'Mais detalhes'}
+            </Button>
+          </div>
+        )}
+        {!quickMode && <NatureSelector value={form.product_nature} onChange={(v) => update({ product_nature: v })} />}
 
-        <div className="grid grid-cols-[160px_1fr] items-center gap-3 rounded-lg border bg-muted/20 p-3">
+        {!quickMode && <div className="grid grid-cols-[160px_1fr] items-center gap-3 rounded-lg border bg-muted/20 p-3">
           <Label className="text-xs uppercase tracking-wide text-muted-foreground">Tipo de Item</Label>
           <Select value={form.item_kind} onValueChange={(v) => update({ item_kind: v as ItemKind })}>
             <SelectTrigger><SelectValue /></SelectTrigger>
@@ -105,9 +123,10 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
               ))}
             </SelectContent>
           </Select>
-        </div>
+        </div>}
 
-        <Tabs defaultValue="general" className="w-full mt-2">
+        <Tabs key={quickMode ? 'simple' : 'full'} defaultValue="general" className="w-full mt-2">
+          {!quickMode && <>
           <TabsList
             className={cn(
               'grid w-full',
@@ -126,12 +145,15 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
               {isIndustry ? 'Produção' : isService ? 'Serviço' : 'Comércio'}
             </TabsTrigger>
           </TabsList>
+          </>}
 
-          <GeneralTab form={form} update={update} isService={isService} categories={categories} />
-          {form.requires_lot_tracking && <LotTab form={form} update={update} />}
-          {!isService && <StockTab form={form} update={update} />}
-          <FiscalTab form={form} update={update} isService={isService} ncmError={ncmError} gtinError={gtinError} />
-          <SpecificTab form={form} update={update} isIndustry={isIndustry} isCommerce={isCommerce} isService={isService} />
+          {quickMode ? <RetailQuickTab form={form} update={update} /> : <>
+            <GeneralTab form={form} update={update} isService={isService} categories={categories} />
+            {form.requires_lot_tracking && <LotTab form={form} update={update} />}
+            {!isService && <StockTab form={form} update={update} />}
+            <FiscalTab form={form} update={update} isService={isService} ncmError={ncmError} gtinError={gtinError} />
+            <SpecificTab form={form} update={update} isIndustry={isIndustry} isCommerce={isCommerce} isService={isService} />
+          </>}
         </Tabs>
 
         <DialogFooter>
