@@ -51,7 +51,7 @@ export function Topbar() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
+           onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
           className="hidden md:flex items-center gap-2 h-9 px-3 rounded-lg border border-sidebar-border/50 bg-sidebar-accent/20 text-sidebar-foreground/50 hover:text-primary hover:bg-sidebar-accent/50 hover:border-primary/30 text-xs transition-all"
         >
           <Search className="h-3.5 w-3.5" />
