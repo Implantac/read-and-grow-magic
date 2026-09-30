@@ -56,10 +56,6 @@ export function TenantSelector() {
 
   return (
     <>
-      <span className="hidden lg:inline-block text-[10px] font-bold uppercase tracking-[0.14em] text-sidebar-foreground/40 mr-1">
-        Contexto
-      </span>
-
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" disabled={isLoading || isSwitching || allowedCompanies.length === 0} aria-label={`Empresa ativa: ${currentCompany?.name || 'nenhuma selecionada'}. Trocar empresa`} className="group flex min-w-0 items-center gap-1.5 h-9 px-2 sm:px-3 rounded-lg border border-sidebar-border/50 bg-sidebar-accent/20 text-sidebar-foreground hover:text-primary hover:bg-sidebar-accent/50 hover:border-primary/30 text-sm font-medium transition-all">
@@ -147,7 +143,7 @@ export function TenantSelector() {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <Badge variant="outline" className="hidden xl:inline-flex h-7 gap-1.5 border-sidebar-border/60 text-sidebar-foreground/60">
+       <Badge variant="outline" className="hidden 2xl:inline-flex h-7 gap-1.5 border-sidebar-border/60 text-sidebar-foreground/60">
         <span>{scope === 'CONSOLIDATED' ? 'Rede' : unitTypeLabel}</span>
         <span aria-hidden="true">•</span>
         <span>{channelLabel}</span>
