@@ -6,6 +6,7 @@
 - [ ] Testar transação integral de entrada em ambiente isolado antes de ativar o lançamento de XML.
 - [x] Remover documentos fiscais simulados do painel e consultar notas reais da empresa.
 - [x] Impedir autorização e cancelamento simulados de NF-e, NFC-e, CT-e e MDF-e; bloquear sincronização offline fictícia e devolução não transacional.
+- [x] Exibir transmissões fiscais reais por empresa, com estado, erro do provedor e atualização manual.
 - [ ] Integrar transmissão e eventos fiscais oficiais para NF-e, NFC-e, CT-e, MDF-e e NFS-e; implementar CT-e OS antes de anunciar prontidão fiscal completa.
 - [ ] Integrar MRP a compras e reservas concorrentes por posição no WMS; validar terminais físicos/TEF no PDV.
 
