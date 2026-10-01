@@ -12,7 +12,6 @@ import {
   DialogTitle,
 } from "@/ui/base/dialog";
 import {
-  AlertTriangle,
   CheckCircle,
   FileSearch,
   Link as LinkIcon,
@@ -146,7 +145,7 @@ export function XMLReviewDialog({
                               </div>
                             ) : (
                               <div className="flex flex-col gap-1">
-                                  <Badge variant="outline" className="w-fit gap-1">Novo produto ao lançar</Badge>
+                                  <Badge variant="outline" className="w-fit gap-1">Sem vínculo no catálogo</Badge>
                                 <Button
                                   variant="link"
                                   size="sm"

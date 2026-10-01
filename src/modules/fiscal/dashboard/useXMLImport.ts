@@ -56,19 +56,7 @@ export function useXMLImport() {
     void supabase.from('products').select('id,name,code').eq('company_id', currentCompany.id).order('name').then(({ data, error }) => {
       if (!active) return;
       if (error) toast.error('Não foi possível consultar os produtos cadastrados.');
-      else {
-        setSystemProducts(data ?? []);
-        setXmlData(previous => previous ? {
-          ...previous,
-          products: previous.products.map(item => {
-            if (item.linkedProductId) return item;
-            const matches = (data ?? []).filter(product => product.code === item.code);
-            return matches.length === 1
-              ? { ...item, linkedProductId: matches[0].id, linkedProductName: matches[0].name }
-              : item;
-          }),
-        } : previous);
-      }
+      else setSystemProducts(data ?? []);
     });
     return () => { active = false; };
   }, [currentCompany?.id, showReview]);
