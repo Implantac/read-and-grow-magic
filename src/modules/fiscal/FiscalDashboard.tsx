@@ -2,6 +2,7 @@ import { DFeMonitor } from './dashboard/DFeMonitor';
 import { FiscalAIPanel } from './dashboard/FiscalAIPanel';
 import { FiscalHeader } from './dashboard/FiscalHeader';
 import { FiscalKPIs } from './dashboard/FiscalKPIs';
+import { FiscalEmissionMonitor } from './dashboard/FiscalEmissionMonitor';
 import { ManualLinkDialog } from './dashboard/ManualLinkDialog';
 import { XMLReviewDialog } from './dashboard/XMLReviewDialog';
 import { useXMLImport } from './dashboard/useXMLImport';
@@ -56,6 +57,8 @@ export default function FiscalDashboard() {
       />
 
       <FiscalKPIs />
+
+      <FiscalEmissionMonitor />
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
         <DFeMonitor />
