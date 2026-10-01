@@ -86,74 +86,14 @@ export function useNFCe() {
     terminalId?: string;
     operatorName?: string;
   }) => {
-    const nfceId = crypto.randomUUID();
-    const number = 'NFCE-' + Date.now().toString().slice(-8);
-    const subtotal = data.items.reduce((s, i) => s + i.quantity * i.unitPrice, 0);
-    const discount = data.discount || 0;
-    const total = subtotal - discount;
-    const change = data.amountPaid - total;
-    const accessKey = Array.from({ length: 44 }, () => Math.floor(Math.random() * 10)).join('');
-    const protocol = '1' + Date.now().toString().slice(-14);
-
-    const { data: nfce, error } = await supabase.from('nfce').insert({
-      id: nfceId,
-      number,
-      payment_method: data.paymentMethod,
-      amount_paid: data.amountPaid,
-      change_amount: Math.max(0, change),
-      subtotal,
-      discount,
-      total,
-      customer_name: data.customerName || null,
-      customer_document: data.customerDocument || null,
-      terminal_id: data.terminalId || 'PDV-01',
-      operator_name: data.operatorName || 'Operador',
-      status: 'authorized',
-      access_key: accessKey,
-      protocol,
-      authorization_date: new Date().toISOString(),
-    }).select().single();
-
-    if (error) { console.error('NFC-e emission error:', error); toast.error('Erro ao emitir NFC-e: ' + (error.message || '')); return null; }
-
-    if (data.items.length > 0 && nfce) {
-      const itemsToInsert = data.items.map(item => ({
-        nfce_id: nfce.id,
-        product_code: item.productCode,
-        product_name: item.productName,
-        product_id: item.productId || null,
-        quantity: item.quantity,
-        unit_price: item.unitPrice,
-        total: item.quantity * item.unitPrice,
-        unit: item.unit || 'UN',
-      }));
-      await supabase.from('nfce_items').insert(itemsToInsert);
-    }
-
-    toast.success(`NFC-e ${number} emitida e autorizada!`);
-    await fetchNFCes();
-    return nfce;
-  }, [fetchNFCes]);
+    toast.error('Emissão de NFC-e indisponível sem autorização oficial. A venda não foi finalizada.');
+    return null;
+  }, []);
 
   const cancel = useCallback(async (id: string, reason: string) => {
-    const trimmed = (reason || '').trim();
-    if (trimmed.length < 15) {
-      toast.error('Motivo do cancelamento deve ter pelo menos 15 caracteres (regra SEFAZ).');
-      return false;
-    }
-    const { data: userRes } = await supabase.auth.getUser();
-    const { error } = await supabase.from('nfce').update({
-      status: 'cancelled',
-      cancellation_date: new Date().toISOString(),
-      cancellation_reason: trimmed,
-      cancelled_by: userRes?.user?.id ?? null,
-    }).eq('id', id);
-
-    if (error) { toast.error('Erro ao cancelar NFC-e'); return false; }
-    toast.success('NFC-e cancelada com sucesso');
-    await fetchNFCes();
-    return true;
-  }, [fetchNFCes]);
+    toast.error('Cancelamento de NFC-e indisponível sem confirmação oficial. Nenhum documento foi alterado.');
+    return false;
+  }, []);
 
   const createReturn = useCallback(async (params: {
     nfceId: string;
@@ -163,63 +103,9 @@ export function useNFCe() {
     terminalId?: string;
     operatorName?: string;
   }) => {
-    const trimmed = (params.reason || '').trim();
-    if (trimmed.length < 5) { toast.error('Informe o motivo da devolução.'); return null; }
-    const items = params.items.filter((i) => i.quantity > 0);
-    if (items.length === 0) { toast.error('Selecione ao menos um item para devolver.'); return null; }
-
-    const refundAmount = items.reduce((s, i) => s + i.quantity * i.unitPrice, 0);
-    const number = 'DEV-' + Date.now().toString().slice(-8);
-
-    const { data: userRes } = await supabase.auth.getUser();
-    const { data: ret, error } = await supabase.from('nfce_returns').insert({
-      nfce_id: params.nfceId,
-      number,
-      reason: trimmed,
-      refund_method: params.refundMethod,
-      refund_amount: refundAmount,
-      status: 'authorized',
-      terminal_id: params.terminalId || null,
-      operator_name: params.operatorName || null,
-      created_by: userRes?.user?.id ?? null,
-    }).select().single();
-
-    if (error || !ret) { toast.error('Erro ao registrar devolução'); return null; }
-
-    const itemsPayload = items.map((i) => ({
-      return_id: ret.id,
-      nfce_item_id: i.nfceItemId,
-      product_id: i.productId || null,
-      product_code: i.productCode || null,
-      product_name: i.productName || null,
-      quantity: i.quantity,
-      unit_price: i.unitPrice,
-      total: i.quantity * i.unitPrice,
-    }));
-    await supabase.from('nfce_return_items').insert(itemsPayload);
-
-    // Recalcular status de devolução do cupom
-    const { data: allReturns } = await supabase.from('nfce_return_items')
-      .select('quantity, nfce_item_id')
-      .in('return_id', [ret.id]);
-    void allReturns;
-
-    // Somar total devolvido por cupom
-    const { data: sums } = await supabase.from('nfce_returns')
-      .select('refund_amount, status')
-      .eq('nfce_id', params.nfceId)
-      .eq('status', 'authorized');
-    const totalReturned = (sums ?? []).reduce((s: number, r: { refund_amount?: number | null }) => s + Number(r.refund_amount || 0), 0);
-
-    const { data: nfceRow } = await supabase.from('nfce').select('total').eq('id', params.nfceId).single();
-    const nfceTotal = Number(nfceRow?.total || 0);
-    const newStatus = totalReturned <= 0 ? 'none' : (totalReturned + 0.001 >= nfceTotal ? 'full' : 'partial');
-    await supabase.from('nfce').update({ return_status: newStatus }).eq('id', params.nfceId);
-
-    toast.success(`Devolução ${number} registrada — reembolso ${refundAmount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`);
-    await fetchNFCes();
-    return ret;
-  }, [fetchNFCes]);
+    toast.error('Devolução fiscal indisponível sem processamento transacional e confirmação fiscal.');
+    return null;
+  }, []);
 
   useEffect(() => { fetchNFCes(); }, [fetchNFCes]);
 
