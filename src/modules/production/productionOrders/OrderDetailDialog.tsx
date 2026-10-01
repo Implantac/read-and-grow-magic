@@ -10,6 +10,7 @@ import type { ProductionOrderRow } from '@/hooks/production/useProductionOrders'
 import { OrderOverviewTab } from './OrderOverviewTab';
 import { OrderStepsTab } from './OrderStepsTab';
 import { OrderLogsTab } from './OrderLogsTab';
+import { OrderBomTab } from './OrderBomTab';
 
 interface Props {
   order: ProductionOrderRow | null;
@@ -42,14 +43,16 @@ function OrderDetailContent({ order }: { order: ProductionOrderRow }) {
       </DialogHeader>
 
       <Tabs defaultValue="overview" className="mt-2">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+          <TabsTrigger value="bom">Materiais</TabsTrigger>
           <TabsTrigger value="steps">Etapas ({orderSteps.length})</TabsTrigger>
           <TabsTrigger value="logs">Histórico ({logs.length})</TabsTrigger>
           <TabsTrigger value="audit">Auditoria</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview"><OrderOverviewTab order={order} /></TabsContent>
+        <TabsContent value="bom" className="mt-4"><OrderBomTab productId={order.product_id} quantity={Number(order.produced_quantity || order.quantity || 0)} /></TabsContent>
         <TabsContent value="steps" className="mt-4"><OrderStepsTab orderId={order.id} /></TabsContent>
         <TabsContent value="logs" className="mt-4"><OrderLogsTab orderId={order.id} /></TabsContent>
         <TabsContent value="audit" className="mt-4">
