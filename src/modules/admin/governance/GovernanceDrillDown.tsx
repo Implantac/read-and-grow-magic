@@ -9,7 +9,7 @@ import { Input } from '@/ui/base/input';
 type Period = '24h' | '7d' | '30d';
 interface Props { type: 'ledger' | 'security' | 'ai'; period: Period; onBack: () => void }
 const titles = { ledger: 'Movimentos de estoque', security: 'Registros de auditoria', ai: 'Decisões de IA' };
-const csvCell = (value: string) => `"${(/^[=+\-@\t\r]/.test(value) ? "'" : '') + value.replaceAll('"', '""')}"`;
+const csvCell = (value: string) => `"${(/^[=+\-@\t\r]/.test(value) ? "'" : '') + value.replace(/"/g, '""')}"`;
 
 export function GovernanceDrillDown({ type, period, onBack }: Props) {
   const { currentCompany } = useEnterprise();
