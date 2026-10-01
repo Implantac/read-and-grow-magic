@@ -6,7 +6,7 @@ import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { parseIncomingNFe } from './parseIncomingNFe';
 
 export function useXMLImport() {
-  const { currentCompany } = useEnterprise();
+  const { currentCompany, allowedUnits, currentBranch } = useEnterprise();
   const [isUploading, setIsUploading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [xmlData, setXmlData] = useState<XMLData | null>(null);
@@ -16,6 +16,38 @@ export function useXMLImport() {
   const [progress, setProgress] = useState(0);
 
   const [systemProducts, setSystemProducts] = useState<SystemProduct[]>([]);
+  const [selectedBranchId, setSelectedBranchId] = useState('');
+  const [documentIssue, setDocumentIssue] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSelectedBranchId(currentBranch?.id && allowedUnits.some(unit => unit.id === currentBranch.id) ? currentBranch.id : '');
+  }, [currentBranch?.id, allowedUnits]);
+
+  useEffect(() => {
+    let active = true;
+    setDocumentIssue(null);
+    if (!xmlData || !currentCompany?.id || !showReview) return () => { active = false; };
+    const unit = allowedUnits.find(item => item.id === selectedBranchId);
+    if (!unit) {
+      setDocumentIssue('Selecione a unidade que receberá a mercadoria.');
+      return () => { active = false; };
+    }
+    void Promise.all([
+      supabase.from('branches').select('cnpj').eq('company_id', currentCompany.id).eq('id', unit.id).maybeSingle(),
+      supabase.from('nfe').select('id').eq('company_id', currentCompany.id).eq('access_key', xmlData.accessKey).limit(1),
+    ]).then(([branch, existing]) => {
+      if (!active) return;
+      if (branch.error || existing.error) { setDocumentIssue('Não foi possível verificar a unidade e a duplicidade da nota.'); return; }
+      const recipient = xmlData.recipientCnpj;
+      const branchCnpj = branch.data?.cnpj?.replace(/\D/g, '');
+      const companyCnpj = currentCompany.cnpj?.replace(/\D/g, '');
+      if (!branchCnpj && !companyCnpj) setDocumentIssue('Cadastre o CNPJ da empresa ou unidade antes da entrada.');
+      else if (recipient !== branchCnpj && recipient !== companyCnpj) setDocumentIssue('O destinatário do XML não corresponde à empresa ou unidade selecionada.');
+      else if (existing.data?.length) setDocumentIssue('Esta chave de acesso já está cadastrada nesta empresa.');
+      else setDocumentIssue(null);
+    });
+    return () => { active = false; };
+  }, [xmlData, currentCompany?.id, currentCompany?.cnpj, selectedBranchId, allowedUnits, showReview]);
 
   useEffect(() => {
     let active = true;
@@ -24,7 +56,19 @@ export function useXMLImport() {
     void supabase.from('products').select('id,name,code').eq('company_id', currentCompany.id).order('name').then(({ data, error }) => {
       if (!active) return;
       if (error) toast.error('Não foi possível consultar os produtos cadastrados.');
-      else setSystemProducts(data ?? []);
+      else {
+        setSystemProducts(data ?? []);
+        setXmlData(previous => previous ? {
+          ...previous,
+          products: previous.products.map(item => {
+            if (item.linkedProductId) return item;
+            const matches = (data ?? []).filter(product => product.code === item.code);
+            return matches.length === 1
+              ? { ...item, linkedProductId: matches[0].id, linkedProductName: matches[0].name }
+              : item;
+          }),
+        } : previous);
+      }
     });
     return () => { active = false; };
   }, [currentCompany?.id, showReview]);
@@ -92,6 +136,10 @@ export function useXMLImport() {
     activeItemIndex,
     progress,
     systemProducts,
+    allowedUnits,
+    selectedBranchId,
+    setSelectedBranchId,
+    documentIssue,
     handleManualLink,
     confirmManualLink,
     handleFileUpload,
