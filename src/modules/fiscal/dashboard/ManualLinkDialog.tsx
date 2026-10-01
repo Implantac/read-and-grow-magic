@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Button } from "@/ui/base/button";
 import { Input } from "@/ui/base/input";
 import { Label } from "@/ui/base/label";
@@ -28,6 +29,11 @@ export function ManualLinkDialog({
   systemProducts,
   onConfirm,
 }: ManualLinkDialogProps) {
+  const [query, setQuery] = useState('');
+  useEffect(() => { if (open) setQuery(''); }, [open, activeItemIndex]);
+  const matches = systemProducts.filter((product) =>
+    `${product.name} ${product.code}`.toLocaleLowerCase('pt-BR').includes(query.trim().toLocaleLowerCase('pt-BR'))
+  );
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
@@ -50,22 +56,22 @@ export function ManualLinkDialog({
               <Label>Pesquisar no Catálogo Local</Label>
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Nome ou código do produto..." className="pl-9" />
+                <Input aria-label="Pesquisar produto" placeholder="Nome ou código do produto..." className="pl-9" value={query} onChange={(event) => setQuery(event.target.value)} />
               </div>
             </div>
 
             <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
-              {systemProducts.map((p) => (
+              {matches.length === 0 && <p className="p-3 text-sm text-muted-foreground">Nenhum produto encontrado.</p>}
+              {matches.map((p) => (
                 <div
                   key={p.id}
-                  className="flex items-center justify-between p-3 rounded-lg border hover:border-primary cursor-pointer transition-all hover:bg-primary/5 group"
-                  onClick={() => onConfirm(p.id)}
+                  className="flex items-center justify-between p-3 rounded-lg border hover:border-primary transition-all hover:bg-primary/5 group"
                 >
                   <div>
                     <p className="text-sm font-bold group-hover:text-primary transition-colors">{p.name}</p>
                     <p className="text-[10px] text-muted-foreground">Cód: {p.code}</p>
                   </div>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Vincular ${p.name}`} onClick={() => onConfirm(p.id)}>
                     <Plus className="h-4 w-4" />
                   </Button>
                 </div>
