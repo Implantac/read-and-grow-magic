@@ -1,12 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
-import { errorMessage } from '@/lib/errors';
 import {
-  enqueue,
   listQueue,
   queueSize,
-  removeFromQueue,
   markFailure,
   type QueuedNFCe,
 } from '@/lib/pdv/offlineQueue';
@@ -14,8 +10,7 @@ import {
 /**
  * Offline-first PDV hook.
  * - Monitors network status.
- * - Enqueues NFC-e emissions locally when offline (cash/pix only).
- * - Auto-syncs on reconnect.
+ * Mantém a fila legada visível, sem autorizar notas sem retorno fiscal oficial.
  */
 export function useOfflinePDV() {
   const [online, setOnline] = useState<boolean>(
@@ -39,73 +34,7 @@ export function useOfflinePDV() {
   }, []);
 
   const submitOne = useCallback(async (q: QueuedNFCe) => {
-    const p = q.payload;
-    const subtotal = p.items.reduce((s, i) => s + i.quantity * i.unitPrice, 0);
-    const discount = p.discount || 0;
-    const total = subtotal - discount;
-    const change = p.amountPaid - total;
-    const number = 'NFCE-' + Date.now().toString().slice(-8);
-    const accessKey = Array.from({ length: 44 }, () => Math.floor(Math.random() * 10)).join('');
-    const protocol = '1' + Date.now().toString().slice(-14);
-
-    const { data: existing, error: existingError } = await supabase
-      .from('nfce')
-      .select('id')
-      .eq('id', q.nfceId)
-      .maybeSingle();
-    if (existingError) throw new Error(existingError.message);
-
-    let nfce = existing;
-    if (!nfce) {
-      const { data: inserted, error } = await supabase
-        .from('nfce')
-        .insert({
-          id: q.nfceId,
-          number,
-          payment_method: p.paymentMethod,
-          amount_paid: p.amountPaid,
-          change_amount: Math.max(0, change),
-          subtotal,
-          discount,
-          total,
-          customer_name: p.customerName || null,
-          customer_document: p.customerDocument || null,
-          terminal_id: p.terminalId || 'PDV-01',
-          operator_name: p.operatorName || 'Operador',
-          status: 'authorized',
-          access_key: accessKey,
-          protocol,
-          authorization_date: new Date().toISOString(),
-        })
-        .select()
-        .single();
-
-      if (error || !inserted) throw new Error(error?.message || 'Falha ao emitir NFC-e');
-      nfce = inserted;
-    }
-
-    if (p.items.length > 0) {
-      const { count, error: countError } = await supabase
-        .from('nfce_items')
-        .select('id', { count: 'exact', head: true })
-        .eq('nfce_id', nfce.id);
-      if (countError) throw new Error(countError.message);
-
-      if (count === 0) {
-        const items = p.items.map((i) => ({
-          nfce_id: nfce.id,
-          product_code: i.productCode,
-          product_name: i.productName,
-          product_id: i.productId || null,
-          quantity: i.quantity,
-          unit_price: i.unitPrice,
-          total: i.quantity * i.unitPrice,
-          unit: i.unit || 'UN',
-        }));
-        const { error: itErr } = await supabase.from('nfce_items').insert(items);
-        if (itErr) throw new Error(itErr.message);
-      }
-    }
+    throw new Error('NFC-e pendente: sincronização fiscal indisponível sem autorização oficial.');
   }, []);
 
   const flush = useCallback(async () => {
@@ -115,13 +44,10 @@ export function useOfflinePDV() {
     if (items.length === 0) return;
 
     setSyncing(true);
-    let ok = 0;
     let fail = 0;
     for (const it of items) {
       try {
         await submitOne(it);
-        removeFromQueue(it.id);
-        ok += 1;
       } catch (e: unknown) {
         markFailure(it.id, errorMessage(e));
         fail += 1;
@@ -130,24 +56,12 @@ export function useOfflinePDV() {
     setSize(queueSize());
     setSyncing(false);
 
-    if (ok > 0) toast.success(`${ok} NFC-e offline sincronizada${ok > 1 ? 's' : ''}.`);
-    if (fail > 0) toast.error(`${fail} NFC-e falhou na sincronização.`);
+    if (fail > 0) toast.error(`${fail} venda(s) pendente(s): emissão fiscal indisponível. Nenhuma foi autorizada.`);
   }, [submitOne, syncing]);
 
-  // Auto flush when we come online.
-  useEffect(() => {
-    if (online) flush();
-  }, [online, flush]);
-
   const emitOffline = useCallback((payload: QueuedNFCe['payload']) => {
-    if (payload.paymentMethod !== 'cash' && payload.paymentMethod !== 'pix') {
-      toast.error('Modo offline aceita apenas Dinheiro ou PIX.');
-      return null;
-    }
-    const it = enqueue(payload);
-    setSize(queueSize());
-    toast.warning('Sem conexão — venda enfileirada. Comprovante será emitido ao reconectar.');
-    return it;
+    toast.error('Venda offline indisponível sem sincronização fiscal segura. Nenhuma venda foi registrada.');
+    return null;
   }, []);
 
   return {

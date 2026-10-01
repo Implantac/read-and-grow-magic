@@ -5,6 +5,9 @@
 - [x] Remover o gatilho legado duplicado de saldo que referenciava coluna inexistente em movimentos.
 - [ ] Testar transação integral de entrada em ambiente isolado antes de ativar o lançamento de XML.
 - [x] Remover documentos fiscais simulados do painel e consultar notas reais da empresa.
+- [x] Impedir autorização e cancelamento simulados de NF-e, NFC-e, CT-e e MDF-e; bloquear sincronização offline fictícia e devolução não transacional.
+- [ ] Integrar transmissão e eventos fiscais oficiais para NF-e, NFC-e, CT-e, MDF-e e NFS-e; implementar CT-e OS antes de anunciar prontidão fiscal completa.
+- [ ] Integrar MRP a compras e reservas concorrentes por posição no WMS; validar terminais físicos/TEF no PDV.
 
 - [x] Fase 0 — Baseline, inventário e matriz de rastreabilidade
 - [ ] Fase 1 — Segurança multiempresa, filial e canal (Lotes 1–2 concluídos; Lote 4 auditado: guards pendentes em `settle_account`, faturamento atômico, auditoria financeira, ajustes e RLS por filial/canal; aplicação bloqueada enquanto o Lovable Cloud finaliza alterações)

@@ -35,7 +35,7 @@ export function OfflinePDVIndicator() {
             disabled={!online || syncing}
           >
             <RefreshCw className={`h-3 w-3 mr-1 ${syncing ? 'animate-spin' : ''}`} />
-            Sincronizar
+            Verificar pendências
           </Button>
         </>
       )}

@@ -274,7 +274,7 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
             <div className="bg-amber-500/10 border-b border-amber-500/20 px-6 py-2 flex items-center justify-between">
               <OfflinePDVIndicator />
               <p className="text-[10px] font-bold uppercase text-amber-600 animate-pulse">
-                Modo Contingência Ativo
+                Sem conexão · emissão indisponível
               </p>
             </div>
           )}
@@ -394,7 +394,7 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
                 ) : (
                   <Button
                     className="w-full h-14 text-sm font-black uppercase tracking-[0.2em] bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xl shadow-emerald-500/30"
-                    disabled={saving || remaining > 0.001 || cart.length === 0}
+                    disabled={saving || remaining > 0.001 || cart.length === 0 || !online}
                     onClick={() => handleFinalize()}
                   >
                     {saving ? (

@@ -9,8 +9,7 @@ import { toast } from 'sonner';
 
 /**
  * Painel Único (PDV) — /comercial/pdv
- * Emissão online via useNFCe. Se offline, enfileira localmente (Dinheiro/PIX apenas)
- * e sincroniza automaticamente ao reconectar.
+ * Sem retorno fiscal oficial, nenhuma venda é confirmada.
  */
 export default function SalesDeskPage() {
   const { emit } = useNFCe();
