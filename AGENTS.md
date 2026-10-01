@@ -1,5 +1,6 @@
 # Decisões arquiteturais
 
+- Cores de ações e navegação devem usar tokens semânticos em ambos os temas; botões primários usam contraste escuro sobre laranja para leitura consistente.
 - Hooks React devem ser chamados antes de qualquer retorno condicional, garantindo ordem estável entre renderizações.
 - Políticas empresariais vindas de metadados devem ser tipadas e mescladas no PolicyProvider, sem supressões TypeScript.
 - Integrações fiscais e bancárias devem falhar com segurança quando indisponíveis; é proibido persistir documentos ou cobranças fictícias.

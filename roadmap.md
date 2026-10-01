@@ -1,5 +1,6 @@
 # Roadmap
 
+- [x] Revisar a combinação de cores e o contraste dos botões compartilhados, menu lateral e barra superior, preservando a identidade e os fluxos atuais.
 - [x] Adaptar cadastro de produtos ao perfil somente loja/PDV, preservando campos avançados para empresas industriais.
 - [ ] Concluir lançamento atômico e idempotente de nota de entrada: leitura e revisão reais prontas; cadastro automático, estoque e financeiro bloqueados até transação segura, regras fiscais e vínculo da unidade.
 - [x] Remover o gatilho legado duplicado de saldo que referenciava coluna inexistente em movimentos.

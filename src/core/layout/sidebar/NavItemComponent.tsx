@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/ui/base/tooltip';
+import { Button } from '@/ui/base/button';
 import type { NavItem } from '@/config/navigation';
 import { iconMap } from './iconMap';
 
@@ -28,33 +29,33 @@ type Props = {
   const isSelected = flatItems && selectedIndex !== undefined && selectedIndex >= 0 && flatItems[selectedIndex] === item;
 
   const baseClasses = cn(
-    'group relative flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium outline-none',
+    'group relative flex w-full items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium outline-none',
     'transition-[background-color,color,box-shadow,transform] duration-200 ease-out',
     'focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar',
     isItemActive
-      ? 'bg-primary/10 text-primary ring-1 ring-primary/20 shadow-[0_1px_0_0_hsl(var(--sidebar-border)/0.4),inset_0_1px_0_0_hsl(var(--primary)/0.08)]'
-       : 'text-sidebar-foreground/65 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground active:scale-[0.985]',
-    isSelected && 'bg-sidebar-accent/60 text-sidebar-foreground ring-1 ring-primary/40'
+       ? 'bg-sidebar-accent text-sidebar-foreground ring-1 ring-sidebar-primary/45 shadow-sm'
+        : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/75 hover:text-sidebar-foreground active:scale-[0.985]',
+    isSelected && 'bg-sidebar-accent text-sidebar-foreground ring-1 ring-sidebar-primary/70'
   );
 
   const indicator = isItemActive && (
     <span
-      className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] rounded-r-full bg-gradient-to-b from-primary to-primary-glow shadow-[0_0_8px_hsl(var(--primary)/0.5)]"
-      style={{ height: '18px', animation: 'sidebar-indicator 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }}
+      className="absolute left-0 top-1/2 -translate-y-1/2 h-[18px] w-[3px] rounded-r-full bg-sidebar-primary"
     />
   );
 
   const iconElement = Icon && (
     <Icon className={cn(
       'h-[18px] w-[18px] shrink-0 transition-all duration-200',
-      isItemActive ? 'text-primary' : 'text-sidebar-foreground/45 group-hover:text-primary/80'
+      isItemActive ? 'text-sidebar-primary' : 'text-sidebar-foreground/65 group-hover:text-sidebar-foreground'
     )} />
   );
 
   const submenuId = `sidebar-submenu-${item.title.replace(/\s+/g, '-').toLowerCase()}`;
 
   const navButton = (
-    <button
+    <Button
+      variant="ghost"
       type="button"
       onClick={() => hasChildren ? toggleExpanded(item.title) : undefined}
       className={baseClasses}
@@ -75,7 +76,7 @@ type Props = {
           )}
         </>
       )}
-    </button>
+    </Button>
   );
 
   const navLink = (
@@ -134,12 +135,12 @@ type Props = {
                             'group flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[12px] transition-all duration-150',
                             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar',
                             isChildActive
-                              ? 'bg-primary/5 text-primary font-semibold'
-                              : 'text-sidebar-foreground/50 hover:bg-sidebar-accent/30 hover:text-sidebar-foreground/80',
+                              ? 'bg-sidebar-accent/80 text-sidebar-foreground font-semibold'
+                              : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground',
                             isChildSelected && 'bg-sidebar-accent/50 text-sidebar-foreground/90 ring-1 ring-primary/30'
                           )}
                         >
-                          {ChildIcon && <ChildIcon aria-hidden="true" className={cn('h-3.5 w-3.5 shrink-0', isChildActive ? 'text-primary' : 'text-sidebar-foreground/30 group-hover:text-primary/50')} />}
+                          {ChildIcon && <ChildIcon aria-hidden="true" className={cn('h-3.5 w-3.5 shrink-0', isChildActive ? 'text-sidebar-primary' : 'text-sidebar-foreground/60 group-hover:text-sidebar-foreground')} />}
                           <span className="truncate">{child.title}</span>
                         </Link>
                       );
