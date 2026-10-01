@@ -11,3 +11,4 @@
 - A lista de empresas exibe todas as entidades jurídicas sem fabricar filiais; unidades operacionais vêm exclusivamente de `branches`, para não confundir tenant com local de operação.
 - A entrada de NF-e só pode confirmar após processamento transacional e idempotente de produtos, estoque e financeiro; leitura do XML sozinha nunca altera saldos nem simula conclusão.
 - O acompanhamento de transmissões fiscais lê apenas a fila persistida e respeita o contexto da empresa; estado fiscal nunca é inferido de ações locais.
+- Painéis de governança exibem apenas contagens e eventos consultados por empresa com RLS; indisponibilidade não pode ser apresentada como saúde ou conformidade verificada.
