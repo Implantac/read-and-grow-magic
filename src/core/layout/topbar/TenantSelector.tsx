@@ -79,12 +79,12 @@ export function TenantSelector() {
                key={company.id}
                onClick={() => handleSelectCompany(company.id)}
                className={cn(
-                 'text-sidebar-foreground/80 hover:text-primary focus:text-primary',
-                 currentCompany?.id === company.id && 'text-primary bg-sidebar-accent',
+                 'text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-foreground focus:bg-sidebar-accent focus:text-sidebar-foreground data-[highlighted]:bg-sidebar-accent data-[highlighted]:text-sidebar-foreground',
+                 currentCompany?.id === company.id && 'text-sidebar-foreground bg-sidebar-accent ring-1 ring-inset ring-sidebar-primary/40',
                )}
             >
                <span className="min-w-0 flex-1 truncate">{company.name}</span>
-               {currentCompany?.id === company.id && <Check className="ml-2 h-4 w-4 shrink-0" aria-label="Selecionada" />}
+               {currentCompany?.id === company.id && <Check className="ml-2 h-4 w-4 shrink-0 text-sidebar-primary" aria-label="Selecionada" />}
             </DropdownMenuItem>
            ))}
         </DropdownMenuContent>
@@ -127,11 +127,11 @@ export function TenantSelector() {
              <>
                <DropdownMenuItem
                  onClick={() => handleSelectBranch(null)}
-                 className={cn('text-sidebar-foreground/80 hover:text-primary focus:text-primary',
-                   scope === 'CONSOLIDATED' && 'text-primary bg-sidebar-accent font-bold')}
+                 className={cn('text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-foreground focus:bg-sidebar-accent focus:text-sidebar-foreground data-[highlighted]:bg-sidebar-accent data-[highlighted]:text-sidebar-foreground',
+                   scope === 'CONSOLIDATED' && 'text-sidebar-foreground bg-sidebar-accent ring-1 ring-inset ring-sidebar-primary/40 font-bold')}
                >
                  Visão consolidada
-                 {scope === 'CONSOLIDATED' && <Check className="ml-auto h-4 w-4" aria-label="Selecionada" />}
+                 {scope === 'CONSOLIDATED' && <Check className="ml-auto h-4 w-4 text-sidebar-primary" aria-label="Selecionada" />}
                </DropdownMenuItem>
                <DropdownMenuSeparator className="bg-sidebar-border/50" />
              </>
@@ -142,20 +142,20 @@ export function TenantSelector() {
             <DropdownMenuItem
               key={branch.id}
               onClick={() => handleSelectBranch(branch.id)}
-              className={cn('text-sidebar-foreground/80 hover:text-primary focus:text-primary',
-                currentBranch?.id === branch.id && 'text-primary bg-sidebar-accent')}
+              className={cn('text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-foreground focus:bg-sidebar-accent focus:text-sidebar-foreground data-[highlighted]:bg-sidebar-accent data-[highlighted]:text-sidebar-foreground',
+                currentBranch?.id === branch.id && 'text-sidebar-foreground bg-sidebar-accent ring-1 ring-inset ring-sidebar-primary/40')}
             >
                <div className="flex min-w-0 flex-1 flex-col">
                 <div className="flex items-center gap-2">
                    <span className="truncate font-medium">{branch.name}</span>
                   {branch.tipo && (
-                     <Badge variant="outline" className="shrink-0 text-[10px] px-1 leading-none">
+                     <Badge variant="outline" className="shrink-0 border-sidebar-primary/40 bg-sidebar-primary/15 text-sidebar-foreground text-[10px] px-1.5 py-0.5 leading-none font-medium">
                        {unitLabels[normalizeUnitType(branch.tipo)]}
                     </Badge>
                   )}
                 </div>
-               {currentBranch?.id === branch.id && <Check className="ml-2 h-4 w-4 shrink-0" aria-label="Selecionada" />}
-                {branch.code && <span className="text-[10px] opacity-50">{branch.code}</span>}
+               {currentBranch?.id === branch.id && <Check className="ml-2 h-4 w-4 shrink-0 text-sidebar-primary" aria-label="Selecionada" />}
+                {branch.code && <span className="text-[10px] text-sidebar-foreground/60">{branch.code}</span>}
               </div>
             </DropdownMenuItem>
           ))}
