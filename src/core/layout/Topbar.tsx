@@ -36,7 +36,7 @@ export function Topbar() {
           aria-label={sidebarCollapsed ? 'Expandir menu lateral' : 'Recolher menu lateral'}
           aria-controls="app-sidebar"
           aria-expanded={!sidebarCollapsed}
-           className="h-9 w-9 shrink-0 rounded-lg text-sidebar-foreground/60 hover:text-primary hover:bg-sidebar-accent/50 transition-all focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
+           className="h-9 w-9 shrink-0 rounded-md text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors focus-visible:ring-2 focus-visible:ring-sidebar-ring/70 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
         >
           <Menu className="h-[18px] w-[18px]" aria-hidden="true" />
         </Button>
@@ -65,7 +65,7 @@ export function Topbar() {
           size="icon"
           onClick={toggleTheme}
           aria-label={theme === 'light' ? 'Ativar tema escuro' : 'Ativar tema claro'}
-           className="hidden sm:inline-flex h-9 w-9 rounded-lg text-sidebar-foreground/60 hover:text-primary hover:bg-sidebar-accent/50 transition-all"
+            className="hidden sm:inline-flex h-9 w-9 rounded-md text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
         >
           {theme === 'light' ? <Moon className="h-[18px] w-[18px]" aria-hidden="true" /> : <Sun className="h-[18px] w-[18px]" aria-hidden="true" />}
         </Button>
@@ -78,7 +78,7 @@ export function Topbar() {
           onClick={() => navigate('/executive/executive')}
           title="IA Executiva"
           aria-label="Abrir IA Executiva"
-          className="hidden sm:inline-flex h-9 w-9 rounded-lg text-sidebar-foreground/60 hover:text-primary hover:bg-sidebar-accent/50 transition-all"
+           className="hidden sm:inline-flex h-9 w-9 rounded-md text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
         >
           <Sparkles className="h-[18px] w-[18px]" aria-hidden="true" />
         </Button>
