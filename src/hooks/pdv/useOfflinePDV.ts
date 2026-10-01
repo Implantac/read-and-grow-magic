@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { errorMessage } from '@/lib/errors';
 import {
   listQueue,
   queueSize,
