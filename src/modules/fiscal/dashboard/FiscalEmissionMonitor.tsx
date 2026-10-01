@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { RefreshCw, ArrowUpRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
@@ -31,7 +32,7 @@ export function FiscalEmissionMonitor() {
     queryFn: async (): Promise<Job[]> => {
       if (!companyId) return [];
       // A fila ainda não consta nos tipos gerados; o acesso é limitado por RLS e empresa.
-      const { data, error } = await (supabase.from as (table: string) => ReturnType<typeof supabase.from>)('fiscal_emission_jobs')
+      const { data, error } = await (supabase as SupabaseClient).from('fiscal_emission_jobs')
         .select('id, document_type, document_id, status, idempotency_key, attempt_count, provider, protocol, access_key, last_error, queued_at')
         .eq('company_id', companyId)
         .order('queued_at', { ascending: false })
