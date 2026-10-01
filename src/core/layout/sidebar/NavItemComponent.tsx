@@ -31,7 +31,7 @@ type Props = {
   const baseClasses = cn(
     'group relative flex w-full items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium outline-none',
     'transition-[background-color,color,box-shadow,transform] duration-200 ease-out',
-    'focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar',
+    'focus-visible:ring-2 focus-visible:ring-sidebar-ring/70 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar',
     isItemActive
        ? 'bg-sidebar-accent text-sidebar-foreground ring-1 ring-sidebar-primary/45 shadow-sm'
         : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/75 hover:text-sidebar-foreground active:scale-[0.985]',
@@ -133,7 +133,7 @@ type Props = {
                           tabIndex={isExpanded ? 0 : -1}
                           className={cn(
                             'group flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[12px] transition-all duration-150',
-                            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar',
+                             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring/70 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar',
                             isChildActive
                               ? 'bg-sidebar-accent/80 text-sidebar-foreground font-semibold'
                               : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground',

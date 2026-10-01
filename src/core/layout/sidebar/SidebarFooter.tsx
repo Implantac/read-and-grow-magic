@@ -18,7 +18,7 @@ export function SidebarFooter({
       {!collapsed ? (
         <div className="space-y-3">
           <div className="flex items-center gap-3 rounded-md bg-sidebar-accent/50 p-2 ring-1 ring-sidebar-border">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/20 text-primary font-bold shadow-sm">
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-sidebar-accent text-sidebar-primary font-bold ring-1 ring-sidebar-border">
               {user?.name?.[0] || 'U'}
             </div>
             <div className="flex flex-col min-w-0">
@@ -63,7 +63,7 @@ export function SidebarFooter({
         <div className="flex flex-col items-center gap-4">
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary font-bold cursor-pointer hover:bg-primary/20 transition-all ring-1 ring-primary/20">
+              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-sidebar-accent text-sidebar-primary font-bold ring-1 ring-sidebar-border">
                 {user?.name?.[0] || 'U'}
               </div>
             </TooltipTrigger>

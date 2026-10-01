@@ -20,7 +20,7 @@ export function CustomEntitiesNav({
     <div className="space-y-2">
       {!sidebarCollapsed && (
         <div className="flex items-center justify-between px-3 mb-1">
-          <h2 className="text-[10px] font-bold uppercase tracking-[0.15em] text-sidebar-foreground/30">
+          <h2 className="text-[10px] font-bold uppercase tracking-[0.15em] text-sidebar-foreground/55">
             Entidades Customizadas
           </h2>
         </div>
@@ -39,13 +39,14 @@ export function CustomEntitiesNav({
             <Link
               to={href}
               className={cn(
-                'group relative flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-200 outline-none',
+                'group relative flex w-full items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium transition-colors duration-200 outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring/70 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar',
                 itemActive
-                  ? 'bg-primary/10 text-primary shadow-sm ring-1 ring-primary/20'
-                  : 'text-sidebar-foreground/60 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
+                  ? 'bg-sidebar-accent text-sidebar-foreground shadow-sm ring-1 ring-sidebar-primary/45 before:absolute before:left-0 before:top-1/2 before:h-[18px] before:w-[3px] before:-translate-y-1/2 before:rounded-r-full before:bg-sidebar-primary'
+                  : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/75 hover:text-sidebar-foreground'
               )}
+              aria-current={itemActive ? 'page' : undefined}
             >
-              <Icon className={cn('h-[18px] w-[18px] shrink-0', itemActive ? 'text-primary' : 'text-sidebar-foreground/40 group-hover:text-primary/70')} />
+              <Icon className={cn('h-[18px] w-[18px] shrink-0', itemActive ? 'text-sidebar-primary' : 'text-sidebar-foreground/65 group-hover:text-sidebar-foreground')} />
               {!sidebarCollapsed && <span className="truncate font-medium">{entity.label_plural || entity.label}</span>}
             </Link>
           );
