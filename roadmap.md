@@ -42,7 +42,7 @@
 - [x] Tornar atualização e exclusão RFID funcionais, com confirmação destrutiva.
 - [ ] Implementar emissão fiscal real de transferência com numeração idempotente e valores dos itens.
 - [x] Entrada da quantidade aprovada da OP no estoque da empresa/unidade, idempotente.
-- [ ] Consumo de matéria-prima na conclusão da OP (bloqueio: não existe estrutura de produto/BOM com componentes no banco).
+- [x] Consumo de matéria-prima na conclusão da OP pela ficha de materiais (aba Materiais da OP).
 - [ ] Implementar CRUD completo de cotações de compra (tela legada possui comandos sem ação e usa tabela de cotações comerciais; requer modelo próprio para compras).
 - [x] Substituir indicadores e eventos simulados da governança por consultas reais por empresa e período, com falhas explícitas e exportação apenas de registros consultados.
 - [ ] Ativar fixtures e testes E2E completos de O2C, P2P, PCP e PDV no pipeline.
