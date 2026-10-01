@@ -96,6 +96,7 @@ export interface XMLData {
   series: string;
   issueDate: string;
   supplier: XMLSupplier;
+  recipientCnpj: string;
   products: XMLProduct[];
   total: number;
   purchaseOrderId?: string;

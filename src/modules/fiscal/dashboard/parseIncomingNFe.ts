@@ -16,10 +16,11 @@ export function parseIncomingNFe(xml: string): XMLData {
   const infNFe = byName('infNFe');
   const ide = infNFe && child(infNFe, 'ide');
   const emit = infNFe && child(infNFe, 'emit');
+  const dest = infNFe && child(infNFe, 'dest');
   const total = infNFe && child(infNFe, 'total');
   const key = infNFe?.getAttribute('Id')?.replace(/^NFe/, '') ?? '';
   const protocol = byName('infProt');
-  if (!infNFe || !ide || !emit || !total || !/^\d{44}$/.test(key)) {
+  if (!infNFe || !ide || !emit || !dest || !total || !/^\d{44}$/.test(key)) {
     throw new Error('Selecione um XML de NF-e com chave de acesso válida.');
   }
   if (!protocol || text(protocol, 'cStat') !== '100' || text(protocol, 'chNFe') !== key) {
@@ -50,13 +51,14 @@ export function parseIncomingNFe(xml: string): XMLData {
   });
   const invoiceTotal = amount(text(child(total, 'ICMSTot'), 'vNF'));
   if (!products.length || products.some((p) => !p.code || !p.description || !p.uCom || !Number.isFinite(p.qCom) || p.qCom <= 0 || !Number.isFinite(p.vUnCom) || p.vUnCom < 0 || !Number.isFinite(p.vProd) || p.vProd < 0)
-    || !Number.isFinite(invoiceTotal) || invoiceTotal <= 0 || !/^\d{14}$/.test(text(emit, 'CNPJ'))) {
+    || !Number.isFinite(invoiceTotal) || invoiceTotal <= 0 || !/^\d{14}$/.test(text(emit, 'CNPJ')) || !/^\d{14}$/.test(text(dest, 'CNPJ'))) {
     throw new Error('A nota possui itens, fornecedor ou valores inválidos.');
   }
   return {
     accessKey: key,
     number: text(ide, 'nNF'), series: text(ide, 'serie'), issueDate: text(ide, 'dhEmi') || text(ide, 'dEmi'),
     supplier: { name: text(emit, 'xNome'), cnpj: text(emit, 'CNPJ'), ie: text(emit, 'IE') },
+    recipientCnpj: text(dest, 'CNPJ'),
     products, total: invoiceTotal,
   };
 }
