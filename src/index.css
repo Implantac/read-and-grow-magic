@@ -10,7 +10,7 @@
   :root {
     /* Primary - Dark Navy */
     --primary: 36 100% 50%;
-    --primary-foreground: 0 0% 100%;
+    --primary-foreground: 222 33% 12%;
     --primary-glow: 36 100% 60%;
     
     /* Background & Surfaces */
@@ -59,7 +59,7 @@
     --sidebar-background: 222 33% 15%;
     --sidebar-foreground: 210 40% 96%;
     --sidebar-primary: 36 100% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-primary-foreground: 222 33% 12%;
     --sidebar-accent: 219 24% 22%;
     --sidebar-accent-foreground: 210 40% 96%;
     --sidebar-border: 219 24% 22%;
@@ -92,7 +92,7 @@
 
   .dark {
     --primary: 36 100% 50%;
-    --primary-foreground: 0 0% 100%;
+    --primary-foreground: 222 33% 12%;
     --primary-glow: 36 100% 60%;
     
     --background: 222 33% 15%;
@@ -132,7 +132,7 @@
     --sidebar-background: 222 40% 10%;
     --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 36 100% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-primary-foreground: 222 33% 12%;
     --sidebar-accent: 219 24% 22%;
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 219 24% 22%;

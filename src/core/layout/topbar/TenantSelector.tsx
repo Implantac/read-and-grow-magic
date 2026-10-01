@@ -65,7 +65,7 @@ export function TenantSelector() {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" disabled={isLoading || isSwitching || allowedCompanies.length === 0} aria-label={`Empresa ativa: ${currentCompany?.name || 'nenhuma selecionada'}. Trocar empresa`} className="group flex min-w-0 items-center gap-1.5 h-9 px-2 sm:px-3 rounded-lg border border-sidebar-border/50 bg-sidebar-accent/20 text-sidebar-foreground hover:text-primary hover:bg-sidebar-accent/50 hover:border-primary/30 text-sm font-medium transition-all">
+          <Button variant="ghost" disabled={isLoading || isSwitching || allowedCompanies.length === 0} aria-label={`Empresa ativa: ${currentCompany?.name || 'nenhuma selecionada'}. Trocar empresa`} className="group flex min-w-0 items-center gap-1.5 h-9 px-2 sm:px-3 rounded-md border border-sidebar-border bg-sidebar-accent/50 text-sidebar-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent hover:border-sidebar-primary/50 text-sm font-medium transition-colors">
             <Building2 className="h-3.5 w-3.5 text-primary/70 group-hover:text-primary shrink-0" aria-hidden="true" />
             <span className="hidden max-w-[180px] truncate sm:inline">{currentCompany?.name || 'Empresa'}</span>
             {isSwitching ? <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin" /> : <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-50 transition-transform group-data-[state=open]:rotate-180" />}
@@ -92,7 +92,7 @@ export function TenantSelector() {
 
       <DropdownMenu onOpenChange={(open) => { if (!open) setUnitSearch(''); }}>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" disabled={isLoading || isSwitching || (!isMatrixManager && allBranches.length === 0)} aria-label={`Unidade ativa na empresa ${currentCompany?.name || 'não selecionada'}: ${currentBranch?.name || 'Visão consolidada'}. Trocar unidade`} className="group flex min-w-0 items-center gap-1.5 h-9 px-1 sm:px-3 rounded-lg text-sidebar-foreground/60 hover:text-primary hover:bg-sidebar-accent/50 text-sm transition-all">
+          <Button variant="ghost" disabled={isLoading || isSwitching || (!isMatrixManager && allBranches.length === 0)} aria-label={`Unidade ativa na empresa ${currentCompany?.name || 'não selecionada'}: ${currentBranch?.name || 'Visão consolidada'}. Trocar unidade`} className="group flex min-w-0 items-center gap-1.5 h-9 px-1 sm:px-3 rounded-md text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent text-sm transition-colors">
             <span className="hidden text-sidebar-foreground/40 sm:inline">/</span>
              {activeUnitType === 'INDUSTRY' && <Factory className="h-3.5 w-3.5 opacity-70 group-hover:text-primary" />}
              {activeUnitType === 'DISTRIBUTION_CENTER' && <Warehouse className="h-3.5 w-3.5 opacity-70 group-hover:text-primary" />}

@@ -15,11 +15,10 @@ export function Topbar() {
   return (
     <header
       className={cn(
-        'fixed right-0 top-0 z-30 flex h-14 items-center justify-between gap-2 border-b border-sidebar-border/40 px-2 sm:px-4 transition-[left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] backdrop-blur-xl supports-[backdrop-filter]:bg-[hsl(var(--sidebar-background)/0.72)]',
+        'fixed right-0 top-0 z-30 flex h-14 items-center justify-between gap-2 border-b border-sidebar-border bg-sidebar px-2 shadow-sm sm:px-4 transition-[left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none supports-[backdrop-filter]:bg-sidebar/95 supports-[backdrop-filter]:backdrop-blur-xl',
         'left-0',
         sidebarCollapsed ? 'md:left-16' : 'md:left-64'
       )}
-      style={{ boxShadow: '0 1px 0 0 hsl(var(--sidebar-border) / 0.4), 0 10px 30px -18px hsl(222 33% 4% / 0.55)' }}
     >
       <div
         aria-hidden="true"
@@ -52,11 +51,11 @@ export function Topbar() {
           variant="ghost"
           size="sm"
            onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
-          className="hidden md:flex items-center gap-2 h-9 px-3 rounded-lg border border-sidebar-border/50 bg-sidebar-accent/20 text-sidebar-foreground/50 hover:text-primary hover:bg-sidebar-accent/50 hover:border-primary/30 text-xs transition-all"
+           className="hidden md:flex items-center gap-2 h-9 px-3 rounded-md border border-sidebar-border bg-sidebar-accent/50 text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent hover:border-sidebar-primary/50 text-xs transition-colors"
         >
           <Search className="h-3.5 w-3.5" />
           <span>Buscar…</span>
-          <kbd className="ml-2 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border border-sidebar-border/60 bg-sidebar-background/60 px-1.5 font-mono text-[10px] font-medium text-sidebar-foreground/50">
+           <kbd className="ml-2 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border border-sidebar-border bg-sidebar px-1.5 font-mono text-[10px] font-medium text-sidebar-foreground/70">
             <Command className="h-2.5 w-2.5" />K
           </kbd>
         </Button>

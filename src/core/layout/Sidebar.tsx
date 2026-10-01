@@ -181,16 +181,12 @@ export function Sidebar() {
         aria-modal={isMobile && sidebarMobileOpen ? true : undefined}
         aria-hidden={isMobile && !sidebarMobileOpen ? true : undefined}
         className={cn(
-          'fixed left-0 top-0 z-40 flex h-dvh flex-col overflow-hidden bg-sidebar transition-[width,transform] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
+          'fixed left-0 top-0 z-40 flex h-dvh flex-col overflow-hidden border-r border-sidebar-border bg-sidebar shadow-xl transition-[width,transform] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none',
           'w-64',
           sidebarCollapsed ? 'md:w-16' : 'md:w-64',
           sidebarMobileOpen ? 'translate-x-0' : '-translate-x-full',
           'md:translate-x-0'
         )}
-        style={{
-          boxShadow: '1px 0 0 0 hsl(var(--sidebar-border) / 0.6), 6px 0 32px -8px hsl(222 33% 4% / 0.55)',
-          background: 'var(--gradient-sidebar)',
-        }}
       >
         <SidebarHeader collapsed={sidebarCollapsed} />
 
@@ -198,13 +194,13 @@ export function Sidebar() {
         {!sidebarCollapsed && (
           <div className="px-4 py-3 animate-fade-in">
             <div className="relative group">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-sidebar-foreground/30 group-focus-within:text-primary transition-colors" />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-sidebar-foreground/60 group-focus-within:text-primary transition-colors" />
                 <Input
                   placeholder="Buscar no menu..."
                   value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={handleSearchKeyDown}
-                className="h-8 pl-8 pr-2 bg-sidebar-foreground/[0.03] border-sidebar-border/50 text-[12px] focus-visible:ring-primary/30 placeholder:text-sidebar-foreground/20 rounded-lg transition-all"
+                 className="h-8 pl-8 pr-2 bg-sidebar-accent/50 border-sidebar-border text-sidebar-foreground text-[12px] focus-visible:ring-primary/60 placeholder:text-sidebar-foreground/55 rounded-md transition-colors"
               />
             </div>
           </div>
@@ -227,7 +223,7 @@ export function Sidebar() {
               <div key={section.label || sectionIndex} className="space-y-2">
                 {!sidebarCollapsed && section.label && (
                   <div className="flex items-center justify-between px-3 mb-1">
-                    <h2 className="text-[10px] font-bold uppercase tracking-[0.15em] text-sidebar-foreground/30">
+                     <h2 className="text-[10px] font-bold uppercase tracking-[0.15em] text-sidebar-foreground/55">
                       {section.label}
                     </h2>
                   </div>

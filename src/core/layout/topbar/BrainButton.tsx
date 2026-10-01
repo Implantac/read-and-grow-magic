@@ -23,7 +23,7 @@ export function BrainButton() {
         ? `${brainPending.length} decisões pendentes · Ctrl+J abre o Cérebro`
         : 'Cérebro Contextual (Ctrl+J) · Shift+clique abre a página completa'}
       aria-label={brainPending.length > 0 ? `Cérebro Nativo, ${brainPending.length} decisões pendentes` : 'Cérebro Nativo'}
-      className="relative h-9 w-9 rounded-lg text-sidebar-foreground/60 hover:text-primary hover:bg-sidebar-accent/50 transition-all"
+      className="relative h-9 w-9 rounded-md text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
     >
       <Brain className="h-[18px] w-[18px]" aria-hidden="true" />
       {brainPending.length > 0 && (
