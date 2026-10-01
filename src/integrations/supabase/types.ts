@@ -7679,6 +7679,77 @@ export type Database = {
           },
         ]
       }
+      fiscal_emission_jobs: {
+        Row: {
+          access_key: string | null
+          attempt_count: number
+          branch_id: string
+          canal_operacional: Database["public"]["Enums"]["canal_operacional"]
+          company_id: string
+          completed_at: string | null
+          created_by: string | null
+          document_id: string
+          document_type: string
+          id: string
+          idempotency_key: string
+          last_error: string | null
+          payload: Json
+          protocol: string | null
+          provider: string | null
+          queued_at: string
+          started_at: string | null
+          status: string
+        }
+        Insert: {
+          access_key?: string | null
+          attempt_count?: number
+          branch_id: string
+          canal_operacional: Database["public"]["Enums"]["canal_operacional"]
+          company_id: string
+          completed_at?: string | null
+          created_by?: string | null
+          document_id: string
+          document_type: string
+          id?: string
+          idempotency_key: string
+          last_error?: string | null
+          payload?: Json
+          protocol?: string | null
+          provider?: string | null
+          queued_at?: string
+          started_at?: string | null
+          status?: string
+        }
+        Update: {
+          access_key?: string | null
+          attempt_count?: number
+          branch_id?: string
+          canal_operacional?: Database["public"]["Enums"]["canal_operacional"]
+          company_id?: string
+          completed_at?: string | null
+          created_by?: string | null
+          document_id?: string
+          document_type?: string
+          id?: string
+          idempotency_key?: string
+          last_error?: string | null
+          payload?: Json
+          protocol?: string | null
+          provider?: string | null
+          queued_at?: string
+          started_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fiscal_emission_jobs_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fiscal_reports: {
         Row: {
           company_id: string
