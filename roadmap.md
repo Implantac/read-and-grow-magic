@@ -2,6 +2,7 @@
 
 - [x] Adaptar cadastro de produtos ao perfil somente loja/PDV, preservando campos avançados para empresas industriais.
 - [ ] Concluir lançamento atômico e idempotente de nota de entrada: leitura e revisão reais prontas; cadastro automático, estoque e financeiro bloqueados até transação segura, regras fiscais e vínculo da unidade.
+- [ ] Resolver a duplicação de atualização do saldo pelos dois gatilhos de movimentos antes de ativar o lançamento de XML; testar transação em ambiente isolado.
 - [x] Remover documentos fiscais simulados do painel e consultar notas reais da empresa.
 
 - [x] Fase 0 — Baseline, inventário e matriz de rastreabilidade
