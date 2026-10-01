@@ -25,7 +25,7 @@ export function FiscalEmissionMonitor() {
   const { currentCompany } = useEnterprise();
   const companyId = currentCompany?.id;
   const [filter, setFilter] = useState<Filter>('all');
-  const { data = [], isLoading, isError, refetch, isFetching } = useQuery({
+  const { data = [], isLoading, isError, error, refetch, isFetching } = useQuery({
     queryKey: ['fiscal_emission_jobs', companyId],
     enabled: Boolean(companyId),
     refetchInterval: 30_000,
@@ -60,7 +60,7 @@ export function FiscalEmissionMonitor() {
       <CardContent>
         {!companyId ? <p className="text-sm text-muted-foreground">Selecione uma empresa.</p>
           : isLoading ? <p role="status" className="text-sm text-muted-foreground">Carregando transmissões...</p>
-          : isError ? <p role="alert" className="text-sm text-destructive">Não foi possível consultar as transmissões. Tente atualizar.</p>
+          : isError ? <p role="alert" className="text-sm text-destructive">{String(error).includes('PGRST205') || String(error).includes('42P01') ? 'Acompanhamento de transmissões ainda não está disponível nesta empresa.' : 'Não foi possível consultar as transmissões. Tente atualizar.'}</p>
           : shown.length === 0 ? <p className="text-sm text-muted-foreground">{filter === 'attention' ? 'Nenhuma transmissão rejeitada.' : 'Nenhuma transmissão registrada.'}</p>
           : <div className="divide-y">{shown.map((job) => (
             <div key={job.id} className="flex flex-wrap items-start justify-between gap-3 py-3 first:pt-0 last:pb-0">
