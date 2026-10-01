@@ -20,11 +20,11 @@ export function useFiscal() {
     mutationFn: (id: string) => fiscalService.transmitNFe(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['nfes'] });
-      toastSuccess('NF-e autorizada com sucesso');
+      toastSuccess('NF-e transmitida');
     },
     onError: (error: unknown) => {
       console.error('Error transmitting NFe:', error);
-      toastError('Erro ao transmitir NF-e');
+      toastError(error instanceof Error ? error.message : 'Erro ao transmitir NF-e');
     }
   });
 
@@ -36,7 +36,7 @@ export function useFiscal() {
     },
     onError: (error: unknown) => {
       console.error('Error cancelling NFe:', error);
-      toastError('Erro ao cancelar NF-e');
+      toastError(error instanceof Error ? error.message : 'Erro ao cancelar NF-e');
     }
   });
 

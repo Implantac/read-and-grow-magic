@@ -78,16 +78,11 @@ export function useTransmitCTe() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const access_key = Array.from({ length: 44 }, () => Math.floor(Math.random() * 10)).join('');
-      const protocol = '1' + Date.now().toString().slice(-14);
-      const { error } = await supabase.from('cte').update({
-        status: 'authorized', access_key, protocol, authorization_date: new Date().toISOString(),
-      }).eq('id', id);
-      if (error) throw error;
+      throw new Error('Transmissão de CT-e indisponível sem retorno oficial da SEFAZ.');
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['ctes'] });
-      toastSuccess('CT-e autorizado na SEFAZ (simulação)');
+      toastSuccess('CT-e transmitido');
     },
     onError: handleMutationError,
   });
@@ -97,10 +92,7 @@ export function useCancelCTe() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
-      const { error } = await supabase.from('cte').update({
-        status: 'cancelled', cancellation_date: new Date().toISOString(), cancellation_reason: reason,
-      }).eq('id', id);
-      if (error) throw error;
+      throw new Error('Cancelamento de CT-e indisponível sem confirmação oficial da SEFAZ.');
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['ctes'] });
