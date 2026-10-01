@@ -43,17 +43,17 @@ export function NotificationsMenu() {
         <DropdownMenuLabel className="flex items-center justify-between text-sidebar-foreground">
           Notificações
           {unreadCount > 0 && (
-            <button
+             <Button variant="ghost" size="xs"
               onClick={(e) => { e.stopPropagation(); markAllAsRead(undefined); }}
-              className="text-xs text-primary hover:text-primary/80 font-normal transition-colors"
+               className="text-xs text-primary hover:text-primary hover:bg-sidebar-accent"
             >
               Marcar todas como lidas
-            </button>
+             </Button>
           )}
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-sidebar-border" />
         {notifications.length === 0 ? (
-          <div className="py-6 text-center text-sm text-sidebar-foreground/40">Nenhuma notificação</div>
+           <div className="py-6 text-center text-sm text-sidebar-foreground/70">Nenhuma notificação</div>
         ) : (
           notifications.slice(0, 5).map((n) => (
             <DropdownMenuItem

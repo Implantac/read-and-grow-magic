@@ -21,8 +21,8 @@ export function UserMenu() {
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="group flex items-center gap-2 h-9 pl-1.5 pr-2 rounded-lg hover:bg-sidebar-accent/50 transition-all">
-          <div className="relative flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-primary/30 to-primary-glow/20 ring-1 ring-primary/40 shadow-[0_0_10px_hsl(var(--primary)/0.25)]">
+        <Button variant="ghost" className="group flex items-center gap-2 h-9 pl-1.5 pr-2 rounded-md text-sidebar-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors">
+          <div className="relative flex h-7 w-7 items-center justify-center rounded-full bg-sidebar-accent ring-1 ring-sidebar-primary/50">
             <User className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
           </div>
           <span className="hidden md:inline-block text-sm text-sidebar-foreground font-medium max-w-[120px] truncate">
