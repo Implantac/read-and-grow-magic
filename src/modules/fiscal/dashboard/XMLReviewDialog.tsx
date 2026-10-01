@@ -2,6 +2,8 @@ import { Badge } from "@/ui/base/badge";
 import { Button } from "@/ui/base/button";
 import { Label } from "@/ui/base/label";
 import { Progress } from "@/ui/base/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/base/select";
+import type { OperationalUnit } from '@/core/auth/operationalContext';
 import {
   Dialog,
   DialogContent,
@@ -25,6 +27,10 @@ interface XMLReviewDialogProps {
   xmlData: XMLData | null;
   isProcessing: boolean;
   progress: number;
+  allowedUnits: OperationalUnit[];
+  selectedBranchId: string;
+  onBranchChange: (id: string) => void;
+  documentIssue: string | null;
   onManualLink: (index: number) => void;
   onConfirm: () => void;
 }
@@ -35,6 +41,10 @@ export function XMLReviewDialog({
   xmlData,
   isProcessing,
   progress,
+  allowedUnits,
+  selectedBranchId,
+  onBranchChange,
+  documentIssue,
   onManualLink,
   onConfirm,
 }: XMLReviewDialogProps) {
@@ -50,6 +60,14 @@ export function XMLReviewDialog({
 
         {xmlData && (
           <div className="space-y-6 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="incoming-unit">Unidade de recebimento</Label>
+              <Select value={selectedBranchId} onValueChange={onBranchChange}>
+                <SelectTrigger id="incoming-unit"><SelectValue placeholder="Selecione uma unidade" /></SelectTrigger>
+                <SelectContent>{allowedUnits.map(unit => <SelectItem key={unit.id} value={unit.id}>{unit.name}</SelectItem>)}</SelectContent>
+              </Select>
+              {documentIssue && <p role="alert" className="text-sm text-destructive">{documentIssue}</p>}
+            </div>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4 p-4 bg-muted/30 rounded-xl border">
               <div>
                 <Label className="text-[10px] uppercase text-muted-foreground font-bold">Número/Série</Label>
@@ -92,7 +110,7 @@ export function XMLReviewDialog({
                   <tbody className="divide-y">
                     {xmlData.products.map((p, idx) => {
                       const isDuplicate = xmlData.products.filter(item => item.code === p.code).length > 1;
-                      const hasIssue = !p.linkedProductId || isDuplicate;
+                      const hasIssue = isDuplicate;
 
                       return (
                         <tr key={idx} className={cn(
@@ -128,9 +146,7 @@ export function XMLReviewDialog({
                               </div>
                             ) : (
                               <div className="flex flex-col gap-1">
-                                <Badge variant="outline" className="text-destructive border-destructive/30 bg-destructive/5 w-fit gap-1 font-bold">
-                                  <AlertTriangle className="h-2 w-2" /> Vínculo Obrigatório
-                                </Badge>
+                                  <Badge variant="outline" className="w-fit gap-1">Novo produto ao lançar</Badge>
                                 <Button
                                   variant="link"
                                   size="sm"
@@ -162,7 +178,7 @@ export function XMLReviewDialog({
                 <div className="flex flex-col">
                   <span className="text-[10px] uppercase font-bold text-muted-foreground">Itens com Pendência</span>
                   <Badge variant="destructive" className="animate-bounce w-fit">
-                    {xmlData.products.filter(p => !p.linkedProductId || xmlData.products.filter(item => item.code === p.code).length > 1).length} Pendentes
+                    {xmlData.products.filter(p => xmlData.products.filter(item => item.code === p.code).length > 1).length} Pendentes
                   </Badge>
                 </div>
                 <div className="flex flex-col">
