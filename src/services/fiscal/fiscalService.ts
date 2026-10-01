@@ -45,19 +45,11 @@ export class FiscalService {
   }
 
   async transmitNFe(id: string): Promise<void> {
-    const { error } = await this.supabase
-      .from('nfe')
-      .update({ status: 'authorized', protocol: '123456789', authorization_date: new Date().toISOString() })
-      .eq('id', id);
-    if (error) throw error;
+    throw new Error('Transmissão de NF-e indisponível até a integração oficial com a SEFAZ. Nenhuma nota foi autorizada.');
   }
 
   async cancelNFe(id: string, reason: string): Promise<void> {
-    const { error } = await this.supabase
-      .from('nfe')
-      .update({ status: 'cancelled', cancellation_reason: reason, cancellation_date: new Date().toISOString() })
-      .eq('id', id);
-    if (error) throw error;
+    throw new Error('Cancelamento de NF-e indisponível até confirmação oficial da SEFAZ. Nenhuma nota foi cancelada.');
   }
 
   // Tax Rules

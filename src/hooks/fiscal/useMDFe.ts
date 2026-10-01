@@ -69,16 +69,11 @@ export function useTransmitMDFe() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const access_key = Array.from({ length: 44 }, () => Math.floor(Math.random() * 10)).join('');
-      const protocol = '1' + Date.now().toString().slice(-14);
-      const { error } = await supabase.from('mdfe').update({
-        status: 'authorized', access_key, protocol, authorization_date: new Date().toISOString(),
-      }).eq('id', id);
-      if (error) throw error;
+      throw new Error('Transmissão de MDF-e indisponível sem retorno oficial da SEFAZ.');
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['mdfes'] });
-      toastSuccess('MDF-e autorizado (simulação)');
+      toastSuccess('MDF-e transmitido');
     },
     onError: handleMutationError,
   });
@@ -88,10 +83,7 @@ export function useCloseMDFe() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('mdfe').update({
-        status: 'closed', closure_date: new Date().toISOString(),
-      }).eq('id', id);
-      if (error) throw error;
+      throw new Error('Encerramento de MDF-e indisponível sem confirmação oficial da SEFAZ.');
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['mdfes'] });
