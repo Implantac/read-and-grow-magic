@@ -1,0 +1,2 @@
+-- O gatilho legado referencia NEW.warehouse_id, coluna inexistente em stock_movements, e duplicaria a atualização já feita pelo gatilho vigente por filial e canal.
+DROP TRIGGER IF EXISTS trg_sync_stock_balance ON public.stock_movements;

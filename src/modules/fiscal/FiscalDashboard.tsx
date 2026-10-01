@@ -18,6 +18,10 @@ export default function FiscalDashboard() {
     activeItemIndex,
     progress,
     systemProducts,
+    allowedUnits,
+    selectedBranchId,
+    setSelectedBranchId,
+    documentIssue,
     handleManualLink,
     confirmManualLink,
     handleFileUpload,
@@ -34,6 +38,10 @@ export default function FiscalDashboard() {
         xmlData={xmlData}
         isProcessing={isProcessing}
         progress={progress}
+        allowedUnits={allowedUnits}
+        selectedBranchId={selectedBranchId}
+        onBranchChange={setSelectedBranchId}
+        documentIssue={documentIssue}
         onManualLink={handleManualLink}
         onConfirm={processImport}
       />
